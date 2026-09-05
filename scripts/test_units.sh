@@ -9,7 +9,7 @@ cd "$ROOT_DIR"
 simulator="${1:-both}"
 unit="${2:-all}"
 case "$simulator" in verilator|iverilog|both) ;; *) echo "Unknown simulator: $simulator" >&2; exit 2;; esac
-tests=(spk286_registers spk286_segments spk286_fetch spk286_core)
+tests=(spk286_registers spk286_segments spk286_fetch spk286_core spk286_prefetch_queue spk286_execution)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do

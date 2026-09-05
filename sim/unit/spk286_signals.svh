@@ -1,5 +1,5 @@
 // Testbench connections to the normal execution/state boundary.
-logic clk = 1'b0, reset = 1'b1, ready = 1'b0;
+logic clk = 1'b0, reset = 1'b1, ready = 1'b0, execute_enable = 1'b0;
 logic [15:0] data_in = 16'h0000;
 logic [2:0] gpr_read_a_index = 3'd0, gpr_read_b_index = 3'd0, gpr_write_index = 3'd0;
 logic gpr_read_a_byte = 1'b0, gpr_read_b_byte = 1'b0;
@@ -16,7 +16,8 @@ wire [15:0] segment_selector, segment_limit;
 wire [23:0] segment_base, segment_address;
 wire [7:0] segment_access;
 logic redirect = 1'b0, fetch_request = 1'b0, fetch_ready = 1'b0;
-wire control_error, fetch_request_ready, fetch_valid, fetch_blocked;
+wire control_error, unsupported_opcode, fetch_request_ready, fetch_valid, fetch_blocked;
+wire [7:0] debug_opcode;
 wire [15:0] fetch_data, fetch_ip;
 wire [1:0] fetch_count;
 wire [23:0] address;
@@ -27,6 +28,7 @@ wire [15:0] debug_cs, debug_ip, debug_flags;
 wire [23:0] debug_cs_base;
 wire [11:0] debug_micro_pc;
 wire [3:0] debug_bus_state;
+wire [3:0] debug_prefetch_count;
 wire [127:0] debug_gpr;
 wire [63:0] debug_segment_selectors, debug_segment_limits;
 wire [95:0] debug_segment_bases;

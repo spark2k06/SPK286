@@ -17,4 +17,6 @@ verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_segments -Irtl rtl/spk286_segments.sv
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_fetch -Irtl rtl/spk286_fetch.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_prefetch_queue -Irtl rtl/spk286_prefetch_queue.sv
 echo "LINT PASS"
