@@ -1,0 +1,9 @@
+* text=auto
+*.sh text eol=lf
+*.sv text eol=lf
+*.cpp text eol=lf
+*.py text eol=lf
+*.mc text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+Makefile text eol=lf

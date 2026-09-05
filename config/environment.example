@@ -1,0 +1,3 @@
+# Optional host-side configuration. Paths are examples, not machine-specific.
+SPK286_BUILD_DIR=./build
+SPK286_SINGLESTEP_PATH=../SingleStepTests/80286
