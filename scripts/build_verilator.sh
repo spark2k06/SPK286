@@ -12,10 +12,11 @@ command -v verilator >/dev/null 2>&1 || {
     exit 1
 }
 
-verilator --cc --exe --build --trace --Wall --Wno-fatal \
+verilator --cc --exe --build --trace --Wall \
     --language 1800-2012 --top-module spk286 \
     --Mdir "$OBJ_DIR" -I"$ROOT_DIR/rtl" \
     -CFLAGS "-std=c++17 -Wall -Wextra" \
-    -o spk286_smoke "$ROOT_DIR/rtl/spk286.sv" "$ROOT_DIR/sim/verilator/reset_smoke.cpp"
+    -o spk286_smoke "$ROOT_DIR"/rtl/*.sv "$ROOT_DIR/sim/verilator/reset_smoke.cpp" \
+    "$ROOT_DIR/sim/verilator/state_vector.cpp"
 
 echo "VERILATOR BUILD PASS: $OBJ_DIR/spk286_smoke"

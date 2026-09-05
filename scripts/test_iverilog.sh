@@ -16,6 +16,6 @@ command -v vvp >/dev/null 2>&1 || {
     exit 1
 }
 
-iverilog -g2012 -Wall -s spk286_reset_tb -o "$OUTPUT" \
-    rtl/spk286.sv sim/iverilog/spk286_reset_tb.sv
+iverilog -g2012 -Wall -Isim/unit -s spk286_reset_tb -o "$OUTPUT" \
+    rtl/*.sv sim/iverilog/spk286_reset_tb.sv
 vvp "$OUTPUT"

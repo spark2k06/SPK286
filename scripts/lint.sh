@@ -10,5 +10,11 @@ command -v verilator >/dev/null 2>&1 || {
 }
 
 verilator --lint-only --language 1800-2012 --Wall \
-    --top-module spk286 -Irtl rtl/spk286.sv
+    --top-module spk286 -Irtl rtl/*.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_registers -Irtl rtl/spk286_registers.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_segments -Irtl rtl/spk286_segments.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_fetch -Irtl rtl/spk286_fetch.sv
 echo "LINT PASS"

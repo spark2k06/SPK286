@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help env bootstrap lint verilator test regression iverilog waveform data-smoke synth-check quartus-info verify-failure clean
+.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure clean
 
 help:
 	@echo "SPK286 development targets:"
@@ -10,9 +10,11 @@ help:
 	@echo "  make verilator    build the Verilator smoke executable"
 	@echo "  make iverilog     run the Icarus smoke test"
 	@echo "  make test         run fast dual-simulator and Python tests"
+	@echo "  make unit         run directed RTL tests in both simulators"
 	@echo "  make regression   run test plus Yosys synthesis sanity check"
 	@echo "  make waveform     run Verilator smoke with a VCD trace"
 	@echo "  make data-smoke   validate the JSON/MOO data loader"
+	@echo "  make state-smoke  initialize RTL and verify first fetch from JSON state"
 	@echo "  make verify-failure prove negative simulator status propagation"
 	@echo "  make synth-check  run the portable RTL through Yosys"
 	@echo "  make quartus-info inspect the local Quartus Docker image"
@@ -36,6 +38,9 @@ iverilog:
 test:
 	./scripts/test.sh
 
+unit:
+	bash ./scripts/test_units.sh
+
 regression:
 	./scripts/test.sh
 	./scripts/synth_check.sh
@@ -46,6 +51,10 @@ waveform:
 
 data-smoke:
 	python3 tools/run_tests.py --smoke
+
+state-smoke: verilator
+	python3 -m tools.state_vectors
+	python3 -m tools.state_vectors --source tests/fixtures/state_vectors.json
 
 verify-failure:
 	./scripts/verify_failure_path.sh

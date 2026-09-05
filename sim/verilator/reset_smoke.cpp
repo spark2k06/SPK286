@@ -1,4 +1,6 @@
 #include "Vspk286.h"
+#include "state_inputs.h"
+#include "state_vector.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
@@ -15,6 +17,7 @@ namespace {
 struct Options {
     std::uint32_t expected_fetch = 0xFFFFF0U;
     std::string trace_path;
+    std::string state_vector;
 };
 
 std::uint32_t parse_hex(const std::string& text) {
@@ -32,10 +35,12 @@ Options parse_options(int argc, char** argv) {
         const std::string argument(argv[index]);
         if (argument == "--expected-fetch" && index + 1 < argc) {
             options.expected_fetch = parse_hex(argv[++index]);
+        } else if (argument == "--state-vector" && index + 1 < argc) {
+            options.state_vector = argv[++index];
         } else if (argument == "--trace" && index + 1 < argc) {
             options.trace_path = argv[++index];
         } else if (argument == "--help") {
-            std::cout << "Usage: spk286_smoke [--expected-fetch VALUE] [--trace PATH]\n";
+            std::cout << "Usage: spk286_smoke [--expected-fetch VALUE] [--trace PATH] | --state-vector PATH\n";
             std::exit(0);
         } else {
             throw std::invalid_argument("unknown or incomplete argument: " + argument);
@@ -67,9 +72,11 @@ int main(int argc, char** argv) {
     try {
         const Options options = parse_options(argc, argv);
         Verilated::commandArgs(argc, argv);
+        if (!options.state_vector.empty()) return run_state_vector(options.state_vector);
         Verilated::traceEverOn(!options.trace_path.empty());
 
         Vspk286 dut;
+        clear_execution_inputs(dut);
         VerilatedVcdC* trace = nullptr;
         if (!options.trace_path.empty()) {
             trace = new VerilatedVcdC;
@@ -87,6 +94,8 @@ int main(int argc, char** argv) {
         pass &= check(dut.debug_cs == 0xF000U, "reset CS mismatch");
         pass &= check(dut.debug_cs_base == 0xFF0000U, "hidden CS base mismatch");
         pass &= check(dut.debug_ip == 0xFFF0U, "reset IP mismatch");
+        pass &= check(dut.debug_flags == 0x0002U, "reset FLAGS mismatch");
+        pass &= check(dut.bus_valid == 0, "bus active during reset");
 
         dut.reset = 0;
         tick(dut, trace, time);

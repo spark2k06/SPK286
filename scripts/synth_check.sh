@@ -12,5 +12,8 @@ command -v yosys >/dev/null 2>&1 || {
     exit 1
 }
 
-yosys -Q -p 'read_verilog -sv rtl/spk286.sv; hierarchy -check -top spk286; proc; opt; check; stat' | tee "$REPORT"
+yosys -Q -p 'read_verilog -sv rtl/*.sv; hierarchy -check -top spk286; proc; opt; check -assert; stat' | tee "$REPORT"
+yosys -Q -p 'read_verilog -sv rtl/spk286_registers.sv; hierarchy -check -top spk286_registers; proc; opt; check -assert; stat' | tee "$BUILD_DIR/reports/yosys_registers.log"
+yosys -Q -p 'read_verilog -sv rtl/spk286_segments.sv; hierarchy -check -top spk286_segments; proc; opt; check -assert; stat' | tee "$BUILD_DIR/reports/yosys_segments.log"
+yosys -Q -p 'read_verilog -sv rtl/spk286_fetch.sv; hierarchy -check -top spk286_fetch; proc; opt; check -assert; stat' | tee "$BUILD_DIR/reports/yosys_fetch.log"
 echo "SYNTH_CHECK PASS: $REPORT"

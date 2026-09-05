@@ -1,0 +1,34 @@
+[
+  {
+    "name": "phase1-odd-high-memory-state",
+    "initial": {
+      "regs": {
+        "ax": 4660, "cx": 43981, "dx": 65535, "bx": 32768,
+        "sp": 2, "bp": 65280, "si": 255, "di": 42405,
+        "cs": 65535, "ds": 9029, "ss": 13398, "es": 17767,
+        "ip": 17, "flags": 32727
+      },
+      "ram": [[1048576, 85], [1048577, 165]],
+      "queue": []
+    },
+    "final": {}
+  },
+  {
+    "name": "phase1-last-code-byte",
+    "initial": {
+      "regs": {"cs": 65535, "ip": 65535, "ax": 65535, "flags": 2},
+      "ram": [[1114094, 51], [1114095, 204]],
+      "queue": []
+    },
+    "final": {}
+  },
+  {
+    "name": "phase1-zero-segment-state",
+    "initial": {
+      "regs": {"cs": 0, "ip": 0, "ds": 65535, "flags": 2119},
+      "ram": [[0, 18], [1, 52]],
+      "queue": []
+    },
+    "final": {}
+  }
+]
