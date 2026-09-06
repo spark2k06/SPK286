@@ -1,0 +1,355 @@
+#include "singlestep.h"
+
+#include "Vspk286.h"
+#include "state_inputs.h"
+#include "verilated.h"
+#include "verilated_vcd_c.h"
+
+#include <array>
+#include <cstdint>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+namespace {
+
+constexpr std::array<const char*, 14> REG_NAMES = {
+    "AX", "BX", "CX", "DX", "CS", "SS", "DS", "ES",
+    "SP", "BP", "SI", "DI", "IP", "FLAGS",
+};
+
+struct BatchCase {
+    std::uint32_t index = 0;
+    std::string name;
+    std::string hash;
+    std::vector<std::uint8_t> instruction_bytes;
+    std::array<std::uint16_t, 14> initial_regs{};
+    std::array<std::uint16_t, 14> expected_regs{};
+    std::array<std::uint16_t, 14> expected_masks{};
+    std::map<std::uint32_t, std::uint8_t> initial_ram;
+    std::map<std::uint32_t, std::uint8_t> expected_ram;
+};
+
+class BatchReader {
+public:
+    explicit BatchReader(const std::string& path) : input_(path, std::ios::binary) {
+        if (!input_) throw std::runtime_error("cannot open SingleStep batch: " + path);
+    }
+
+    std::vector<BatchCase> read_all() {
+        const std::array<char, 8> expected_magic = {'S', 'P', 'K', '2', '8', '6', 'S', 'S'};
+        for (char value : expected_magic) {
+            if (read_u8() != static_cast<std::uint8_t>(value))
+                throw std::runtime_error("invalid SingleStep batch magic");
+        }
+        if (read_u32() != 1) throw std::runtime_error("unsupported SingleStep batch version");
+        const std::uint32_t count = read_u32();
+        if (count > 1000000U) throw std::runtime_error("unreasonable SingleStep batch size");
+        std::vector<BatchCase> cases;
+        cases.reserve(count);
+        for (std::uint32_t i = 0; i < count; ++i) cases.push_back(read_case());
+        if (input_.peek() != std::ifstream::traits_type::eof())
+            throw std::runtime_error("trailing SingleStep batch data");
+        return cases;
+    }
+
+private:
+    std::ifstream input_;
+
+    std::uint8_t read_u8() {
+        char value = 0;
+        if (!input_.get(value)) throw std::runtime_error("truncated SingleStep batch");
+        return static_cast<std::uint8_t>(value);
+    }
+
+    std::uint16_t read_u16() {
+        const std::uint16_t low = read_u8();
+        return static_cast<std::uint16_t>(low | (static_cast<std::uint16_t>(read_u8()) << 8));
+    }
+
+    std::uint32_t read_u32() {
+        std::uint32_t value = 0;
+        for (unsigned shift = 0; shift < 32; shift += 8)
+            value |= static_cast<std::uint32_t>(read_u8()) << shift;
+        return value;
+    }
+
+    std::string read_string(std::uint32_t length, const char* label) {
+        if (length > 1000000U) throw std::runtime_error(std::string("unreasonable ") + label);
+        std::string value(length, '\0');
+        if (length != 0 && !input_.read(value.data(), static_cast<std::streamsize>(length)))
+            throw std::runtime_error(std::string("truncated ") + label);
+        return value;
+    }
+
+    std::map<std::uint32_t, std::uint8_t> read_memory(const char* label) {
+        const std::uint32_t count = read_u32();
+        if (count > 100000U) throw std::runtime_error(std::string("unreasonable ") + label);
+        std::map<std::uint32_t, std::uint8_t> values;
+        for (std::uint32_t i = 0; i < count; ++i) {
+            const std::uint32_t address = read_u32();
+            const std::uint8_t value = read_u8();
+            const auto [it, inserted] = values.emplace(address, value);
+            if (!inserted && it->second != value)
+                throw std::runtime_error(std::string("conflicting ") + label + " entry");
+        }
+        return values;
+    }
+
+    BatchCase read_case() {
+        BatchCase result;
+        result.index = read_u32();
+        result.name = read_string(read_u32(), "case name");
+        result.hash = read_string(read_u32(), "case hash");
+        const std::uint32_t byte_count = read_u32();
+        if (byte_count == 0 || byte_count > 32) throw std::runtime_error("invalid instruction length");
+        result.instruction_bytes.resize(byte_count);
+        for (auto& value : result.instruction_bytes) value = read_u8();
+        for (auto& value : result.initial_regs) value = read_u16();
+        result.initial_ram = read_memory("initial RAM");
+        for (auto& value : result.expected_regs) value = read_u16();
+        for (auto& value : result.expected_masks) value = read_u16();
+        result.expected_ram = read_memory("expected RAM");
+        return result;
+    }
+};
+
+void tick(Vspk286& dut, VerilatedVcdC* trace, std::uint64_t& time) {
+    dut.clk = 0;
+    dut.eval();
+    if (trace != nullptr) trace->dump(time++);
+    dut.clk = 1;
+    dut.eval();
+    if (trace != nullptr) trace->dump(time++);
+    dut.clk = 0;
+    dut.eval();
+    if (trace != nullptr) trace->dump(time++);
+}
+
+std::uint8_t memory_read(const std::map<std::uint32_t, std::uint8_t>& memory,
+                         std::uint32_t address) {
+    const auto it = memory.find(address & 0xFFFFFFU);
+    return it == memory.end() ? 0 : it->second;
+}
+
+std::uint16_t read_bus_word(const std::map<std::uint32_t, std::uint8_t>& memory,
+                            std::uint32_t address) {
+    const std::uint32_t aligned = address & 0xFFFFFEU;
+    return static_cast<std::uint16_t>(memory_read(memory, aligned) |
+                                      (static_cast<std::uint16_t>(memory_read(memory, aligned + 1)) << 8));
+}
+
+void apply_bus_write(Vspk286& dut, std::map<std::uint32_t, std::uint8_t>& memory) {
+    if (!dut.bus_valid || !dut.bus_write) return;
+    const std::uint32_t address = dut.address & 0xFFFFFFU;
+    if ((address & 1U) != 0U) {
+        memory[address] = static_cast<std::uint8_t>((dut.data_out >> 8) & 0xFFU);
+    } else if (dut.bus_bhe_n == 0) {
+        memory[address] = static_cast<std::uint8_t>(dut.data_out & 0xFFU);
+        memory[(address + 1) & 0xFFFFFFU] = static_cast<std::uint8_t>((dut.data_out >> 8) & 0xFFU);
+    } else {
+        memory[address] = static_cast<std::uint8_t>(dut.data_out & 0xFFU);
+    }
+}
+
+void initialize_case(Vspk286& dut, const BatchCase& test) {
+    clear_execution_inputs(dut);
+    dut.ready = 0;
+    dut.reset = 1;
+    std::uint64_t time = 0;
+    tick(dut, nullptr, time);
+    dut.reset = 0;
+
+    constexpr std::array<unsigned, 8> gpr_moo_indices = {0, 2, 3, 1, 8, 9, 10, 11};
+    for (unsigned rtl_index = 0; rtl_index < gpr_moo_indices.size(); ++rtl_index) {
+        dut.gpr_write_en = 1;
+        dut.gpr_write_index = rtl_index;
+        dut.gpr_write_data = test.initial_regs[gpr_moo_indices[rtl_index]];
+        tick(dut, nullptr, time);
+    }
+    dut.gpr_write_en = 0;
+
+    // The MOO state is real mode, so ordinary segment loads derive selector*16
+    // hidden bases.  CS and IP are committed together as the stream restart.
+    constexpr std::array<unsigned, 3> ordinary_segments = {7, 5, 6}; // ES, SS, DS
+    for (unsigned moo_index : ordinary_segments) {
+        dut.segment_load_en = 1;
+        dut.segment_load_index = moo_index == 7 ? 0 : (moo_index == 5 ? 2 : 3);
+        dut.segment_load_selector = test.initial_regs[moo_index];
+        tick(dut, nullptr, time);
+    }
+    dut.flags_write_en = 1;
+    dut.flags_write_mask = 0xFFFF;
+    dut.flags_write_data = test.initial_regs[13];
+    dut.segment_load_en = 1;
+    dut.segment_load_index = 1;
+    dut.segment_load_selector = test.initial_regs[4];
+    dut.ip_write_en = 1;
+    dut.ip_write_data = test.initial_regs[12];
+    dut.redirect = 1;
+    tick(dut, nullptr, time);
+
+    clear_execution_inputs(dut);
+    dut.reset = 0;
+    dut.execute_enable = 1;
+}
+
+std::array<std::uint16_t, 14> read_registers(Vspk286& dut) {
+    std::array<std::uint16_t, 14> values{};
+    constexpr std::array<unsigned, 8> moo_indices = {0, 1, 2, 3, 8, 9, 10, 11};
+    constexpr std::array<unsigned, 8> rtl_indices = {0, 3, 1, 2, 4, 5, 6, 7};
+    for (unsigned gpr = 0; gpr < moo_indices.size(); ++gpr) {
+        dut.gpr_read_a_index = rtl_indices[gpr];
+        dut.eval();
+        values[moo_indices[gpr]] = dut.gpr_read_a_data;
+    }
+    values[4] = dut.debug_cs;
+    values[5] = static_cast<std::uint16_t>((dut.debug_segment_selectors >> 32) & 0xFFFFU);
+    values[6] = static_cast<std::uint16_t>((dut.debug_segment_selectors >> 48) & 0xFFFFU);
+    values[7] = static_cast<std::uint16_t>(dut.debug_segment_selectors & 0xFFFFU);
+    values[12] = dut.debug_ip;
+    values[13] = dut.debug_flags;
+    return values;
+}
+
+std::string hex16(std::uint16_t value) {
+    std::ostringstream output;
+    output << "0x" << std::uppercase << std::hex << std::setw(4) << std::setfill('0') << value;
+    return output.str();
+}
+
+void print_failure(const BatchCase& test, const std::array<std::uint16_t, 14>& actual,
+                   const std::string& reason) {
+    std::cout << "SINGLESTEP FAIL opcode=" << std::uppercase << std::hex
+              << static_cast<unsigned>(test.instruction_bytes.front()) << std::dec
+              << " index=" << test.index << " hash=" << test.hash
+              << " instruction=\"" << test.name << "\"\n";
+    if (!reason.empty()) std::cout << "  reason: " << reason << "\n";
+    std::cout << "  initial:";
+    for (unsigned i = 0; i < REG_NAMES.size(); ++i)
+        std::cout << ' ' << REG_NAMES[i] << '=' << hex16(test.initial_regs[i]);
+    std::cout << "\n  expected:";
+    for (unsigned i = 0; i < REG_NAMES.size(); ++i)
+        std::cout << ' ' << REG_NAMES[i] << '=' << hex16(test.expected_regs[i]);
+    std::cout << "\n  actual:";
+    for (unsigned i = 0; i < REG_NAMES.size(); ++i) std::cout << ' ' << REG_NAMES[i] << '=' << hex16(actual[i]);
+    std::cout << "\n  differences:";
+    bool any = false;
+    for (unsigned i = 0; i < REG_NAMES.size(); ++i) {
+        if ((actual[i] & test.expected_masks[i]) != (test.expected_regs[i] & test.expected_masks[i])) {
+            std::cout << ' ' << REG_NAMES[i] << " expected " << hex16(test.expected_regs[i])
+                      << " got " << hex16(actual[i]);
+            any = true;
+        }
+    }
+    if (!any) std::cout << " none";
+    std::cout << '\n';
+}
+
+bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ordinal,
+              bool report_failure, std::uint64_t& total_cycles) {
+    Vspk286 dut;
+    VerilatedVcdC* trace = nullptr;
+    std::uint64_t time = 0;
+    if (!trace_path.empty()) {
+        if (ordinal != 0) throw std::runtime_error("a trace requires a single selected case");
+        Verilated::traceEverOn(true);
+        trace = new VerilatedVcdC;
+        dut.trace(trace, 99);
+        trace->open(trace_path.c_str());
+    }
+
+    initialize_case(dut, test);
+    std::map<std::uint32_t, std::uint8_t> memory = test.initial_ram;
+    bool retired = false;
+    bool failed = false;
+    std::string reason;
+    constexpr unsigned max_cycles = 512;
+    unsigned cycles = 0;
+    for (; cycles < max_cycles; ++cycles) {
+        if (dut.bus_valid) {
+            dut.ready = 1;
+            dut.data_in = read_bus_word(memory, dut.address);
+        } else {
+            dut.ready = 0;
+            dut.data_in = 0;
+        }
+        apply_bus_write(dut, memory);
+        tick(dut, trace, time);
+        if (dut.unsupported_opcode) {
+            failed = true;
+            reason = "unsupported opcode observed before target retirement";
+            break;
+        }
+        if (dut.instruction_retired) {
+            retired = true;
+            break;
+        }
+    }
+    total_cycles += cycles + (retired || failed ? 1 : 0);
+
+    if (!retired && !failed) {
+        failed = true;
+        reason = "instruction retirement timeout";
+    }
+    const auto actual = read_registers(dut);
+    if (retired) {
+        for (unsigned i = 0; i < actual.size(); ++i) {
+            if ((actual[i] & test.expected_masks[i]) != (test.expected_regs[i] & test.expected_masks[i])) {
+                failed = true;
+                reason = "architectural register mismatch";
+                break;
+            }
+        }
+        if (!failed && memory != test.expected_ram) {
+            failed = true;
+            reason = "memory state mismatch";
+        }
+    }
+    if (failed && report_failure) print_failure(test, actual, reason);
+
+    if (trace != nullptr) {
+        trace->flush();
+        trace->close();
+        delete trace;
+    }
+    dut.final();
+    return !failed;
+}
+
+}  // namespace
+
+int run_singlestep_batch(const std::string& path, const std::string& trace_path) {
+    try {
+        const auto tests = BatchReader(path).read_all();
+        std::uint64_t total_cycles = 0;
+        std::uint32_t passed = 0;
+        std::uint32_t failures = 0;
+        constexpr std::uint32_t max_reported_failures = 20;
+        for (unsigned i = 0; i < tests.size(); ++i) {
+            const bool report_failure = failures < max_reported_failures;
+            const bool pass = run_case(tests[i], trace_path, i, report_failure, total_cycles);
+            if (pass) {
+                ++passed;
+            } else {
+                ++failures;
+                if (failures == max_reported_failures && tests.size() > i + 1)
+                    std::cout << "SINGLESTEP: further failure diagnostics suppressed\n";
+            }
+        }
+        std::cout << "SINGLESTEP_RESULT executed=" << tests.size()
+                  << " passed=" << passed << " failed=" << failures
+                  << " cycles=" << total_cycles << '\n';
+        return failures == 0 ? 0 : 1;
+    } catch (const std::exception& error) {
+        std::cerr << "SINGLESTEP ERROR: " << error.what() << '\n';
+        return 2;
+    }
+}

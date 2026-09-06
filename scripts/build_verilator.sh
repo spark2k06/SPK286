@@ -17,6 +17,7 @@ verilator --cc --exe --build --trace --Wall \
     --Mdir "$OBJ_DIR" -I"$ROOT_DIR/rtl" \
     -CFLAGS "-std=c++17 -Wall -Wextra" \
     -o spk286_smoke "$ROOT_DIR"/rtl/*.sv "$ROOT_DIR/sim/verilator/reset_smoke.cpp" \
-    "$ROOT_DIR/sim/verilator/state_vector.cpp"
+    "$ROOT_DIR/sim/verilator/state_vector.cpp" \
+    "$ROOT_DIR/sim/verilator/singlestep.cpp"
 
 echo "VERILATOR BUILD PASS: $OBJ_DIR/spk286_smoke"

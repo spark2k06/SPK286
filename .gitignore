@@ -1,5 +1,6 @@
 # Build and simulator output
 /build/
+/\.cache/
 /obj_dir/
 **/obj_dir/
 *.vvp

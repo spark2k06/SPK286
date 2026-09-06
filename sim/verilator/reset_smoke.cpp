@@ -1,6 +1,7 @@
 #include "Vspk286.h"
 #include "state_inputs.h"
 #include "state_vector.h"
+#include "singlestep.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
@@ -18,6 +19,7 @@ struct Options {
     std::uint32_t expected_fetch = 0xFFFFF0U;
     std::string trace_path;
     std::string state_vector;
+    std::string singlestep_batch;
 };
 
 std::uint32_t parse_hex(const std::string& text) {
@@ -37,10 +39,12 @@ Options parse_options(int argc, char** argv) {
             options.expected_fetch = parse_hex(argv[++index]);
         } else if (argument == "--state-vector" && index + 1 < argc) {
             options.state_vector = argv[++index];
+        } else if (argument == "--singlestep-batch" && index + 1 < argc) {
+            options.singlestep_batch = argv[++index];
         } else if (argument == "--trace" && index + 1 < argc) {
             options.trace_path = argv[++index];
         } else if (argument == "--help") {
-            std::cout << "Usage: spk286_smoke [--expected-fetch VALUE] [--trace PATH] | --state-vector PATH\n";
+            std::cout << "Usage: spk286_smoke [--expected-fetch VALUE] [--trace PATH] | --state-vector PATH | --singlestep-batch PATH\n";
             std::exit(0);
         } else {
             throw std::invalid_argument("unknown or incomplete argument: " + argument);
@@ -73,6 +77,8 @@ int main(int argc, char** argv) {
         const Options options = parse_options(argc, argv);
         Verilated::commandArgs(argc, argv);
         if (!options.state_vector.empty()) return run_state_vector(options.state_vector);
+        if (!options.singlestep_batch.empty())
+            return run_singlestep_batch(options.singlestep_batch, options.trace_path);
         Verilated::traceEverOn(!options.trace_path.empty());
 
         Vspk286 dut;

@@ -38,6 +38,7 @@ module spk286 (
     output logic         control_error,
     output logic         unsupported_opcode,
     output logic [7:0]   debug_opcode,
+    output logic         instruction_retired,
 
     input  logic         fetch_request,
     output logic         fetch_request_ready,
@@ -220,7 +221,9 @@ module spk286 (
             immediate_low_q <= 8'h00;
             opcode_q <= 8'h00;
             unsupported_q <= 1'b0;
+            instruction_retired <= 1'b0;
         end else if (execute_enable) begin
+            instruction_retired <= 1'b0;
             case (frontend_state_q)
                 FRONTEND_OPCODE: begin
                     if (queue_consume_valid) begin
@@ -241,11 +244,15 @@ module spk286 (
                     end
                 end
                 FRONTEND_IMMEDIATE_HIGH: begin
-                    if (queue_consume_valid && queue_consume_ready)
+                    if (queue_consume_valid && queue_consume_ready) begin
                         frontend_state_q <= FRONTEND_OPCODE;
+                        instruction_retired <= 1'b1;
+                    end
                 end
                 default: frontend_state_q <= FRONTEND_UNSUPPORTED;
             endcase
+        end else begin
+            instruction_retired <= 1'b0;
         end
     end
 

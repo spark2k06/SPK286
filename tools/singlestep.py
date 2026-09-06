@@ -2,13 +2,14 @@
 
 The reader normalizes the published JSON representation and the MOO 1.1
 chunked representation into the same lightweight ``SingleStepCase`` object.
-It intentionally stops at data loading and selection in Phase 0; instruction
-execution and comparison against RTL belong to a later CPU milestone.
+Execution and comparison against RTL are implemented by the phase-specific
+runner, while this module remains responsible for format interpretation.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+import gzip
 import json
 from pathlib import Path
 import struct
@@ -33,7 +34,7 @@ REGISTER_NAMES = (
 )
 
 BUS_STATUS_NAMES_286 = {
-    0: "INTA",
+    0: "IRQA",
     1: "PASV",
     2: "PASV",
     3: "PASV",
@@ -297,7 +298,12 @@ def _parse_moo_test(payload: bytes, top_level_masks: Mapping[str, int] | None) -
 def load_moo(path: str | Path) -> MooFile:
     """Load a MOO 1.0/1.1 file and return normalized cases."""
 
-    data = Path(path).read_bytes()
+    source_path = Path(path)
+    if source_path.name.lower().endswith(".gz"):
+        with gzip.open(source_path, "rb") as source:
+            data = source.read()
+    else:
+        data = source_path.read_bytes()
     header: dict[str, Any] = {}
     metadata: dict[str, Any] = {}
     tests: list[SingleStepCase] = []
@@ -315,17 +321,22 @@ def load_moo(path: str | Path) -> MooFile:
                 "cpu_id": payload[8:12].decode("ascii").rstrip(" "),
             }
         elif kind == "META":
-            if len(payload) >= 28:
-                metadata = {
-                    "major_version": payload[0],
-                    "minor_version": payload[1],
-                    "cpu_type": payload[2],
-                    "opcode": struct.unpack_from("<I", payload, 4)[0],
-                    "mnemonic": payload[8:16].decode("ascii").rstrip(" "),
-                    "test_count": struct.unpack_from("<I", payload, 16)[0],
-                    "file_seed": struct.unpack_from("<Q", payload, 20)[0],
-                    "cpu_mode": payload[28] if len(payload) > 28 else None,
-                }
+            # META is advisory.  Some published 80286 files contain the
+            # historical 31-byte payload, while the header and TEST chunks
+            # are the normative data needed by this reader.  Keep the raw
+            # payload and decode only fields whose offsets are unambiguous.
+            metadata = {"raw": payload.hex()}
+            if len(payload) >= 7:
+                metadata.update(
+                    {
+                        "major_version": payload[0],
+                        "minor_version": payload[1],
+                        "cpu_type": payload[2],
+                        "opcode": struct.unpack_from("<I", payload, 3)[0],
+                    }
+                )
+            if len(payload) >= 15:
+                metadata["mnemonic"] = payload[7:15].decode("ascii", "replace").rstrip(" ")
         elif kind in {"RMSK", "RM32"}:
             if kind == "RMSK":
                 top_level_masks = _parse_register_payload(payload)
@@ -358,9 +369,11 @@ def load_json(path: str | Path) -> tuple[SingleStepCase, ...]:
 
 
 def load_source(path: str | Path) -> tuple[SingleStepCase, ...]:
-    """Load ``.json`` or ``.moo`` and return normalized cases."""
+    """Load JSON, MOO, or gzip-compressed MOO and return normalized cases."""
 
     source_path = Path(path)
+    if source_path.name.lower().endswith(".moo.gz"):
+        return load_moo(source_path).tests
     suffix = source_path.suffix.lower()
     if suffix == ".moo":
         return load_moo(source_path).tests

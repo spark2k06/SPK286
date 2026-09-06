@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure clean
+.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov clean
 
 help:
 	@echo "SPK286 development targets:"
@@ -15,6 +15,9 @@ help:
 	@echo "  make waveform     run Verilator smoke with a VCD trace"
 	@echo "  make data-smoke   validate the JSON/MOO data loader"
 	@echo "  make state-smoke  initialize RTL and verify first fetch from JSON state"
+	@echo "  make singlestep-fetch acquire the pinned external 80286 MOO working set"
+	@echo "  make singlestep-smoke run ten deterministic B8..BF cases per opcode"
+	@echo "  make singlestep-mov   run all non-revoked B8..BF cases"
 	@echo "  make verify-failure prove negative simulator status propagation"
 	@echo "  make synth-check  run the portable RTL through Yosys"
 	@echo "  make quartus-info inspect the local Quartus Docker image"
@@ -58,6 +61,15 @@ state-smoke: verilator
 
 verify-failure:
 	./scripts/verify_failure_path.sh
+
+singlestep-fetch:
+	python3 tools/fetch_singlestep.py
+
+singlestep-smoke: verilator
+	python3 -m tools.run_singlestep --smoke
+
+singlestep-mov: verilator
+	python3 -m tools.run_singlestep --full
 
 synth-check:
 	./scripts/synth_check.sh

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import gzip
 from pathlib import Path
 import struct
 import tempfile
@@ -64,6 +65,12 @@ class SingleStepReaderTests(unittest.TestCase):
         self.assertEqual(parsed.tests[0].name, "smoke")
         self.assertEqual(parsed.tests[0].test_hash, "11" * 20)
         self.assertEqual(parsed.tests[0].initial["ram"], [[0xFFFFF0, 0x90]])
+
+        with tempfile.TemporaryDirectory() as directory:
+            compressed = Path(directory) / "sample.MOO.gz"
+            with gzip.open(compressed, "wb") as output:
+                output.write(moo_header + test)
+            self.assertEqual(load_moo(compressed).tests[0].index, 7)
 
     def test_revocation_hashes_are_preserved(self) -> None:
         cases = load_json(ROOT / "tests" / "fixtures" / "singlestep_sample.json")
