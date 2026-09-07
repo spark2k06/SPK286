@@ -191,8 +191,13 @@ def _parse_ram_payload(payload: bytes) -> list[list[int]]:
 
 def _parse_state(payload: bytes) -> dict[str, Any]:
     state: dict[str, Any] = {"regs": {}, "ram": [], "queue": []}
+    seen: set[str] = set()
     for chunk_type, chunk_payload in _chunks(payload):
         kind = _ascii_id(chunk_type)
+        if kind in {"REGS", "RMSK", "RAM ", "QUEU", "RG32", "RM32", "EA32"}:
+            if kind in seen:
+                raise SingleStepFormatError(f"duplicate state chunk {kind}")
+            seen.add(kind)
         if kind == "REGS":
             state["regs"] = _parse_register_payload(chunk_payload)
         elif kind == "RMSK":
@@ -263,8 +268,13 @@ def _parse_moo_test(payload: bytes, top_level_masks: Mapping[str, int] | None) -
         "cycles": [],
     }
     final_masks = top_level_masks
+    seen: set[str] = set()
     for chunk_type, chunk_payload in _chunks(payload, 4):
         kind = _ascii_id(chunk_type)
+        if kind in {"NAME", "BYTS", "INIT", "FINA", "CYCL", "EXCP", "HASH", "RMSK", "RM32"}:
+            if kind in seen:
+                raise SingleStepFormatError(f"duplicate TEST chunk {kind}")
+            seen.add(kind)
         if kind == "NAME":
             mapping["name"] = _length_prefixed_bytes(chunk_payload, "name").decode("ascii")
         elif kind == "BYTS":
@@ -312,6 +322,8 @@ def load_moo(path: str | Path) -> MooFile:
     for chunk_type, payload in _chunks(data):
         kind = _ascii_id(chunk_type)
         if kind == "MOO ":
+            if header or tests:
+                raise SingleStepFormatError("duplicate or misplaced MOO header")
             if len(payload) < 12:
                 raise SingleStepFormatError("MOO header is too short")
             header = {
@@ -320,6 +332,10 @@ def load_moo(path: str | Path) -> MooFile:
                 "test_count": struct.unpack_from("<I", payload, 4)[0],
                 "cpu_id": payload[8:12].decode("ascii").rstrip(" "),
             }
+            if (header["major_version"], header["minor_version"]) not in {(1, 0), (1, 1)}:
+                raise SingleStepFormatError("unsupported MOO format version; expected 1.0 or 1.1")
+            if header["cpu_id"] not in {"286", "C286"}:
+                raise SingleStepFormatError(f"unsupported MOO CPU: {header['cpu_id']}")
         elif kind == "META":
             # META is advisory.  Some published 80286 files contain the
             # historical 31-byte payload, while the header and TEST chunks
@@ -341,10 +357,16 @@ def load_moo(path: str | Path) -> MooFile:
             if kind == "RMSK":
                 top_level_masks = _parse_register_payload(payload)
         elif kind == "TEST":
+            if not header:
+                raise SingleStepFormatError("TEST before MOO header")
             tests.append(_parse_moo_test(payload, top_level_masks))
 
     if not header:
         raise SingleStepFormatError("MOO header chunk is missing")
+    if header["test_count"] != len(tests):
+        raise SingleStepFormatError(
+            f"MOO test count mismatch: header={header['test_count']} parsed={len(tests)}"
+        )
     return MooFile(header=header, metadata=metadata, tests=tuple(tests))
 
 

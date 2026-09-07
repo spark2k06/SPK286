@@ -101,3 +101,30 @@ pauses hold them. Invalid ROM addresses/words halt with `microcode_fault` until
 reset or cancellation. Debug PCs remain at the last operation when inactive;
 consult `debug_micro_active` to distinguish a pending operation from a retired
 one. Source strings are only in the generated map/listing and Python tools.
+
+## Auditoría incorporada en Phase 2.80
+
+`make microcode-audit` comprueba el contrato de Phase 2.75, la ROM RTL emitida
+y su reconstrucción a DSL canónico. `make microcode-test` incluye los tests
+del compilador y de esta auditoría. La regresión habitual ejecuta ambos.
+
+El checker lee la plantilla concreta de package/case-ROM de encoding 1 y usa
+los entry points y labels del JSON como metadatos: las palabras de dos bits
+no contienen esos nombres. Reconstruye DSL, lo compila y compara las palabras,
+direcciones y símbolos; los comentarios y las posiciones del fuente original
+no forman parte del round-trip. No es un parser SystemVerilog general: primero
+se exige la consistencia de los cinco artefactos con el compilador existente.
+
+`tests/fixtures/microcode_phase2_75.json` fija `MOV_R16_IMM16=0`,
+`MOV_R16_IMM16.writeback=1`, las palabras `[1, 2, 3]` y el ancho de dirección.
+El test de desplazamiento añade otra entrada antes de MOV y demuestra que la
+auditoría rechaza el cambio con ubicación de fuente. Una fase que amplíe la ISA
+deberá versionar deliberadamente su contrato, conservando éste como evidencia
+histórica; no se deben actualizar expectativas para ocultar una regresión.
+
+Los informes ignorados `canonical.mc` y `audit.json` incluyen SHA-256 del fuente
+y de los cinco artefactos. El compilador ya normalizaba CRLF/LF al leer archivos;
+los nuevos tests comprueban esa propiedad y la independencia de `PYTHONHASHSEED`
+en procesos separados. Los hashes de metadatos son del texto UTF-8 normalizado.
+No se cambian el compilador de producción, el source MOV, el formato 1, el
+encoding 1, el RTL ni los bytes de los cinco ficheros generados.

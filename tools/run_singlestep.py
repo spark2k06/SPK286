@@ -27,7 +27,10 @@ REG_ORDER = (
     "sp", "bp", "si", "di", "ip", "flags",
 )
 OPCODES = tuple(f"{value:02X}" for value in range(0xB8, 0xC0))
-RESULT_RE = re.compile(r"SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)")
+RESULT_RE = re.compile(
+    r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
+    re.MULTILINE,
+)
 
 
 class SingleStepRunnerError(RuntimeError):
@@ -110,6 +113,8 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
 
     initial = case.initial
     final = case.final
+    if case.exception is not None:
+        raise SingleStepRunnerError(f"case {case.index}: exception outcomes are unsupported")
     if set(initial) - {"regs", "ram", "queue"}:
         raise SingleStepRunnerError(f"case {case.index}: unsupported initial state fields")
     if set(final) - {"regs", "ram", "queue", "reg_masks"}:
@@ -124,8 +129,13 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
         raise SingleStepRunnerError(
             f"case {case.index}: file opcode {case.instruction_bytes[0]:02X} differs from {opcode}"
         )
+    if opcode not in OPCODES or len(case.instruction_bytes) != 4:
+        raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
 
     initial_regs = read_state_registers(initial, "initial")
+    initial_flags = initial_regs[REG_ORDER.index("flags")]
+    if initial_flags != ((initial_flags & 0x7FD5) | 0x0002):
+        raise SingleStepRunnerError(f"case {case.index}: initial FLAGS cannot be represented by current storage")
     final_regs = final.get("regs", {})
     if not isinstance(final_regs, Mapping):
         raise SingleStepRunnerError(f"case {case.index}: final.regs is not an object")
@@ -148,6 +158,14 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
     expected_regs[REG_ORDER.index("ip")] = retired_ip
 
     initial_ram = read_ram(initial, "initial")
+    code_base = initial_regs[REG_ORDER.index("cs")] << 4
+    initial_ip = initial_regs[REG_ORDER.index("ip")]
+    for offset, byte in enumerate(case.instruction_bytes):
+        address = code_base + initial_ip + offset
+        if initial_ram.get(address) != byte:
+            raise SingleStepRunnerError(
+                f"case {case.index}: instruction bytes disagree with initial RAM at {address:06X}"
+            )
     expected_ram = initial_ram.copy()
     expected_ram.update(read_ram(final, "final"))
     return PreparedCase(
@@ -249,6 +267,14 @@ def run_opcode(
     if not source_path.is_file():
         raise SingleStepRunnerError(f"missing SingleStep source: {source_path}")
     cases = load_source(source_path)
+    indexes: set[int] = set()
+    hashes: set[str] = set()
+    for case in cases:
+        if case.index in indexes or (case.test_hash is not None and case.test_hash in hashes):
+            raise SingleStepRunnerError(f"{source_path}: duplicate case index/hash at {case.index}")
+        indexes.add(case.index)
+        if case.test_hash is not None:
+            hashes.add(case.test_hash)
     selected, selection_skipped = select_cases(
         cases, revoked, args.sample, args.full, args.index, args.test_hash
     )
@@ -265,14 +291,21 @@ def run_opcode(
         print(result.stdout, end="")
     if result.stderr:
         print(result.stderr, end="")
-    match = RESULT_RE.search(result.stdout)
-    if match is None:
+    matches = RESULT_RE.findall(result.stdout)
+    if len(matches) != 1:
         raise SingleStepRunnerError(
             f"SingleStep simulator failed for {opcode} with status {result.returncode}"
         )
-    executed, passed, failed = (int(value) for value in match.groups())
+    executed, passed, failed = (int(value) for value in matches[0])
     if result.returncode not in (0, 1):
         raise SingleStepRunnerError(f"SingleStep simulator returned infrastructure error {result.returncode}")
+    if executed != len(prepared) or executed != passed + failed:
+        raise SingleStepRunnerError(
+            f"SingleStep accounting mismatch for {opcode}: selected={len(prepared)} "
+            f"executed={executed} passed={passed} failed={failed}"
+        )
+    if result.returncode != (1 if failed else 0):
+        raise SingleStepRunnerError(f"SingleStep result/status mismatch for {opcode}: status={result.returncode}")
     revoked_count = sum(is_revoked(case, revoked) for case in cases)
     return len(cases), revoked_count, selection_skipped, executed, passed, failed
 
@@ -313,6 +346,8 @@ def main() -> int:
     if not executable.is_file():
         raise SingleStepRunnerError(f"missing Verilator executable: {executable}; run make verilator first")
     opcodes = tuple(args.opcodes or OPCODES)
+    if len(set(opcodes)) != len(opcodes):
+        raise SingleStepRunnerError("duplicate --opcode selection")
     revoked = load_revocation_list(revocation_path)
     total_discovered = total_revoked = total_selection_skipped = 0
     total_executed = total_passed = total_failed = 0

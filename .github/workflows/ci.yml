@@ -15,3 +15,5 @@ jobs:
           sudo apt-get install -y verilator iverilog yosys cmake ninja-build gtkwave
       - name: Verify generated microcode and run CPU regression
         run: make regression
+      - name: Validate pinned MCL86 reference reconstruction
+        run: make mcl86-fetch mcl86-check

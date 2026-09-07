@@ -20,7 +20,8 @@ class SingleStepPreparationTests(unittest.TestCase):
             "idx": 1847,
             "name": "mov ax,1234h",
             "bytes": [0xB8, 0x34, 0x12, 0xF4],
-            "initial": {"regs": REGS, "ram": [[0x11200, 0xB8], [0x11201, 0x34]], "queue": []},
+            "initial": {"regs": REGS, "ram": [[0x11200, 0xB8], [0x11201, 0x34],
+                                                [0x11202, 0x12], [0x11203, 0xF4]], "queue": []},
             "final": {"regs": {"ax": 0x1234, "ip": 0x1204}, "ram": [], "queue": []},
             "hash": "ab" * 20,
         })
@@ -34,7 +35,8 @@ class SingleStepPreparationTests(unittest.TestCase):
     def test_reg_masks_are_preserved_for_undefined_bits(self) -> None:
         case = SingleStepCase.from_mapping({
             "bytes": [0xBF, 0x78, 0x56, 0xF4],
-            "initial": {"regs": REGS, "ram": []},
+            "initial": {"regs": REGS, "ram": [[0x11200, 0xBF], [0x11201, 0x78],
+                                                [0x11202, 0x56], [0x11203, 0xF4]]},
             "final": {
                 "regs": {"di": 0x5678, "ip": 0x1204},
                 "reg_masks": {"flags": 0x7FFF},
