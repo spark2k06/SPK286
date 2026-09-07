@@ -313,7 +313,15 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
             reason = "memory state mismatch";
         }
     }
-    if (failed && report_failure) print_failure(test, actual, reason);
+    if (failed && report_failure) {
+        print_failure(test, actual, reason);
+        std::cout << "  microstate: micro_pc=" << hex16(dut.debug_micro_pc)
+                  << " micro_entry=" << hex16(dut.debug_micro_entry)
+                  << " micro_instruction=" << static_cast<unsigned>(dut.debug_micro_instruction)
+                  << " active=" << static_cast<unsigned>(dut.debug_micro_active)
+                  << " fault=" << static_cast<unsigned>(dut.microcode_fault)
+                  << " queue_count=" << static_cast<unsigned>(dut.debug_prefetch_count) << '\n';
+    }
 
     if (trace != nullptr) {
         trace->flush();

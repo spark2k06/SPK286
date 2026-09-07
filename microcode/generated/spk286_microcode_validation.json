@@ -1,0 +1,18 @@
+{
+  "address_width": 2,
+  "compiler_version": "1.0",
+  "encoding_version": 1,
+  "format_version": 1,
+  "instruction_entries": 1,
+  "rom_depth": 3,
+  "schema_version": 1,
+  "source_sha256": {
+    "data_move.mc": "da7aef70bc2c61c3c9019be91aab7b9c1fe30d11390b299cba762e926b09b88b"
+  },
+  "timing_metadata": null,
+  "unused_words": 0,
+  "used_words": 3,
+  "validation": "PASS",
+  "warnings": [],
+  "word_width": 2
+}

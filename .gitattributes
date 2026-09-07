@@ -6,6 +6,7 @@
 *.cpp text eol=lf
 *.py text eol=lf
 *.mc text eol=lf
+*.lst text eol=lf
 *.md text eol=lf
 *.json text eol=lf
 Makefile text eol=lf

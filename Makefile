@@ -1,9 +1,12 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov clean
+.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov clean microcode microcode-check microcode-test
 
 help:
 	@echo "SPK286 development targets:"
+	@echo "  make microcode       regenerate committed ROM, constants and source maps"
+	@echo "  make microcode-check fail if any generated microcode artifact is stale"
+	@echo "  make microcode-test  run independent Python compiler/ROM tests"
 	@echo "  make env          check the WSL toolchain"
 	@echo "  make bootstrap    install missing WSL packages when permitted"
 	@echo "  make lint         run Verilator lint"
@@ -25,6 +28,15 @@ help:
 
 env:
 	./scripts/env_check.sh
+
+microcode:
+	python3 -m tools.microcode.compile_microcode
+
+microcode-check:
+	python3 -m tools.microcode.compile_microcode --check
+
+microcode-test: microcode-check
+	python3 -m unittest discover -s tests -p 'test_microcode.py' -v
 
 bootstrap:
 	./scripts/bootstrap.sh

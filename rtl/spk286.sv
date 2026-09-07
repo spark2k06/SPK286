@@ -1,5 +1,5 @@
-// Phase 1 architectural datapath and fetch boundary.
-// Execution-facing controls will be driven by the future decoder/microsequencer.
+// Standalone CPU: decoder -> generated microcode -> functional datapath service.
+// Architectural state, prefetch storage and physical fetch retain separate owners.
 `timescale 1ns/1ps
 
 module spk286 (
@@ -39,6 +39,7 @@ module spk286 (
     output logic         unsupported_opcode,
     output logic [7:0]   debug_opcode,
     output logic         instruction_retired,
+    output logic         microcode_fault,
 
     input  logic         fetch_request,
     output logic         fetch_request_ready,
@@ -70,6 +71,9 @@ module spk286 (
     output logic [31:0]  debug_segment_access,
     output logic [16:0]  debug_fetch_cursor,
     output logic [11:0]  debug_micro_pc,
+    output logic [11:0]  debug_micro_entry,
+    output logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] debug_micro_instruction,
+    output logic         debug_micro_active,
     output logic [3:0]   debug_prefetch_count,
     output logic [3:0]   debug_bus_state
 );
@@ -88,26 +92,21 @@ module spk286 (
     logic [7:0] queue_consume_data;
     logic [3:0] queue_count;
 
-    typedef enum logic [1:0] {
-        FRONTEND_OPCODE = 2'd0,
-        FRONTEND_IMMEDIATE_LOW = 2'd1,
-        FRONTEND_IMMEDIATE_HIGH = 2'd2,
-        FRONTEND_UNSUPPORTED = 2'd3
-    } frontend_state_t;
-    frontend_state_t frontend_state_q;
     logic [2:0] destination_q;
-    logic [7:0] immediate_low_q, opcode_q;
+    logic [7:0] opcode_q;
     logic unsupported_q;
+    logic execution_allowed, decode_supported, decode_ready, micro_start;
+    logic [2:0] decode_destination;
+    logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] decode_entry, micro_pc, micro_entry;
+    logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] micro_word;
+    logic micro_active, micro_valid, micro_end, operation_valid, operation_done;
+    logic executor_done, executor_byte_ready;
     logic internal_gpr_write_en, internal_ip_write_en;
     logic [2:0] internal_gpr_write_index;
     logic [15:0] internal_gpr_write_data, internal_ip_write_data;
     logic effective_gpr_write_en, effective_ip_write_en, effective_flags_write_en;
     logic [2:0] effective_gpr_write_index;
     logic [15:0] effective_gpr_write_data, effective_ip_write_data;
-
-    function automatic logic is_mov_imm_opcode(input logic [7:0] opcode);
-        is_mov_imm_opcode = (opcode >= 8'hB8) && (opcode <= 8'hBF);
-    endfunction
 
     // A CS reload requires a coordinated IP write and fetch restart. Reject a
     // malformed controller transaction as a whole, without partial state writes.
@@ -117,9 +116,10 @@ module spk286 (
     assign commit_allowed = !control_error;
     assign restart = redirect && commit_allowed;
     assign queue_flush = restart;
+    assign execution_allowed = execute_enable && commit_allowed && !reset && !restart;
 
     // The Phase 1 state ports remain the setup/debug path. Once execution is
-    // enabled, the frontend owns GPR/IP writeback, while an explicit redirect
+    // enabled, the microcode path owns GPR/IP writeback, while an explicit redirect
     // still has priority for the architectural IP and CS cache transaction.
     assign effective_gpr_write_en = execute_enable ? internal_gpr_write_en : gpr_write_en;
     assign effective_gpr_write_index = execute_enable ? internal_gpr_write_index : gpr_write_index;
@@ -133,7 +133,7 @@ module spk286 (
     // Keep two bytes of bus capacity available. This lets the current fetch
     // service preserve both bytes of every word response without a second
     // response staging slot in the instruction queue.
-    assign fetch_request_internal = execute_enable && !unsupported_q &&
+    assign fetch_request_internal = execute_enable && !unsupported_q && !microcode_fault &&
                                     (queue_count <= 4'd4);
     assign fetch_response_ready = execute_enable ? queue_fill_ready : fetch_ready;
 
@@ -142,7 +142,8 @@ module spk286 (
         .read_a_index(gpr_read_a_index), .read_b_index(gpr_read_b_index),
         .read_a_byte(gpr_read_a_byte), .read_b_byte(gpr_read_b_byte),
         .read_a_data(gpr_read_a_data), .read_b_data(gpr_read_b_data),
-        .write_en(effective_gpr_write_en && commit_allowed), .write_byte(gpr_write_byte),
+        .write_en(effective_gpr_write_en && commit_allowed),
+        .write_byte(execute_enable ? 1'b0 : gpr_write_byte),
         .write_index(effective_gpr_write_index), .write_data(effective_gpr_write_data),
         .ip_write_en(effective_ip_write_en && commit_allowed), .ip_write_data(effective_ip_write_data),
         .flags_write_en(effective_flags_write_en && commit_allowed),
@@ -177,7 +178,7 @@ module spk286 (
 
     spk286_prefetch_queue prefetch_queue (
         .clk(clk), .reset(reset), .flush(queue_flush),
-        .fill_valid(fetch_response_valid), .fill_data(fetch_response_data),
+        .fill_valid(fetch_response_valid && execute_enable), .fill_data(fetch_response_data),
         .fill_count(fetch_response_count), .fill_ready(queue_fill_ready),
         .consume_valid(queue_consume_valid), .consume_data(queue_consume_data),
         .consume_ready(queue_consume_ready), .count(queue_count)
@@ -192,67 +193,55 @@ module spk286 (
     assign bus_bhe_n = fetch_bus_bhe_n;
     assign address = fetch_address;
 
-    // Unsupported opcodes are inspected without being consumed. The
-    // development trap therefore cannot accidentally execute as another form.
-    always_comb begin
-        queue_consume_ready = 1'b0;
-        if (execute_enable && !unsupported_q && queue_consume_valid) begin
-            case (frontend_state_q)
-                FRONTEND_OPCODE: queue_consume_ready = is_mov_imm_opcode(queue_consume_data);
-                FRONTEND_IMMEDIATE_LOW,
-                FRONTEND_IMMEDIATE_HIGH: queue_consume_ready = 1'b1;
-                default: queue_consume_ready = 1'b0;
-            endcase
-        end
-    end
+    spk286_decoder decoder (
+        .opcode(queue_consume_data), .supported(decode_supported),
+        .destination(decode_destination), .entry(decode_entry)
+    );
+
+    spk286_microcode_rom microcode_rom (
+        .address(micro_pc), .word(micro_word), .valid(micro_valid)
+    );
+
+    assign micro_end = micro_word == spk286_microcode_pkg::MC_END;
+    assign operation_done = micro_end || executor_done;
+    assign micro_start = decode_ready && !unsupported_q && queue_consume_valid && decode_supported;
+
+    spk286_microsequencer #(
+        .ADDRESS_WIDTH(spk286_microcode_pkg::MC_ADDR_WIDTH),
+        .ROM_DEPTH(spk286_microcode_pkg::MC_DEPTH)
+    ) microsequencer (
+        .clk(clk), .reset(reset), .cancel(restart), .enable(execution_allowed),
+        .start(micro_start), .start_entry(decode_entry), .start_ready(decode_ready),
+        .rom_valid(micro_valid), .rom_end(micro_end), .operation_done(operation_done),
+        .operation_valid(operation_valid), .active(micro_active),
+        .micro_pc(micro_pc), .micro_entry(micro_entry),
+        .retired(instruction_retired), .fault(microcode_fault)
+    );
+
+    spk286_micro_executor micro_executor (
+        .clk(clk), .reset(reset), .cancel(restart), .start(micro_start),
+        .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done),
+        .byte_valid(queue_consume_valid), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
+        .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
+        .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data)
+    );
+
+    // Decode and the executor share one byte-consumption interface. Unsupported
+    // opcodes stay at its head. Redirect/control errors suppress both consumers.
+    assign queue_consume_ready = micro_start || executor_byte_ready;
 
     assign internal_ip_write_en = queue_consume_valid && queue_consume_ready;
     assign internal_ip_write_data = debug_ip + 16'h0001;
-    assign internal_gpr_write_en = execute_enable &&
-                                   (frontend_state_q == FRONTEND_IMMEDIATE_HIGH) &&
-                                   queue_consume_valid && queue_consume_ready;
-    assign internal_gpr_write_index = destination_q;
-    assign internal_gpr_write_data = {queue_consume_data, immediate_low_q};
 
     always_ff @(posedge clk) begin
         if (reset || restart) begin
-            frontend_state_q <= FRONTEND_OPCODE;
             destination_q <= 3'd0;
-            immediate_low_q <= 8'h00;
             opcode_q <= 8'h00;
             unsupported_q <= 1'b0;
-            instruction_retired <= 1'b0;
-        end else if (execute_enable) begin
-            instruction_retired <= 1'b0;
-            case (frontend_state_q)
-                FRONTEND_OPCODE: begin
-                    if (queue_consume_valid) begin
-                        opcode_q <= queue_consume_data;
-                        if (is_mov_imm_opcode(queue_consume_data)) begin
-                            destination_q <= queue_consume_data[2:0];
-                            frontend_state_q <= FRONTEND_IMMEDIATE_LOW;
-                        end else begin
-                            unsupported_q <= 1'b1;
-                            frontend_state_q <= FRONTEND_UNSUPPORTED;
-                        end
-                    end
-                end
-                FRONTEND_IMMEDIATE_LOW: begin
-                    if (queue_consume_valid && queue_consume_ready) begin
-                        immediate_low_q <= queue_consume_data;
-                        frontend_state_q <= FRONTEND_IMMEDIATE_HIGH;
-                    end
-                end
-                FRONTEND_IMMEDIATE_HIGH: begin
-                    if (queue_consume_valid && queue_consume_ready) begin
-                        frontend_state_q <= FRONTEND_OPCODE;
-                        instruction_retired <= 1'b1;
-                    end
-                end
-                default: frontend_state_q <= FRONTEND_UNSUPPORTED;
-            endcase
-        end else begin
-            instruction_retired <= 1'b0;
+        end else if (decode_ready && !unsupported_q && queue_consume_valid) begin
+            opcode_q <= queue_consume_data;
+            if (decode_supported) destination_q <= decode_destination;
+            else unsupported_q <= 1'b1;
         end
     end
 
@@ -261,14 +250,10 @@ module spk286 (
     assign unsupported_opcode = unsupported_q;
     assign debug_opcode = opcode_q;
     assign debug_prefetch_count = queue_count;
-    always_comb begin
-        case (frontend_state_q)
-            FRONTEND_OPCODE: debug_micro_pc = 12'h000;
-            FRONTEND_IMMEDIATE_LOW: debug_micro_pc = 12'h001;
-            FRONTEND_IMMEDIATE_HIGH: debug_micro_pc = 12'h002;
-            default: debug_micro_pc = 12'h0FF;
-        endcase
-    end
+    assign debug_micro_pc = 12'(micro_pc);
+    assign debug_micro_entry = 12'(micro_entry);
+    assign debug_micro_instruction = micro_word;
+    assign debug_micro_active = micro_active;
     assign debug_bus_state = bus_valid ? 4'h1 : 4'h0;
     assign bus_status = bus_valid ? 4'hD : 4'hF;
     assign data_out = 16'h0000;

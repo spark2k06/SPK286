@@ -1,0 +1,52 @@
+{
+  "entries": {
+    "MOV_R16_IMM16": 0
+  },
+  "labels": {
+    "MOV_R16_IMM16.writeback": 1
+  },
+  "operations": [
+    {
+      "address": 0,
+      "location": {
+        "entry": "MOV_R16_IMM16",
+        "file": "data_move.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 1,
+      "location": {
+        "entry": "MOV_R16_IMM16",
+        "file": "data_move.mc",
+        "line": 7
+      },
+      "operands": [
+        "TMP0",
+        "DST"
+      ],
+      "operation": "MOVE",
+      "statement": "TMP0 -> DST",
+      "word": 2
+    },
+    {
+      "address": 2,
+      "location": {
+        "entry": "MOV_R16_IMM16",
+        "file": "data_move.mc",
+        "line": 8
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    }
+  ],
+  "schema_version": 1
+}

@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+python3 -m tools.microcode.compile_microcode --check
+python3 -m unittest discover -s tests -p 'test_microcode.py' -v
 ./scripts/lint.sh
 bash ./scripts/test_units.sh
 ./scripts/test_verilator.sh

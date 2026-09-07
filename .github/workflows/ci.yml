@@ -13,5 +13,5 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y verilator iverilog yosys cmake ninja-build gtkwave
-      - name: Run Phase 0 regression
+      - name: Verify generated microcode and run CPU regression
         run: make regression

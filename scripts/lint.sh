@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
+source scripts/rtl_sources.sh
 
 command -v verilator >/dev/null 2>&1 || {
     echo "verilator is required; run ./scripts/bootstrap.sh" >&2
@@ -10,7 +11,7 @@ command -v verilator >/dev/null 2>&1 || {
 }
 
 verilator --lint-only --language 1800-2012 --Wall \
-    --top-module spk286 -Irtl rtl/*.sv
+    --top-module spk286 -Irtl "${rtl_sources[@]}"
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_registers -Irtl rtl/spk286_registers.sv
 verilator --lint-only --language 1800-2012 --Wall \
@@ -19,4 +20,8 @@ verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_fetch -Irtl rtl/spk286_fetch.sv
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_prefetch_queue -Irtl rtl/spk286_prefetch_queue.sv
+for module in spk286_microsequencer spk286_decoder spk286_micro_executor spk286_microcode_rom; do
+    verilator --lint-only --language 1800-2012 --Wall \
+        --top-module "$module" -Irtl "${rtl_sources[@]}"
+done
 echo "LINT PASS"
