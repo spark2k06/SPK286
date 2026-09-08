@@ -1,18 +1,19 @@
 {
-  "address_width": 6,
-  "compiler_version": "3.0",
-  "encoding_version": 3,
-  "format_version": 3,
-  "instruction_entries": 8,
-  "rom_depth": 45,
+  "address_width": 7,
+  "compiler_version": "4.0",
+  "encoding_version": 4,
+  "format_version": 4,
+  "instruction_entries": 20,
+  "rom_depth": 97,
   "schema_version": 1,
   "source_sha256": {
     "data_move.mc": "0aa4ae7fa92080e5d14b2118327c4f528e31f1e015c3fe0b1f8c5cb31f718823",
-    "word_alu.mc": "b4230a9c35c20bd2c0db9ed84590f33b4777a9f368acc939ad779986feb415ee"
+    "word_alu.mc": "b4230a9c35c20bd2c0db9ed84590f33b4777a9f368acc939ad779986feb415ee",
+    "word_stack_control.mc": "fda3a61931fe4285ff38b53d6e3ce1823b547451e080720cda720fcff55b5080"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 45,
+  "used_words": 97,
   "validation": "PASS",
   "warnings": [],
   "word_width": 5

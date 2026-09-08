@@ -1,0 +1,78 @@
+# Functional stack/near-control operations; no historical timing delays.
+microcode_format 4
+
+instruction PUSH_R16:
+    READ_DST16 -> TMP0
+    PUSH16 DECODED TMP0
+    END
+
+instruction POP_R16:
+    POP16 -> TMP0
+    TMP0 -> DST
+    END
+
+instruction PUSH_IMM16:
+    FETCH_IMM16 -> TMP0
+    PUSH16 DECODED TMP0
+    END
+
+instruction PUSH_IMM8S:
+    FETCH_IMM8S -> TMP0
+    PUSH16 DECODED TMP0
+    END
+
+instruction POP_RM16:
+    DECODE_MODRM
+    CHECK_RM16
+    POP16 -> TMP0
+    TMP0 -> RM16
+    END
+
+instruction GROUP5_NEAR:
+    DECODE_MODRM
+    READ_RM16 -> TMP0
+    TARGET_ABS16 TMP0
+    PUSH16 DECODED TMP0
+    REDIRECT DECODED
+    END
+
+instruction CALL_REL16:
+    FETCH_IMM16 -> TMP1
+    TARGET_REL16 TMP1
+    READ_IP16 -> TMP0
+    PUSH16 DECODED TMP0
+    REDIRECT DECODED
+    END
+
+instruction JMP_REL16:
+    FETCH_IMM16 -> TMP1
+    TARGET_REL16 TMP1
+    REDIRECT DECODED
+    END
+
+instruction BRANCH_REL8:
+    FETCH_IMM8S -> TMP1
+    TARGET_REL16 TMP1
+    REDIRECT DECODED
+    END
+
+instruction LOOP_REL8:
+    FETCH_IMM8S -> TMP1
+    COUNT DECODED
+    TARGET_REL16 TMP1
+    REDIRECT DECODED
+    END
+
+instruction RET_NEAR:
+    POP16 -> TMP0
+    TARGET_ABS16 TMP0
+    REDIRECT DECODED
+    END
+
+instruction RET_IMM16:
+    FETCH_IMM16 -> TMP1
+    POP16 -> TMP0
+    TARGET_ABS16 TMP0
+    ADJUST_SP16 TMP1
+    REDIRECT DECODED
+    END

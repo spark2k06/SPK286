@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 3 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 4 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -24,7 +24,10 @@ STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
               11: "FETCH_IMM16 -> TMP1", 12: "FETCH_IMM8S -> TMP1",
               13: "READ_DST16 -> TMP0", 14: "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
               15: "TMP2 -> REG16 IF_WRITE", 16: "TMP2 -> RM16 IF_WRITE",
-              17: "TMP2 -> DST IF_WRITE", 18: "COMMIT_FLAGS"}
+              17: "TMP2 -> DST IF_WRITE", 18: "COMMIT_FLAGS", 19: "CHECK_RM16", 20: "FETCH_IMM8S -> TMP0",
+              21: "PUSH16 DECODED TMP0", 22: "POP16 -> TMP0", 23: "READ_IP16 -> TMP0",
+              24: "TARGET_REL16 TMP1", 25: "TARGET_ABS16 TMP0", 26: "REDIRECT DECODED",
+              27: "ADJUST_SP16 TMP1", 28: "COUNT DECODED"}
 
 
 def validate_entries(program, expected):
@@ -63,6 +66,10 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
                         FETCH_IMM8S_TMP1=12, READ_DST16=13, ALU=14,
                         WRITE_RESULT_REG16=15, WRITE_RESULT_RM16=16,
                         WRITE_RESULT_DST=17, COMMIT_FLAGS=18)
+    if dimension('MC_FORMAT_VERSION') >= 4:
+        expected.update(CHECK_RM16=19, FETCH_IMM8S_TMP0=20, PUSH16=21, POP16=22,
+                        READ_IP16=23, TARGET_REL16=24, TARGET_ABS16=25,
+                        REDIRECT=26, ADJUST_SP16=27, COUNT=28)
     if {name: values.get(name) for name in expected} != expected:
         raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
@@ -112,7 +119,7 @@ def canonical_source(words, entries, labels=None):
         if owner != match[1]:
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
-    version = 3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)
+    version = 4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
@@ -173,7 +180,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase4.json")
+                        default=ROOT / "tests/fixtures/microcode_phase5.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

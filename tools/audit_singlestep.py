@@ -17,7 +17,7 @@ import runpy
 import struct
 import subprocess
 
-from tools.run_singlestep import SUPPORTED_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
+from tools.run_singlestep import SUPPORTED_OPCODES, PHASE5_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
 from tools.singlestep import is_revoked, load_moo, load_revocation_list
 
 
@@ -93,6 +93,7 @@ def main():
     identities = set()
     example = None
     memory_examples = {}
+    stack_control_examples = {}
     excluded_count = 0
     for opcode in SUPPORTED_OPCODES:
         path = args.repo / "v1_real_mode" / f"{opcode}.MOO.gz"
@@ -134,6 +135,8 @@ def main():
                 excluded_count += 1
             else:
                 prepared = prepare_case(ours, opcode)
+                if opcode in PHASE5_OPCODES:
+                    stack_control_examples.setdefault(opcode, prepared)
                 if example is None:
                     example = prepared
                 if opcode in ("89", "8B") and ours.instruction_bytes[1] >> 6 != 3:
@@ -210,7 +213,14 @@ def main():
     values[write_address] ^= 1
     execute("expected-operand-byte", replace(write, expected_ram=tuple(sorted(values.items()))),
             "memory state mismatch")
-    print("SINGLESTEP_AUDIT PASS: corpus cross-check; 20 rejected fault probes; 4 pristine executions")
+    require(set(stack_control_examples) == set(PHASE5_OPCODES), 'missing Phase 5 comparator probes')
+    for opcode, prepared in stack_control_examples.items():
+        execute('pristine-stack-control-'+opcode, prepared)
+        values = list(prepared.expected_regs)
+        values[REG_ORDER.index('ip')] ^= 1
+        execute('expected-target-'+opcode, replace(prepared, expected_regs=tuple(values)),
+                'architectural register mismatch')
+    print("SINGLESTEP_AUDIT PASS: corpus cross-check; 67 rejected fault probes; 51 pristine executions")
 
 
 if __name__ == "__main__":

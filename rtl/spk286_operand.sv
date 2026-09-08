@@ -3,7 +3,7 @@
 `timescale 1ns/1ps
 module spk286_operand (
     input  logic clk, reset, cancel,
-    input  logic request_valid, request_write, select_rm,
+    input  logic request_valid, request_write, request_check, select_rm,
     input  logic [15:0] write_data,
     output logic done,
     output logic [15:0] read_data,
@@ -31,14 +31,14 @@ module spk286_operand (
     assign is_memory = select_rm && !register_direct;
     assign within_limit = ({1'b0, offset} + 17'd1) <= {1'b0, segment_limit};
     assign allowed = request_valid && !reset && !cancel && !blocked;
-    assign memory_request = allowed && is_memory && !pending_q && within_limit;
+    assign memory_request = allowed && is_memory && !pending_q && within_limit && !request_check;
     assign memory_write = request_write;
     assign memory_address = physical_address;
     assign memory_write_data = write_data;
     assign memory_response_ready = allowed && pending_q;
-    assign done = allowed && ((!is_memory && !pending_q) || (pending_q && memory_response_valid));
+    assign done = allowed && ((request_check && (!is_memory || within_limit) && !pending_q) || (!is_memory && !pending_q) || (pending_q && memory_response_valid));
     assign read_data = is_memory ? memory_read_data : register_state[register_index * 16 +: 16];
-    assign gpr_write_en = done && request_write && !is_memory;
+    assign gpr_write_en = done && request_write && !is_memory && !request_check;
     assign gpr_write_index = register_index;
     assign gpr_write_data = write_data;
     always_ff @(posedge clk) begin

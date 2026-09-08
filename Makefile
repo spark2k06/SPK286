@@ -27,6 +27,9 @@ help:
 	@echo "  make singlestep-smoke run ten supported cases per opcode, B8..BF and 89/8B"
 	@echo "  make singlestep-operands run the complete supported 89/8B corpus"
 	@echo "  make phase3-check run mandatory Phase 3 gates with the pinned external corpus"
+	@echo "  make phase5-check run all inherited and stack/control-flow release gates"
+	@echo "  make stack-control-audit reject twelve isolated stack/control RTL mutants"
+	@echo "  make singlestep-stack-control run all 47 Phase 5 hardware forms"
 	@echo "  make phase4-check run all inherited and word ALU release gates"
 	@echo "  make singlestep-alu run all admitted Phase 4 hardware forms"
 	@echo "  make alu-audit reject eight isolated ALU/datapath mutants"
@@ -147,3 +150,16 @@ quartus-info:
 
 clean:
 	rm -rf build
+
+.PHONY: phase5-check stack-control-audit singlestep-stack-control singlestep-stack-control-smoke
+phase5-check:
+	bash scripts/validate_phase5.sh
+
+stack-control-audit:
+	python3 -m tools.audit_stack_control
+
+singlestep-stack-control: verilator
+	python3 -m tools.run_singlestep --stack-control --full
+
+singlestep-stack-control-smoke: verilator
+	python3 -m tools.run_singlestep --stack-control --smoke

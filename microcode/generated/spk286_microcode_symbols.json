@@ -5,9 +5,21 @@
     "ALU_RM16_IMM16": 31,
     "ALU_RM16_IMM8S": 38,
     "ALU_RM16_R16": 11,
+    "BRANCH_REL8": 78,
+    "CALL_REL16": 68,
+    "GROUP5_NEAR": 62,
+    "JMP_REL16": 74,
+    "LOOP_REL8": 82,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
-    "MOV_RM16_R16": 3
+    "MOV_RM16_R16": 3,
+    "POP_R16": 48,
+    "POP_RM16": 57,
+    "PUSH_IMM16": 51,
+    "PUSH_IMM8S": 54,
+    "PUSH_R16": 45,
+    "RET_IMM16": 91,
+    "RET_NEAR": 87
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -627,6 +639,710 @@
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
         "line": 52
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 45,
+      "location": {
+        "entry": "PUSH_R16",
+        "file": "word_stack_control.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 46,
+      "location": {
+        "entry": "PUSH_R16",
+        "file": "word_stack_control.mc",
+        "line": 6
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 47,
+      "location": {
+        "entry": "PUSH_R16",
+        "file": "word_stack_control.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 48,
+      "location": {
+        "entry": "POP_R16",
+        "file": "word_stack_control.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 49,
+      "location": {
+        "entry": "POP_R16",
+        "file": "word_stack_control.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP0",
+        "DST"
+      ],
+      "operation": "MOVE",
+      "statement": "TMP0 -> DST",
+      "word": 2
+    },
+    {
+      "address": 50,
+      "location": {
+        "entry": "POP_R16",
+        "file": "word_stack_control.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 51,
+      "location": {
+        "entry": "PUSH_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 15
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 52,
+      "location": {
+        "entry": "PUSH_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 16
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 53,
+      "location": {
+        "entry": "PUSH_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 54,
+      "location": {
+        "entry": "PUSH_IMM8S",
+        "file": "word_stack_control.mc",
+        "line": 20
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM8S_TMP0",
+      "statement": "FETCH_IMM8S -> TMP0",
+      "word": 20
+    },
+    {
+      "address": 55,
+      "location": {
+        "entry": "PUSH_IMM8S",
+        "file": "word_stack_control.mc",
+        "line": 21
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 56,
+      "location": {
+        "entry": "PUSH_IMM8S",
+        "file": "word_stack_control.mc",
+        "line": 22
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 57,
+      "location": {
+        "entry": "POP_RM16",
+        "file": "word_stack_control.mc",
+        "line": 25
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 58,
+      "location": {
+        "entry": "POP_RM16",
+        "file": "word_stack_control.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "CHECK_RM16",
+      "statement": "CHECK_RM16",
+      "word": 19
+    },
+    {
+      "address": 59,
+      "location": {
+        "entry": "POP_RM16",
+        "file": "word_stack_control.mc",
+        "line": 27
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 60,
+      "location": {
+        "entry": "POP_RM16",
+        "file": "word_stack_control.mc",
+        "line": 28
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM16",
+      "statement": "TMP0 -> RM16",
+      "word": 8
+    },
+    {
+      "address": 61,
+      "location": {
+        "entry": "POP_RM16",
+        "file": "word_stack_control.mc",
+        "line": 29
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 62,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 63,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 33
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 64,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 34
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "TARGET_ABS16",
+      "statement": "TARGET_ABS16 TMP0",
+      "word": 25
+    },
+    {
+      "address": 65,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 35
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 66,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 36
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 67,
+      "location": {
+        "entry": "GROUP5_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 37
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 68,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 69,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 41
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "TARGET_REL16",
+      "statement": "TARGET_REL16 TMP1",
+      "word": 24
+    },
+    {
+      "address": 70,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 42
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_IP16",
+      "statement": "READ_IP16 -> TMP0",
+      "word": 23
+    },
+    {
+      "address": 71,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 43
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 72,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 44
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 73,
+      "location": {
+        "entry": "CALL_REL16",
+        "file": "word_stack_control.mc",
+        "line": 45
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 74,
+      "location": {
+        "entry": "JMP_REL16",
+        "file": "word_stack_control.mc",
+        "line": 48
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 75,
+      "location": {
+        "entry": "JMP_REL16",
+        "file": "word_stack_control.mc",
+        "line": 49
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "TARGET_REL16",
+      "statement": "TARGET_REL16 TMP1",
+      "word": 24
+    },
+    {
+      "address": 76,
+      "location": {
+        "entry": "JMP_REL16",
+        "file": "word_stack_control.mc",
+        "line": 50
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 77,
+      "location": {
+        "entry": "JMP_REL16",
+        "file": "word_stack_control.mc",
+        "line": 51
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 78,
+      "location": {
+        "entry": "BRANCH_REL8",
+        "file": "word_stack_control.mc",
+        "line": 54
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8S_TMP1",
+      "statement": "FETCH_IMM8S -> TMP1",
+      "word": 12
+    },
+    {
+      "address": 79,
+      "location": {
+        "entry": "BRANCH_REL8",
+        "file": "word_stack_control.mc",
+        "line": 55
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "TARGET_REL16",
+      "statement": "TARGET_REL16 TMP1",
+      "word": 24
+    },
+    {
+      "address": 80,
+      "location": {
+        "entry": "BRANCH_REL8",
+        "file": "word_stack_control.mc",
+        "line": 56
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 81,
+      "location": {
+        "entry": "BRANCH_REL8",
+        "file": "word_stack_control.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 82,
+      "location": {
+        "entry": "LOOP_REL8",
+        "file": "word_stack_control.mc",
+        "line": 60
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8S_TMP1",
+      "statement": "FETCH_IMM8S -> TMP1",
+      "word": 12
+    },
+    {
+      "address": 83,
+      "location": {
+        "entry": "LOOP_REL8",
+        "file": "word_stack_control.mc",
+        "line": 61
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "COUNT",
+      "statement": "COUNT DECODED",
+      "word": 28
+    },
+    {
+      "address": 84,
+      "location": {
+        "entry": "LOOP_REL8",
+        "file": "word_stack_control.mc",
+        "line": 62
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "TARGET_REL16",
+      "statement": "TARGET_REL16 TMP1",
+      "word": 24
+    },
+    {
+      "address": 85,
+      "location": {
+        "entry": "LOOP_REL8",
+        "file": "word_stack_control.mc",
+        "line": 63
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 86,
+      "location": {
+        "entry": "LOOP_REL8",
+        "file": "word_stack_control.mc",
+        "line": 64
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 87,
+      "location": {
+        "entry": "RET_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 67
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 88,
+      "location": {
+        "entry": "RET_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 68
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "TARGET_ABS16",
+      "statement": "TARGET_ABS16 TMP0",
+      "word": 25
+    },
+    {
+      "address": 89,
+      "location": {
+        "entry": "RET_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 69
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 90,
+      "location": {
+        "entry": "RET_NEAR",
+        "file": "word_stack_control.mc",
+        "line": 70
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 91,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 73
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 92,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 74
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 93,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 75
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "TARGET_ABS16",
+      "statement": "TARGET_ABS16 TMP0",
+      "word": 25
+    },
+    {
+      "address": 94,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 76
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "ADJUST_SP16",
+      "statement": "ADJUST_SP16 TMP1",
+      "word": 27
+    },
+    {
+      "address": 95,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 77
+      },
+      "operands": [
+        "DECODED"
+      ],
+      "operation": "REDIRECT",
+      "statement": "REDIRECT DECODED",
+      "word": 26
+    },
+    {
+      "address": 96,
+      "location": {
+        "entry": "RET_IMM16",
+        "file": "word_stack_control.mc",
+        "line": 78
       },
       "operands": [],
       "operation": "END",

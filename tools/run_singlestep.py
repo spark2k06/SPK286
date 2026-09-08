@@ -32,7 +32,10 @@ OPCODES = tuple(f"{value:02X}" for value in range(0xB8, 0xC0))
 MODRM_OPCODES = ("89", "8B")
 ALU_OPCODES = tuple(f'{group*8+form:02X}' for group in range(8) for form in (1, 3, 5)) + tuple(
     f'{opcode}.{group}' for opcode in ('81', '83') for group in range(8))
-SUPPORTED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES
+PHASE5_OPCODES = tuple(f'{value:02X}' for value in range(0x50,0x60)) + ('68','6A') + tuple(
+    f'{value:02X}' for value in range(0x70,0x80)) + ('8F','C2','C3','E0','E1','E2','E3','E8','E9','EB','FF.2','FF.4','FF.6')
+CONTROL_OPCODES = tuple(f'{value:02X}' for value in range(0x70,0x80)) + ('C2','C3','E0','E1','E2','E3','E8','E9','EB','FF.2','FF.4')
+SUPPORTED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -62,7 +65,7 @@ def scope_exclusion(case: SingleStepCase, opcode: str) -> str | None:
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES + ALU_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
@@ -166,9 +169,16 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
     elif opcode in ALU_OPCODES and byte_opcode < 0x40 and byte_opcode & 7 == 5:
         if len(case.instruction_bytes) != 4:
             raise SingleStepRunnerError(f"case {case.index}: accumulator immediate length mismatch")
-    elif opcode in MODRM_OPCODES + ALU_OPCODES:
+    elif opcode in PHASE5_OPCODES and byte_opcode not in (0x8F, 0xFF):
+        instruction_length = (3 if byte_opcode in (0x68,0xC2,0xE8,0xE9) else
+                              2 if byte_opcode in (0x6A,0xE0,0xE1,0xE2,0xE3,0xEB) or 0x70 <= byte_opcode <= 0x7F else 1)
+        if len(case.instruction_bytes) != instruction_length + 1:
+            raise SingleStepRunnerError(f'case {case.index}: stack/control length mismatch')
+    elif opcode in MODRM_OPCODES + ALU_OPCODES + ('8F','FF.2','FF.4','FF.6'):
         if len(case.instruction_bytes) < 3:
             raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
+        if byte_opcode == 0x8F and (case.instruction_bytes[1] >> 3) & 7 != 0:
+            raise SingleStepRunnerError(f'case {case.index}: invalid POP group extension')
         mode, rm = case.instruction_bytes[1] >> 6, case.instruction_bytes[1] & 7
         displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
         immediate_bytes = 2 if byte_opcode == 0x81 else (1 if byte_opcode == 0x83 else 0)
@@ -194,10 +204,12 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
 
     # SingleStep executes the target bytes followed by F4.  The published IP
     # includes that one-byte HALT, so the retirement boundary is final IP - 1.
+    # Control-transfer vectors inject HLT on the first target fetch (upstream
+    # README). Preserve the published target; do not enforce sequential IP.
     published_ip = expected_regs[REG_ORDER.index("ip")]
     retired_ip = (published_ip - 1) & 0xFFFF
     expected_target_ip = (initial_regs[REG_ORDER.index("ip")] + len(case.instruction_bytes) - 1) & 0xFFFF
-    if retired_ip != expected_target_ip:
+    if opcode not in CONTROL_OPCODES and retired_ip != expected_target_ip:
         raise SingleStepRunnerError(
             f"case {case.index}: HALT/IP convention mismatch: published={published_ip:04X} "
             f"target={expected_target_ip:04X}"
@@ -387,6 +399,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--build-dir", type=Path, default=Path(os.environ.get("SPK286_BUILD_DIR", "build")))
     parser.add_argument("--executable", type=Path)
     parser.add_argument("--opcode", dest="opcodes", action="append", choices=SUPPORTED_OPCODES)
+    parser.add_argument("--stack-control", action="store_true", help="select all Phase 5 forms")
     parser.add_argument("--alu", action="store_true", help="select every admitted Phase 4 ALU form")
     parser.add_argument("--full", action="store_true", help="run every non-revoked case")
     parser.add_argument("--sample", type=int, help="run this many deterministic cases per opcode")
@@ -399,6 +412,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.stack_control:
+        if args.opcodes or args.alu:
+            raise SingleStepRunnerError('--stack-control cannot be combined with another family selector')
+        args.opcodes = list(PHASE5_OPCODES)
     if args.alu:
         if args.opcodes:
             raise SingleStepRunnerError('--alu cannot be combined with --opcode')

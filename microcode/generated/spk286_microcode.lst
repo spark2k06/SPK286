@@ -1,4 +1,4 @@
-SPK286 microcode compiler 3.0; format 3; encoding 3
+SPK286 microcode compiler 4.0; format 4; encoding 4
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -60,3 +60,67 @@ SPK286 microcode compiler 3.0; format 3; encoding 3
 002A  10  TMP2 -> RM16 IF_WRITE  # word_alu.mc:50
 002B  12  COMMIT_FLAGS  # word_alu.mc:51
 002C  3  END  # word_alu.mc:52
+002D  PUSH_R16:
+002D  D  READ_DST16 -> TMP0  # word_stack_control.mc:5
+002E  15  PUSH16 DECODED TMP0  # word_stack_control.mc:6
+002F  3  END  # word_stack_control.mc:7
+0030  POP_R16:
+0030  16  POP16 -> TMP0  # word_stack_control.mc:10
+0031  2  TMP0 -> DST  # word_stack_control.mc:11
+0032  3  END  # word_stack_control.mc:12
+0033  PUSH_IMM16:
+0033  1  FETCH_IMM16 -> TMP0  # word_stack_control.mc:15
+0034  15  PUSH16 DECODED TMP0  # word_stack_control.mc:16
+0035  3  END  # word_stack_control.mc:17
+0036  PUSH_IMM8S:
+0036  14  FETCH_IMM8S -> TMP0  # word_stack_control.mc:20
+0037  15  PUSH16 DECODED TMP0  # word_stack_control.mc:21
+0038  3  END  # word_stack_control.mc:22
+0039  POP_RM16:
+0039  4  DECODE_MODRM  # word_stack_control.mc:25
+003A  13  CHECK_RM16  # word_stack_control.mc:26
+003B  16  POP16 -> TMP0  # word_stack_control.mc:27
+003C  8  TMP0 -> RM16  # word_stack_control.mc:28
+003D  3  END  # word_stack_control.mc:29
+003E  GROUP5_NEAR:
+003E  4  DECODE_MODRM  # word_stack_control.mc:32
+003F  6  READ_RM16 -> TMP0  # word_stack_control.mc:33
+0040  19  TARGET_ABS16 TMP0  # word_stack_control.mc:34
+0041  15  PUSH16 DECODED TMP0  # word_stack_control.mc:35
+0042  1A  REDIRECT DECODED  # word_stack_control.mc:36
+0043  3  END  # word_stack_control.mc:37
+0044  CALL_REL16:
+0044  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:40
+0045  18  TARGET_REL16 TMP1  # word_stack_control.mc:41
+0046  17  READ_IP16 -> TMP0  # word_stack_control.mc:42
+0047  15  PUSH16 DECODED TMP0  # word_stack_control.mc:43
+0048  1A  REDIRECT DECODED  # word_stack_control.mc:44
+0049  3  END  # word_stack_control.mc:45
+004A  JMP_REL16:
+004A  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:48
+004B  18  TARGET_REL16 TMP1  # word_stack_control.mc:49
+004C  1A  REDIRECT DECODED  # word_stack_control.mc:50
+004D  3  END  # word_stack_control.mc:51
+004E  BRANCH_REL8:
+004E  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:54
+004F  18  TARGET_REL16 TMP1  # word_stack_control.mc:55
+0050  1A  REDIRECT DECODED  # word_stack_control.mc:56
+0051  3  END  # word_stack_control.mc:57
+0052  LOOP_REL8:
+0052  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:60
+0053  1C  COUNT DECODED  # word_stack_control.mc:61
+0054  18  TARGET_REL16 TMP1  # word_stack_control.mc:62
+0055  1A  REDIRECT DECODED  # word_stack_control.mc:63
+0056  3  END  # word_stack_control.mc:64
+0057  RET_NEAR:
+0057  16  POP16 -> TMP0  # word_stack_control.mc:67
+0058  19  TARGET_ABS16 TMP0  # word_stack_control.mc:68
+0059  1A  REDIRECT DECODED  # word_stack_control.mc:69
+005A  3  END  # word_stack_control.mc:70
+005B  RET_IMM16:
+005B  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:73
+005C  16  POP16 -> TMP0  # word_stack_control.mc:74
+005D  19  TARGET_ABS16 TMP0  # word_stack_control.mc:75
+005E  1B  ADJUST_SP16 TMP1  # word_stack_control.mc:76
+005F  1A  REDIRECT DECODED  # word_stack_control.mc:77
+0060  3  END  # word_stack_control.mc:78

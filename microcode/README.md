@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-preserved Phase 2.75/3 formats and the active Phase 4 extension below.
+preserved Phase 2.75/3/4 formats and the active Phase 5 extension below.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -175,7 +175,7 @@ processes. Metadata hashes describe normalized UTF-8 source. Compiler version
 2.0 identifies the minimal operand extension; generated outputs remain entirely
 owned by the compiler.
 
-## Active Phase 4 format 3
+## Preserved Phase 4 format 3
 
 Format/encoding 3 adds only ten controls, keeping all format-2 controls and MOV
 entries unchanged. The current package uses five control bits, six address bits
@@ -219,3 +219,15 @@ COMMIT_FLAGS follows full register/logical-memory completion; END follows FLAGS.
 The executor holds candidates/validity separately from architectural storage.
 Pause holds all semantic state; reset/redirect/start clear new temporary and
 candidate state. The generic microsequencer, BIU and operand service are unchanged.
+
+## Phase 5 active image
+
+`source/word_stack_control.mc` adds twelve reusable entries for register,
+immediate and RM stack transfers, near CALL/RET/JMP, Jcc and LOOP/JCXZ.
+Compiler/encoding 4 uses 97 five-bit words and seven-bit addresses. The first
+45 words are preserved exactly. `tests/fixtures/microcode_phase5.json` is the
+independently specified active contract; Phase 4 remains a frozen test.
+The operation/lifetime contract is documented in
+[SPK286_MICROCODE_FORMAT.md](../SPK286_MICROCODE_FORMAT.md). Generated files
+must still be regenerated, never hand-edited. `make phase5-check` verifies
+regeneration, all inherited gates and the stack/control additions.

@@ -10,7 +10,9 @@ module spk286_decoder_tb;
     initial begin
         for (integer i = 0; i < 256; i = i + 1) begin
             opcode = 8'(i); #1;
-            if (supported !== ((i >= 184 && i <= 191) || i == 137 || i == 139 || i == 129 || i == 131 ||
+            if (supported !== ((i >= 80 && i <= 95) || (i >= 112 && i <= 127) || i == 104 || i == 106 || i == 143 || i == 255 ||
+                              i == 194 || i == 195 || (i >= 224 && i <= 227) || i == 232 || i == 233 || i == 235 ||
+                              (i >= 184 && i <= 191) || i == 137 || i == 139 || i == 129 || i == 131 ||
                               (i < 64 && (i % 8 == 1 || i % 8 == 3 || i % 8 == 5)))) $fatal(1, "opcode support %h", opcode);
             if (i >= 184 && i <= 191 && (destination !== 3'(i - 184) ||
                 entry !== spk286_microcode_pkg::MC_ENTRY_MOV_R16_IMM16))

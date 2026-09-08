@@ -30,4 +30,9 @@ if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/01.MOO.gz" ]]; then
 else
     echo "SINGLESTEP ALU SMOKE SKIP: external ALU corpus absent; release gate requires it"
 fi
+if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/E8.MOO.gz" ]]; then
+    python3 -m tools.run_singlestep --stack-control --smoke
+else
+    echo "SINGLESTEP STACK/CONTROL SMOKE SKIP: external corpus absent; release gate requires it"
+fi
 echo "TEST PASS"

@@ -83,7 +83,11 @@ module spk286 (
     output logic [3:0]   debug_bus_state
 );
     logic commit_allowed;
-    logic restart;
+    logic restart, stream_restart, internal_redirect;
+    logic [15:0] internal_target, stream_ip, stack_offset, service_offset;
+    logic [1:0] service_segment;
+    logic stack_request, operand_check, condition_taken, branch_taken;
+    logic push_enabled, push_return_ip, decrement_count, form_supported;
     logic [23:0] fetch_address;
     logic fetch_bus_valid, fetch_bus_bhe_n;
     logic fetch_bus_ready;
@@ -140,8 +144,12 @@ module spk286 (
                            (segment_load_en && segment_load_index == 2'd1 && !redirect));
     assign commit_allowed = !control_error;
     assign restart = redirect && commit_allowed;
-    assign queue_flush = restart;
-    assign execution_allowed = execute_enable && commit_allowed && !reset && !restart && !operand_blocked;
+    assign stream_restart = restart || internal_redirect;
+    assign stream_ip = restart ? ip_write_data : internal_target;
+    assign queue_flush = stream_restart;
+    assign service_segment = stack_request ? 2'd2 : operand_segment;
+    assign service_offset = stack_request ? stack_offset : operand_offset;
+    assign execution_allowed = execute_enable && commit_allowed && !reset && !restart && !operand_blocked && !unsupported_q;
 
     // The Phase 1 state ports remain the setup/debug path. Once execution is
     // enabled, the microcode path owns GPR/IP writeback, while an explicit redirect
@@ -181,8 +189,8 @@ module spk286 (
         .clk(clk), .reset(reset),
         .load_en(segment_load_en && commit_allowed),
         .load_index(segment_load_index), .load_selector(segment_load_selector),
-        .read_index(execute_enable ? operand_segment : segment_read_index),
-        .offset(execute_enable ? operand_offset : segment_offset),
+        .read_index(execute_enable ? service_segment : segment_read_index),
+        .offset(execute_enable ? service_offset : segment_offset),
         .selector(segment_selector), .base(segment_base), .limit(segment_limit),
         .access_rights(segment_access), .physical_address(segment_address),
         .selector_state(debug_segment_selectors), .base_state(debug_segment_bases),
@@ -193,7 +201,7 @@ module spk286 (
         .clk(clk), .reset(reset), .ready(fetch_bus_ready), .data_in(data_in),
         .code_base(debug_segment_bases[24 +: 24]),
         .code_limit(debug_segment_limits[16 +: 16]),
-        .restart(restart), .restart_ip(ip_write_data),
+        .restart(stream_restart), .restart_ip(stream_ip),
         .request(execute_enable ? fetch_request_internal : fetch_request),
         .request_ready(fetch_request_ready_internal),
         .response_ready(fetch_response_ready), .response_valid(fetch_response_valid),
@@ -258,7 +266,11 @@ module spk286 (
         .byte_valid(queue_consume_valid), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
         .decode_operand(operand_decode_enable), .decode_done(operand_decode_done),
         .decode_byte_ready(operand_byte_ready), .operand_request(operand_request),
-        .operand_write(operand_write), .operand_select_rm(operand_select_rm),
+        .operand_write(operand_write), .operand_select_rm(operand_select_rm), .operand_check(operand_check),
+        .stack_request(stack_request), .stack_offset(stack_offset),
+        .architectural_ip(debug_ip), .stack_pointer(register_state[64 +: 16]), .count_value(register_state[16 +: 16]),
+        .push_enabled(push_enabled), .push_return_ip(push_return_ip), .branch_taken(branch_taken), .decrement_count(decrement_count),
+        .redirect_request(internal_redirect), .redirect_target(internal_target), .redirect_ready(1'b1),
         .operand_write_data(operand_write_data), .operand_done(operand_done),
         .operand_read_data(operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
         .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
@@ -269,6 +281,17 @@ module spk286 (
         .decoded_flags_mask(decoded_flags_mask), .decoded_undefined_mask(decoded_undefined_mask),
         .flags_write_en(internal_flags_write_en), .flags_write_data(internal_flags_write_data),
         .flags_write_mask(internal_flags_write_mask)
+    );
+
+    spk286_condition condition_decode (
+        .condition_code(opcode_q[3:0]), .carry(debug_flags[0]), .parity(debug_flags[2]),
+        .zero(debug_flags[6]), .sign_flag(debug_flags[7]), .overflow(debug_flags[11]), .taken(condition_taken)
+    );
+    spk286_control_decode control_decode (
+        .opcode(opcode_q), .group_extension(operand_reg), .condition_taken(condition_taken),
+        .zero(debug_flags[6]), .count(register_state[16 +: 16]), .push_enabled(push_enabled),
+        .push_return_ip(push_return_ip), .branch_taken(branch_taken), .decrement_count(decrement_count),
+        .form_supported(form_supported)
     );
 
     spk286_alu_decode alu_decode (
@@ -289,10 +312,10 @@ module spk286 (
     );
     spk286_operand operand (
         .clk(clk), .reset(reset), .cancel(restart), .request_valid(operand_request),
-        .request_write(operand_write), .select_rm(operand_select_rm), .write_data(operand_write_data),
+        .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .read_data(operand_read_data), .register_state(register_state),
-        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct),
-        .physical_address(segment_address), .offset(operand_offset), .segment_limit(segment_limit),
+        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !stack_request),
+        .physical_address(segment_address), .offset(service_offset), .segment_limit(segment_limit),
         .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
         .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
         .memory_request(memory_request), .memory_request_ready(memory_request_ready),
@@ -305,14 +328,16 @@ module spk286 (
     // opcodes stay at its head. Redirect/control errors suppress both consumers.
     assign queue_consume_ready = micro_start || executor_byte_ready;
 
-    assign internal_ip_write_en = queue_consume_valid && queue_consume_ready;
-    assign internal_ip_write_data = debug_ip + 16'h0001;
+    assign internal_ip_write_en = internal_redirect || (queue_consume_valid && queue_consume_ready);
+    assign internal_ip_write_data = internal_redirect ? internal_target : debug_ip + 16'h0001;
 
     always_ff @(posedge clk) begin
         if (reset || restart) begin
             destination_q <= 3'd0;
             opcode_q <= 8'h00;
             unsupported_q <= 1'b0;
+        end else if (operand_decode_done && !form_supported) begin
+            unsupported_q <= 1'b1;
         end else if (decode_ready && !unsupported_q && queue_consume_valid) begin
             opcode_q <= queue_consume_data;
             if (decode_supported) destination_q <= decode_destination;

@@ -17,7 +17,7 @@ import sys
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tools.run_singlestep import ALU_OPCODES
+from tools.run_singlestep import ALU_OPCODES, PHASE5_OPCODES
 
 
 REPOSITORY = "https://github.com/SingleStepTests/80286.git"
@@ -32,7 +32,7 @@ REQUIRED_PATHS = [
     *(f"/v1_real_mode/{opcode}.MOO.gz" for opcode in (f"{value:02X}" for value in range(0xB8, 0xC0))),
     "/v1_real_mode/89.MOO.gz",
     "/v1_real_mode/8B.MOO.gz",
-    *(f"/v1_real_mode/{opcode}.MOO.gz" for opcode in ALU_OPCODES),
+    *(f"/v1_real_mode/{opcode}.MOO.gz" for opcode in ALU_OPCODES + PHASE5_OPCODES),
 ]
 
 
