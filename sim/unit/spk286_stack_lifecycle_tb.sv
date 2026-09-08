@@ -172,9 +172,11 @@ module spk286_stack_lifecycle_tb;
         check(stale_redirects>0 && full_redirects>0,"outstanding stale fetch and full queue exercised");
         // Observe the pre-delivery invalid/unsupported boundary under pause.
         // Complete #UD frames and non-retirement belong to the event suite.
+        // FF /0 and /1 are now owned INC/DEC; their full width/alias/lifecycle
+        // coverage is in the unary suites. Register far forms /3,/5 and /7 remain invalid.
         for(integer group_number=0;group_number<8;group_number=group_number+1)
           for(integer form=0;form<2;form=form+1)
-            if((form==0 && group_number!=0) || (form==1 && group_number!=2 && group_number!=4 && group_number!=6))begin
+            if((form==0 && group_number!=0) || (form==1 && (group_number==3 || group_number==5 || group_number==7)))begin
                 setup(0);memory[256]=form==0?8'h8F:8'hFF;memory[257]=8'hC0+8'(group_number*8);
                 saved_gpr=debug_gpr;saved_flags=debug_flags;timeout_count=0;
                 while(!unsupported_opcode && !dut.invalid_form && timeout_count<100)begin service();timeout_count=timeout_count+1;end

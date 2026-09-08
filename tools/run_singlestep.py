@@ -42,7 +42,10 @@ BYTE_SCALAR_OPCODES = tuple(f'{v:02X}' for v in range(0xB0,0xB8)) + ('88','8A','
 TEST_OPCODES = ('84','85','A8','A9','F6.0','F7.0')
 SCALAR_DIRECT_OPCODES = tuple(f'{v:02X}' for v in range(0x40,0x50)) + ('98','99','9E','9F','F5','F8','F9','FC','FD')
 SHIFT_OPCODES = tuple(f'{op}.{g}' for op in ('C0','C1','D0','D1','D2','D3') for g in (0,1,2,3,4,5,7))
-SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES
+DATA_OPCODES = ('86','87','8D','D7','A0','A1','A2','A3') + tuple(f'{v:02X}' for v in range(0x90,0x98))
+UNARY_OPCODES = ('F6.2','F6.3','F7.2','F7.3','FE.0','FE.1','FF.0','FF.1')
+ADJUST_OPCODES = ('27','2F','37','3F','D4','D5')
+SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -74,7 +77,7 @@ def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
@@ -173,7 +176,7 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
         expected_event=checked_byte(case.exception['number'],'EXCP vector')
         checked_address(case.exception['flag_address'],'EXCP flag address')
         expected_retired=int(opcode in ('CC','CD','CE'))
-        if not expected_retired and expected_event not in (6,13):
+        if not expected_retired and expected_event not in (6,13) and not (opcode == 'D4' and expected_event == 0):
             raise SingleStepRunnerError(f'case {case.index}: unsupported architectural fault producer')
     if set(initial) - {"regs", "ram", "queue"}:
         raise SingleStepRunnerError(f"case {case.index}: unsupported initial state fields")
@@ -199,9 +202,15 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
     if opcode in BYTE_SCALAR_OPCODES and (0xB0 <= byte_opcode < 0xB8 or byte_opcode < 0x40 and byte_opcode & 7 == 4):
         if len(instruction_bytes) != 3:
             raise SingleStepRunnerError(f'case {case.index}: byte immediate length mismatch')
-    elif opcode in SCALAR_DIRECT_OPCODES:
+    elif opcode in SCALAR_DIRECT_OPCODES + ('27','2F','37','3F','D7') + tuple(f'{v:02X}' for v in range(0x90,0x98)):
         if len(instruction_bytes) != 2:
             raise SingleStepRunnerError(f'case {case.index}: scalar single-byte instruction length mismatch')
+    elif opcode in ('D4','D5'):
+        if len(instruction_bytes) != 3:
+            raise SingleStepRunnerError(f'case {case.index}: adjust radix length mismatch')
+    elif opcode in ('A0','A1','A2','A3'):
+        if len(instruction_bytes) != 4:
+            raise SingleStepRunnerError(f'case {case.index}: direct address length mismatch')
     elif opcode in ('A8','A9'):
         if len(instruction_bytes) != (3 if opcode == 'A8' else 4):
             raise SingleStepRunnerError(f'case {case.index}: TEST accumulator immediate length mismatch')
@@ -224,14 +233,14 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
                      else len(instruction_bytes) == instruction_length+1)
         if not length_ok:
             raise SingleStepRunnerError(f'case {case.index}: stack/control length mismatch')
-    elif opcode in MODRM_OPCODES + ALU_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SHIFT_OPCODES + ('8F','FF.2','FF.4','FF.6'):
+    elif opcode in MODRM_OPCODES + ALU_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SHIFT_OPCODES + UNARY_OPCODES + ('86','87','8D') + ('8F','FF.2','FF.4','FF.6'):
         if len(instruction_bytes) < 3:
             raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
         if byte_opcode == 0x8F and (instruction_bytes[1] >> 3) & 7 != 0 and not include_exceptions:
             raise SingleStepRunnerError(f'case {case.index}: invalid POP group extension')
         mode, rm = instruction_bytes[1] >> 6, instruction_bytes[1] & 7
         displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
-        immediate_bytes = 2 if byte_opcode in (0x81,0xC7,0xF7) else (1 if byte_opcode in (0x80,0x83,0xC6,0xF6,0xC0,0xC1) else 0)
+        immediate_bytes = 0 if opcode in UNARY_OPCODES else 2 if byte_opcode in (0x81,0xC7,0xF7) else (1 if byte_opcode in (0x80,0x83,0xC6,0xF6,0xC0,0xC1) else 0)
         if '.' in opcode and (instruction_bytes[1] >> 3) & 7 != int(opcode[-1]):
             raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
         # Invalid POP extensions end decoding at ModR/M. The generator can leave

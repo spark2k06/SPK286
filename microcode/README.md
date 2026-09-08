@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-preserved Phase 2.75/3/4 formats and the incremental extensions below; format 8 is current.
+preserved Phase 2.75/3/4 formats and the incremental extensions below; format 11 is current.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -270,7 +270,7 @@ This is the bounded increment described in
 [PHASE7_HANDOFF](../docs/PHASE7_HANDOFF.md), not the complete Phase 7 image.
 The isolated 190-word scalar-I/O prototype is outside this source tree.
 
-## Phase 7 scalar increment (current image)
+## Verified prior Phase 7 scalar increment
 
 Compiler 7.0 / format 7 uses 42 entries, 193 words, eight-bit addresses and
 six-bit controls. `source/zzz_scalar.mc` adds direct flag control, flags-to-byte,
@@ -289,7 +289,7 @@ No control represents a historical timing delay. The separate I/O prototype
 predates these control assignments and must be rebased through source/compiler
 regeneration before integration. Its generated artifacts cannot be copied here.
 
-## Active format 8 shift extension
+## Verified prior format 8 shift extension
 
 Controls 62 SHIFT and 63 COUNT_LOW_TMP1 retain six-bit words. Six symbolic
 programs acquire ModR/M, then a constant/CL/immediate count, then the byte/word
@@ -304,3 +304,52 @@ controls. The prior 193 words are unchanged. Frozen format-7 sources and the
 independent format-8 fixture preserve historical and current encoding checks.
 Count zero still reads/checks memory but suppresses result and FLAGS writes.
 See docs/PHASE7_SHIFT_FLAGS.md for undefined flag policy and physical evidence.
+
+## Verified prior format 9 data-transfer extension
+
+Seven typed controls (64–70) acquire EA, write TMP1 to REG8/REG16, read the
+decoded target, write the decoded source, set a temporary address, and add a
+base to TMP0. The shared operand/register/BIU owners perform the actual effects.
+Nine programs implement LEA, RM and accumulator XCHG, direct-offset MOV and
+XLAT. Complete width/acquisition/commit protocols are required by the compiler.
+
+The active image has 57 entries/282 words, nine-bit addresses and seven-bit
+controls. All previous 235 words remain unchanged. Format-8 sources are frozen
+in `microcode_phase7_shift_sources.json`; `microcode_phase7_data.json` supplies
+the independent active encoding contract. Historical formats remain supported.
+See `docs/PHASE7_DATA_TRANSFER.md` for address lifetime and partial commit rules.
+
+## Verified prior format 10 unary and decoded dispatch extension
+
+DISPATCH_DECODED (71) is a terminal micro-operation after DECODE_MODRM. The
+existing instruction metadata decoder supplies a symbolic target; the generic
+sequencer validates and follows it without resetting instruction state or
+retiring. Targets query the operand decoder's explicitly rearmed cached context.
+This consumes no extra bytes and does not recompute the effective address.
+
+CONST_ZERO_TMP1 (72) and CONST_ONES_TMP1 (73) provide real ALU operands. Six
+byte/word NOT, NEG and memory INC/DEC protocols require source acquisition,
+ALU computation, result disposition, FLAGS commit and END. NOT uses complement
+with an empty mask; NEG uses decoded operand reversal; INC/DEC preserve CF.
+Two group dispatch entries preserve reusable TEST and near-control targets.
+
+The image has 65 entries/328 words, nine-bit addresses and seven-bit controls.
+All prior 282 words and entry addresses are unchanged. Format-9 sources are
+frozen in microcode_phase7_data_sources.json and an independent 46-word literal
+appendix specifies format 10. Parsing supports a multi-digit version. Canonical
+reconstruction recognizes terminal dispatch and standalone memory INC/DEC using
+older control values. Complete protocols and active CLI defaults are checked.
+No branch or operation represents a historical timing delay.
+
+## Active format 11 decimal and radix adjustments
+
+ADJUST (74) requests the captured arithmetic service; CHECK_ARITHMETIC (75)
+serializes a pending #DE before normal END. The direct and immediate-radix
+programs each require complete acquisition, computation, result disposition,
+FLAGS commit and fault check. AAM radix zero suppresses AX and commits the
+physical fault FLAGS policy before the existing event owner captures the frame.
+The image has 67 entries/342 words with nine address and seven control bits;
+all prior 328 words and entry addresses remain unchanged. Frozen format-10
+sources and the independent format-11 literal fixture check both contracts.
+No microinstruction represents an idle delay or duplicates opcode decoding.
+See docs/PHASE7_DECIMAL_ADJUST.md for arithmetic, exception and lifetime rules.

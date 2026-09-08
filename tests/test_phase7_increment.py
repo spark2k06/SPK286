@@ -16,7 +16,7 @@ class Phase7IncrementTests(unittest.TestCase):
         self.assertEqual(len(REQUIRED_PATHS), len(set(REQUIRED_PATHS)))
 
     def test_complete_phase_cannot_pass_as_a_subset(self):
-        with self.assertRaisesRegex(ValueError,'84 required opcode families remain unimplemented'):
+        with self.assertRaisesRegex(ValueError,'54 required opcode families remain unimplemented'):
             require_complete()
         result=subprocess.run(['make','phase7-check'],capture_output=True,text=True)
         self.assertNotEqual(result.returncode,0)

@@ -7,7 +7,8 @@ module spk286_decoder (
     output logic [2:0] destination, source_index,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry
 );
-    logic binary_byte, binary_word, stack_control, event_instruction, test_instruction;
+    logic binary_byte, binary_word, stack_control, event_instruction, test_instruction, adjust_instruction;
+    assign adjust_instruction = opcode == 8'h27 || opcode == 8'h2F || opcode == 8'h37 || opcode == 8'h3F || opcode == 8'hD4 || opcode == 8'hD5;
     assign test_instruction = opcode == 8'h84 || opcode == 8'h85 || opcode == 8'hA8 || opcode == 8'hA9 || opcode == 8'hF6 || opcode == 8'hF7;
     assign event_instruction = opcode == 8'h9C || opcode == 8'h9D ||
                                opcode[7:2] == 6'b110011 || opcode == 8'hF4 || opcode == 8'hFA || opcode == 8'hFB;
@@ -18,12 +19,23 @@ module spk286_decoder (
     assign binary_byte = opcode[7:6] == 2'b00 && (opcode[2:0] == 3'd0 || opcode[2:0] == 3'd2 || opcode[2:0] == 3'd4);
     assign binary_word = opcode[7:6] == 2'b00 &&
                          (opcode[2:0] == 3'd1 || opcode[2:0] == 3'd3 || opcode[2:0] == 3'd5);
-    assign supported = opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
+    assign supported = adjust_instruction || opcode == 8'hFE || opcode == 8'h86 || opcode == 8'h87 || opcode == 8'h8D || opcode[7:3] == 5'b10010 || opcode[7:2] == 6'b101000 || opcode == 8'hD7 || opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
                        binary_word || opcode == 8'h81 || opcode == 8'h83;
-    assign source_index = opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
-    assign destination = opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
+    assign source_index = opcode[7:3] == 5'b10010 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
+    assign destination = adjust_instruction ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
-    assign entry = opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :
+    assign entry = adjust_instruction ? ((opcode == 8'hD4 || opcode == 8'hD5) ? spk286_microcode_pkg::MC_ENTRY_ADJUST_RADIX : spk286_microcode_pkg::MC_ENTRY_ADJUST_DIRECT) :
+                   opcode == 8'hFE ? spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM8 :
+                   opcode == 8'h86 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM8_R8 :
+                   opcode == 8'h87 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM16_R16 :
+                   opcode == 8'h8D ? spk286_microcode_pkg::MC_ENTRY_LEA_R16_M :
+                   opcode[7:3] == 5'b10010 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_SOURCE_TARGET16 :
+                   opcode == 8'hA0 ? spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT8 :
+                   opcode == 8'hA1 ? spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT16 :
+                   opcode == 8'hA2 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT8 :
+                   opcode == 8'hA3 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT16 :
+                   opcode == 8'hD7 ? spk286_microcode_pkg::MC_ENTRY_LOAD_BASE_INDEX8 :
+                   opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :
                    opcode == 8'hC1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_IMM8 :
                    opcode == 8'hD0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_ONE :
                    opcode == 8'hD1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_ONE :
@@ -38,8 +50,8 @@ module spk286_decoder (
                    opcode == 8'h85 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16 :
                    opcode == 8'hA8 ? spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8 :
                    opcode == 8'hA9 ? spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16 :
-                   opcode == 8'hF6 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8 :
-                   opcode == 8'hF7 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16 :
+                   opcode == 8'hF6 ? spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH :
+                   opcode == 8'hF7 ? spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH :
                    opcode[7:3] == 5'b10110 ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_IMM8 :
                    opcode == 8'h88 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM8_R8 :
                    opcode == 8'h8A ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_RM8 :
@@ -60,7 +72,7 @@ module spk286_decoder (
                    opcode == 8'h68 ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM16 :
                    opcode == 8'h6A ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM8S :
                    opcode == 8'h8F ? spk286_microcode_pkg::MC_ENTRY_POP_RM16 :
-                   opcode == 8'hFF ? spk286_microcode_pkg::MC_ENTRY_GROUP5_NEAR :
+                   opcode == 8'hFF ? spk286_microcode_pkg::MC_ENTRY_GROUP5_DISPATCH :
                    opcode == 8'hE8 ? spk286_microcode_pkg::MC_ENTRY_CALL_REL16 :
                    opcode == 8'hE9 ? spk286_microcode_pkg::MC_ENTRY_JMP_REL16 :
                    opcode == 8'hEB || opcode[7:4] == 4'h7 ? spk286_microcode_pkg::MC_ENTRY_BRANCH_REL8 :

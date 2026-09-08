@@ -813,7 +813,7 @@
       ],
       "git_blob": "bf90e5b5e67c6d65bbd6563e75a7b444bcc4785e",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -823,8 +823,8 @@
       },
       "mnemonic": "DAA",
       "opcode": "27",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -962,7 +962,7 @@
       ],
       "git_blob": "337b5a8e5a834b2597ec79ef6d7bb602871f79a2",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -972,8 +972,8 @@
       },
       "mnemonic": "DAS",
       "opcode": "2F",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -1123,7 +1123,7 @@
       ],
       "git_blob": "94c3ae3c740e8ac99c211c919c5d510e3861b478",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -1133,8 +1133,8 @@
       },
       "mnemonic": "AAA",
       "opcode": "37",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -1272,7 +1272,7 @@
       ],
       "git_blob": "4a7c5542cac80637a618b87307517b7ee85f90a1",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -1282,8 +1282,8 @@
       },
       "mnemonic": "AAS",
       "opcode": "3F",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3210,7 +3210,7 @@
       ],
       "git_blob": "68547cdf97cce9eb4dfe93b12a6c8debf5d9a026",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3218,8 +3218,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "86",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3231,7 +3231,7 @@
       ],
       "git_blob": "efc8698af1e7efc0fb26a90b714d95434d7ccdfb",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3239,8 +3239,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "87",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3359,7 +3359,7 @@
       ],
       "git_blob": "90f6c96a83ca0b8f338bd3fd3e16e88fcf0a9953",
       "group": "pointer",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3367,8 +3367,8 @@
       },
       "mnemonic": "LEA",
       "opcode": "8D",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3456,7 +3456,7 @@
       ],
       "git_blob": "21208a613345c00bb215c753a0352acc46553855",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3464,8 +3464,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "90",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3477,7 +3477,7 @@
       ],
       "git_blob": "9d63ae1469aedef362f509987ed35e8e5a5bf950",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3485,8 +3485,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "91",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3498,7 +3498,7 @@
       ],
       "git_blob": "5d1ebb16e1bca77064b859967bf06203bf81323c",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3506,8 +3506,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "92",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3519,7 +3519,7 @@
       ],
       "git_blob": "f2938a5f6a4888070ecf88c76a551611b18c1db9",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3527,8 +3527,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "93",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3540,7 +3540,7 @@
       ],
       "git_blob": "7a0ac609ed70004b4108d238880625455dc3516b",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3548,8 +3548,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "94",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3561,7 +3561,7 @@
       ],
       "git_blob": "6c94d5185f5d39a1dd4de3dcb4baf4d5c352e6a8",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3569,8 +3569,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "95",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3582,7 +3582,7 @@
       ],
       "git_blob": "e2066b8cb8a258f697fa91d1780885a128a296b3",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3590,8 +3590,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "96",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3603,7 +3603,7 @@
       ],
       "git_blob": "26b78a0b6e7636fa9bd5ce81b8516a2226d3f17f",
       "group": "exchange",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3611,8 +3611,8 @@
       },
       "mnemonic": "XCHG",
       "opcode": "97",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3783,7 +3783,7 @@
       ],
       "git_blob": "6ebc1f05f98d60ef943e5d7ca4695a8a119bf334",
       "group": "mov",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3791,8 +3791,8 @@
       },
       "mnemonic": "MOV",
       "opcode": "A0",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3804,7 +3804,7 @@
       ],
       "git_blob": "6d85d73c5da4c0f65b302a46c64e0ee1a3f9d73d",
       "group": "mov",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3812,8 +3812,8 @@
       },
       "mnemonic": "MOV",
       "opcode": "A1",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3825,7 +3825,7 @@
       ],
       "git_blob": "665a6f21d8d9ddf038d18216dd4e9f3dac02593b",
       "group": "mov",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3833,8 +3833,8 @@
       },
       "mnemonic": "MOV",
       "opcode": "A2",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -3846,7 +3846,7 @@
       ],
       "git_blob": "6c9cd34b91b1b81c8f20e18d45f8d0c41c50e5df",
       "group": "mov",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -3854,8 +3854,8 @@
       },
       "mnemonic": "MOV",
       "opcode": "A3",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -5857,7 +5857,7 @@
       ],
       "git_blob": "1c99e9c939700b9a5cce725958139f44a3ca7157",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -5867,8 +5867,8 @@
       },
       "mnemonic": "AAM",
       "opcode": "D4",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -5880,7 +5880,7 @@
       ],
       "git_blob": "318c33d7ea790b739581fa84594802c9e0511cba",
       "group": "adjust",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -5890,8 +5890,8 @@
       },
       "mnemonic": "AAD",
       "opcode": "D5",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -5915,7 +5915,7 @@
       ],
       "git_blob": "f9e3c82ccdf39bd2bf67c351cf7de801eb34ed50",
       "group": "pointer",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -5923,8 +5923,8 @@
       },
       "mnemonic": "XLAT",
       "opcode": "D7",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6363,7 +6363,7 @@
       ],
       "git_blob": "7fb29506674ce399fe6dbb7d2cb1e3dd4e2e556e",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6371,8 +6371,8 @@
       },
       "mnemonic": "NOT",
       "opcode": "F6.2",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6384,7 +6384,7 @@
       ],
       "git_blob": "7d1e237da87b1de0c0391608d5035f90fc4acae0",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6392,8 +6392,8 @@
       },
       "mnemonic": "NEG",
       "opcode": "F6.3",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6534,7 +6534,7 @@
       ],
       "git_blob": "572857aab670e63633dbb107c1ed0ddb8f6243be",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6542,8 +6542,8 @@
       },
       "mnemonic": "NOT",
       "opcode": "F7.2",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6555,7 +6555,7 @@
       ],
       "git_blob": "365c16b7e123b0c0d08a87cf616677adfcccea64",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6563,8 +6563,8 @@
       },
       "mnemonic": "NEG",
       "opcode": "F7.3",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6794,7 +6794,7 @@
       ],
       "git_blob": "d362dcd7340b82bbaa9906e97db17fc4f0f6ccf1",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6802,8 +6802,8 @@
       },
       "mnemonic": "INC",
       "opcode": "FE.0",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6815,7 +6815,7 @@
       ],
       "git_blob": "2eed921e3588068570ca81501218d9f5e1ee40c7",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6823,8 +6823,8 @@
       },
       "mnemonic": "DEC",
       "opcode": "FE.1",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6836,7 +6836,7 @@
       ],
       "git_blob": "46ad47d483335d93dbc791db94403560000947fd",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6844,8 +6844,8 @@
       },
       "mnemonic": "INC",
       "opcode": "FF.0",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {
@@ -6857,7 +6857,7 @@
       ],
       "git_blob": "9b4862d152dd0dc7831c95c1592a505c33ccdb9d",
       "group": "unary-test",
-      "implementation": "pending",
+      "implementation": "implemented-candidate",
       "legacy_family": false,
       "metadata": {
         "arch": "86",
@@ -6865,8 +6865,8 @@
       },
       "mnemonic": "DEC",
       "opcode": "FF.1",
-      "phase7_validation": "pending",
-      "prefix_readmission": "pending",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
       "scope": "required"
     },
     {

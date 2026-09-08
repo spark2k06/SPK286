@@ -237,7 +237,7 @@ def main():
     execute("actual-immediate", replace(example, initial_ram=tuple(sorted(values.items()))),
             "architectural register mismatch")
     values = dict(example.initial_ram)
-    values[instruction_address] = 0x90  # Unsupported input: the target must not retire.
+    values[instruction_address] = 0x0f  # Unsupported system escape: the target must not retire.
     execute("actual-unsupported", replace(example, initial_ram=tuple(sorted(values.items()))),
             "unsupported opcode observed before target retirement")
     execute("pristine-after", example)

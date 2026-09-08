@@ -6,6 +6,8 @@ module spk286_microsequencer_tb;
     logic rom_valid = 1, rom_end = 0, operation_done = 0;
     wire start_ready, operation_valid, active, retired, fault;
     wire [3:0] micro_pc, micro_entry;
+    logic branch_request=0, branch_target_valid=0;
+    logic [3:0] branch_target=0;
     integer checks = 0;
     spk286_microsequencer #(.ADDRESS_WIDTH(4), .ROM_DEPTH(10)) dut (.*);
 
@@ -24,7 +26,7 @@ module spk286_microsequencer_tb;
     endtask
     task automatic clear_context;
         cancel = 1; tick(); cancel = 0;
-        rom_valid = 1; rom_end = 0; operation_done = 0;
+        rom_valid = 1; rom_end = 0; operation_done = 0; branch_request = 0; branch_target_valid = 0;
         #1; check(!active && !retired && !fault && micro_pc == 0 && micro_entry == 0,
                   "cancel clears context");
     endtask
@@ -80,6 +82,27 @@ module spk286_microsequencer_tb;
         check(fault && micro_pc == 9 && !retired, "fallthrough cannot wrap ROM boundary");
         clear_context(); launch(4'd9); rom_end = 1; operation_done = 1; tick();
         check(retired && !fault && !active, "last ROM address may END normally");
+        clear_context(); launch(4'd9); branch_request=1; branch_target_valid=1; branch_target=2;
+        operation_done=0; repeat(3) tick();
+        check(micro_pc==9 && active && !fault && !retired,"branch waits for functional completion");
+        operation_done=1; enable=0; repeat(3) tick();
+        check(micro_pc==9 && !operation_valid && !retired,"pause suppresses branch");
+        enable=1; tick();
+        check(micro_pc==2 && micro_entry==9 && active && !fault && !retired,"branch target preserves macro entry without retirement");
+        branch_target=2; tick(); check(micro_pc==2 && active && !retired,"generic self branch is permitted");
+        branch_request=0; tick(); check(micro_pc==3 && active,"branch resumes target sequence");
+        rom_end=1; tick(); check(retired && !fault && !active,"branched target END retires once");
+        for(integer bad=0;bad<3;bad=bad+1) begin
+            clear_context(); launch(4'd1); branch_request=1; operation_done=1;
+            branch_target_valid=bad!=0; branch_target=bad==0?4'd2:(bad==1?4'd10:4'd15); tick();
+            check(fault && !active && !retired && micro_pc==1,"invalid branch target fails closed");
+        end
+        clear_context(); launch(4'd1); branch_request=1; operation_done=1; branch_target_valid=1; branch_target=5;
+        cancel=1; tick(); cancel=0;
+        check(!active && !retired && !fault && micro_pc==0,"cancel suppresses branch");
+        branch_request=0; operation_done=0; launch(4'd1); branch_request=1; operation_done=1;
+        reset=1; tick(); reset=0;
+        check(!active && !retired && !fault && micro_pc==0,"reset suppresses branch");
         $display("MICROSEQUENCER PASS: %0d entry/stall/resume/END/reset/cancel/fault checks", checks);
         $finish;
     end

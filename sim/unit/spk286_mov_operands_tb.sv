@@ -29,7 +29,7 @@ module spk286_mov_operands_tb;
     endtask
     task automatic tick;
         #1;
-        data_in = 16'h9090;
+        data_in = 16'h0F0F;
         if (bus_valid && address < 24'd1114112)
             data_in = {memory[{address[20:1], 1'b1}], memory[{address[20:1], 1'b0}]};
         // Poison inactive lanes; only selected lanes may affect a logical operand.
@@ -138,12 +138,12 @@ module spk286_mov_operands_tb;
     endfunction
     initial begin
         // Only initialize the code region; operand bytes/guards are explicit per case.
-        for (integer a = 65536; a < 69632; a = a + 1) memory[a] = 8'h90;
+        for (integer a = 65536; a < 69632; a = a + 1) memory[a] = 8'h0F;
         for (integer direction = 0; direction < 2; direction = direction + 1)
             for (integer r = 0; r < 8; r = r + 1)
                 for (integer rm = 0; rm < 8; rm = rm + 1) begin
                     memory[65792] = direction == 0 ? 8'h89 : 8'h8B;
-                    memory[65793] = 8'(192 + r*8 + rm); memory[65794] = 8'h90;
+                    memory[65793] = 8'(192 + r*8 + rm); memory[65794] = 8'h0F;
                     wait_length = (r + rm) % 4;
                     setup(16'h0100, 0);
                     source_index = direction == 0 ? r : rm; destination_index = direction == 0 ? rm : r;
@@ -175,7 +175,7 @@ module spk286_mov_operands_tb;
                         memory[code_start] = direction == 0 ? 8'h89 : 8'h8B;
                         memory[code_start+1] = 8'(m*64 + ((rm+d)%8)*8 + rm);
                         memory[code_start+2] = disp[7:0]; memory[code_start+3] = disp[15:8];
-                        memory[code_start+instruction_length] = 8'h90;
+                        memory[code_start+instruction_length] = 8'h0F;
                         wait_length = d % 4;
                         setup(16'h0100 + 16'(alignment), d == 4);
                         if (alignment != 0 && !(m == 0 && rm == 6)) begin
@@ -216,7 +216,7 @@ module spk286_mov_operands_tb;
         memory[66048] = 8'h89; memory[66049] = 8'h06; memory[66050] = 8'h01; memory[66051] = 8'h10;
         memory[66052] = 8'h8B; memory[66053] = 8'h1E; memory[66054] = 8'h01; memory[66055] = 8'h10;
         memory[66056] = 8'h89; memory[66057] = 8'hD8;
-        memory[66058] = 8'hBE; memory[66059] = 8'h34; memory[66060] = 8'h12; memory[66061] = 8'h90;
+        memory[66058] = 8'hBE; memory[66059] = 8'h34; memory[66060] = 8'h12; memory[66061] = 8'h0F;
         setup(16'h0200, 0); wait_length = 3;
         target_address = 266241; expected_value = 16'hAA55;
         expect_data = 1; expect_write = 1; expected_cycles = 2;
@@ -237,7 +237,7 @@ module spk286_mov_operands_tb;
         memory[66314]=8'hBD; memory[66315]=8'h22; memory[66316]=8'h00;
         memory[66317]=8'h89; memory[66318]=8'h5A; memory[66319]=8'hAE;
         memory[66320]=8'h8B; memory[66321]=8'h3E; memory[66322]=8'h01; memory[66323]=8'h00;
-        memory[66324]=8'h89; memory[66325]=8'hF8; memory[66326]=8'h90;
+        memory[66324]=8'h89; memory[66325]=8'hF8; memory[66326]=8'h0F;
         memory[262144]=8'h19; memory[262145]=8'h3A; memory[262146]=8'h4B; memory[262147]=8'h91;
         memory[262176]=8'h27; memory[262177]=8'h00; memory[262178]=8'h00; memory[262179]=8'h72;
         memory[524288]=8'h38; memory[524289]=8'h00; memory[524290]=8'h00; memory[524291]=8'h83;

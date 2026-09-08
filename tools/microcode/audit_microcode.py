@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 8 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 11 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -38,7 +38,7 @@ STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
               50: 'FETCH_IMM8 -> TMP1', 51: 'READ_REG8 -> TMP1', 52: 'READ_RM8 -> TMP1',
               53: 'READ_DST8 -> TMP0', 54: 'TMP0 -> DST8', 55: 'TMP2 -> REG8 IF_WRITE',
               56: 'TMP2 -> RM8 IF_WRITE', 57: 'TMP2 -> DST8 IF_WRITE',
-              58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1'}
+              58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1', 64: 'READ_EA -> TMP0', 65: 'TMP1 -> REG8', 66: 'TMP1 -> REG16', 67: 'READ_TARGET16 -> TMP1', 68: 'TMP1 -> SOURCE16', 69: 'SET_ADDRESS TMP1', 70: 'ADD_BASE TMP0 -> TMP1', 71: 'DISPATCH DECODED', 72: 'CONST_ZERO -> TMP1', 73: 'CONST_ONES -> TMP1', 74: 'ADJUST DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 75: 'CHECK_ARITHMETIC'}
 
 
 def validate_entries(program, expected):
@@ -61,7 +61,7 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
     depth = dimension("MC_DEPTH")
     width = dimension("MC_ADDR_WIDTH")
     word_width = dimension("MC_WORD_WIDTH")
-    if word_width not in (2, 4, 5, 6) or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
+    if word_width not in (2, 4, 5, 6, 7) or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
         raise ValueError("invalid ROM dimensions")
     constants = re.findall(rf"MC_([A-Z0-9_]+) = {word_width}'d([0-9]+);", package)
     values = {}
@@ -95,6 +95,12 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
         expected.update(FLAGS_DECODED=58, SIGN_EXTEND8=59, SIGN_FILL16=60, CONST_ONE_TMP1=61)
     if dimension('MC_FORMAT_VERSION') >= 8:
         expected.update(SHIFT=62, COUNT_LOW_TMP1=63)
+    if dimension('MC_FORMAT_VERSION') >= 9:
+        expected.update(READ_EA=64, WRITE_REG8_TMP1=65, WRITE_REG16_TMP1=66, READ_TARGET16_TMP1=67, MOVE_SOURCE16_TMP1=68, SET_ADDRESS_TMP1=69, ADD_BASE_TMP0_TMP1=70)
+    if dimension('MC_FORMAT_VERSION') >= 10:
+        expected.update(DISPATCH_DECODED=71, CONST_ZERO_TMP1=72, CONST_ONES_TMP1=73)
+    if dimension('MC_FORMAT_VERSION') >= 11:
+        expected.update(ADJUST=74, CHECK_ARITHMETIC=75)
     if {name: values.get(name) for name in expected} != expected:
         raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
@@ -130,7 +136,7 @@ def canonical_source(words, entries, labels=None):
             raise ValueError(f"invalid entry name {name}")
         if type(address) is not int or not 0 <= address < used or address in by_address:
             raise ValueError(f"invalid or duplicate entry address {address}")
-        if address and words[address - 1] != 3:
+        if address and words[address - 1] not in (3, 71):
             raise ValueError(f"entry {name} is not at an END boundary")
         by_address[address] = name
     if 0 not in by_address:
@@ -144,12 +150,13 @@ def canonical_source(words, entries, labels=None):
         if owner != match[1]:
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
-    version = 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
+    unary = any(tuple(words[i:i+7]) in ((4,47,61,14,56,18,3), (4,6,61,14,16,18,3)) for i in range(len(words)-6))
+    version = 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
             lines.append(f"instruction {by_address[address]}:")
-        elif address and words[address - 1] == 3:
+        elif address and words[address - 1] in (3, 71):
             raise ValueError(f"missing entry after END at {address-1}")
         lines.extend(f"{label}:" for label in label_addresses.get(address, []))
         lines.append(f"    {STATEMENTS[word]}")
@@ -205,7 +212,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase7_shift.json")
+                        default=ROOT / "tests/fixtures/microcode_phase7_adjust.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

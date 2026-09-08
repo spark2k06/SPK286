@@ -29,7 +29,7 @@ module spk286_event_lifecycle_tb;
         stackword={memory[524288+offset+1],memory[524288+offset]};
     endfunction
     task automatic tick;
-        #1; data_in=16'h9090;
+        #1; data_in=16'h0F0F;
         if(bus_valid && address<24'd1114112) data_in={memory[{address[20:1],1'b1}],memory[{address[20:1],1'b0}]};
         if(bus_valid && bus_status==0) begin
             // READY-low vector changes are noise; only the accepted second
@@ -83,11 +83,11 @@ module spk286_event_lifecycle_tb;
             redirect=s==1; ip_write_en=s==1; ip_write_data=16'h0100; tick();
         end
         segment_load_en=0; redirect=0; ip_write_en=0;
-        for(integer a=256;a<320;a=a+1) memory[65536+a]=8'h90;
+        for(integer a=256;a<320;a=a+1) memory[65536+a]=8'h0F;
         for(integer v=0;v<256;v=v+1) begin
             putword(v*4,'h0400+v*8); putword(v*4+2,'h1000);
             memory[65536+1024+v*8]=8'hCF;
-            memory[65536+1024+v*8+1]=8'h90;
+            memory[65536+1024+v*8+1]=8'h0F;
         end
         memory[65792]=8'hB8; memory[65793]=8'h34; memory[65794]=8'h12; memory[65795]=8'hF4;
         retires=0; deliveries=0; acks=0; writes=0; execute_enable=1;

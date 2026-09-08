@@ -13,7 +13,7 @@ PROBES = (
     ('test-undefined-af','spk286_micro_executor','spk286_test_instructions',
      'decoded_flags_mask & ~decoded_undefined_mask', 'decoded_flags_mask | decoded_undefined_mask', 'exact FLAGS and preserved bits'),
     ('inc-preserves-carry','spk286_alu_decode','spk286_scalar_direct',
-     "opcode[7:4] == 4'h4 ? 16'h08D4", "opcode[7:4] == 4'h4 ? 16'h08D5", 'exact FLAGS and preserved bits'),
+     "inc_dec ? 16'h08D4", "inc_dec ? 16'h08D5", 'exact FLAGS and preserved bits'),
     ('sahf-preserves-controls','spk286_flags_decode','spk286_scalar_direct',
      "mask = 16'h00D5", "mask = 16'h0FD5", 'exact FLAGS and preserved bits'),
     ('lahf-high-byte','spk286_decoder','spk286_scalar_direct',

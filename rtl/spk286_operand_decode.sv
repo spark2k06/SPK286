@@ -3,7 +3,7 @@
 `timescale 1ns/1ps
 module spk286_operand_decode (
     input  logic clk, reset, cancel, start,
-    input  logic enable,
+    input  logic enable, rearm,
     input  logic byte_valid,
     input  logic [7:0] byte_data,
     output logic byte_ready,
@@ -25,7 +25,7 @@ module spk286_operand_decode (
     logic decoded_direct, ea_memory;
     logic [15:0] ea_offset;
     logic [1:0] ea_segment;
-    logic allowed;
+    logic allowed, reuse_q;
     spk286_modrm modrm (
         .encoded(byte_data), .mode(decoded_mode), .reg_index(decoded_reg),
         .rm_index(decoded_rm), .register_direct(decoded_direct), .displacement_bytes(decoded_size)
@@ -39,15 +39,20 @@ module spk286_operand_decode (
     assign byte_ready = allowed && (state_q == MODRM || state_q == DISP_LOW || state_q == DISP_HIGH);
     // RESOLVE captures the computed offset on the same edge that advances the
     // microsequencer. All instruction bytes are already stable at this boundary.
-    assign done = allowed && state_q == RESOLVE;
+    assign done = allowed && (state_q == RESOLVE || (state_q == COMPLETE && reuse_q));
     assign modrm_valid = state_q != MODRM;
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
+            reuse_q <= 1'b0;
             state_q <= MODRM;
             mode <= 2'b00; reg_index <= 3'd0; rm_index <= 3'd0;
             register_direct <= 1'b0; displacement <= 16'h0000;
             effective_offset <= 16'h0000; segment_index <= 2'd3; size_q <= 2'd0;
+        end else if (rearm && state_q == COMPLETE) begin
+            // A decoded branch reuses the captured EA; no bytes or GPRs are reread.
+            reuse_q <= 1'b1;
         end else if (allowed) begin
+            if (state_q == COMPLETE && reuse_q) reuse_q <= 1'b0;
             if (byte_valid && byte_ready) begin
                 case (state_q)
                     MODRM: begin

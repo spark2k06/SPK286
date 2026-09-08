@@ -14,7 +14,7 @@ module spk286_operand_lifecycle_tb;
     endtask
     task automatic tick;
         #1;
-        data_in=16'h9090;
+        data_in=16'h0F0F;
         if(bus_valid && address < 65536) data_in={memory[{address[15:1],1'b1}],memory[{address[15:1],1'b0}]};
         #4;
         if(bus_valid && ready && !reset && (bus_status==5 || bus_status==6)) begin
@@ -46,9 +46,9 @@ module spk286_operand_lifecycle_tb;
         segment_load_en=1; segment_load_index=1; segment_load_selector=0;
         redirect_to(16'h0100); segment_load_en=0;
         memory[256]=wr?8'h89:8'h8B; memory[257]=wr?8'h06:8'h0E;
-        memory[258]=8'h01; memory[259]=8'h10; memory[260]=8'h90;
+        memory[258]=8'h01; memory[259]=8'h10; memory[260]=8'h0F;
         // New stream loads a different operand, exposing stale-response routing.
-        memory[512]=8'h8B; memory[513]=8'h3E; memory[514]=8'h03; memory[515]=8'h10; memory[516]=8'h90;
+        memory[512]=8'h8B; memory[513]=8'h3E; memory[514]=8'h03; memory[515]=8'h10; memory[516]=8'h0F;
         memory[4096]=8'h79; memory[4097]=8'h5A; memory[4098]=8'hC3;
         memory[4099]=8'h34; memory[4100]=8'h12; memory[4101]=8'h97;
         retired_count=0; data_count=0; write_count=0; permit_data=0; execute_enable=1;
@@ -82,7 +82,7 @@ module spk286_operand_lifecycle_tb;
         end
     endtask
     initial begin
-        for(integer i=0;i<65536;i=i+1) memory[i]=8'h90;
+        for(integer i=0;i<65536;i=i+1) memory[i]=8'h0F;
         for(integer wr=0;wr<2;wr=wr+1)
             for(integer stage=0;stage<6;stage=stage+1) begin
                 setup(1'(wr)); reach(stage); saved_pc=debug_micro_pc;
@@ -127,7 +127,7 @@ module spk286_operand_lifecycle_tb;
             for(integer at_end=0;at_end<2;at_end=at_end+1) begin
                 setup(0);
                 memory[256]=direction==0?8'h89:8'h8B;
-                memory[257]=direction==0?8'hC1:8'hC8; memory[258]=8'h90;
+                memory[257]=direction==0?8'hC1:8'hC8; memory[258]=8'h0F;
                 timeout_count=0;
                 while(!(debug_micro_active && debug_micro_pc==12'((direction==0?5:9)+at_end)) && timeout_count<150) begin
                     service(); timeout_count=timeout_count+1;

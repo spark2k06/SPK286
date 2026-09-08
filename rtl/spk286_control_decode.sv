@@ -5,12 +5,35 @@ module spk286_control_decode (
     input logic [2:0] group_extension,
     input logic condition_taken, zero,
     input logic [15:0] count,
-    output logic push_enabled, push_return_ip, branch_taken, decrement_count, form_supported
+    output logic push_enabled, push_return_ip, branch_taken, decrement_count, form_supported,
+    output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] dispatch_entry,
+    output logic [2:0] adjust_kind,
+    output logic dispatch_valid
 );
+    assign adjust_kind = opcode == 8'h2F ? 3'd1 : opcode == 8'h37 ? 3'd2 : opcode == 8'h3F ? 3'd3 : opcode == 8'hD4 ? 3'd4 : opcode == 8'hD5 ? 3'd5 : 3'd0;
     assign form_supported = opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 ? group_extension != 3'd6 :
-                            opcode == 8'hF6 || opcode == 8'hF7 ? group_extension == 3'd0 :
-                            opcode == 8'hFF ? (group_extension == 3'd2 || group_extension == 3'd4 || group_extension == 3'd6) :
+                            opcode == 8'hFE ? group_extension < 2 :
+                            opcode == 8'hF6 || opcode == 8'hF7 ? (group_extension == 0 || group_extension == 2 || group_extension == 3) :
+                            opcode == 8'hFF ? (group_extension < 2 || group_extension == 3'd2 || group_extension == 3'd4 || group_extension == 3'd6) :
                             opcode != 8'h8F || group_extension == 3'd0;
+    always_comb begin
+        dispatch_valid = 1'b1;
+        dispatch_entry = '0;
+        if (opcode == 8'hF6 || opcode == 8'hF7) begin
+            case (group_extension)
+                3'd0: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16 : spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8;
+                3'd2: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NOT_RM16 : spk286_microcode_pkg::MC_ENTRY_NOT_RM8;
+                3'd3: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NEG_RM16 : spk286_microcode_pkg::MC_ENTRY_NEG_RM8;
+                default: dispatch_valid = 1'b0;
+            endcase
+        end else if (opcode == 8'hFF) begin
+            case (group_extension)
+                3'd0, 3'd1: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM16;
+                3'd2, 3'd4, 3'd6: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_GROUP5_NEAR;
+                default: dispatch_valid = 1'b0;
+            endcase
+        end else dispatch_valid = 1'b0;
+    end
     assign push_return_ip = opcode == 8'hFF && group_extension == 3'd2;
     assign push_enabled = opcode != 8'hFF || group_extension != 3'd4;
     assign decrement_count = opcode == 8'hE0 || opcode == 8'hE1 || opcode == 8'hE2;

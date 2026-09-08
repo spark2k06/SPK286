@@ -27,7 +27,7 @@ module spk286_event_instructions_tb;
     endtask
     task automatic tick;
         #1;
-        data_in=16'h9090;
+        data_in=16'h0F0F;
         if (bus_valid && address<24'd1114112)
             data_in={memory[{address[20:1],1'b1}],memory[{address[20:1],1'b0}]};
         if (address[0]) data_in[7:0]=8'hA3;

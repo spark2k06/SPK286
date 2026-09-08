@@ -2,6 +2,7 @@
 module spk286_operand_decode_tb;
     wire modrm_valid;
     logic clk=0, reset=1, cancel=0, start=0, enable=0, byte_valid=0;
+    logic rearm=0;
     logic [7:0] byte_data=0;
     wire byte_ready, done, register_direct;
     logic [15:0] bx=16'h1000, bp=16'h2000, si=16'h0011, di=16'h0023;
@@ -67,6 +68,18 @@ module spk286_operand_decode_tb;
             check(displacement==0 && !done,"redirect discards partial displacement");
             send_byte(8'hC1); check(done && register_direct,"fresh register context after cancellation"); tick();
         end
+        start=1; tick(); start=0; send_byte(8'h07); // [BX] acquired once.
+        tick(); held_ea=effective_offset; check(held_ea==16'h1000,"resolved address before rearm");
+        consumed=0; enable=0; bx=16'h7777; byte_valid=1; byte_data=8'hC1;
+        rearm=1; tick(); rearm=0; repeat(3) tick();
+        check(!done && !byte_ready && effective_offset==held_ea && consumed==0,"rearm pause preserves cached EA and queue");
+        enable=1; #1; check(done && !byte_ready && effective_offset==held_ea,"rearm completes cached context without recomputing EA");
+        tick(); check(!done && !byte_ready && consumed==0,"rearmed completion remains a single pulse");
+        enable=0; rearm=1; tick(); rearm=0; cancel=1; tick(); cancel=0; byte_valid=0; enable=1;
+        check(!done && !modrm_valid,"cancel discards pending reused context");
+        bx=16'h1000; send_byte(8'h07); tick(); enable=0; rearm=1; tick(); rearm=0;
+        reset=1; tick(); reset=0; enable=1;
+        check(!done && !modrm_valid,"reset discards pending reused context");
         $display("OPERAND_DECODE PASS: %0d streaming contexts plus partial cancellation; %0d checks",cases,checks);
         $finish;
     end

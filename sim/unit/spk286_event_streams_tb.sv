@@ -28,7 +28,7 @@ module spk286_event_streams_tb;
     endtask
     function automatic logic [7:0] byte_at(input logic [23:0] location);
         if(location<24'd1114112 && tags[location[20:0]]==cases+1) byte_at=memory[location[20:0]];
-        else byte_at=8'h90;
+        else byte_at=8'h0F;
     endfunction
     task automatic tick;
         #1;data_in={byte_at({address[23:1],1'b1}),byte_at({address[23:1],1'b0})};

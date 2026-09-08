@@ -201,3 +201,15 @@ phase7-scalar-check:
 .PHONY: phase7-shift-check
 phase7-shift-check:
 	bash scripts/validate_phase7_shift.sh
+
+.PHONY: phase7-data-check
+phase7-data-check:
+	bash scripts/validate_phase7_data.sh
+
+.PHONY: phase7-unary-check
+phase7-unary-check:
+	bash scripts/validate_phase7_unary.sh
+
+.PHONY: phase7-adjust-check
+phase7-adjust-check:
+	bash scripts/validate_phase7_adjust.sh

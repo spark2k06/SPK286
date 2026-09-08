@@ -75,7 +75,7 @@ module spk286_execution_tb;
         load_byte(16'h0000, 8'hB8);
         load_byte(16'h0001, 8'h34);
         load_byte(16'h0002, 8'h12);
-        load_byte(16'h0003, 8'h90); // Unsupported if stale bytes escape a flush.
+        load_byte(16'h0003, 8'h0F); // Unsupported if stale bytes escape a flush.
 
         // The redirected stream covers the remaining seven destination codes.
         load_byte(16'h0100, 8'hB9); load_byte(16'h0101, 8'h78); load_byte(16'h0102, 8'h56);
@@ -179,14 +179,14 @@ module spk286_execution_tb;
         ip_write_en = 1'b1;
         ip_write_data = 16'h0200;
         redirect = 1'b1;
-        load_byte(16'h0200, 8'h90);
+        load_byte(16'h0200, 8'h0F);
         #1;
         tick();
         ip_write_en = 1'b0;
         redirect = 1'b0;
         for (cycles = 0; cycles < 600 && !unsupported_opcode; cycles = cycles + 1)
             service_cycle();
-        if (!unsupported_opcode || debug_opcode !== 8'h90 || debug_ip !== 16'h0200 ||
+        if (!unsupported_opcode || debug_opcode !== 8'h0F || debug_ip !== 16'h0200 ||
             debug_gpr[15:0] !== 16'h1234 || debug_flags !== 16'h0043)
             $fatal(1, "unsupported opcode trap did not preserve state");
 
