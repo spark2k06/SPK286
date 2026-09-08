@@ -44,7 +44,7 @@ module spk286_alu_lifecycle_tb;
         execute_enable=0; reset=1; ready=0; gpr_write_en=0; flags_write_en=0;
         segment_load_en=0; redirect=0; ip_write_en=0; tick(); reset=0;
         gpr_write_en=1; gpr_write_index=0; gpr_write_data=1; tick(); gpr_write_en=0;
-        flags_write_en=1; flags_write_mask=16'hFFFF; flags_write_data=16'h7FD7; tick(); flags_write_en=0;
+        flags_write_en=1; flags_write_mask=16'hFFFF; flags_write_data=16'h7ED7; tick(); flags_write_en=0;
         segment_load_en=1; segment_load_index=1; segment_load_selector=0; redirect_to(16'h0100); segment_load_en=0;
         memory[256]=cmp?8'h39:8'h01; memory[257]=8'h06; memory[258]=1; memory[259]=8'h10; memory[260]=8'hF4;
         memory[512]=8'hBF; memory[513]=8'h34; memory[514]=8'h12; memory[515]=8'hF4;
@@ -86,7 +86,7 @@ module spk286_alu_lifecycle_tb;
             check(debug_flags==saved_flags,"canceled ALU cannot commit stale FLAGS into MOV");
         end else begin
             check(debug_ip==16'h0104 && debug_gpr==saved_gpr,"resumed ALU state/IP");
-            check(debug_flags==(compare_only?16'h7782:16'h7757),"resumed ALU exact FLAGS");
+            check(debug_flags==(compare_only?16'h7682:16'h7657),"resumed ALU exact FLAGS");
             check(writes==(compare_only?0:2),"one logical result or no CMP write");
         end
         check(memory[4096]==8'h5A && memory[4099]==8'hA5,"lifecycle neighbor preservation");
@@ -149,7 +149,7 @@ module spk286_alu_lifecycle_tb;
                 end
                 execute_enable=1; timeout_count=0;
                 while(!instruction_retired && timeout_count<200) begin service(); timeout_count=timeout_count+1; end
-                check(retires==1 && debug_ip==16'h0103 && debug_gpr[15:0]==16'h8001 && debug_flags==16'h7F92,
+                check(retires==1 && debug_ip==16'h0103 && debug_gpr[15:0]==16'h8001 && debug_flags==16'h7E92,
                       "resumed immediate ADC includes carry and exact FLAGS");
                 check(writes==0,"immediate accumulator does not access data memory");
             end else if(action==1) begin
@@ -176,9 +176,9 @@ module spk286_alu_lifecycle_tb;
         memory[271]=8'h03; memory[272]=8'hD8;
         memory[273]=8'h33; memory[274]=8'hC0;
         memory[275]=8'h15; memory[276]=0; memory[277]=0; memory[278]=8'hF4;
-        stream_flags[0]=16'h7713; stream_flags[1]=16'h7F12; stream_flags[2]=16'h7796;
-        stream_flags[3]=16'h7717; stream_flags[4]=16'h7717; stream_flags[5]=16'h7706;
-        stream_flags[6]=16'h7746; stream_flags[7]=16'h7746;
+        stream_flags[0]=16'h7613; stream_flags[1]=16'h7E12; stream_flags[2]=16'h7696;
+        stream_flags[3]=16'h7617; stream_flags[4]=16'h7617; stream_flags[5]=16'h7606;
+        stream_flags[6]=16'h7646; stream_flags[7]=16'h7646;
         stream_gpr=debug_gpr; stream_ip=256; permit_read=1; permit_write=1; execute_enable=1;
         for(integer instruction=0;instruction<8;instruction=instruction+1) begin
             if(instruction_retired) service();

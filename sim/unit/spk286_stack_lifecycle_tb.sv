@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module spk286_stack_lifecycle_tb;
+    // TF delivery is verified by the event suite; this stream isolates its original datapath contract.
     `include "spk286_signals.svh"
     logic [7:0] memory[0:65535];
     integer checks=0,cases=0,retires=0,writes=0,timeout_count,kind_q;
@@ -49,7 +50,7 @@ module spk286_stack_lifecycle_tb;
         for(integer r=0;r<8;r=r+1)begin
             gpr_write_en=1;gpr_write_index=3'(r);gpr_write_data=r==4?16'h1003:(r==1?16'd2:16'h55AA);tick();
         end
-        gpr_write_en=0;flags_write_en=1;flags_write_mask=16'hFFFF;flags_write_data=16'h7FD7;tick();flags_write_en=0;
+        gpr_write_en=0;flags_write_en=1;flags_write_mask=16'hFFFF;flags_write_data=16'h7ED7;tick();flags_write_en=0;
         segment_load_en=1;segment_load_index=1;segment_load_selector=0;redirect_to(16'h0100);segment_load_en=0;
         for(integer b=256;b<300;b=b+1)memory[b]=8'hF4;
         case(kind)
@@ -169,16 +170,21 @@ module spk286_stack_lifecycle_tb;
             check(retires==2 && debug_ip==16'h0183 && debug_gpr[111:96]==16'hBEEF,"wrong-path fetch cannot execute after redirect");
         end
         check(stale_redirects>0 && full_redirects>0,"outstanding stale fetch and full queue exercised");
-        // Invalid group forms stop after ModR/M without operand or stack effects.
+        // Observe the pre-delivery invalid/unsupported boundary under pause.
+        // Complete #UD frames and non-retirement belong to the event suite.
         for(integer group_number=0;group_number<8;group_number=group_number+1)
           for(integer form=0;form<2;form=form+1)
             if((form==0 && group_number!=0) || (form==1 && group_number!=2 && group_number!=4 && group_number!=6))begin
                 setup(0);memory[256]=form==0?8'h8F:8'hFF;memory[257]=8'hC0+8'(group_number*8);
                 saved_gpr=debug_gpr;saved_flags=debug_flags;timeout_count=0;
-                while(!unsupported_opcode && timeout_count<100)begin service();timeout_count=timeout_count+1;end
+                while(!unsupported_opcode && !dut.invalid_form && timeout_count<100)begin service();timeout_count=timeout_count+1;end
+                execute_enable=0;
                 repeat(6)service();
-                check(unsupported_opcode && retires==0 && writes==0 && debug_gpr==saved_gpr && debug_flags==saved_flags,
+                check((unsupported_opcode || dut.invalid_form) && retires==0 && writes==0 && debug_gpr==saved_gpr && debug_flags==saved_flags,
                       "invalid group cannot partially execute");
+                check(dut.invalid_form==(form==0 || group_number==3 || group_number==5 || group_number==7),
+                      "invalid encoding is distinct from legal unsupported form");
+                execute_enable=1;
                 redirect_to(16'h0200);finish(1);
             end
         // Repeated transfer to the identical address must still flush and retire.
@@ -218,7 +224,7 @@ module spk286_stack_lifecycle_tb;
             check(retires==i+1 && debug_ip==16'(expected_stream_ip[i]),"nested stream exact retirement IP");
             check(debug_gpr[79:64]==(i<14?16'(expected_stream_sp[i%7]):16'h1003),"nested stream stack balance");
             check(debug_gpr[31:16]==(i<6?16'd2:i<13?16'd1:16'd0),"LOOP count dependencies");
-            check(debug_flags==16'h7FD7 && debug_cs==0 && debug_gpr[127:112]==16'h55AA,"FLAGS CS and poisoned wrong-path register preserved");
+            check(debug_flags==16'h7ED7 && debug_cs==0 && debug_gpr[127:112]==16'h55AA,"FLAGS CS and poisoned wrong-path register preserved");
         end
         check(debug_gpr[111:96]==16'hBEEF && debug_gpr[47:32]==16'hCAFE && debug_gpr[63:48]==16'h55AA,
               "nested stream dependent stack values and fallthrough results");

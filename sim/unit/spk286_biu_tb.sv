@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 module spk286_biu_tb;
     logic clk = 0, reset = 1, cancel_data = 0, ready = 0;
+    logic hold_request = 0, ack_request = 0, ack_response_ready = 0;
+    wire hlda, ack_request_ready, ack_response_valid, bus_lock;
+    wire [7:0] ack_vector;
     logic [15:0] data_in = 0;
     logic code_valid = 0, code_bhe_n = 0;
     logic [23:0] code_address = 24'h100000;

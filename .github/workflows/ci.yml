@@ -12,10 +12,15 @@ jobs:
       - name: Install HDL toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y verilator iverilog yosys cmake ninja-build gtkwave
+          sudo apt-get install -y verilator iverilog yosys cmake ninja-build gtkwave nasm
       - name: Verify generated microcode and run CPU regression
         run: make regression
       - name: Validate pinned MCL86 reference reconstruction
         run: make mcl86-fetch mcl86-check
       - name: Validate complete supported hardware-vector families
-        run: make singlestep-fetch phase5-check
+        run: make singlestep-fetch phase6-exec-check
+      - name: Classify strict Phase 6 architectural evidence (pending is not approval)
+        run: |
+          set -euo pipefail
+          python3 -m tools.phase6_development --ci-status | tee phase6-architectural-status.txt
+          cat phase6-architectural-status.txt >> "$GITHUB_STEP_SUMMARY"

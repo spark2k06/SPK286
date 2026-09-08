@@ -72,7 +72,7 @@ def evaluate(code, registers, flags, ip, memory):
         sp = r[4]
         r[4] = pop(sp, 0)
         return access(False, 0x80000+sp)
-    def operand():
+    def operand(check_limit=True):
         mod, reg, rm = code[1] // 64, (code[1] // 8) % 8, code[1] % 8
         if mod == 3:
             return reg, rm, None
@@ -80,7 +80,7 @@ def evaluate(code, registers, flags, ip, memory):
                 if mod == 2 or rm == 6 and mod == 0 else 0)
         base = (r[3]+r[6], r[3]+r[7], r[5]+r[6], r[5]+r[7], r[6], r[7], r[5], r[3])[rm]
         offset = disp if mod == 0 and rm == 6 else (base+disp) % 65536
-        if offset == 65535:
+        if check_limit and offset == 65535:
             raise ValueError('operand word exceeds limit')
         ss = rm in (2,3) or rm == 6 and mod != 0
         return reg, rm, (0x80000 if ss else 0x40000)+offset
@@ -92,10 +92,12 @@ def evaluate(code, registers, flags, ip, memory):
         elif op in (0x68, 0x6a):
             stack_push(code[1]+256*code[2] if op == 0x68 else signed(code[1],8) % 65536)
         elif op == 0x8f:
-            reg, rm, address = operand()
+            reg, rm, address = operand(check_limit=False)
             if reg != 0:
                 raise ValueError('unsupported POP group')
             value = stack_pop()
+            if address is not None and address % 65536 == 65535:
+                raise ValueError('POP destination word exceeds limit after stack read')
             if address is None:
                 r[rm] = value
             else:
@@ -127,5 +129,5 @@ def evaluate(code, registers, flags, ip, memory):
         else:
             raise ValueError('unsupported instruction')
     except ValueError:
-        return Outcome(list(registers), next_ip, dict(memory), transactions, True, False)
+        return Outcome(r, next_ip, ram, transactions, True, False)
     return Outcome(r, target, ram, transactions, False, redirected)

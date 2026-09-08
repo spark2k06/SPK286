@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 
 module spk286_fetch_tb;
+    logic suspend = 0;
     logic clk = 1'b0, reset = 1'b1, ready = 1'b0;
     logic [15:0] data_in = 16'h0000;
     logic [23:0] code_base = 24'hFF0000;

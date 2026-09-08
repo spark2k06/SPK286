@@ -231,3 +231,21 @@ The operation/lifetime contract is documented in
 [SPK286_MICROCODE_FORMAT.md](../SPK286_MICROCODE_FORMAT.md). Generated files
 must still be regenerated, never hand-edited. `make phase5-check` verifies
 regeneration, all inherited gates and the stack/control additions.
+
+## Phase 6 candidate active image
+
+Compiler 5.0 / format 5 uses 28 entries, 128 words, seven-bit addresses and
+six-bit controls. `z_interrupts.mc` is authoritative for shared event entry,
+return and supporting FLAGS/IF/halt instructions. The sequencer remains generic.
+Controls request functional operations and wait for real operand/BIU dependencies.
+
+Format 4 sources are frozen in `tests/fixtures/microcode_phase5_sources.json`;
+formats 1–4 remain tested. Active Phase 5 POP-memory loses CHECK_RM16 before its
+POP, because physical destination-fault cases require the completed SP+2 effect.
+The active image has an independent fixed-number fixture and canonical round-trip
+checks. No generated artifact is edited by hand.
+
+New event protocols validate ordered saved-state acquisition, temporary validity,
+vector context, one final context commit and terminal END. Entry completion is
+filtered from ordinary guest retirement. See [format](../SPK286_MICROCODE_FORMAT.md)
+and [event contract](../docs/INTERRUPTS_EXCEPTIONS.md).

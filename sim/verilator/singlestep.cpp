@@ -35,6 +35,8 @@ struct BatchCase {
     std::array<std::uint16_t, 14> expected_masks{};
     std::map<std::uint32_t, std::uint8_t> initial_ram;
     std::map<std::uint32_t, std::uint8_t> expected_ram;
+    std::uint16_t expected_event = 256;
+    std::uint8_t expected_retired = 1;
 };
 
 class BatchReader {
@@ -49,7 +51,7 @@ public:
             if (read_u8() != static_cast<std::uint8_t>(value))
                 throw std::runtime_error("invalid SingleStep batch magic");
         }
-        if (read_u32() != 1) throw std::runtime_error("unsupported SingleStep batch version");
+        if (read_u32() != 2) throw std::runtime_error("unsupported SingleStep batch version");
         const std::uint32_t count = read_u32();
         if (count > 1000000U) throw std::runtime_error("unreasonable SingleStep batch size");
         std::vector<BatchCase> cases;
@@ -117,6 +119,10 @@ private:
         for (auto& value : result.expected_regs) value = read_u16();
         for (auto& value : result.expected_masks) value = read_u16();
         result.expected_ram = read_memory("expected RAM");
+        result.expected_event = read_u16();
+        result.expected_retired = read_u8();
+        if (result.expected_event > 256 || result.expected_retired > 1)
+            throw std::runtime_error("invalid completion expectation");
         return result;
     }
 };
@@ -292,9 +298,9 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
         }
         apply_bus_write(dut, memory);
         tick(dut, trace, time);
-        if (dut.operand_blocked || dut.microcode_fault) {
+        if (dut.shutdown || dut.microcode_fault) {
             failed = true;
-            reason = dut.operand_blocked ? "operand segment bound blocked" : "microcode fault";
+            reason = dut.shutdown ? "CPU shutdown before target completion" : "microcode fault";
             break;
         }
         if (dut.unsupported_opcode) {
@@ -302,8 +308,16 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
             reason = "unsupported opcode observed before target retirement";
             break;
         }
-        if (dut.instruction_retired) {
+        if (dut.instruction_retired || dut.event_completed) {
             retired = true;
+            // Oracle metadata never drives event delivery. Observe either CPU
+            // completion independently, then check its identity and retirement.
+            if (dut.instruction_retired != test.expected_retired ||
+                bool(dut.event_completed) != (test.expected_event != 256) ||
+                (dut.event_completed && dut.debug_event_vector != test.expected_event)) {
+                failed = true;
+                reason = "architectural completion mismatch";
+            }
             break;
         }
     }
@@ -314,7 +328,7 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
         reason = "instruction retirement timeout";
     }
     const auto actual = read_registers(dut);
-    if (retired) {
+    if (retired && !failed) {
         for (unsigned i = 0; i < actual.size(); ++i) {
             if ((actual[i] & test.expected_masks[i]) != (test.expected_regs[i] & test.expected_masks[i])) {
                 failed = true;

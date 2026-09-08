@@ -1,5 +1,11 @@
 // Testbench connections to the normal execution/state boundary.
 logic clk = 1'b0, reset = 1'b1, ready = 1'b0, execute_enable = 1'b0;
+logic intr = 1'b0, nmi = 1'b0, hold_request = 1'b0;
+wire halted, shutdown, event_completed;
+wire [7:0] debug_event_vector;
+wire [2:0] debug_event_kind;
+wire [15:0] debug_instruction_ip;
+wire debug_nmi_pending, debug_nmi_blocked, debug_sti_shadow;
 logic [15:0] data_in = 16'h0000;
 logic [2:0] gpr_read_a_index = 3'd0, gpr_read_b_index = 3'd0, gpr_write_index = 3'd0;
 logic gpr_read_a_byte = 1'b0, gpr_read_b_byte = 1'b0;

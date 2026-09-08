@@ -5,21 +5,29 @@
     "ALU_RM16_IMM16": 31,
     "ALU_RM16_IMM8S": 38,
     "ALU_RM16_R16": 11,
-    "BRANCH_REL8": 78,
-    "CALL_REL16": 68,
-    "GROUP5_NEAR": 62,
-    "JMP_REL16": 74,
-    "LOOP_REL8": 82,
+    "BRANCH_REL8": 77,
+    "CALL_REL16": 67,
+    "CONTROL_IF": 102,
+    "EVENT_ENTRY": 116,
+    "GROUP5_NEAR": 61,
+    "HALT_CPU": 104,
+    "INTERRUPT_RETURN": 111,
+    "JMP_REL16": 73,
+    "LOOP_REL8": 81,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
     "MOV_RM16_R16": 3,
+    "POP_FLAGS": 99,
     "POP_R16": 48,
     "POP_RM16": 57,
+    "PUSH_FLAGS": 96,
     "PUSH_IMM16": 51,
     "PUSH_IMM8S": 54,
     "PUSH_R16": 45,
-    "RET_IMM16": 91,
-    "RET_NEAR": 87
+    "RET_IMM16": 90,
+    "RET_NEAR": 86,
+    "SOFTWARE_EVENT": 106,
+    "SOFTWARE_EVENT_IMM8": 108
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -826,18 +834,6 @@
       "location": {
         "entry": "POP_RM16",
         "file": "word_stack_control.mc",
-        "line": 26
-      },
-      "operands": [],
-      "operation": "CHECK_RM16",
-      "statement": "CHECK_RM16",
-      "word": 19
-    },
-    {
-      "address": 59,
-      "location": {
-        "entry": "POP_RM16",
-        "file": "word_stack_control.mc",
         "line": 27
       },
       "operands": [
@@ -848,7 +844,7 @@
       "word": 22
     },
     {
-      "address": 60,
+      "address": 59,
       "location": {
         "entry": "POP_RM16",
         "file": "word_stack_control.mc",
@@ -862,7 +858,7 @@
       "word": 8
     },
     {
-      "address": 61,
+      "address": 60,
       "location": {
         "entry": "POP_RM16",
         "file": "word_stack_control.mc",
@@ -874,7 +870,7 @@
       "word": 3
     },
     {
-      "address": 62,
+      "address": 61,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -886,7 +882,7 @@
       "word": 4
     },
     {
-      "address": 63,
+      "address": 62,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -900,7 +896,7 @@
       "word": 6
     },
     {
-      "address": 64,
+      "address": 63,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -914,7 +910,7 @@
       "word": 25
     },
     {
-      "address": 65,
+      "address": 64,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -929,7 +925,7 @@
       "word": 21
     },
     {
-      "address": 66,
+      "address": 65,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -943,7 +939,7 @@
       "word": 26
     },
     {
-      "address": 67,
+      "address": 66,
       "location": {
         "entry": "GROUP5_NEAR",
         "file": "word_stack_control.mc",
@@ -955,7 +951,7 @@
       "word": 3
     },
     {
-      "address": 68,
+      "address": 67,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -969,7 +965,7 @@
       "word": 11
     },
     {
-      "address": 69,
+      "address": 68,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -983,7 +979,7 @@
       "word": 24
     },
     {
-      "address": 70,
+      "address": 69,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -997,7 +993,7 @@
       "word": 23
     },
     {
-      "address": 71,
+      "address": 70,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -1012,7 +1008,7 @@
       "word": 21
     },
     {
-      "address": 72,
+      "address": 71,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -1026,7 +1022,7 @@
       "word": 26
     },
     {
-      "address": 73,
+      "address": 72,
       "location": {
         "entry": "CALL_REL16",
         "file": "word_stack_control.mc",
@@ -1038,7 +1034,7 @@
       "word": 3
     },
     {
-      "address": 74,
+      "address": 73,
       "location": {
         "entry": "JMP_REL16",
         "file": "word_stack_control.mc",
@@ -1052,7 +1048,7 @@
       "word": 11
     },
     {
-      "address": 75,
+      "address": 74,
       "location": {
         "entry": "JMP_REL16",
         "file": "word_stack_control.mc",
@@ -1066,7 +1062,7 @@
       "word": 24
     },
     {
-      "address": 76,
+      "address": 75,
       "location": {
         "entry": "JMP_REL16",
         "file": "word_stack_control.mc",
@@ -1080,7 +1076,7 @@
       "word": 26
     },
     {
-      "address": 77,
+      "address": 76,
       "location": {
         "entry": "JMP_REL16",
         "file": "word_stack_control.mc",
@@ -1092,7 +1088,7 @@
       "word": 3
     },
     {
-      "address": 78,
+      "address": 77,
       "location": {
         "entry": "BRANCH_REL8",
         "file": "word_stack_control.mc",
@@ -1106,7 +1102,7 @@
       "word": 12
     },
     {
-      "address": 79,
+      "address": 78,
       "location": {
         "entry": "BRANCH_REL8",
         "file": "word_stack_control.mc",
@@ -1120,7 +1116,7 @@
       "word": 24
     },
     {
-      "address": 80,
+      "address": 79,
       "location": {
         "entry": "BRANCH_REL8",
         "file": "word_stack_control.mc",
@@ -1134,7 +1130,7 @@
       "word": 26
     },
     {
-      "address": 81,
+      "address": 80,
       "location": {
         "entry": "BRANCH_REL8",
         "file": "word_stack_control.mc",
@@ -1146,7 +1142,7 @@
       "word": 3
     },
     {
-      "address": 82,
+      "address": 81,
       "location": {
         "entry": "LOOP_REL8",
         "file": "word_stack_control.mc",
@@ -1160,7 +1156,7 @@
       "word": 12
     },
     {
-      "address": 83,
+      "address": 82,
       "location": {
         "entry": "LOOP_REL8",
         "file": "word_stack_control.mc",
@@ -1174,7 +1170,7 @@
       "word": 28
     },
     {
-      "address": 84,
+      "address": 83,
       "location": {
         "entry": "LOOP_REL8",
         "file": "word_stack_control.mc",
@@ -1188,7 +1184,7 @@
       "word": 24
     },
     {
-      "address": 85,
+      "address": 84,
       "location": {
         "entry": "LOOP_REL8",
         "file": "word_stack_control.mc",
@@ -1202,7 +1198,7 @@
       "word": 26
     },
     {
-      "address": 86,
+      "address": 85,
       "location": {
         "entry": "LOOP_REL8",
         "file": "word_stack_control.mc",
@@ -1214,7 +1210,7 @@
       "word": 3
     },
     {
-      "address": 87,
+      "address": 86,
       "location": {
         "entry": "RET_NEAR",
         "file": "word_stack_control.mc",
@@ -1228,7 +1224,7 @@
       "word": 22
     },
     {
-      "address": 88,
+      "address": 87,
       "location": {
         "entry": "RET_NEAR",
         "file": "word_stack_control.mc",
@@ -1242,7 +1238,7 @@
       "word": 25
     },
     {
-      "address": 89,
+      "address": 88,
       "location": {
         "entry": "RET_NEAR",
         "file": "word_stack_control.mc",
@@ -1256,7 +1252,7 @@
       "word": 26
     },
     {
-      "address": 90,
+      "address": 89,
       "location": {
         "entry": "RET_NEAR",
         "file": "word_stack_control.mc",
@@ -1268,7 +1264,7 @@
       "word": 3
     },
     {
-      "address": 91,
+      "address": 90,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
@@ -1282,7 +1278,7 @@
       "word": 11
     },
     {
-      "address": 92,
+      "address": 91,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
@@ -1296,7 +1292,7 @@
       "word": 22
     },
     {
-      "address": 93,
+      "address": 92,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
@@ -1310,7 +1306,7 @@
       "word": 25
     },
     {
-      "address": 94,
+      "address": 93,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
@@ -1324,7 +1320,7 @@
       "word": 27
     },
     {
-      "address": 95,
+      "address": 94,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
@@ -1338,11 +1334,411 @@
       "word": 26
     },
     {
-      "address": 96,
+      "address": 95,
       "location": {
         "entry": "RET_IMM16",
         "file": "word_stack_control.mc",
         "line": 78
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 96,
+      "location": {
+        "entry": "PUSH_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 5
+      },
+      "operands": [],
+      "operation": "READ_FLAGS",
+      "statement": "READ_FLAGS -> TMP0",
+      "word": 30
+    },
+    {
+      "address": 97,
+      "location": {
+        "entry": "PUSH_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 6
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 98,
+      "location": {
+        "entry": "PUSH_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 99,
+      "location": {
+        "entry": "POP_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 100,
+      "location": {
+        "entry": "POP_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 11
+      },
+      "operands": [],
+      "operation": "RESTORE_FLAGS",
+      "statement": "RESTORE_FLAGS TMP0",
+      "word": 31
+    },
+    {
+      "address": 101,
+      "location": {
+        "entry": "POP_FLAGS",
+        "file": "z_interrupts.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 102,
+      "location": {
+        "entry": "CONTROL_IF",
+        "file": "z_interrupts.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "SET_IF",
+      "statement": "SET_IF DECODED",
+      "word": 32
+    },
+    {
+      "address": 103,
+      "location": {
+        "entry": "CONTROL_IF",
+        "file": "z_interrupts.mc",
+        "line": 16
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 104,
+      "location": {
+        "entry": "HALT_CPU",
+        "file": "z_interrupts.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "HALT",
+      "statement": "HALT",
+      "word": 33
+    },
+    {
+      "address": 105,
+      "location": {
+        "entry": "HALT_CPU",
+        "file": "z_interrupts.mc",
+        "line": 20
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 106,
+      "location": {
+        "entry": "SOFTWARE_EVENT",
+        "file": "z_interrupts.mc",
+        "line": 23
+      },
+      "operands": [],
+      "operation": "REQUEST_EVENT",
+      "statement": "REQUEST_EVENT DECODED",
+      "word": 34
+    },
+    {
+      "address": 107,
+      "location": {
+        "entry": "SOFTWARE_EVENT",
+        "file": "z_interrupts.mc",
+        "line": 24
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 108,
+      "location": {
+        "entry": "SOFTWARE_EVENT_IMM8",
+        "file": "z_interrupts.mc",
+        "line": 27
+      },
+      "operands": [],
+      "operation": "FETCH_IMM8",
+      "statement": "FETCH_IMM8 -> TMP0",
+      "word": 29
+    },
+    {
+      "address": 109,
+      "location": {
+        "entry": "SOFTWARE_EVENT_IMM8",
+        "file": "z_interrupts.mc",
+        "line": 28
+      },
+      "operands": [],
+      "operation": "REQUEST_EVENT",
+      "statement": "REQUEST_EVENT DECODED",
+      "word": 34
+    },
+    {
+      "address": 110,
+      "location": {
+        "entry": "SOFTWARE_EVENT_IMM8",
+        "file": "z_interrupts.mc",
+        "line": 29
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 111,
+      "location": {
+        "entry": "INTERRUPT_RETURN",
+        "file": "z_interrupts.mc",
+        "line": 32
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 112,
+      "location": {
+        "entry": "INTERRUPT_RETURN",
+        "file": "z_interrupts.mc",
+        "line": 33
+      },
+      "operands": [],
+      "operation": "POP16_TMP1",
+      "statement": "POP16 -> TMP1",
+      "word": 43
+    },
+    {
+      "address": 113,
+      "location": {
+        "entry": "INTERRUPT_RETURN",
+        "file": "z_interrupts.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "POP16_TMP2",
+      "statement": "POP16 -> TMP2",
+      "word": 44
+    },
+    {
+      "address": 114,
+      "location": {
+        "entry": "INTERRUPT_RETURN",
+        "file": "z_interrupts.mc",
+        "line": 35
+      },
+      "operands": [],
+      "operation": "IRET_COMMIT",
+      "statement": "IRET_COMMIT TMP0 TMP1 TMP2",
+      "word": 45
+    },
+    {
+      "address": 115,
+      "location": {
+        "entry": "INTERRUPT_RETURN",
+        "file": "z_interrupts.mc",
+        "line": 36
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 116,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 39
+      },
+      "operands": [],
+      "operation": "EVENT_ACK",
+      "statement": "EVENT_ACK",
+      "word": 35
+    },
+    {
+      "address": 117,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 40
+      },
+      "operands": [],
+      "operation": "EVENT_FLAGS",
+      "statement": "EVENT_FLAGS -> TMP0",
+      "word": 36
+    },
+    {
+      "address": 118,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 41
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 119,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "EVENT_CS",
+      "statement": "EVENT_CS -> TMP0",
+      "word": 37
+    },
+    {
+      "address": 120,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 43
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 121,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 44
+      },
+      "operands": [],
+      "operation": "EVENT_IP",
+      "statement": "EVENT_IP -> TMP0",
+      "word": 38
+    },
+    {
+      "address": 122,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 45
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 123,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 46
+      },
+      "operands": [],
+      "operation": "CLEAR_IF_TF",
+      "statement": "CLEAR_IF_TF",
+      "word": 39
+    },
+    {
+      "address": 124,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 47
+      },
+      "operands": [],
+      "operation": "VECTOR_IP",
+      "statement": "VECTOR_IP -> TMP0",
+      "word": 40
+    },
+    {
+      "address": 125,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "VECTOR_CS",
+      "statement": "VECTOR_CS -> TMP1",
+      "word": 41
+    },
+    {
+      "address": 126,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 127,
+      "location": {
+        "entry": "EVENT_ENTRY",
+        "file": "z_interrupts.mc",
+        "line": 50
       },
       "operands": [],
       "operation": "END",

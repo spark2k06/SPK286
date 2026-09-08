@@ -17,7 +17,7 @@ import runpy
 import struct
 import subprocess
 
-from tools.run_singlestep import SUPPORTED_OPCODES, PHASE5_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
+from tools.run_singlestep import SUPPORTED_OPCODES, PHASE5_OPCODES, PHASE6_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
 from tools.singlestep import is_revoked, load_moo, load_revocation_list
 
 
@@ -80,6 +80,34 @@ def compare_final_state(actual, upstream, wire_masks):
     require(common == upstream, 'final state differs from upstream parser')
 
 
+def independent_wire_exceptions(data):
+    """Third, audit-only EXCP reader; strict five-byte payload and record identity."""
+    def chunks(blob):
+        position=0
+        while position<len(blob):
+            require(position+8<=len(blob),'EXCP audit: truncated chunk header')
+            tag=blob[position:position+4]
+            size=int.from_bytes(blob[position+4:position+8],'little')
+            position+=8
+            require(position+size<=len(blob),'EXCP audit: truncated chunk payload')
+            yield tag,blob[position:position+size]
+            position+=size
+    records={}
+    for tag,body in chunks(data):
+        if tag!=b'TEST': continue
+        require(len(body)>=4,'EXCP audit: truncated identity')
+        index=int.from_bytes(body[:4],'little')
+        require(index not in records,'EXCP audit: duplicate identity')
+        records[index]=None
+        for tag,value in chunks(body[4:]):
+            if tag==b'EXCP':
+                require(records[index] is None and len(value)==5,'EXCP audit: duplicate/malformed EXCP')
+                address=int.from_bytes(value[1:],'little')
+                require(address<1<<24,'EXCP audit: flag address outside physical bus')
+                records[index]={'number':value[0],'flag_address':address}
+    return records
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path,
@@ -94,17 +122,21 @@ def main():
     example = None
     memory_examples = {}
     stack_control_examples = {}
+    event_examples = {}
+    fault_examples = {}
     excluded_count = 0
     for opcode in SUPPORTED_OPCODES:
         path = args.repo / "v1_real_mode" / f"{opcode}.MOO.gz"
         parsed = load_moo(path)
         raw = gzip.decompress(path.read_bytes())
         wire_masks = independent_wire_masks(raw)
+        wire_exceptions = independent_wire_exceptions(raw)
         with contextlib.redirect_stdout(io.StringIO()):
             cpu, upstream = reference(raw)
         require(cpu == parsed.header["cpu_id"], f"{opcode}: CPU mismatch")
         require(len(upstream) == len(parsed.tests) == parsed.header["test_count"], f"{opcode}: count mismatch")
         require(set(wire_masks) == {case.index for case in parsed.tests}, f'{opcode}: mask record identities')
+        require(set(wire_exceptions)==set(wire_masks),f'{opcode}: exception record identities')
         indexes = set()
         for ours, theirs in zip(parsed.tests, upstream):
             for field, actual in (("idx", ours.index), ("name", ours.name),
@@ -113,6 +145,7 @@ def main():
                                   ("hash", ours.test_hash), ("exception", ours.exception)):
                 require(actual == theirs.get(field), f"{opcode}/{ours.index}: {field} differs from upstream parser")
             compare_final_state(ours.final, theirs['final'], wire_masks[ours.index])
+            require(ours.exception==wire_exceptions[ours.index],f'{opcode}/{ours.index}: independent EXCP mismatch')
             require(ours.index not in indexes, f"{opcode}: duplicate index")
             require(ours.test_hash is not None and ours.test_hash not in identities, "missing/duplicate global hash")
             indexes.add(ours.index)
@@ -131,12 +164,16 @@ def main():
             masked += bool(ours.final.get("reg_masks"))
             if is_revoked(ours, revoked):
                 revoked_count += 1
-            elif scope_exclusion(ours, opcode) is not None:
+            elif scope_exclusion(ours, opcode, True) is not None:
                 excluded_count += 1
             else:
-                prepared = prepare_case(ours, opcode)
-                if opcode in PHASE5_OPCODES:
+                prepared = prepare_case(ours, opcode, True)
+                if opcode in PHASE5_OPCODES and ours.exception is None:
                     stack_control_examples.setdefault(opcode, prepared)
+                if opcode in PHASE6_OPCODES:
+                    event_examples.setdefault(opcode,prepared)
+                if ours.exception is not None:
+                    fault_examples.setdefault((opcode in PHASE6_OPCODES,ours.exception['number']),prepared)
                 if example is None:
                     example = prepared
                 if opcode in ("89", "8B") and ours.instruction_bytes[1] >> 6 != 3:
@@ -221,6 +258,35 @@ def main():
         execute('expected-target-'+opcode, replace(prepared, expected_regs=tuple(values)),
                 'architectural register mismatch')
     print("SINGLESTEP_AUDIT PASS: corpus cross-check; 67 rejected fault probes; 51 pristine executions")
+    require(set(event_examples)==set(PHASE6_OPCODES),'missing event instruction comparator probes')
+    event_probes=0
+    for opcode,prepared in event_examples.items():
+        execute('pristine-event-'+opcode,prepared,trace=True)
+        execute('wrong-completion-'+opcode,replace(prepared,expected_retired=1-prepared.expected_retired),
+                'architectural completion mismatch'); event_probes+=1
+        for register in ('ip','cs','sp','flags'):
+            values=list(prepared.expected_regs); index=REG_ORDER.index(register)
+            mask=prepared.expected_masks[index]
+            require(mask!=0,'event comparison requires defined bits')
+            values[index]^=mask & -mask
+            execute('wrong-'+register+'-'+opcode,replace(prepared,expected_regs=tuple(values)),
+                    'architectural register mismatch'); event_probes+=1
+    require((False,6) in fault_examples and (False,13) in fault_examples,'both inherited fault classes required')
+    for key,prepared in fault_examples.items():
+        name=('software-' if key[0] else 'fault-')+str(key[1])
+        execute('pristine-'+name,prepared,trace=not key[0])
+        execute('wrong-vector-'+name,replace(prepared,expected_event=(prepared.expected_event+1)%256),
+                'architectural completion mismatch');event_probes+=1
+        # EXCP gives the captured FLAGS address; alter each of all six frame
+        # bytes independently. Never weaken the full cumulative RAM comparison.
+        frame=prepared.source.exception['flag_address']
+        for offset in range(-4,2):
+            values=dict(prepared.expected_ram);address=frame+offset
+            require(address in values,'missing captured event frame byte')
+            values[address]^=1
+            execute('wrong-frame-'+name+'-'+str(offset+4),replace(prepared,expected_ram=tuple(sorted(values.items()))),
+                    'memory state mismatch');event_probes+=1
+    print(f'EVENT_COMPARATOR_AUDIT PASS: {event_probes} additional rejected probes; all EXCP/RMSK records independently checked')
 
 
 if __name__ == "__main__":

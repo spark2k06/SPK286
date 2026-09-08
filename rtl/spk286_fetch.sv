@@ -12,6 +12,7 @@ module spk286_fetch (
     input  logic        restart,
     input  logic [15:0] restart_ip,
     input  logic        request,
+    input  logic        suspend,
     output logic        request_ready,
     input  logic        response_ready,
     output logic        response_valid,
@@ -84,7 +85,7 @@ module spk286_fetch (
                         cursor_q <= {1'b0, request_ip_q} + {15'h0000, request_count_q};
                     end
                 end
-            end else if (!response_valid && !blocked && (restart_pending_q || request)) begin
+            end else if (!suspend && !response_valid && !blocked && (restart_pending_q || request)) begin
                 active_q <= 1'b1;
                 canceled_q <= 1'b0;
                 restart_pending_q <= 1'b0;

@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 
 module spk286_microcode_execution_tb;
+    // TF delivery is verified by the event suite; this stream isolates its original datapath contract.
     `include "spk286_signals.svh"
     logic [7:0] memory [0:4095];
     integer cycles = 0, checks = 0, retirements = 0, underfill_cycles = 0;
@@ -59,7 +60,7 @@ module spk286_microcode_execution_tb;
             expected_gpr[r*16 +: 16] = gpr_write_data; tick();
         end
         gpr_write_en = 0;
-        flags_write_en = 1; flags_write_data = 16'h7FD7; flags_write_mask = 16'hFFFF;
+        flags_write_en = 1; flags_write_data = 16'h7ED7; flags_write_mask = 16'hFFFF;
         tick(); flags_write_en = 0;
         for (integer s = 0; s < 4; s = s + 1) begin
             if (s != 1) begin
@@ -88,7 +89,7 @@ module spk286_microcode_execution_tb;
     endtask
     task automatic check_architecture(input logic [15:0] expected_ip);
         check(debug_gpr == expected_gpr, "destination and unrelated GPR preservation");
-        check(debug_ip == expected_ip && debug_flags == 16'h7FD7, "exact IP and FLAGS");
+        check(debug_ip == expected_ip && debug_flags == 16'h7ED7, "exact IP and FLAGS");
         check(debug_segment_selectors == saved_selectors && debug_segment_bases == saved_bases &&
               debug_segment_limits == saved_limits && debug_segment_access == saved_access, "all segment state preserved");
     endtask

@@ -25,7 +25,7 @@ class AluMicrocodeTests(unittest.TestCase):
         self.assertEqual([encode(op) for op in original.operations], [encode(op) for op in rebuilt.operations])
 
     def test_active_contract(self):
-        p = compile_sources({f.name: f.read_text() for f in (ROOT/'microcode/source').glob('*.mc') if f.name != 'word_stack_control.mc'})
+        p = compile_sources({f.name: f.read_text() for f in (ROOT/'microcode/source').glob('*.mc') if f.name in ('data_move.mc', 'word_alu.mc')})
         contract = json.loads((ROOT/'tests/fixtures/microcode_phase4.json').read_text())
         generated = generate(p)
         words = read_generated_words(generated['spk286_microcode_pkg.sv'], generated['spk286_microcode_rom.sv'])

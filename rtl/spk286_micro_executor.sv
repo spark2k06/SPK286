@@ -35,6 +35,16 @@ module spk286_micro_executor (
     output logic [15:0] gpr_write_data,
     input logic [15:0] destination_read_data,
     input logic carry_in,
+    input logic [15:0] architectural_flags,
+    input logic if_value,
+    input logic [15:0] event_flags, event_cs, event_ip,
+    input logic [7:0] event_vector,
+    input logic event_needs_ack, ack_done,
+    output logic ack_request, software_event_request, halt_request,
+    output logic [7:0] software_vector,
+    output logic context_commit, vector_request,
+    output logic [15:0] context_cs,
+    output logic [15:0] vector_offset,
     input logic [2:0] alu_operation,
     input logic result_write_allowed,
     input logic [15:0] decoded_flags_mask, decoded_undefined_mask,
@@ -52,24 +62,53 @@ module spk286_micro_executor (
     logic redirect_operation, adjust_stack, count_operation, stack_write_sp, check_operand;
     logic target_valid_q;
     logic [15:0] target_q, stack_next_sp;
+    logic fetch_byte, read_flags, restore_flags, set_if, clear_if_tf;
+    logic read_event_flags, read_event_cs, read_event_ip, vector_ip, vector_cs;
+    logic commit_context, ack_operation, request_event, halt_operation, iret_commit;
     spk286_stack stack_service (
         .request(stack_request), .push(push_transfer), .adjust(adjust_stack), .operand_done(operand_done),
         .sp(stack_pointer), .adjustment(tmp1_q), .offset(stack_offset), .next_sp(stack_next_sp), .write_sp(stack_write_sp)
     );
     assign push_operation = allowed && operation == spk286_microcode_pkg::MC_PUSH16 && temporary_valid_q[0];
     assign push_transfer = push_operation && push_enabled;
-    assign pop_operation = allowed && operation == spk286_microcode_pkg::MC_POP16;
+    assign pop_operation = allowed && (operation == spk286_microcode_pkg::MC_POP16 ||
+                                      operation == spk286_microcode_pkg::MC_POP16_TMP1 ||
+                                      operation == spk286_microcode_pkg::MC_POP16_TMP2);
     assign stack_request = push_transfer || pop_operation;
     assign read_ip = allowed && operation == spk286_microcode_pkg::MC_READ_IP16;
     assign target_relative = allowed && operation == spk286_microcode_pkg::MC_TARGET_REL16 && temporary_valid_q[1];
     assign target_absolute = allowed && operation == spk286_microcode_pkg::MC_TARGET_ABS16 && temporary_valid_q[0];
     assign redirect_operation = allowed && operation == spk286_microcode_pkg::MC_REDIRECT && target_valid_q;
-    assign redirect_request = redirect_operation && branch_taken;
-    assign redirect_target = target_q;
+    assign redirect_request = (redirect_operation && branch_taken) || context_commit;
+    assign redirect_target = context_commit ? tmp0_q : target_q;
     assign adjust_stack = allowed && operation == spk286_microcode_pkg::MC_ADJUST_SP16 && temporary_valid_q[1];
     assign count_operation = allowed && operation == spk286_microcode_pkg::MC_COUNT;
     assign check_operand = allowed && operation == spk286_microcode_pkg::MC_CHECK_RM16;
     assign operand_check = check_operand;
+
+    assign fetch_byte = allowed && operation == spk286_microcode_pkg::MC_FETCH_IMM8;
+    assign read_flags = allowed && operation == spk286_microcode_pkg::MC_READ_FLAGS;
+    assign restore_flags = allowed && operation == spk286_microcode_pkg::MC_RESTORE_FLAGS && temporary_valid_q[0];
+    assign set_if = allowed && operation == spk286_microcode_pkg::MC_SET_IF;
+    assign clear_if_tf = allowed && operation == spk286_microcode_pkg::MC_CLEAR_IF_TF;
+    assign read_event_flags = allowed && operation == spk286_microcode_pkg::MC_EVENT_FLAGS;
+    assign read_event_cs = allowed && operation == spk286_microcode_pkg::MC_EVENT_CS;
+    assign read_event_ip = allowed && operation == spk286_microcode_pkg::MC_EVENT_IP;
+    assign vector_ip = allowed && operation == spk286_microcode_pkg::MC_VECTOR_IP;
+    assign vector_cs = allowed && operation == spk286_microcode_pkg::MC_VECTOR_CS;
+    assign vector_request = vector_ip || vector_cs;
+    assign vector_offset = {6'b000000, event_vector, 2'b00} + (vector_cs ? 16'd2 : 16'd0);
+    assign commit_context = allowed && operation == spk286_microcode_pkg::MC_CONTEXT_COMMIT && &temporary_valid_q[1:0];
+    assign iret_commit = allowed && operation == spk286_microcode_pkg::MC_IRET_COMMIT && &temporary_valid_q;
+    assign context_commit = (commit_context || iret_commit) && redirect_ready;
+    assign context_cs = tmp1_q;
+    assign ack_operation = allowed && operation == spk286_microcode_pkg::MC_EVENT_ACK;
+    assign ack_request = ack_operation && event_needs_ack;
+    assign request_event = allowed && operation == spk286_microcode_pkg::MC_REQUEST_EVENT;
+    assign software_event_request = request_event;
+    assign software_vector = tmp0_q[7:0];
+    assign halt_operation = allowed && operation == spk286_microcode_pkg::MC_HALT;
+    assign halt_request = halt_operation;
 
 
     spk286_alu alu (.operation(alu_operation), .operand_a(tmp0_q), .operand_b(tmp1_q),
@@ -87,28 +126,30 @@ module spk286_micro_executor (
     assign commit_result = allowed && result_operation && temporary_valid_q[2] && !result_disposed_q;
     assign discard_result = commit_result && !result_write_allowed;
     assign result_to_dst = commit_result && result_write_allowed && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST;
-    assign operand_request = stack_request || check_operand || (allowed &&
+    assign operand_request = vector_request || stack_request || check_operand || (allowed &&
                              (operation == spk286_microcode_pkg::MC_READ_REG16 || operation == spk286_microcode_pkg::MC_READ_RM16 || read_tmp1 ||
                               ((operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16) && temporary_valid_q[0]) ||
                               (commit_result && result_write_allowed && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST)));
     assign operand_write = push_transfer || operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || result_operation;
-    assign operand_select_rm = stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
+    assign operand_select_rm = vector_request || stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
                                operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM16;
     assign operand_write_data = push_transfer && push_return_ip ? architectural_ip : (result_operation ? tmp2_q : tmp0_q);
     assign read_operand = operand_request && !operand_write && !operand_check;
     assign compute_alu = allowed && operation == spk286_microcode_pkg::MC_ALU && temporary_valid_q[0] && temporary_valid_q[1] && !flags_valid_q;
     assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
-    assign byte_ready = fetch_word || fetch_signed_byte || decode_byte_ready;
-    assign operation_done = read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
+    assign byte_ready = fetch_word || fetch_signed_byte || fetch_byte || decode_byte_ready;
+    assign operation_done = read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
+                            context_commit || request_event || halt_operation || (ack_operation && (!event_needs_ack || ack_done)) || (fetch_byte && byte_valid) ||
+                            read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
                             (push_operation && !push_enabled) || (redirect_operation && (!branch_taken || redirect_ready)) || move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
                             (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
                             (decode_operand && decode_done) || (operand_request && operand_done);
     assign gpr_write_en = stack_write_sp || (count_operation && decrement_count) || move_word || result_to_dst || operand_gpr_write_en;
     assign gpr_write_index = stack_write_sp ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
     assign gpr_write_data = stack_write_sp ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
-    assign flags_write_en = commit_flags;
-    assign flags_write_data = flags_q;
-    assign flags_write_mask = flags_mask_q;
+    assign flags_write_en = commit_flags || restore_flags || set_if || clear_if_tf || iret_commit;
+    assign flags_write_data = restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : (clear_if_tf ? 16'd0 : flags_q)));
+    assign flags_write_mask = restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : flags_mask_q));
 
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
@@ -138,8 +179,14 @@ module spk286_micro_executor (
                 end
             end
             if (read_operand && operand_done) begin
-                if (read_tmp1) begin tmp1_q <= operand_read_data; temporary_valid_q[1] <= 1'b1; end
+                if (operation == spk286_microcode_pkg::MC_POP16_TMP2) begin tmp2_q <= operand_read_data; temporary_valid_q[2] <= 1'b1; end
+                else if (read_tmp1 || vector_cs || operation == spk286_microcode_pkg::MC_POP16_TMP1) begin tmp1_q <= operand_read_data; temporary_valid_q[1] <= 1'b1; end
                 else begin tmp0_q <= operand_read_data; temporary_valid_q[0] <= 1'b1; end
+            end
+            if (fetch_byte && byte_valid) begin tmp0_q <= {8'd0, byte_data}; temporary_valid_q[0] <= 1'b1; end
+            if (read_flags || read_event_flags || read_event_cs || read_event_ip) begin
+                tmp0_q <= read_flags ? architectural_flags : (read_event_flags ? event_flags : (read_event_cs ? event_cs : event_ip));
+                temporary_valid_q[0] <= 1'b1;
             end
             if (read_ip) begin tmp0_q <= architectural_ip; temporary_valid_q[0] <= 1'b1; end
             if (target_relative || target_absolute) begin

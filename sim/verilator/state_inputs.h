@@ -7,6 +7,9 @@
 inline void clear_execution_inputs(Vspk286& dut) {
     dut.data_in = 0;
     dut.execute_enable = 0;
+    dut.intr = 0;
+    dut.nmi = 0;
+    dut.hold_request = 0;
     dut.gpr_read_a_index = 0;
     dut.gpr_read_b_index = 0;
     dut.gpr_read_a_byte = 0;

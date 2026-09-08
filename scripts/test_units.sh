@@ -14,7 +14,8 @@ tests=(spk286_registers spk286_segments spk286_fetch spk286_core spk286_prefetch
        spk286_microsequencer spk286_microcode_rom spk286_decoder
        spk286_execution spk286_microcode_execution spk286_modrm spk286_effective_address
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle
-       spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle spk286_stack_control spk286_stack_lifecycle)
+       spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle spk286_stack_control spk286_stack_lifecycle
+       spk286_event_instructions spk286_event_lifecycle spk286_event_streams)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
@@ -30,6 +31,14 @@ for name in "${tests[@]}"; do
     if [[ "$name" == spk286_stack_control ]]; then
         python3 -m tools.stack_control_vectors --output "$BUILD_DIR/stack-control.txt"
         run_args=("+instruction_vectors=$BUILD_DIR/stack-control.txt")
+    fi
+    if [[ "$name" == spk286_event_instructions ]]; then
+        python3 -m tools.event_vectors --output "$BUILD_DIR/event-instructions.txt"
+        run_args=("+event_vectors=$BUILD_DIR/event-instructions.txt")
+    fi
+    if [[ "$name" == spk286_event_streams ]]; then
+        python3 -m tools.event_streams --output "$BUILD_DIR/event-streams.txt"
+        run_args=("+stream_vectors=$BUILD_DIR/event-streams.txt")
     fi
     tb="${name}_tb"
     test -f "sim/unit/$tb.sv"

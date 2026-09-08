@@ -130,12 +130,16 @@ module spk286_stack_control_tb;
                 check(!unsupported_opcode, "supported stack/control instruction");
             end
             if (blocked != 0) begin
+                // Preserve the original fault-producer check under debug pause.
+                // Completed delivery and frame effects are covered by Phase 6.
+                execute_enable = 0;
                 repeat (6) service();
                 check(operand_blocked && retires == 0 && writes == 0, "whole word blocks without effects");
             end else begin
                 check(retires == 1 && debug_ip == expected_ip, "exact IP and single retirement");
                 check(transaction_index == transaction_count, "complete ordered data traffic before END");
             end
+            check(transaction_index == transaction_count, "all modeled pre-delivery word effects");
             check(debug_gpr == expected_gpr, "exact GPR result/preservation");
             check(debug_flags == expected_flags, "exact FLAGS and preserved bits");
             check(redirects == expected_redirects, "exact taken/not-taken queue flush count");

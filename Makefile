@@ -28,6 +28,10 @@ help:
 	@echo "  make singlestep-operands run the complete supported 89/8B corpus"
 	@echo "  make phase3-check run mandatory Phase 3 gates with the pinned external corpus"
 	@echo "  make phase5-check run all inherited and stack/control-flow release gates"
+	@echo "  make phase6-check run the complete event release gate in a fresh build directory"
+	@echo "  make phase6-exec-check run all executable checks with explicit provisional evidence status"
+	@echo "  make singlestep-phase6 run all 474049 admitted Phase 6 hardware cases"
+	@echo "  make event-audit reject isolated event/arbitration/INTA RTL mutations"
 	@echo "  make stack-control-audit reject twelve isolated stack/control RTL mutants"
 	@echo "  make singlestep-stack-control run all 47 Phase 5 hardware forms"
 	@echo "  make phase4-check run all inherited and word ALU release gates"
@@ -163,3 +167,19 @@ singlestep-stack-control: verilator
 
 singlestep-stack-control-smoke: verilator
 	python3 -m tools.run_singlestep --stack-control --smoke
+
+.PHONY: phase6-check phase6-exec-check event-audit singlestep-events-smoke singlestep-phase6
+phase6-check:
+	bash scripts/validate_phase6.sh
+
+phase6-exec-check:
+	bash scripts/validate_phase6.sh executable
+
+event-audit:
+	python3 -m tools.audit_events
+
+singlestep-events-smoke: verilator
+	python3 -m tools.run_singlestep --events --smoke
+
+singlestep-phase6: verilator
+	python3 -m tools.run_singlestep --phase6 --full

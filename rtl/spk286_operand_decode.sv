@@ -8,6 +8,7 @@ module spk286_operand_decode (
     input  logic [7:0] byte_data,
     output logic byte_ready,
     output logic done,
+    output logic modrm_valid,
     input  logic [15:0] bx, bp, si, di,
     output logic [1:0] mode,
     output logic [2:0] reg_index, rm_index,
@@ -39,6 +40,7 @@ module spk286_operand_decode (
     // RESOLVE captures the computed offset on the same edge that advances the
     // microsequencer. All instruction bytes are already stable at this boundary.
     assign done = allowed && state_q == RESOLVE;
+    assign modrm_valid = state_q != MODRM;
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
             state_q <= MODRM;

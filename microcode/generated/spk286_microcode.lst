@@ -1,4 +1,4 @@
-SPK286 microcode compiler 4.0; format 4; encoding 4
+SPK286 microcode compiler 5.0; format 5; encoding 5
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -78,49 +78,88 @@ SPK286 microcode compiler 4.0; format 4; encoding 4
 0038  3  END  # word_stack_control.mc:22
 0039  POP_RM16:
 0039  4  DECODE_MODRM  # word_stack_control.mc:25
-003A  13  CHECK_RM16  # word_stack_control.mc:26
-003B  16  POP16 -> TMP0  # word_stack_control.mc:27
-003C  8  TMP0 -> RM16  # word_stack_control.mc:28
-003D  3  END  # word_stack_control.mc:29
-003E  GROUP5_NEAR:
-003E  4  DECODE_MODRM  # word_stack_control.mc:32
-003F  6  READ_RM16 -> TMP0  # word_stack_control.mc:33
-0040  19  TARGET_ABS16 TMP0  # word_stack_control.mc:34
-0041  15  PUSH16 DECODED TMP0  # word_stack_control.mc:35
-0042  1A  REDIRECT DECODED  # word_stack_control.mc:36
-0043  3  END  # word_stack_control.mc:37
-0044  CALL_REL16:
-0044  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:40
-0045  18  TARGET_REL16 TMP1  # word_stack_control.mc:41
-0046  17  READ_IP16 -> TMP0  # word_stack_control.mc:42
-0047  15  PUSH16 DECODED TMP0  # word_stack_control.mc:43
-0048  1A  REDIRECT DECODED  # word_stack_control.mc:44
-0049  3  END  # word_stack_control.mc:45
-004A  JMP_REL16:
-004A  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:48
-004B  18  TARGET_REL16 TMP1  # word_stack_control.mc:49
-004C  1A  REDIRECT DECODED  # word_stack_control.mc:50
-004D  3  END  # word_stack_control.mc:51
-004E  BRANCH_REL8:
-004E  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:54
-004F  18  TARGET_REL16 TMP1  # word_stack_control.mc:55
-0050  1A  REDIRECT DECODED  # word_stack_control.mc:56
-0051  3  END  # word_stack_control.mc:57
-0052  LOOP_REL8:
-0052  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:60
-0053  1C  COUNT DECODED  # word_stack_control.mc:61
-0054  18  TARGET_REL16 TMP1  # word_stack_control.mc:62
-0055  1A  REDIRECT DECODED  # word_stack_control.mc:63
-0056  3  END  # word_stack_control.mc:64
-0057  RET_NEAR:
-0057  16  POP16 -> TMP0  # word_stack_control.mc:67
-0058  19  TARGET_ABS16 TMP0  # word_stack_control.mc:68
-0059  1A  REDIRECT DECODED  # word_stack_control.mc:69
-005A  3  END  # word_stack_control.mc:70
-005B  RET_IMM16:
-005B  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:73
-005C  16  POP16 -> TMP0  # word_stack_control.mc:74
-005D  19  TARGET_ABS16 TMP0  # word_stack_control.mc:75
-005E  1B  ADJUST_SP16 TMP1  # word_stack_control.mc:76
-005F  1A  REDIRECT DECODED  # word_stack_control.mc:77
-0060  3  END  # word_stack_control.mc:78
+003A  16  POP16 -> TMP0  # word_stack_control.mc:27
+003B  8  TMP0 -> RM16  # word_stack_control.mc:28
+003C  3  END  # word_stack_control.mc:29
+003D  GROUP5_NEAR:
+003D  4  DECODE_MODRM  # word_stack_control.mc:32
+003E  6  READ_RM16 -> TMP0  # word_stack_control.mc:33
+003F  19  TARGET_ABS16 TMP0  # word_stack_control.mc:34
+0040  15  PUSH16 DECODED TMP0  # word_stack_control.mc:35
+0041  1A  REDIRECT DECODED  # word_stack_control.mc:36
+0042  3  END  # word_stack_control.mc:37
+0043  CALL_REL16:
+0043  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:40
+0044  18  TARGET_REL16 TMP1  # word_stack_control.mc:41
+0045  17  READ_IP16 -> TMP0  # word_stack_control.mc:42
+0046  15  PUSH16 DECODED TMP0  # word_stack_control.mc:43
+0047  1A  REDIRECT DECODED  # word_stack_control.mc:44
+0048  3  END  # word_stack_control.mc:45
+0049  JMP_REL16:
+0049  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:48
+004A  18  TARGET_REL16 TMP1  # word_stack_control.mc:49
+004B  1A  REDIRECT DECODED  # word_stack_control.mc:50
+004C  3  END  # word_stack_control.mc:51
+004D  BRANCH_REL8:
+004D  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:54
+004E  18  TARGET_REL16 TMP1  # word_stack_control.mc:55
+004F  1A  REDIRECT DECODED  # word_stack_control.mc:56
+0050  3  END  # word_stack_control.mc:57
+0051  LOOP_REL8:
+0051  C  FETCH_IMM8S -> TMP1  # word_stack_control.mc:60
+0052  1C  COUNT DECODED  # word_stack_control.mc:61
+0053  18  TARGET_REL16 TMP1  # word_stack_control.mc:62
+0054  1A  REDIRECT DECODED  # word_stack_control.mc:63
+0055  3  END  # word_stack_control.mc:64
+0056  RET_NEAR:
+0056  16  POP16 -> TMP0  # word_stack_control.mc:67
+0057  19  TARGET_ABS16 TMP0  # word_stack_control.mc:68
+0058  1A  REDIRECT DECODED  # word_stack_control.mc:69
+0059  3  END  # word_stack_control.mc:70
+005A  RET_IMM16:
+005A  B  FETCH_IMM16 -> TMP1  # word_stack_control.mc:73
+005B  16  POP16 -> TMP0  # word_stack_control.mc:74
+005C  19  TARGET_ABS16 TMP0  # word_stack_control.mc:75
+005D  1B  ADJUST_SP16 TMP1  # word_stack_control.mc:76
+005E  1A  REDIRECT DECODED  # word_stack_control.mc:77
+005F  3  END  # word_stack_control.mc:78
+0060  PUSH_FLAGS:
+0060  1E  READ_FLAGS -> TMP0  # z_interrupts.mc:5
+0061  15  PUSH16 DECODED TMP0  # z_interrupts.mc:6
+0062  3  END  # z_interrupts.mc:7
+0063  POP_FLAGS:
+0063  16  POP16 -> TMP0  # z_interrupts.mc:10
+0064  1F  RESTORE_FLAGS TMP0  # z_interrupts.mc:11
+0065  3  END  # z_interrupts.mc:12
+0066  CONTROL_IF:
+0066  20  SET_IF DECODED  # z_interrupts.mc:15
+0067  3  END  # z_interrupts.mc:16
+0068  HALT_CPU:
+0068  21  HALT  # z_interrupts.mc:19
+0069  3  END  # z_interrupts.mc:20
+006A  SOFTWARE_EVENT:
+006A  22  REQUEST_EVENT DECODED  # z_interrupts.mc:23
+006B  3  END  # z_interrupts.mc:24
+006C  SOFTWARE_EVENT_IMM8:
+006C  1D  FETCH_IMM8 -> TMP0  # z_interrupts.mc:27
+006D  22  REQUEST_EVENT DECODED  # z_interrupts.mc:28
+006E  3  END  # z_interrupts.mc:29
+006F  INTERRUPT_RETURN:
+006F  16  POP16 -> TMP0  # z_interrupts.mc:32
+0070  2B  POP16 -> TMP1  # z_interrupts.mc:33
+0071  2C  POP16 -> TMP2  # z_interrupts.mc:34
+0072  2D  IRET_COMMIT TMP0 TMP1 TMP2  # z_interrupts.mc:35
+0073  3  END  # z_interrupts.mc:36
+0074  EVENT_ENTRY:
+0074  23  EVENT_ACK  # z_interrupts.mc:39
+0075  24  EVENT_FLAGS -> TMP0  # z_interrupts.mc:40
+0076  15  PUSH16 DECODED TMP0  # z_interrupts.mc:41
+0077  25  EVENT_CS -> TMP0  # z_interrupts.mc:42
+0078  15  PUSH16 DECODED TMP0  # z_interrupts.mc:43
+0079  26  EVENT_IP -> TMP0  # z_interrupts.mc:44
+007A  15  PUSH16 DECODED TMP0  # z_interrupts.mc:45
+007B  27  CLEAR_IF_TF  # z_interrupts.mc:46
+007C  28  VECTOR_IP -> TMP0  # z_interrupts.mc:47
+007D  29  VECTOR_CS -> TMP1  # z_interrupts.mc:48
+007E  2A  CONTEXT_COMMIT TMP0 TMP1  # z_interrupts.mc:49
+007F  3  END  # z_interrupts.mc:50

@@ -98,6 +98,7 @@ class SingleStepAccountingTests(unittest.TestCase):
             ("SINGLESTEP_RESULT executed=1 passed=1 failed=0\n", 1),
             ("SINGLESTEP_RESULT executed=1 passed=0 failed=1\n", 0),
             ("SINGLESTEP_RESULT executed=1 passed=1 failed=0\n" * 2, 0),
+            ("SINGLESTEP_RESULT executed=1 passed=1 failed=0\nSINGLESTEP_RESULT broken\n", 0),
             ("SINGLESTEP_RESULT executed=1 passed=1 failed=0\n", 2),
             ("", 0),
         ):

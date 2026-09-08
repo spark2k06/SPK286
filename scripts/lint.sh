@@ -20,7 +20,7 @@ verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_fetch -Irtl rtl/spk286_fetch.sv
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_prefetch_queue -Irtl rtl/spk286_prefetch_queue.sv
-for module in spk286_microsequencer spk286_decoder spk286_micro_executor spk286_microcode_rom spk286_modrm spk286_effective_address spk286_operand_decode spk286_operand spk286_biu spk286_alu spk286_alu_decode spk286_stack spk286_condition spk286_control_decode; do
+for module in spk286_microsequencer spk286_decoder spk286_micro_executor spk286_microcode_rom spk286_modrm spk286_effective_address spk286_operand_decode spk286_operand spk286_biu spk286_alu spk286_alu_decode spk286_stack spk286_condition spk286_control_decode spk286_events; do
     verilator --lint-only --language 1800-2012 --Wall \
         --top-module "$module" -Irtl "${rtl_sources[@]}"
 done

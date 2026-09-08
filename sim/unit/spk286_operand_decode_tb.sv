@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module spk286_operand_decode_tb;
+    wire modrm_valid;
     logic clk=0, reset=1, cancel=0, start=0, enable=0, byte_valid=0;
     logic [7:0] byte_data=0;
     wire byte_ready, done, register_direct;

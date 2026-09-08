@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-packages=(git python3 python3-pip build-essential make cmake ninja-build verilator iverilog yosys gtkwave)
+packages=(git python3 python3-pip build-essential make cmake ninja-build verilator iverilog yosys gtkwave nasm)
 missing=()
-for command_name in git python3 pip3 gcc g++ make verilator iverilog vvp yosys cmake ninja gtkwave; do
+for command_name in git python3 pip3 gcc g++ make verilator iverilog vvp yosys cmake ninja gtkwave nasm ndisasm; do
     command -v "$command_name" >/dev/null 2>&1 || missing+=("$command_name")
 done
 

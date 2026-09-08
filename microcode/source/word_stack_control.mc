@@ -1,5 +1,5 @@
 # Functional stack/near-control operations; no historical timing delays.
-microcode_format 4
+microcode_format 5
 
 instruction PUSH_R16:
     READ_DST16 -> TMP0
@@ -23,7 +23,7 @@ instruction PUSH_IMM8S:
 
 instruction POP_RM16:
     DECODE_MODRM
-    CHECK_RM16
+    # Physical 286: a destination fault retains the completed POP's SP increment.
     POP16 -> TMP0
     TMP0 -> RM16
     END

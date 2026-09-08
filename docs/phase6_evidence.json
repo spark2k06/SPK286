@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "phase": 6,
+  "decisions": [
+    {
+      "id": "failed-iret-nmi",
+      "status": "unresolved",
+      "candidate": "NMI inhibition is released when IRET starts, including an attempt that later faults.",
+      "required_evidence": "A primary 80286 clarification or physical 80286 trace distinguishing a successful IRET from a faulting attempt.",
+      "reference": "docs/PHASE6_ARCHITECTURAL_REVIEW.md"
+    },
+    {
+      "id": "sti-old-if",
+      "status": "unresolved",
+      "candidate": "STI creates the following-instruction shadow only when old IF was zero.",
+      "required_evidence": "286-specific evidence for STI entered with IF=1 and for consecutive STI instructions.",
+      "reference": "docs/PHASE6_ARCHITECTURAL_REVIEW.md"
+    },
+    {
+      "id": "fault-tf",
+      "status": "unresolved",
+      "candidate": "A faulting instruction does not create a new retirement-based TF trap.",
+      "required_evidence": "Resolve the conflict between Real Mode entry/completion text and Appendix C/D instruction-exception single-step wording.",
+      "reference": "docs/PHASE6_ARCHITECTURAL_REVIEW.md"
+    }
+  ]
+}

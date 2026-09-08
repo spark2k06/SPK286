@@ -120,6 +120,7 @@ module spk286_alu_instructions_tb;
                 check(!unsupported_opcode, "supported ALU instruction");
             end
             if (blocked != 0) begin
+                execute_enable = 0; // Inspect the fault producer; event suite checks delivery.
                 repeat (6) service();
                 check(operand_blocked && retires == 0 && reads == 0 && writes == 0, "whole word blocks without effects");
             end else begin

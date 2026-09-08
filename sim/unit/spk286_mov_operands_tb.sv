@@ -91,7 +91,7 @@ module spk286_mov_operands_tb;
             gpr_write_en = 1; gpr_write_index = 3'(r); gpr_write_data = initial_gpr[r*16 +: 16]; tick();
         end
         gpr_write_en = 0;
-        flags_write_en = 1; flags_write_mask = 16'hFFFF; flags_write_data = 16'h7FD7; tick(); flags_write_en = 0;
+        flags_write_en = 1; flags_write_mask = 16'hFFFF; flags_write_data = 16'h7ED7; tick(); flags_write_en = 0;
         for (integer s = 0; s < 4; s = s + 1) begin
             segment_load_en = 1; segment_load_index = 2'(s);
             case (s)
@@ -118,7 +118,7 @@ module spk286_mov_operands_tb;
             check(!unsupported_opcode && !operand_blocked, "supported instruction runs");
         end
         check(instruction_retired, "bounded retirement");
-        check(debug_gpr == expected_gpr && debug_flags == 16'h7FD7, "exact GPR/FLAGS result and preservation");
+        check(debug_gpr == expected_gpr && debug_flags == 16'h7ED7, "exact GPR/FLAGS result and preservation");
         check(debug_segment_selectors == saved_selectors && debug_segment_bases == saved_bases &&
               debug_segment_limits == saved_limits && debug_segment_access == saved_access, "all segment state preserved");
         check(data_cycles == expected_cycles, "exact physical transfer count");
@@ -200,8 +200,10 @@ module spk286_mov_operands_tb;
                             check(debug_ip == 16'h0100 + 16'(alignment+instruction_length) && retirements == 1, "memory MOV length / single END");
                             check({memory[target_address+1], memory[target_address]} == expected_value, "little-endian memory contents");
                         end else begin
-                            // Architectural exception delivery is deferred; prove fail-closed before either byte.
-                            repeat (150) service();
+                            // Pause at the real fault producer; Phase 6 checks its
+                            // completed frame separately with the physical corpus.
+                            for (integer cycle=0;cycle<150 && !operand_blocked;cycle=cycle+1) service();
+                            execute_enable=0; repeat (6) service();
                             check(operand_blocked && retirements == 0 && data_cycles == 0 && debug_gpr == initial_gpr,
                                   "word at FFFF blocked before side effects");
                             check({memory[target_address+1],memory[target_address]} == 16'hC17E, "blocked write did not modify memory");

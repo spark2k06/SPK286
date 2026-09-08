@@ -6,7 +6,8 @@ from tools.microcode.audit_microcode import read_generated_words, canonical_sour
 
 class StackControlMicrocodeTests(unittest.TestCase):
     def test_independent_contract_and_roundtrip(self):
-        p=compile_sources({f.name:f.read_text() for f in (ROOT/'microcode/source').glob('*.mc')})
+        sources=json.loads((ROOT/'tests/fixtures/microcode_phase5_sources.json').read_text())
+        p=compile_sources(sources)
         c=json.loads((ROOT/'tests/fixtures/microcode_phase5.json').read_text())
         g=generate(p)
         w=read_generated_words(g['spk286_microcode_pkg.sv'],g['spk286_microcode_rom.sv'])
@@ -15,7 +16,7 @@ class StackControlMicrocodeTests(unittest.TestCase):
         self.assertEqual((p.format_version,p.address_width,p.word_width),(4,7,5))
         rebuilt=compile_sources({'canonical.mc':canonical_source(w,p.entries,p.labels)})
         self.assertEqual(rebuilt.entries,p.entries)
-        self.assertEqual(generate(p),generate(compile_sources(dict(reversed(list({f.name:f.read_text() for f in (ROOT/'microcode/source').glob('*.mc')}.items()))))))
+        self.assertEqual(generate(p),generate(compile_sources(dict(reversed(list(sources.items()))))))
 
     def test_invalid_lifetimes_and_order(self):
         for body,message in (

@@ -15,8 +15,8 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
     ("code-owner", "spk286_biu", "spk286_biu",
-     "assign select_data = owner_valid_q ? owner_data_q : data_active_q;",
-     "assign select_data = data_active_q;",
+     "owner_valid_q ? owner_q : (ack_active_q ? 2'd2 : (data_active_q ? 2'd1 : 2'd0))",
+     "(ack_active_q ? 2'd2 : (data_active_q ? 2'd1 : 2'd0))",
      "data cannot preempt active code"),
     ("cancel-ready", "spk286_biu", "spk286_biu",
      "data_response_valid <= !canceled_q && !cancel_data;",

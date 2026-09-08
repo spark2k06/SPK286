@@ -7,18 +7,27 @@ module spk286_decoder (
     output logic [2:0] destination,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry
 );
-    logic binary_word, stack_control;
+    logic binary_word, stack_control, event_instruction;
+    assign event_instruction = opcode == 8'h9C || opcode == 8'h9D ||
+                               opcode[7:2] == 6'b110011 || opcode == 8'hF4 || opcode == 8'hFA || opcode == 8'hFB;
     assign stack_control = opcode[7:4] == 4'h5 || opcode[7:4] == 4'h7 ||
                            opcode == 8'h68 || opcode == 8'h6A || opcode == 8'h8F || opcode == 8'hFF ||
                            opcode == 8'hC2 || opcode == 8'hC3 || opcode[7:2] == 6'b111000 ||
                            opcode == 8'hE8 || opcode == 8'hE9 || opcode == 8'hEB;
     assign binary_word = opcode[7:6] == 2'b00 &&
                          (opcode[2:0] == 3'd1 || opcode[2:0] == 3'd3 || opcode[2:0] == 3'd5);
-    assign supported = stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
+    assign supported = event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
                        binary_word || opcode == 8'h81 || opcode == 8'h83;
     assign destination = binary_word ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
-    assign entry = opcode[7:3] == 5'b01010 ? spk286_microcode_pkg::MC_ENTRY_PUSH_R16 :
+    assign entry = opcode == 8'h9C ? spk286_microcode_pkg::MC_ENTRY_PUSH_FLAGS :
+                   opcode == 8'h9D ? spk286_microcode_pkg::MC_ENTRY_POP_FLAGS :
+                   opcode == 8'hFA || opcode == 8'hFB ? spk286_microcode_pkg::MC_ENTRY_CONTROL_IF :
+                   opcode == 8'hF4 ? spk286_microcode_pkg::MC_ENTRY_HALT_CPU :
+                   opcode == 8'hCC || opcode == 8'hCE ? spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT :
+                   opcode == 8'hCD ? spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT_IMM8 :
+                   opcode == 8'hCF ? spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN :
+                   opcode[7:3] == 5'b01010 ? spk286_microcode_pkg::MC_ENTRY_PUSH_R16 :
                    opcode[7:3] == 5'b01011 ? spk286_microcode_pkg::MC_ENTRY_POP_R16 :
                    opcode == 8'h68 ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM16 :
                    opcode == 8'h6A ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM8S :
