@@ -183,3 +183,21 @@ singlestep-events-smoke: verilator
 
 singlestep-phase6: verilator
 	python3 -m tools.run_singlestep --phase6 --full
+
+.PHONY: phase7-check phase7-byte-prefix-check
+phase7-byte-prefix-check:
+	bash scripts/validate_phase7_byte_prefix.sh
+
+# Full scope cannot pass by running only the byte/prefix increment.
+phase7-check:
+	python3 -m tools.phase7_scope
+	@echo "PHASE7_DEVELOPMENT_VALIDATION_FAIL: full-scope gate and independent review are pending" >&2
+	@exit 1
+
+.PHONY: phase7-scalar-check
+phase7-scalar-check:
+	bash scripts/validate_phase7_scalar.sh
+
+.PHONY: phase7-shift-check
+phase7-shift-check:
+	bash scripts/validate_phase7_shift.sh

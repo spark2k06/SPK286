@@ -1,22 +1,36 @@
 {
   "entries": {
+    "ALU_AL_IMM8": 161,
     "ALU_AX_IMM16": 25,
     "ALU_R16_RM16": 18,
+    "ALU_R8_RM8": 154,
     "ALU_RM16_IMM16": 31,
     "ALU_RM16_IMM8S": 38,
     "ALU_RM16_R16": 11,
+    "ALU_RM8_IMM8": 167,
+    "ALU_RM8_R8": 147,
     "BRANCH_REL8": 77,
     "CALL_REL16": 67,
+    "CONTROL_FLAGS": 174,
     "CONTROL_IF": 102,
     "EVENT_ENTRY": 116,
+    "EXTEND_BYTE": 179,
+    "EXTEND_WORD": 183,
     "GROUP5_NEAR": 61,
     "HALT_CPU": 104,
+    "INC_DEC_R16": 187,
     "INTERRUPT_RETURN": 111,
     "JMP_REL16": 73,
+    "LOAD_FLAGS_BYTE": 176,
     "LOOP_REL8": 81,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
+    "MOV_R8_IMM8": 128,
+    "MOV_R8_RM8": 135,
+    "MOV_RM16_IMM16": 143,
     "MOV_RM16_R16": 3,
+    "MOV_RM8_IMM8": 139,
+    "MOV_RM8_R8": 131,
     "POP_FLAGS": 99,
     "POP_R16": 48,
     "POP_RM16": 57,
@@ -26,6 +40,12 @@
     "PUSH_R16": 45,
     "RET_IMM16": 90,
     "RET_NEAR": 86,
+    "SHIFT_RM16_CL": 221,
+    "SHIFT_RM16_IMM8": 228,
+    "SHIFT_RM16_ONE": 214,
+    "SHIFT_RM8_CL": 200,
+    "SHIFT_RM8_IMM8": 207,
+    "SHIFT_RM8_ONE": 193,
     "SOFTWARE_EVENT": 106,
     "SOFTWARE_EVENT_IMM8": 108
   },
@@ -190,7 +210,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 6
+        "line": 7
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -202,7 +222,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 7
+        "line": 8
       },
       "operands": [
         "TMP0"
@@ -216,7 +236,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 8
+        "line": 9
       },
       "operands": [
         "TMP1"
@@ -230,7 +250,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 9
+        "line": 10
       },
       "operands": [
         "DECODED",
@@ -248,7 +268,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 11
+        "line": 12
       },
       "operands": [
         "TMP2"
@@ -262,7 +282,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 12
+        "line": 13
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -274,7 +294,7 @@
       "location": {
         "entry": "ALU_RM16_R16",
         "file": "word_alu.mc",
-        "line": 13
+        "line": 14
       },
       "operands": [],
       "operation": "END",
@@ -286,7 +306,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 16
+        "line": 17
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -298,7 +318,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 17
+        "line": 18
       },
       "operands": [
         "TMP0"
@@ -312,7 +332,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 18
+        "line": 19
       },
       "operands": [
         "TMP1"
@@ -326,7 +346,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 19
+        "line": 20
       },
       "operands": [
         "DECODED",
@@ -344,7 +364,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 21
+        "line": 22
       },
       "operands": [
         "TMP2"
@@ -358,7 +378,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 22
+        "line": 23
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -370,7 +390,7 @@
       "location": {
         "entry": "ALU_R16_RM16",
         "file": "word_alu.mc",
-        "line": 23
+        "line": 24
       },
       "operands": [],
       "operation": "END",
@@ -382,7 +402,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 26
+        "line": 27
       },
       "operands": [
         "TMP0"
@@ -396,7 +416,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 27
+        "line": 28
       },
       "operands": [
         "TMP1"
@@ -410,7 +430,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 28
+        "line": 29
       },
       "operands": [
         "DECODED",
@@ -428,7 +448,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 30
+        "line": 31
       },
       "operands": [
         "TMP2"
@@ -442,7 +462,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 31
+        "line": 32
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -454,7 +474,7 @@
       "location": {
         "entry": "ALU_AX_IMM16",
         "file": "word_alu.mc",
-        "line": 32
+        "line": 33
       },
       "operands": [],
       "operation": "END",
@@ -466,7 +486,7 @@
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
-        "line": 35
+        "line": 36
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -475,20 +495,6 @@
     },
     {
       "address": 32,
-      "location": {
-        "entry": "ALU_RM16_IMM16",
-        "file": "word_alu.mc",
-        "line": 36
-      },
-      "operands": [
-        "TMP0"
-      ],
-      "operation": "READ_RM16",
-      "statement": "READ_RM16 -> TMP0",
-      "word": 6
-    },
-    {
-      "address": 33,
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
@@ -502,11 +508,25 @@
       "word": 11
     },
     {
-      "address": 34,
+      "address": 33,
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
         "line": 38
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 34,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 39
       },
       "operands": [
         "DECODED",
@@ -524,7 +544,7 @@
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
-        "line": 40
+        "line": 41
       },
       "operands": [
         "TMP2"
@@ -538,7 +558,7 @@
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
-        "line": 41
+        "line": 42
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -550,7 +570,7 @@
       "location": {
         "entry": "ALU_RM16_IMM16",
         "file": "word_alu.mc",
-        "line": 42
+        "line": 43
       },
       "operands": [],
       "operation": "END",
@@ -562,7 +582,7 @@
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
-        "line": 45
+        "line": 46
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -571,20 +591,6 @@
     },
     {
       "address": 39,
-      "location": {
-        "entry": "ALU_RM16_IMM8S",
-        "file": "word_alu.mc",
-        "line": 46
-      },
-      "operands": [
-        "TMP0"
-      ],
-      "operation": "READ_RM16",
-      "statement": "READ_RM16 -> TMP0",
-      "word": 6
-    },
-    {
-      "address": 40,
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
@@ -598,11 +604,25 @@
       "word": 12
     },
     {
-      "address": 41,
+      "address": 40,
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
         "line": 48
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 41,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 49
       },
       "operands": [
         "DECODED",
@@ -620,7 +640,7 @@
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
-        "line": 50
+        "line": 51
       },
       "operands": [
         "TMP2"
@@ -634,7 +654,7 @@
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
-        "line": 51
+        "line": 52
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -646,7 +666,7 @@
       "location": {
         "entry": "ALU_RM16_IMM8S",
         "file": "word_alu.mc",
-        "line": 52
+        "line": 53
       },
       "operands": [],
       "operation": "END",
@@ -1738,6 +1758,1444 @@
       "location": {
         "entry": "EVENT_ENTRY",
         "file": "z_interrupts.mc",
+        "line": 50
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 128,
+      "location": {
+        "entry": "MOV_R8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "FETCH_IMM8",
+      "statement": "FETCH_IMM8 -> TMP0",
+      "word": 29
+    },
+    {
+      "address": 129,
+      "location": {
+        "entry": "MOV_R8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP0",
+        "DST8"
+      ],
+      "operation": "MOVE8",
+      "statement": "TMP0 -> DST8",
+      "word": 54
+    },
+    {
+      "address": 130,
+      "location": {
+        "entry": "MOV_R8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 131,
+      "location": {
+        "entry": "MOV_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 8
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 132,
+      "location": {
+        "entry": "MOV_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 9
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_REG8",
+      "statement": "READ_REG8 -> TMP0",
+      "word": 46
+    },
+    {
+      "address": 133,
+      "location": {
+        "entry": "MOV_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM8",
+      "statement": "TMP0 -> RM8",
+      "word": 49
+    },
+    {
+      "address": 134,
+      "location": {
+        "entry": "MOV_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 11
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 135,
+      "location": {
+        "entry": "MOV_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 13
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 136,
+      "location": {
+        "entry": "MOV_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 14
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 137,
+      "location": {
+        "entry": "MOV_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 15
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_REG8",
+      "statement": "TMP0 -> REG8",
+      "word": 48
+    },
+    {
+      "address": 138,
+      "location": {
+        "entry": "MOV_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 16
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 139,
+      "location": {
+        "entry": "MOV_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 18
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 140,
+      "location": {
+        "entry": "MOV_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "FETCH_IMM8",
+      "statement": "FETCH_IMM8 -> TMP0",
+      "word": 29
+    },
+    {
+      "address": 141,
+      "location": {
+        "entry": "MOV_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 20
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM8",
+      "statement": "TMP0 -> RM8",
+      "word": 49
+    },
+    {
+      "address": 142,
+      "location": {
+        "entry": "MOV_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 21
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 143,
+      "location": {
+        "entry": "MOV_RM16_IMM16",
+        "file": "zz_byte_scalar.mc",
+        "line": 23
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 144,
+      "location": {
+        "entry": "MOV_RM16_IMM16",
+        "file": "zz_byte_scalar.mc",
+        "line": 24
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 145,
+      "location": {
+        "entry": "MOV_RM16_IMM16",
+        "file": "zz_byte_scalar.mc",
+        "line": 25
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM16",
+      "statement": "TMP0 -> RM16",
+      "word": 8
+    },
+    {
+      "address": 146,
+      "location": {
+        "entry": "MOV_RM16_IMM16",
+        "file": "zz_byte_scalar.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 147,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 28
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 148,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 29
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 149,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_REG8_TMP1",
+      "statement": "READ_REG8 -> TMP1",
+      "word": 51
+    },
+    {
+      "address": 150,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 31
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 151,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 32
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 152,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 33
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 153,
+      "location": {
+        "entry": "ALU_RM8_R8",
+        "file": "zz_byte_scalar.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 154,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 36
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 155,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 37
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_REG8",
+      "statement": "READ_REG8 -> TMP0",
+      "word": 46
+    },
+    {
+      "address": 156,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_RM8_TMP1",
+      "statement": "READ_RM8 -> TMP1",
+      "word": 52
+    },
+    {
+      "address": 157,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 39
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 158,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_REG8",
+      "statement": "TMP2 -> REG8 IF_WRITE",
+      "word": 55
+    },
+    {
+      "address": 159,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 160,
+      "location": {
+        "entry": "ALU_R8_RM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 161,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 44
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST8",
+      "statement": "READ_DST8 -> TMP0",
+      "word": 53
+    },
+    {
+      "address": 162,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 45
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8_TMP1",
+      "statement": "FETCH_IMM8 -> TMP1",
+      "word": 50
+    },
+    {
+      "address": 163,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 46
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 164,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 47
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_DST8",
+      "statement": "TMP2 -> DST8 IF_WRITE",
+      "word": 57
+    },
+    {
+      "address": 165,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 166,
+      "location": {
+        "entry": "ALU_AL_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 167,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 51
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 168,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 52
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8_TMP1",
+      "statement": "FETCH_IMM8 -> TMP1",
+      "word": 50
+    },
+    {
+      "address": 169,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 53
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 170,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 54
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 171,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 55
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 172,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 56
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 173,
+      "location": {
+        "entry": "ALU_RM8_IMM8",
+        "file": "zz_byte_scalar.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 174,
+      "location": {
+        "entry": "CONTROL_FLAGS",
+        "file": "zzz_scalar.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "FLAGS_DECODED",
+      "statement": "FLAGS DECODED",
+      "word": 58
+    },
+    {
+      "address": 175,
+      "location": {
+        "entry": "CONTROL_FLAGS",
+        "file": "zzz_scalar.mc",
+        "line": 5
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 176,
+      "location": {
+        "entry": "LOAD_FLAGS_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "READ_FLAGS",
+      "statement": "READ_FLAGS -> TMP0",
+      "word": 30
+    },
+    {
+      "address": 177,
+      "location": {
+        "entry": "LOAD_FLAGS_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 8
+      },
+      "operands": [
+        "TMP0",
+        "DST8"
+      ],
+      "operation": "MOVE8",
+      "statement": "TMP0 -> DST8",
+      "word": 54
+    },
+    {
+      "address": 178,
+      "location": {
+        "entry": "LOAD_FLAGS_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 179,
+      "location": {
+        "entry": "EXTEND_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 180,
+      "location": {
+        "entry": "EXTEND_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 12
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "SIGN_EXTEND8",
+      "statement": "SIGN_EXTEND8 TMP0",
+      "word": 59
+    },
+    {
+      "address": 181,
+      "location": {
+        "entry": "EXTEND_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 13
+      },
+      "operands": [
+        "TMP0",
+        "DST"
+      ],
+      "operation": "MOVE",
+      "statement": "TMP0 -> DST",
+      "word": 2
+    },
+    {
+      "address": 182,
+      "location": {
+        "entry": "EXTEND_BYTE",
+        "file": "zzz_scalar.mc",
+        "line": 14
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 183,
+      "location": {
+        "entry": "EXTEND_WORD",
+        "file": "zzz_scalar.mc",
+        "line": 16
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 184,
+      "location": {
+        "entry": "EXTEND_WORD",
+        "file": "zzz_scalar.mc",
+        "line": 17
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "SIGN_FILL16",
+      "statement": "SIGN_FILL16 TMP0",
+      "word": 60
+    },
+    {
+      "address": 185,
+      "location": {
+        "entry": "EXTEND_WORD",
+        "file": "zzz_scalar.mc",
+        "line": 18
+      },
+      "operands": [
+        "TMP0",
+        "DST"
+      ],
+      "operation": "MOVE",
+      "statement": "TMP0 -> DST",
+      "word": 2
+    },
+    {
+      "address": 186,
+      "location": {
+        "entry": "EXTEND_WORD",
+        "file": "zzz_scalar.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 187,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 188,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 22
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ONE_TMP1",
+      "statement": "CONST_ONE -> TMP1",
+      "word": 61
+    },
+    {
+      "address": 189,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 23
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 190,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 24
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_DST",
+      "statement": "TMP2 -> DST IF_WRITE",
+      "word": 17
+    },
+    {
+      "address": 191,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 25
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 192,
+      "location": {
+        "entry": "INC_DEC_R16",
+        "file": "zzz_scalar.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 193,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 194,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ONE_TMP1",
+      "statement": "CONST_ONE -> TMP1",
+      "word": 61
+    },
+    {
+      "address": 195,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 6
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 196,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 7
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 197,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 8
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 198,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 199,
+      "location": {
+        "entry": "SHIFT_RM8_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 10
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 200,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 201,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 13
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "COUNT_LOW_TMP1",
+      "statement": "COUNT_LOW -> TMP1",
+      "word": 63
+    },
+    {
+      "address": 202,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 14
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 203,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 15
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 204,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 16
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 205,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 206,
+      "location": {
+        "entry": "SHIFT_RM8_CL",
+        "file": "zzzz_shift.mc",
+        "line": 18
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 207,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 20
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 208,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8_TMP1",
+      "statement": "FETCH_IMM8 -> TMP1",
+      "word": 50
+    },
+    {
+      "address": 209,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 22
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 210,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 23
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 211,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 24
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 212,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 25
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 213,
+      "location": {
+        "entry": "SHIFT_RM8_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 214,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 28
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 215,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 29
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ONE_TMP1",
+      "statement": "CONST_ONE -> TMP1",
+      "word": 61
+    },
+    {
+      "address": 216,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 217,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 31
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 218,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 32
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 219,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 33
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 220,
+      "location": {
+        "entry": "SHIFT_RM16_ONE",
+        "file": "zzzz_shift.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 221,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 36
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 222,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 37
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "COUNT_LOW_TMP1",
+      "statement": "COUNT_LOW -> TMP1",
+      "word": 63
+    },
+    {
+      "address": 223,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 224,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 39
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 225,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 226,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 227,
+      "location": {
+        "entry": "SHIFT_RM16_CL",
+        "file": "zzzz_shift.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 228,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 44
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 229,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 45
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8_TMP1",
+      "statement": "FETCH_IMM8 -> TMP1",
+      "word": 50
+    },
+    {
+      "address": 230,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 46
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 231,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 47
+      },
+      "operands": [
+        "TMP0",
+        "TMP1",
+        "TMP2"
+      ],
+      "operation": "SHIFT",
+      "statement": "SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 62
+    },
+    {
+      "address": 232,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 48
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 233,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 234,
+      "location": {
+        "entry": "SHIFT_RM16_IMM8",
+        "file": "zzzz_shift.mc",
         "line": 50
       },
       "operands": [],

@@ -3,7 +3,7 @@
 module spk286_events (
     input logic clk, reset, cancel, enable,
     input logic intr, nmi,
-    input logic instruction_start, instruction_active, retired,
+    input logic instruction_start, opcode_dispatch, instruction_active, retired,
     input logic [7:0] opcode,
     input logic [15:0] ip, cs, flags,
     input logic fault_request,
@@ -72,6 +72,8 @@ module spk286_events (
             if (instruction_start) begin
                 instruction_ip <= ip; instruction_cs_q <= cs;
                 trap_sample_q <= flags[8];
+            end
+            if (opcode_dispatch) begin
                 // Candidate policy: release at IRET start. The failed-IRET
                 // distinction still requires 286 evidence; the release gate
                 // records it in docs/phase6_evidence.json. Boundaries remain safe.

@@ -1,11 +1,13 @@
 // Shared normalized 80286 bus. Fetch supplies code-cycle metadata; the BIU
-// sequences logical data words and arbitrates every physical READY handshake.
+// sequences logical memory/I/O bytes and words and owns every READY handshake.
+// I/O starts with a zero-extended port; an odd word retains physical carry
+// into A16 (FFFF -> 10000), as captured by the pinned 286 corpus.
 // This is functional transaction timing, not native Ts/Tc/Ti timing.
 `timescale 1ns/1ps
 module spk286_biu (
     input  logic clk, reset, cancel_data,
     input  logic ready,
-    input  logic hold_request,
+    input  logic hold_request, lock_request,
     output logic hlda,
     input  logic ack_request,
     output logic ack_request_ready, ack_response_valid,
@@ -16,7 +18,7 @@ module spk286_biu (
     input  logic code_valid, code_bhe_n,
     input  logic [23:0] code_address,
     output logic code_ready,
-    input  logic data_request, data_write,
+    input  logic data_request, data_write, data_byte, data_io,
     input  logic [23:0] data_address,
     input  logic [15:0] data_write_data,
     output logic data_request_ready,
@@ -28,7 +30,7 @@ module spk286_biu (
     output logic data_oe, bus_valid, bus_write, bus_bhe_n,
     output logic [3:0] bus_status
 );
-    logic data_active_q, write_q, second_q, canceled_q;
+    logic data_active_q, write_q, second_q, canceled_q, byte_q, io_q;
     logic [23:0] address_q;
     logic [15:0] write_data_q;
     logic [7:0] low_byte_q;
@@ -45,15 +47,15 @@ module spk286_biu (
     assign bus_valid = !reset && !hlda && (select_ack ? ack_active_q : (select_data ? data_active_q : (code_valid && !lock_chain_q)));
     assign address = !bus_valid || select_ack ? 24'h000000 : (select_data ? address_q : code_address);
     assign bus_write = bus_valid && select_data && write_q;
-    assign bus_bhe_n = !bus_valid || select_ack ? 1'b1 : (select_data ? second_q : code_bhe_n);
+    assign bus_bhe_n = !bus_valid || select_ack ? 1'b1 : (select_data ? (byte_q ? !address_q[0] : second_q) : code_bhe_n);
     assign data_out = !bus_write ? 16'h0000 :
                       (address_q[0] ? {write_data_q[7:0], 8'h00} :
-                       (second_q ? {8'h00, write_data_q[15:8]} : write_data_q));
+                       (second_q ? {8'h00, write_data_q[15:8]} : (byte_q ? {8'd0, write_data_q[7:0]} : write_data_q)));
     assign data_oe = bus_write;
-    assign bus_status = !bus_valid ? 4'hF : (select_ack ? 4'h0 : (!select_data ? 4'hD : (write_q ? 4'h6 : 4'h5)));
+    assign bus_status = !bus_valid ? 4'hF : (select_ack ? 4'h0 : (!select_data ? 4'hD : (io_q ? (write_q ? 4'hA : 4'h9) : (write_q ? 4'h6 : 4'h5))));
     assign code_ready = bus_valid && !select_data && !select_ack && ready;
     assign data_complete = bus_valid && select_data && ready;
-    assign bus_lock = !reset && (lock_chain_q || (bus_valid && select_ack));
+    assign bus_lock = !reset && (lock_request || lock_chain_q || (bus_valid && select_ack));
 
     always_ff @(posedge clk) begin
         if (reset) hlda <= 1'b0;
@@ -86,7 +88,7 @@ module spk286_biu (
             end
             // B-2 correction: link both INTA cycles to the first complete frame
             // word. The second half of an odd push is still the same word.
-            if (data_complete && !address_q[0] && write_q) lock_chain_q <= 1'b0;
+            if (data_complete && !address_q[0] && write_q && !io_q && !byte_q) lock_chain_q <= 1'b0;
             if (cancel_data) begin
                 ack_response_valid <= 1'b0;
                 if (ack_active_q) ack_canceled_q <= 1'b1;
@@ -106,6 +108,7 @@ module spk286_biu (
     always_ff @(posedge clk) begin
         if (reset) begin
             data_active_q <= 1'b0; write_q <= 1'b0; second_q <= 1'b0; canceled_q <= 1'b0;
+            byte_q <= 1'b0; io_q <= 1'b0;
             address_q <= 24'h000000; write_data_q <= 16'h0000; low_byte_q <= 8'h00;
             data_response_valid <= 1'b0; data_read_data <= 16'h0000;
         end else begin
@@ -116,16 +119,18 @@ module spk286_biu (
             end
             if (data_request && data_request_ready) begin
                 data_active_q <= 1'b1; write_q <= data_write; second_q <= 1'b0;
-                canceled_q <= 1'b0; address_q <= data_address; write_data_q <= data_write_data;
+                canceled_q <= 1'b0; address_q <= data_io ? {8'd0, data_address[15:0]} : data_address; write_data_q <= data_write_data;
+                byte_q <= data_byte; io_q <= data_io;
             end
             if (data_complete) begin
-                if (address_q[0]) begin
+                if (address_q[0] && !byte_q) begin
                     low_byte_q <= data_in[15:8];
                     address_q <= address_q + 24'd1;
                     second_q <= 1'b1;
                 end else begin
                     data_active_q <= 1'b0;
-                    data_read_data <= second_q ? {data_in[7:0], low_byte_q} : data_in;
+                    data_read_data <= byte_q ? {8'd0, (address_q[0] ? data_in[15:8] : data_in[7:0])} :
+                                      (second_q ? {data_in[7:0], low_byte_q} : data_in);
                     data_response_valid <= !canceled_q && !cancel_data;
                     canceled_q <= 1'b0;
                 end

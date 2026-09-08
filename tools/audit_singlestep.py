@@ -108,12 +108,25 @@ def independent_wire_exceptions(data):
     return records
 
 
+def memory_probe_candidate(case, opcode):
+    """Select a genuine captured MOV operand access, independently of prefixes.
+
+    Register-only MOVs may have prefixes too. Fault-handler IVT/stack traffic
+    is not a completed source/destination operand suitable for this probe.
+    All records remain subject to the full corpus checks above this selection.
+    """
+    kind = {'89': 'MEMW', '8B': 'MEMR'}.get(opcode)
+    return (kind is not None and case.exception is None and
+            any(c['bus_status_name'] == kind for c in case.cycles))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path,
                         default=Path(os.environ.get("SPK286_SINGLESTEP_ROOT", ".cache/singlestep-80286")))
     parser.add_argument("--build-dir", type=Path,
                         default=Path(os.environ.get("SPK286_BUILD_DIR", "build")))
+    parser.add_argument('--include-prefixes',action='store_true',help='independently audit newly admitted prefix records')
     args = parser.parse_args()
     reference = runpy.run_path(str(args.repo / "tools/moo2json.py"))["parse_moo_bytes"]
     revoked = load_revocation_list(args.repo / "revocation_list.txt")
@@ -164,10 +177,10 @@ def main():
             masked += bool(ours.final.get("reg_masks"))
             if is_revoked(ours, revoked):
                 revoked_count += 1
-            elif scope_exclusion(ours, opcode, True) is not None:
+            elif scope_exclusion(ours, opcode, True, args.include_prefixes) is not None:
                 excluded_count += 1
             else:
-                prepared = prepare_case(ours, opcode, True)
+                prepared = prepare_case(ours, opcode, True, args.include_prefixes)
                 if opcode in PHASE5_OPCODES and ours.exception is None:
                     stack_control_examples.setdefault(opcode, prepared)
                 if opcode in PHASE6_OPCODES:
@@ -176,7 +189,7 @@ def main():
                     fault_examples.setdefault((opcode in PHASE6_OPCODES,ours.exception['number']),prepared)
                 if example is None:
                     example = prepared
-                if opcode in ("89", "8B") and ours.instruction_bytes[1] >> 6 != 3:
+                if memory_probe_candidate(ours, opcode):
                     memory_examples.setdefault(opcode, prepared)
         print(f"CORPUS_AUDIT opcode={opcode} header={parsed.header['test_count']} "
               f"parsed={len(parsed.tests)} upstream_equal={len(upstream)}")

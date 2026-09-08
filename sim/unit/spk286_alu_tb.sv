@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module spk286_alu_tb;
+    logic operand_byte=0;
     logic [2:0] operation;
     logic [15:0] operand_a, operand_b;
     logic carry_in;

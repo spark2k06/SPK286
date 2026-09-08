@@ -15,11 +15,36 @@ tests=(spk286_registers spk286_segments spk286_fetch spk286_core spk286_prefetch
        spk286_execution spk286_microcode_execution spk286_modrm spk286_effective_address
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle
        spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle spk286_stack_control spk286_stack_lifecycle
-       spk286_event_instructions spk286_event_lifecycle spk286_event_streams)
+       spk286_event_instructions spk286_event_lifecycle spk286_event_streams
+       spk286_biu_width_io spk286_operand_byte spk286_alu_byte spk286_byte_scalar spk286_prefix spk286_test_instructions spk286_scalar_direct spk286_shift spk286_shift_instructions)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
     run_args=()
+    if [[ "$name" == spk286_test_instructions ]]; then
+        python3 -m tools.test_instruction_vectors --output "$BUILD_DIR/test-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/test-vectors.txt")
+    fi
+    if [[ "$name" == spk286_scalar_direct ]]; then
+        python3 -m tools.scalar_direct_vectors --output "$BUILD_DIR/scalar-direct-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/scalar-direct-vectors.txt")
+    fi
+    if [[ "$name" == spk286_shift ]]; then
+        python3 -m tools.shift_reference --output "$BUILD_DIR/shift-vectors.txt"
+        run_args=("+shift_vectors=$BUILD_DIR/shift-vectors.txt")
+    fi
+    if [[ "$name" == spk286_shift_instructions ]]; then
+        python3 -m tools.shift_instruction_vectors --output "$BUILD_DIR/shift-instruction-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/shift-instruction-vectors.txt")
+    fi
+    if [[ "$name" == spk286_alu_byte ]]; then
+        python3 -m tools.byte_alu_vectors --output "$BUILD_DIR/byte-alu-vectors.txt"
+        run_args=("+vectors=$BUILD_DIR/byte-alu-vectors.txt")
+    fi
+    if [[ "$name" == spk286_byte_scalar ]]; then
+        python3 -m tools.byte_scalar_vectors --output "$BUILD_DIR/byte-scalar-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/byte-scalar-vectors.txt")
+    fi
     if [[ "$name" == spk286_alu ]]; then
         python3 -m tools.alu_reference --output "$BUILD_DIR/alu-vectors.txt"
         run_args=("+alu_vectors=$BUILD_DIR/alu-vectors.txt")
@@ -45,7 +70,7 @@ for name in "${tests[@]}"; do
     if [[ "$simulator" != iverilog ]]; then
         obj="$BUILD_DIR/verilator/$tb"
         mkdir -p "$obj"
-        verilator --binary --timing --assert --language 1800-2012 \
+        verilator --binary --build-jobs "${SPK286_BUILD_JOBS:-1}" --timing --assert --language 1800-2012 \
             --top-module "$tb" --Mdir "$obj" -Irtl -Isim/unit \
             -o "$tb" "${rtl_sources[@]}" "sim/unit/$tb.sv" >"$obj/build.log" 2>&1 || {
                 cat "$obj/build.log"; exit 1;

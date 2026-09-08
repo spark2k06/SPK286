@@ -4,23 +4,51 @@
 module spk286_decoder (
     input  logic [7:0] opcode,
     output logic supported,
-    output logic [2:0] destination,
+    output logic [2:0] destination, source_index,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry
 );
-    logic binary_word, stack_control, event_instruction;
+    logic binary_byte, binary_word, stack_control, event_instruction, test_instruction;
+    assign test_instruction = opcode == 8'h84 || opcode == 8'h85 || opcode == 8'hA8 || opcode == 8'hA9 || opcode == 8'hF6 || opcode == 8'hF7;
     assign event_instruction = opcode == 8'h9C || opcode == 8'h9D ||
                                opcode[7:2] == 6'b110011 || opcode == 8'hF4 || opcode == 8'hFA || opcode == 8'hFB;
     assign stack_control = opcode[7:4] == 4'h5 || opcode[7:4] == 4'h7 ||
                            opcode == 8'h68 || opcode == 8'h6A || opcode == 8'h8F || opcode == 8'hFF ||
                            opcode == 8'hC2 || opcode == 8'hC3 || opcode[7:2] == 6'b111000 ||
                            opcode == 8'hE8 || opcode == 8'hE9 || opcode == 8'hEB;
+    assign binary_byte = opcode[7:6] == 2'b00 && (opcode[2:0] == 3'd0 || opcode[2:0] == 3'd2 || opcode[2:0] == 3'd4);
     assign binary_word = opcode[7:6] == 2'b00 &&
                          (opcode[2:0] == 3'd1 || opcode[2:0] == 3'd3 || opcode[2:0] == 3'd5);
-    assign supported = event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
+    assign supported = opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
                        binary_word || opcode == 8'h81 || opcode == 8'h83;
-    assign destination = binary_word ? 3'd0 : opcode[2:0];
+    assign source_index = opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
+    assign destination = opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
-    assign entry = opcode == 8'h9C ? spk286_microcode_pkg::MC_ENTRY_PUSH_FLAGS :
+    assign entry = opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :
+                   opcode == 8'hC1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_IMM8 :
+                   opcode == 8'hD0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_ONE :
+                   opcode == 8'hD1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_ONE :
+                   opcode == 8'hD2 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_CL :
+                   opcode == 8'hD3 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_CL :
+                   opcode[7:4] == 4'h4 ? spk286_microcode_pkg::MC_ENTRY_INC_DEC_R16 :
+                   opcode == 8'h98 ? spk286_microcode_pkg::MC_ENTRY_EXTEND_BYTE :
+                   opcode == 8'h99 ? spk286_microcode_pkg::MC_ENTRY_EXTEND_WORD :
+                   opcode == 8'h9F ? spk286_microcode_pkg::MC_ENTRY_LOAD_FLAGS_BYTE :
+                   opcode == 8'h9E || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD ? spk286_microcode_pkg::MC_ENTRY_CONTROL_FLAGS :
+                   opcode == 8'h84 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8 :
+                   opcode == 8'h85 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16 :
+                   opcode == 8'hA8 ? spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8 :
+                   opcode == 8'hA9 ? spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16 :
+                   opcode == 8'hF6 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8 :
+                   opcode == 8'hF7 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16 :
+                   opcode[7:3] == 5'b10110 ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_IMM8 :
+                   opcode == 8'h88 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM8_R8 :
+                   opcode == 8'h8A ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_RM8 :
+                   opcode == 8'hC6 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM8_IMM8 :
+                   opcode == 8'hC7 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM16_IMM16 :
+                   opcode == 8'h80 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8 :
+                   binary_byte ? (opcode[2:0] == 3'd0 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8 :
+                                  opcode[2:0] == 3'd2 ? spk286_microcode_pkg::MC_ENTRY_ALU_R8_RM8 :
+                                                       spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8) : opcode == 8'h9C ? spk286_microcode_pkg::MC_ENTRY_PUSH_FLAGS :
                    opcode == 8'h9D ? spk286_microcode_pkg::MC_ENTRY_POP_FLAGS :
                    opcode == 8'hFA || opcode == 8'hFB ? spk286_microcode_pkg::MC_ENTRY_CONTROL_IF :
                    opcode == 8'hF4 ? spk286_microcode_pkg::MC_ENTRY_HALT_CPU :

@@ -9,6 +9,7 @@ alive for many vectors instead of being rebuilt or relaunched for each case.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from dataclasses import dataclass
 from collections import Counter
 import json
@@ -37,7 +38,11 @@ PHASE5_OPCODES = tuple(f'{value:02X}' for value in range(0x50,0x60)) + ('68','6A
 CONTROL_OPCODES = tuple(f'{value:02X}' for value in range(0x70,0x80)) + ('C2','C3','E0','E1','E2','E3','E8','E9','EB','FF.2','FF.4')
 PHASE6_OPCODES = ('9C','9D','CC','CD','CE','CF','F4','FA','FB')
 INHERITED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES
-SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES
+BYTE_SCALAR_OPCODES = tuple(f'{v:02X}' for v in range(0xB0,0xB8)) + ('88','8A','C6','C7') + tuple(f'{g*8+f:02X}' for g in range(8) for f in (0,2,4)) + tuple(f'80.{g}' for g in range(8))
+TEST_OPCODES = ('84','85','A8','A9','F6.0','F7.0')
+SCALAR_DIRECT_OPCODES = tuple(f'{v:02X}' for v in range(0x40,0x50)) + ('98','99','9E','9F','F5','F8','F9','FC','FD')
+SHIFT_OPCODES = tuple(f'{op}.{g}' for op in ('C0','C1','D0','D1','D2','D3') for g in (0,1,2,3,4,5,7))
+SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -63,13 +68,13 @@ class PreparedCase:
     expected_retired: int = 1
 
 
-def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool = False) -> str | None:
+def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool = False, include_prefixes: bool = False) -> str | None:
     """ModR/M and Phase 4 forms permit explicit, counted prefix/exception exclusions.
 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
@@ -79,7 +84,7 @@ def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool 
         raise SingleStepRunnerError(f"case {case.index}: file opcode differs from {opcode}")
     if '.' in opcode and (prefix_count+1 >= len(data) or (data[prefix_count+1] >> 3) & 7 != int(opcode[-1])):
         raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
-    if prefix_count:
+    if prefix_count and not include_prefixes:
         return "unsupported_prefix"
     if case.exception is not None and not (include_exceptions or opcode in PHASE6_OPCODES):
         return "exception_delivery"
@@ -145,9 +150,17 @@ def read_masks(final_state: Mapping[str, object]) -> list[int]:
     return masks
 
 
-def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = False) -> PreparedCase:
+def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = False, include_prefixes: bool = False) -> PreparedCase:
     """Convert one sparse MOO state into a full comparison contract."""
 
+    instruction_bytes = case.instruction_bytes
+    if include_prefixes:
+        prefix_count=0
+        while prefix_count<len(instruction_bytes) and instruction_bytes[prefix_count] in PREFIXES:
+            prefix_count+=1
+        instruction_bytes=instruction_bytes[prefix_count:]
+        if not instruction_bytes:
+            raise SingleStepRunnerError(f'case {case.index}: missing opcode after prefixes')
     initial = case.initial
     final = case.final
     if case.exception is not None and not (include_exceptions or opcode in PHASE6_OPCODES):
@@ -170,44 +183,64 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
         raise SingleStepRunnerError(f"case {case.index}: non-empty prefetch queue is unsupported")
     if final.get("queue"):
         raise SingleStepRunnerError(f"case {case.index}: final queue is unexpectedly non-empty")
-    if len(case.instruction_bytes) < 2 or case.instruction_bytes[-1] != 0xF4:
+    # Invalid immediate-MOV encodings fault at ModR/M. The physical generator
+    # replaces the first unconsumed byte with HLT, retaining the remaining tail.
+    # Admit only that documented shape; every recorded RAM byte stays compared.
+    early_halt = (opcode in ('C6','C7') and len(instruction_bytes) >= 3 and
+                  (instruction_bytes[1] >> 3) & 7 != 0 and
+                  instruction_bytes[2] == 0xF4 and expected_event == 6)
+    if len(instruction_bytes) < 2 or (instruction_bytes[-1] != 0xF4 and not early_halt):
         raise SingleStepRunnerError(f"case {case.index}: expected terminating HALT byte F4")
     byte_opcode = int(opcode.split('.')[0], 16)
-    if case.instruction_bytes[0] != byte_opcode:
+    if instruction_bytes[0] != byte_opcode:
         raise SingleStepRunnerError(
-            f"case {case.index}: file opcode {case.instruction_bytes[0]:02X} differs from {opcode}"
+            f"case {case.index}: file opcode {instruction_bytes[0]:02X} differs from {opcode}"
         )
-    if opcode in OPCODES:
-        if len(case.instruction_bytes) != 4:
+    if opcode in BYTE_SCALAR_OPCODES and (0xB0 <= byte_opcode < 0xB8 or byte_opcode < 0x40 and byte_opcode & 7 == 4):
+        if len(instruction_bytes) != 3:
+            raise SingleStepRunnerError(f'case {case.index}: byte immediate length mismatch')
+    elif opcode in SCALAR_DIRECT_OPCODES:
+        if len(instruction_bytes) != 2:
+            raise SingleStepRunnerError(f'case {case.index}: scalar single-byte instruction length mismatch')
+    elif opcode in ('A8','A9'):
+        if len(instruction_bytes) != (3 if opcode == 'A8' else 4):
+            raise SingleStepRunnerError(f'case {case.index}: TEST accumulator immediate length mismatch')
+    elif opcode in OPCODES:
+        if len(instruction_bytes) != 4:
             raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
     elif opcode in PHASE6_OPCODES:
-        if len(case.instruction_bytes) != (3 if opcode=='CD' else 2):
+        if len(instruction_bytes) != (3 if opcode=='CD' else 2):
             raise SingleStepRunnerError(f'case {case.index}: event instruction length mismatch')
     elif opcode in ALU_OPCODES and byte_opcode < 0x40 and byte_opcode & 7 == 5:
-        if len(case.instruction_bytes) != 4:
+        if len(instruction_bytes) != 4:
             raise SingleStepRunnerError(f"case {case.index}: accumulator immediate length mismatch")
     elif opcode in PHASE5_OPCODES and byte_opcode not in (0x8F, 0xFF):
         instruction_length = (3 if byte_opcode in (0x68,0xC2,0xE8,0xE9) else
                               2 if byte_opcode in (0x6A,0xE0,0xE1,0xE2,0xE3,0xEB) or 0x70 <= byte_opcode <= 0x7F else 1)
-        if len(case.instruction_bytes) != instruction_length + 1:
+        # Some unconditional-jump captures retain unexecuted generator tail
+        # bytes after the displacement. Preserve them as compared RAM; the
+        # target fetch is the capture's terminating HLT convention.
+        length_ok = (instruction_length+1 <= len(instruction_bytes) <= 11 if byte_opcode in (0xE9,0xEB)
+                     else len(instruction_bytes) == instruction_length+1)
+        if not length_ok:
             raise SingleStepRunnerError(f'case {case.index}: stack/control length mismatch')
-    elif opcode in MODRM_OPCODES + ALU_OPCODES + ('8F','FF.2','FF.4','FF.6'):
-        if len(case.instruction_bytes) < 3:
+    elif opcode in MODRM_OPCODES + ALU_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SHIFT_OPCODES + ('8F','FF.2','FF.4','FF.6'):
+        if len(instruction_bytes) < 3:
             raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
-        if byte_opcode == 0x8F and (case.instruction_bytes[1] >> 3) & 7 != 0 and not include_exceptions:
+        if byte_opcode == 0x8F and (instruction_bytes[1] >> 3) & 7 != 0 and not include_exceptions:
             raise SingleStepRunnerError(f'case {case.index}: invalid POP group extension')
-        mode, rm = case.instruction_bytes[1] >> 6, case.instruction_bytes[1] & 7
+        mode, rm = instruction_bytes[1] >> 6, instruction_bytes[1] & 7
         displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
-        immediate_bytes = 2 if byte_opcode == 0x81 else (1 if byte_opcode == 0x83 else 0)
-        if '.' in opcode and (case.instruction_bytes[1] >> 3) & 7 != int(opcode[-1]):
+        immediate_bytes = 2 if byte_opcode in (0x81,0xC7,0xF7) else (1 if byte_opcode in (0x80,0x83,0xC6,0xF6,0xC0,0xC1) else 0)
+        if '.' in opcode and (instruction_bytes[1] >> 3) & 7 != int(opcode[-1]):
             raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
         # Invalid POP extensions end decoding at ModR/M. The generator can leave
         # additional bytes before its HLT sentinel; they are initialized memory,
         # not an operand displacement to execute. Keep every byte for comparison.
-        invalid_pop = byte_opcode==0x8f and (case.instruction_bytes[1] >> 3) & 7 != 0
-        if invalid_pop and not 3 <= len(case.instruction_bytes) <= 11:
+        invalid_pop = byte_opcode in (0x8F,0xC6,0xC7) and (instruction_bytes[1] >> 3) & 7 != 0
+        if invalid_pop and not 3 <= len(instruction_bytes) <= 11:
             raise SingleStepRunnerError(f'case {case.index}: invalid-form capture length out of bounds')
-        if not invalid_pop and len(case.instruction_bytes) != 3+displacement_bytes+immediate_bytes:
+        if not invalid_pop and len(instruction_bytes) != 3+displacement_bytes+immediate_bytes:
             raise SingleStepRunnerError(f"case {case.index}: ModR/M displacement length mismatch")
     else:
         raise SingleStepRunnerError(f"case {case.index}: unsupported opcode {opcode}")
@@ -367,7 +400,7 @@ def run_opcode(
     for case in cases:
         if is_revoked(case, revoked):
             continue
-        reason = scope_exclusion(case, opcode, getattr(args, 'include_exceptions', False))
+        reason = scope_exclusion(case, opcode, getattr(args, 'include_exceptions', False), getattr(args, 'include_prefixes', False))
         if reason is not None:
             exclusions.append({"index": case.index, "hash": case.test_hash, "reason": reason})
             if args.index == case.index or (args.test_hash is not None and args.test_hash.lower() == case.test_hash):
@@ -377,7 +410,7 @@ def run_opcode(
     selected, selection_skipped = select_cases(
         tuple(eligible), frozenset(), args.sample, args.full, args.index, args.test_hash
     )
-    prepared = [prepare_case(case, opcode, getattr(args, 'include_exceptions', False)) for case in selected]
+    prepared = [prepare_case(case, opcode, getattr(args, 'include_exceptions', False), getattr(args, 'include_prefixes', False)) for case in selected]
     batch_path = build_dir / "singlestep" / "batches" / f"{opcode}.bin"
     write_batch(batch_path, prepared)
     command = [str(executable), "--singlestep-batch", str(batch_path.resolve())]
@@ -417,6 +450,19 @@ def run_opcode(
               "inherited_selected":sum(opcode in INHERITED_OPCODES and c.exception is None for c in selected),
               "fault_selected":sum(opcode in INHERITED_OPCODES and c.exception is not None for c in selected),
               "phase6_selected":len(selected) if opcode in PHASE6_OPCODES else 0}
+    if getattr(args, 'include_prefixes', False):
+        identities = []
+        for case in selected:
+            legacy = opcode in INHERITED_OPCODES + PHASE6_OPCODES
+            category = ('legacy_prefix' if case.instruction_bytes[0] in PREFIXES else 'legacy') if legacy else 'new_form'
+            identities.append({'index':case.index,'hash':case.test_hash,'category':category})
+        identity_path=build_dir/'singlestep'/'identities'/f'{opcode}.json'
+        identity_path.parent.mkdir(parents=True,exist_ok=True)
+        identity_bytes=(json.dumps(identities,sort_keys=True,separators=(',',':'))+'\n').encode()
+        identity_path.write_bytes(identity_bytes)
+        report['identity_sha256']=hashlib.sha256(identity_bytes).hexdigest()
+        raw=source_path.read_bytes()
+        report['source_git_blob']=hashlib.sha1(f'blob {len(raw)}\0'.encode()+raw).hexdigest()
     report_path = build_dir / "singlestep" / "reports" / f"{opcode}.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -433,6 +479,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stack-control", action="store_true", help="select all Phase 5 forms")
     parser.add_argument('--events',action='store_true',help='select all nine Phase 6 instruction files')
     parser.add_argument('--phase6',action='store_true',help='select all inherited/new families including real-mode faults')
+    parser.add_argument('--include-prefixes',action='store_true',help='admit supported prefix contexts; separate from the frozen Phase 6 cohort')
     parser.add_argument('--include-exceptions',action='store_true',help='admit inherited real-mode exception outcomes')
     parser.add_argument("--alu", action="store_true", help="select every admitted Phase 4 ALU form")
     parser.add_argument("--full", action="store_true", help="run every non-revoked case")
@@ -446,10 +493,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.phase6 and args.include_prefixes:
+        raise SingleStepRunnerError('the frozen Phase 6 cohort cannot admit prefixes')
     if args.events or args.phase6:
         if args.opcodes or args.alu or args.stack_control or (args.events and args.phase6):
             raise SingleStepRunnerError('incompatible event/family selectors')
-        args.opcodes=list(SUPPORTED_OPCODES if args.phase6 else PHASE6_OPCODES)
+        args.opcodes=list(INHERITED_OPCODES + PHASE6_OPCODES if args.phase6 else PHASE6_OPCODES)
         args.include_exceptions=True
     if args.stack_control:
         if args.opcodes or args.alu:

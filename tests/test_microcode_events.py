@@ -5,8 +5,8 @@ from tools.microcode.audit_microcode import canonical_source, read_generated_wor
 
 
 class EventMicrocodeTests(unittest.TestCase):
-    def test_active_contract_and_roundtrip(self):
-        sources={p.name:p.read_text() for p in (ROOT/'microcode/source').glob('*.mc')}
+    def test_frozen_phase6_contract_and_roundtrip(self):
+        sources=json.loads((ROOT/'tests/fixtures/microcode_phase6_sources.json').read_text())
         p=compile_sources(sources)
         contract=json.loads((ROOT/'tests/fixtures/microcode_phase6.json').read_text())
         self.assertEqual(tuple(contract[field] for field in ('format_version','encoding_version','word_width','address_width')),

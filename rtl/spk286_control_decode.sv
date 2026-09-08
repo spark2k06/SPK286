@@ -7,7 +7,9 @@ module spk286_control_decode (
     input logic [15:0] count,
     output logic push_enabled, push_return_ip, branch_taken, decrement_count, form_supported
 );
-    assign form_supported = opcode == 8'hFF ? (group_extension == 3'd2 || group_extension == 3'd4 || group_extension == 3'd6) :
+    assign form_supported = opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 ? group_extension != 3'd6 :
+                            opcode == 8'hF6 || opcode == 8'hF7 ? group_extension == 3'd0 :
+                            opcode == 8'hFF ? (group_extension == 3'd2 || group_extension == 3'd4 || group_extension == 3'd6) :
                             opcode != 8'h8F || group_extension == 3'd0;
     assign push_return_ip = opcode == 8'hFF && group_extension == 3'd2;
     assign push_enabled = opcode != 8'hFF || group_extension != 3'd4;

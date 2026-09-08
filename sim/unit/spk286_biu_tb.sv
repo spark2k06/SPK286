@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
 module spk286_biu_tb;
+    logic lock_request=0;
+    logic data_byte=0, data_io=0;
     logic clk = 0, reset = 1, cancel_data = 0, ready = 0;
     logic hold_request = 0, ack_request = 0, ack_response_ready = 0;
     wire hlda, ack_request_ready, ack_response_valid, bus_lock;

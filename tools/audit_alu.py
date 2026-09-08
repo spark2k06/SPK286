@@ -10,18 +10,18 @@ from tools.alu_instruction_vectors import write_vectors as write_instruction_vec
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
-    ('carry', 'spk286_alu', 'spk286_alu', 'candidate_flags[0] = extended_result[16];',
-     'candidate_flags[0] = ~extended_result[16];', 'ALU flag bit=0'),
+    ('carry', 'spk286_alu', 'spk286_alu', 'candidate_flags[0] = operand_byte ? extended_result[8] : extended_result[16];',
+     'candidate_flags[0] = operand_byte ? ~extended_result[8] : ~extended_result[16];', 'ALU flag bit=0'),
     ('word-parity', 'spk286_alu', 'spk286_alu', '~^result[7:0]', '~^result[15:0]', 'ALU flag bit=2'),
-    ('overflow', 'spk286_alu', 'spk286_alu', '(operand_a[15] ^ result[15]) &', "1'b0 &", 'ALU flag bit=11'),
+    ('overflow', 'spk286_alu', 'spk286_alu', '(sign_a ^ sign_result) &', "1'b0 &", 'ALU flag bit=11'),
     ('auxiliary-carry', 'spk286_alu', 'spk286_alu', 'operand_a[4] ^ operand_b[4] ^ result[4]', "1'b0", 'ALU flag bit=4'),
-    ('subtraction-order', 'spk286_alu', 'spk286_alu', "{1'b0, operand_a} - {1'b0, operand_b}",
-     "{1'b0, operand_b} - {1'b0, operand_a}", 'ALU result'),
+    ('subtraction-order', 'spk286_alu', 'spk286_alu', "{1'b0, a} - {1'b0, b}",
+     "{1'b0, b} - {1'b0, a}", 'ALU result'),
     ('carry-input', 'spk286_alu', 'spk286_alu', 'assign carry = carry_in &&', "assign carry = 1'b0 &&", 'ALU result'),
-    ('cmp-write', 'spk286_alu_decode', 'spk286_alu_instructions', "assign write_result = kind != 3'd7;",
-     "assign write_result = 1'b1;", 'exact GPR result/preservation'),
+    ('cmp-write', 'spk286_alu_decode', 'spk286_alu_instructions', "assign write_result = kind != 3'd7 && !test_instruction;",
+     "assign write_result = !test_instruction;", 'exact GPR result/preservation'),
     ('all-flags', 'spk286_micro_executor', 'spk286_alu_instructions',
-     'flags_mask_q <= decoded_flags_mask & ~decoded_undefined_mask;', "flags_mask_q <= 16'h7FD5;", 'exact FLAGS and preserved bits'),
+     'flags_mask_q <= shift_complete ? shift_mask : (decoded_flags_mask & ~decoded_undefined_mask);', "flags_mask_q <= shift_complete ? shift_mask : 16'h7FD5;", 'exact FLAGS and preserved bits'),
 )
 
 

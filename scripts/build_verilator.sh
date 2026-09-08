@@ -13,7 +13,7 @@ command -v verilator >/dev/null 2>&1 || {
     exit 1
 }
 
-verilator --cc --exe --build --trace --Wall \
+verilator --cc --exe --build --build-jobs "${SPK286_BUILD_JOBS:-1}" --trace --Wall \
     --language 1800-2012 --top-module spk286 \
     --Mdir "$OBJ_DIR" -I"$ROOT_DIR/rtl" \
     -CFLAGS "-std=c++17 -Wall -Wextra" \

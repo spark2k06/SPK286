@@ -1,0 +1,84 @@
+"""TEST disposition, scalar source selection and flag preservation mutation evidence."""
+import argparse
+import hashlib
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+PROBES = (
+    ('test-write-suppression','spk286_alu_decode','spk286_test_instructions',
+     "kind != 3'd7 && !test_instruction", "kind != 3'd7", 'TEST never writes data'),
+    ('test-undefined-af','spk286_micro_executor','spk286_test_instructions',
+     'decoded_flags_mask & ~decoded_undefined_mask', 'decoded_flags_mask | decoded_undefined_mask', 'exact FLAGS and preserved bits'),
+    ('inc-preserves-carry','spk286_alu_decode','spk286_scalar_direct',
+     "opcode[7:4] == 4'h4 ? 16'h08D4", "opcode[7:4] == 4'h4 ? 16'h08D5", 'exact FLAGS and preserved bits'),
+    ('sahf-preserves-controls','spk286_flags_decode','spk286_scalar_direct',
+     "mask = 16'h00D5", "mask = 16'h0FD5", 'exact FLAGS and preserved bits'),
+    ('lahf-high-byte','spk286_decoder','spk286_scalar_direct',
+     "opcode == 8'h9F ? 3'd4", "opcode == 8'h9F ? 3'd0", 'exact GPR result/preservation'),
+    ('cbw-sign-bit','spk286_micro_executor','spk286_scalar_direct',
+     "{{8{tmp0_q[7]}}, tmp0_q[7:0]}", "{{8{tmp0_q[15]}}, tmp0_q[7:0]}", 'exact GPR result/preservation'),
+    ('cwd-source','spk286_decoder','spk286_scalar_direct',
+     "opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination", "opcode == 8'h98 ? 3'd0 : destination", 'exact GPR result/preservation'),
+)
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--build-dir', type=Path, default=Path(os.environ.get('SPK286_BUILD_DIR', 'build')))
+    args = parser.parse_args()
+    subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
+    output = args.build_dir.resolve()/'scalar-audit'
+    output.mkdir(parents=True, exist_ok=True)
+    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
+               *sorted((ROOT/'rtl').glob('*.sv'))]
+    originals = {p: p.read_bytes() for p in sources}
+    (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
+                                              for p,data in originals.items()), encoding='utf-8')
+    from tools.test_instruction_vectors import vectors as test_vectors
+    from tools.scalar_direct_vectors import vectors as direct_vectors
+    vector_paths = {}
+    for bench, rows in (('spk286_test_instructions',list(test_vectors())),('spk286_scalar_direct',list(direct_vectors()))):
+        path=output/(bench+'.txt')
+        path.write_text(f'{len(rows):x}\n'+''.join(' '.join(f'{v:x}' for v in row)+'\n' for row in rows))
+        vector_paths[bench]=path
+    def execute(name, bench, replacement=None, reason=None):
+        directory = output/name; directory.mkdir(parents=True, exist_ok=True)
+        inputs = list(sources)
+        if replacement:
+            module, old, new = replacement
+            original = ROOT/'rtl'/f'{module}.sv'
+            text = originals[original].decode()
+            if text.count(old) != 1:
+                raise RuntimeError(f'{name}: mutation anchor must be unique')
+            mutant = directory/original.name; mutant.write_text(text.replace(old,new), encoding='utf-8')
+            inputs[inputs.index(original)] = mutant
+        binary = directory/'test.vvp'
+        build = subprocess.run(['iverilog','-g2012','-Wall','-Irtl','-Isim/unit','-s',bench+'_tb',
+                                '-o',str(binary),*map(str,inputs),str(ROOT/'sim/unit'/f'{bench}_tb.sv')],
+                               cwd=ROOT,capture_output=True,text=True)
+        (directory/'build.log').write_text(build.stdout+build.stderr, encoding='utf-8')
+        if build.returncode:
+            raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
+        run = subprocess.run(['vvp',str(binary),'+instruction_vectors='+str(vector_paths[bench])],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
+        if reason:
+            if run.returncode == 0 or reason not in run.stdout+run.stderr:
+                raise RuntimeError(f'{name}: intended assertion did not reject mutant')
+        elif run.returncode or 'PASS:' not in run.stdout:
+            raise RuntimeError(f'{name}: pristine bench failed')
+        print(f'SCALAR_MUTATION {name}: {"rejected" if reason else "passed"} status={run.returncode}')
+    for bench in ('spk286_test_instructions','spk286_scalar_direct'):
+        execute('pristine-'+bench,bench)
+    for name,module,bench,old,new,reason in PROBES:
+        execute(name,bench,(module,old,new),reason)
+    if any(p.read_bytes()!=data for p,data in originals.items()):
+        raise RuntimeError('production source changed during mutation audit')
+    print('SCALAR_AUDIT PASS: 7 rejected RTL mutants; 2 pristine benches; source bytes unchanged')
+
+
+if __name__ == '__main__':
+    main()

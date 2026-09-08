@@ -1,6 +1,7 @@
 // Exercise the logical operand API directly, independently of MOV and TMP0.
 `timescale 1ns/1ps
 module spk286_operand_service_tb;
+    logic request_byte=0; wire gpr_write_byte, memory_byte;
     logic clk=0, reset=1, cancel=0;
     logic request_valid=0, request_write=0, select_rm=0;
     logic [15:0] write_data=0;

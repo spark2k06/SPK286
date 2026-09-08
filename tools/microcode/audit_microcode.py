@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 5 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 8 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -33,7 +33,12 @@ STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
               36: 'EVENT_FLAGS -> TMP0', 37: 'EVENT_CS -> TMP0', 38: 'EVENT_IP -> TMP0',
               39: 'CLEAR_IF_TF', 40: 'VECTOR_IP -> TMP0', 41: 'VECTOR_CS -> TMP1',
               42: 'CONTEXT_COMMIT TMP0 TMP1', 43: 'POP16 -> TMP1', 44: 'POP16 -> TMP2',
-              45: 'IRET_COMMIT TMP0 TMP1 TMP2'}
+              45: 'IRET_COMMIT TMP0 TMP1 TMP2',
+              46: 'READ_REG8 -> TMP0', 47: 'READ_RM8 -> TMP0', 48: 'TMP0 -> REG8', 49: 'TMP0 -> RM8',
+              50: 'FETCH_IMM8 -> TMP1', 51: 'READ_REG8 -> TMP1', 52: 'READ_RM8 -> TMP1',
+              53: 'READ_DST8 -> TMP0', 54: 'TMP0 -> DST8', 55: 'TMP2 -> REG8 IF_WRITE',
+              56: 'TMP2 -> RM8 IF_WRITE', 57: 'TMP2 -> DST8 IF_WRITE',
+              58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1'}
 
 
 def validate_entries(program, expected):
@@ -82,6 +87,14 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
                         EVENT_CS=37, EVENT_IP=38, CLEAR_IF_TF=39, VECTOR_IP=40,
                         VECTOR_CS=41, CONTEXT_COMMIT=42, POP16_TMP1=43,
                         POP16_TMP2=44, IRET_COMMIT=45)
+    if dimension('MC_FORMAT_VERSION') >= 6:
+        expected.update(READ_REG8=46, READ_RM8=47, WRITE_REG8=48, WRITE_RM8=49, FETCH_IMM8_TMP1=50,
+                        READ_REG8_TMP1=51, READ_RM8_TMP1=52, READ_DST8=53, MOVE8=54,
+                        WRITE_RESULT_REG8=55, WRITE_RESULT_RM8=56, WRITE_RESULT_DST8=57)
+    if dimension('MC_FORMAT_VERSION') >= 7:
+        expected.update(FLAGS_DECODED=58, SIGN_EXTEND8=59, SIGN_FILL16=60, CONST_ONE_TMP1=61)
+    if dimension('MC_FORMAT_VERSION') >= 8:
+        expected.update(SHIFT=62, COUNT_LOW_TMP1=63)
     if {name: values.get(name) for name in expected} != expected:
         raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
@@ -131,7 +144,7 @@ def canonical_source(words, entries, labels=None):
         if owner != match[1]:
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
-    version = 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
+    version = 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
@@ -192,7 +205,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase6.json")
+                        default=ROOT / "tests/fixtures/microcode_phase7_shift.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-preserved Phase 2.75/3/4 formats and the active Phase 5 extension below.
+preserved Phase 2.75/3/4 formats and the incremental extensions below; format 8 is current.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -249,3 +249,58 @@ New event protocols validate ordered saved-state acquisition, temporary validity
 vector context, one final context commit and terminal END. Entry completion is
 filtered from ordinary guest retirement. See [format](../SPK286_MICROCODE_FORMAT.md)
 and [event contract](../docs/INTERRUPTS_EXCEPTIONS.md).
+
+## Phase 7 byte/prefix increment (verified prior image)
+
+The sections above describe historical images. Compiler 6.0 / format 6 now
+uses 37 entries, 174 words, eight-bit addresses and six-bit controls.
+`source/zz_byte_scalar.mc` adds nine reusable entries for byte MOV/ALU and
+immediate-to-RM MOV. Controls 46–57 express typed byte operations; the
+microsequencer remains generic. The two immediate RM word-ALU entries now
+acquire their immediate bytes before requesting data memory, preserving the
+physical overlength-fault ordering.
+
+Frozen format 1–5 fixtures and source snapshots remain unchanged. The current
+independent contract is `tests/fixtures/microcode_phase7_byte.json`, including
+the two justified word-entry reorderings. The compiler checks byte operand,
+temporary and result/FLAGS disposition protocols and rejects incompatible
+word/event controls. Generate all artifacts from the .mc sources.
+
+This is the bounded increment described in
+[PHASE7_HANDOFF](../docs/PHASE7_HANDOFF.md), not the complete Phase 7 image.
+The isolated 190-word scalar-I/O prototype is outside this source tree.
+
+## Phase 7 scalar increment (current image)
+
+Compiler 7.0 / format 7 uses 42 entries, 193 words, eight-bit addresses and
+six-bit controls. `source/zzz_scalar.mc` adds direct flag control, flags-to-byte,
+byte sign extension, sign fill, and INC/DEC register protocols. Controls 58–61
+are FLAGS_DECODED, SIGN_EXTEND8, SIGN_FILL16 and CONST_ONE_TMP1. Decode supplies
+source/destination register selectors and the direct flag mask/data; the executor
+never decodes guest opcodes. TEST reuses existing byte/word ALU microprograms
+with decoded AND and suppressed result writeback.
+
+Format 1–6 source snapshots and encoding fixtures stay frozen. The active
+independent contract is `tests/fixtures/microcode_phase7_scalar.json`. Scalar
+validation rejects undefined sources, missing result/FLAGS disposition, duplicate
+commits and unsupported mixed protocols. The two register selectors are captured
+at dispatch so CWD reads AX and writes DX through the existing GPR owner.
+No control represents a historical timing delay. The separate I/O prototype
+predates these control assignments and must be rebased through source/compiler
+regeneration before integration. Its generated artifacts cannot be copied here.
+
+## Active format 8 shift extension
+
+Controls 62 SHIFT and 63 COUNT_LOW_TMP1 retain six-bit words. Six symbolic
+programs acquire ModR/M, then a constant/CL/immediate count, then the byte/word
+operand. SHIFT produces TMP2, a precise FLAGS mask and a result disposition;
+the existing conditional result operation precedes COMMIT_FLAGS and END.
+COUNT_LOW snapshots the architectural count register's low byte before an
+aliased operand is read. The arithmetic service owns iterative computation and
+backpressure; the microsequencer waits for its real completion.
+
+The active image has 48 entries/235 words, eight-bit addresses and six-bit
+controls. The prior 193 words are unchanged. Frozen format-7 sources and the
+independent format-8 fixture preserve historical and current encoding checks.
+Count zero still reads/checks memory but suppresses result and FLAGS writes.
+See docs/PHASE7_SHIFT_FLAGS.md for undefined flag policy and physical evidence.

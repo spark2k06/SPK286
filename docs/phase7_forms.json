@@ -1,0 +1,6992 @@
+{
+  "case_count_note": "Counts are physical source inventory only. They do not imply implementation or execution.",
+  "corpus_metadata_sha256": "a4ade95e176bdc7f272adf328f2233352cc33a559cbf82a9c3d28f9981b5acc8",
+  "corpus_revision": "37c73caf53dcd22d3dd369ff09305d13d117a4fe",
+  "forms": [
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/00.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "9e602cb108541d82d7b9a6c43ee7f5f55d52a8c4",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "00",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/01.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "9b2df1c497b6e43cd070001675daf8ebfa670504",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "01",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/02.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "920085f1f377e228d3855a775b61cc87ab82494c",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "02",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/03.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "de0e4d084b3a6983733f2ab4d2d73018c02a6fbd",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "03",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/04.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "172b76dcb3d8ffaf6d6cbe8cbe7f63eff7752367",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "04",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/05.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "3dcb3727b5f20526f8b6d22f9368c94f18ce866d",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "05",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/06.MOO.gz",
+      "forms": [
+        "ES"
+      ],
+      "git_blob": "4c0af2ae3c03fb198f9fd25dcd83fc9959d0dfcf",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "06",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/07.MOO.gz",
+      "forms": [
+        "ES"
+      ],
+      "git_blob": "9b9b3020849ffa25cbf311a9fa7bb514b2fa7a63",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "07",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/08.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "0937aa7745fd9327a57d4416f1900ba106fe76d9",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "08",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/09.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "e8c0d4855c82dd14928093ce3c6236c77a43a1f6",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "09",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/0A.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "f60c5b12ca8ac41190819f6cda2c14df54502c72",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "0A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/0B.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "e895ab20956402043c2a923368f5fa3605addd32",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "0B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/0C.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "f260c8cf4d9c62de4636ecba9fb971a66ad9e9ca",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "0C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/0D.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "41658e4b317356ad231730c41c2138c6123798ca",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "0D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/0E.MOO.gz",
+      "forms": [
+        "CS"
+      ],
+      "git_blob": "1cc9173842bd851ec4572cf2662ba383e0e40cdc",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "0E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/10.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "871a78074c04d3ead73d8b3902871bacb5126fa8",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "10",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/11.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "06a7317a1bd5ba30e7379880bd7db3f6e04e3b8c",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "11",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/12.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "d17d4ac6731a462cb7da52f55264580359941395",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "12",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/13.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "60567ae85db02b9bb190b63c15b5edc3f3b3dc9a",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "13",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/14.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "bb3fc51d766cff5f80e2b9eefef05da64d741ea6",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "14",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/15.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "e99c64e9bb4d97ed953265fe1de612bc4da143d6",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "15",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/16.MOO.gz",
+      "forms": [
+        "SS"
+      ],
+      "git_blob": "f57f2ce3cdb27cb653798c4231480ca0d923763e",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "16",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/17.MOO.gz",
+      "forms": [
+        "SS"
+      ],
+      "git_blob": "83101094f73a5157b537eae677d9798f5e7c2e17",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "17",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/18.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "03840f0638cf399fd15f89ce37d2054634d46dad",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "18",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/19.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "ff61f42e26e6fd63bb9fe4b73a6718d8f2fe3bae",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "19",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1A.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "7f9f28efb9b7b5ad44f3d92224cbc2587084bd19",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "1A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1B.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "b52fcbe02113d17257cee008cb8c24e4af1b452d",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "1B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1C.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "aebecf509cbcb802cc50aa6ed224934eb7fc3dde",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "1C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1D.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "83dbb7731217f96bb3f019da58704fcc1bb49f7d",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "1D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1E.MOO.gz",
+      "forms": [
+        "DS"
+      ],
+      "git_blob": "6ca9d7b786122b177a1550e6cc381b6eb0a644bf",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "1E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/1F.MOO.gz",
+      "forms": [
+        "DS"
+      ],
+      "git_blob": "ad0a415b356e1ef06ceff04041ccd8ecc53357e8",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "1F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/20.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "73afe7d781fa4ffed647bd9de50156c80970ba71",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "20",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/21.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "c77f598629dd7126d4bc1ac821ddd7503d964e5f",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "21",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/22.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "0ae078cc64352e6b414f6d0f2e8b4cc8fbfe72e1",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "22",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/23.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "3d929b9eab0f2f2c3687003e7b52eb9402470f43",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "23",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/24.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "6e9051ab6eafb35b464bc034359ae7f974a14513",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "24",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/25.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "b02498ff1bf6e2fe8e28bb992ecf37a5d70c5f5e",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "25",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/27.MOO.gz",
+      "forms": [
+        "AL"
+      ],
+      "git_blob": "bf90e5b5e67c6d65bbd6563e75a7b444bcc4785e",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "DAA",
+      "opcode": "27",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/28.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "182c21c02db82f91a7f9c5ad755cd7c51360e132",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "28",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/29.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "12a8462fa1f0b516e7bbeb313b9297cdafe3cb3b",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "29",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/2A.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "a006f44262d7ef0742a088a5b23004ea9163f116",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "2A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/2B.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "32150324c4be166a46919f6da3032fdddcd63a21",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "2B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/2C.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "0bbd80d27343cfba0166a59fec749b7f4457892a",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "2C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/2D.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "59c89a6919f2a40f00e3be0ae6ff5611a7e62e40",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "2D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/2F.MOO.gz",
+      "forms": [
+        "AL"
+      ],
+      "git_blob": "337b5a8e5a834b2597ec79ef6d7bb602871f79a2",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "DAS",
+      "opcode": "2F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/30.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "0c29bacbdc9c8c1d5bc9b747f9710c310f89d731",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "30",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/31.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "b5b095c16e25b393cc2cf0dcf1d1842ae1464164",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "31",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/32.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "fc660a534eb20fa736b50cde5ce54256fb06c774",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "32",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/33.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "9ec3aca4a192764285a3a547151081b596274572",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "33",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/34.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "c719e90eb46abaedda50b3d7756697a37f1029db",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "34",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/35.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "49c189bbd84a27ac24f39e31976bb0552eb7efed",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "35",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/37.MOO.gz",
+      "forms": [
+        "AX"
+      ],
+      "git_blob": "94c3ae3c740e8ac99c211c919c5d510e3861b478",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..sz.p.",
+        "flags-mask": 63291,
+        "status": "normal"
+      },
+      "mnemonic": "AAA",
+      "opcode": "37",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/38.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "757fd8f87c23e1d58e4d26cdbbf61c92d663677d",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "38",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/39.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "e8c0166f111daa9989d389eeb38f97d27972bf97",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "39",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/3A.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "b0e9d5bfc5a5a91d53e1f67bfc0bed0cf21e6e78",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "3A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/3B.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "9fce7735baa1eed58f038856495479c74545ec9e",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "3B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/3C.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "21af5e7f2e81ed84bbe17f18b7a97ee617bfc36a",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "3C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/3D.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "78635597f4e12c1b7b197b3aed47aedfc3e6a611",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "3D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/3F.MOO.gz",
+      "forms": [
+        "AX"
+      ],
+      "git_blob": "4a7c5542cac80637a618b87307517b7ee85f90a1",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..sz.p.",
+        "flags-mask": 63291,
+        "status": "normal"
+      },
+      "mnemonic": "AAS",
+      "opcode": "3F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/40.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "18833d1c0d651e280ca3edc613751d94ef341163",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "40",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/41.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "a70380e146c2e81651d33018473dc7cdeb924423",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "41",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/42.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "588880c7aca8ca34e7dd15b7da7315b095dbfd87",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "42",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/43.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "52c0772b562c3fac77bc96378edde77f13d9a7e2",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "43",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/44.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "79e8d855d005f16f65b5f5326f2f5442c4659f50",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "44",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/45.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "5cc14183c192e478fdf27416b00fb4674be57df9",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "45",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/46.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "777300e0502804c950455c38ddeb1652b0632019",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "46",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/47.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "3dc59c5ded54b3da57d7009d92713c3fbfe13425",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "47",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/48.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "68866a60e5a1ed075fa505f43fee49d6dda0b4ba",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "48",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/49.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "2c2ff4b44185b157a3079b80430f236c5ee67d35",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "49",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4A.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "456a4a67a9246f9a9dd4f4e3adc6bbf48370242a",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4A",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4B.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "517d97b6c65067a4f6773b05d1aed97657e35c99",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4B",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4C.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "9f96a9b693534b850a6f01385373568e2fe6c76b",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4C",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4D.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "c00daadd4557837b8c2e27b4814ac4ed7a970453",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4D",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4E.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "ec4b7e46d981bca7bd0f936722caab86e6fc4e9c",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/4F.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "9a3ec3bf74c36e4a9483ad64f68fc6b32cc02fe1",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "4F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/50.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "b40309ba2ae2e97a6ee93e3b2f89ac246df2d76d",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "50",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/51.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "5504e1f6e1c13f725654dcf23b06032b814b5318",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "51",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/52.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "a8115a26941734a471846f732fc011534e3fcc9b",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "52",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/53.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "2bb646e268ba53ac745471be721135c7195ae0d8",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "53",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/54.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "1ac3b5e1ffd3d1d131d4cb10f99a79f1ecf24594",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "54",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/55.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "da5e8a56cf8c6128c989b7155cfa7ce30be500ee",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "55",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/56.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "ff226fafb1c982f602a14a4d32e16eccd01391b6",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "56",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/57.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "723b3893531cb71f4079865a22bd1fec82eb16f9",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "57",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/58.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "ece13777f4f3e2527c6ff196d97e831d8a09d6cc",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "58",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/59.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "fa36a9f329f5fb42806e007248090b5e48aca0cc",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "59",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5A.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "b3127996b30d5224c07309c98a63f262c4a9754c",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5B.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "d783509960e1bcd8e12528e1c95524ccc29ca0c0",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5C.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "ad53c2b983dbc79f68c4221cc5f64619d7d8d8cc",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5D.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "b56aefdbbef937f26922562c3c3c3e33f3f59e35",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5E.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "a874c1cf9b464ed07b1480d711b44e2bdf196d71",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5E",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/5F.MOO.gz",
+      "forms": [
+        "r16"
+      ],
+      "git_blob": "6ba84da17c14148bc1c0b2710ccf81d988957169",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POP",
+      "opcode": "5F",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/60.MOO.gz",
+      "forms": [
+        "word registers, original SP"
+      ],
+      "git_blob": "a3b638fddef965145267942b7577993848571440",
+      "group": "stack",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSHA",
+      "opcode": "60",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/61.MOO.gz",
+      "forms": [
+        "word registers, skipped SP slot"
+      ],
+      "git_blob": "eb1c3726530d5b26275344e7e428359dcdc2cca3",
+      "group": "stack",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POPA",
+      "opcode": "61",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/62.MOO.gz",
+      "forms": [
+        "r16,m16:16",
+        "mod=3 invalid"
+      ],
+      "git_blob": "44999613e6c881d2f89b3e5dfce170c462d53290",
+      "group": "bounds",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "BOUND",
+      "opcode": "62",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/68.MOO.gz",
+      "forms": [
+        "imm16"
+      ],
+      "git_blob": "83c6b70218b7d907fed6b452aca6febf476e8478",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "68",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/69.MOO.gz",
+      "forms": [
+        "r16,r/m16,imm16"
+      ],
+      "git_blob": "d6217ade2cb7b8d4758d2b187a56177e91eb5126",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "IMUL",
+      "opcode": "69",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6A.MOO.gz",
+      "forms": [
+        "imm8 signed"
+      ],
+      "git_blob": "4150773c2de9780ce7daee211fafee816e65d2d3",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "6A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6B.MOO.gz",
+      "forms": [
+        "r16,r/m16,imm8 signed"
+      ],
+      "git_blob": "5e4e1b6aae80236f00872d6cce2e0202846c7656",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "IMUL",
+      "opcode": "6B",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 2000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6C.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "1c26d7724e44a2e8872c431586d2ca5da60e5c0c",
+      "group": "io-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "INS",
+      "opcode": "6C",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 2000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6D.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "cbff84ae8ecd95aada6c71728162dfc3148e2d7e",
+      "group": "io-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "INS",
+      "opcode": "6D",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 2000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6E.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "35c9bfd51c711983b678874897e9ee0b9895511e",
+      "group": "io-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "OUTS",
+      "opcode": "6E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 2000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/6F.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "7a1c859969cad5beab706743247ec7b7c84efb05",
+      "group": "io-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "OUTS",
+      "opcode": "6F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/70.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "b6f8fc12251e9b6001167b451f17224a825da08f",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JO",
+      "opcode": "70",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/71.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "09e84ea5745db36ccf6164b6d3d8502d6270af3e",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JNO",
+      "opcode": "71",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/72.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "7e2e46a8fd0587895dd9c2ed12046d7cc94f4533",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JB",
+      "opcode": "72",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/73.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "a03e75a0ad37174c7985935c9c0115190f1c53dc",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JAE",
+      "opcode": "73",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/74.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "7daa2e382bf888ccb55cc40d73543bd52b8ffc29",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JE",
+      "opcode": "74",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/75.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "e8465576ad45a17404e614970469bb6f438d090f",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JNE",
+      "opcode": "75",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/76.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "4559591daa0f73320157ab824ce9bb2eb5a0d587",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JBE",
+      "opcode": "76",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/77.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "7194c38d4a3537df52d508901428dd943849f07a",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JA",
+      "opcode": "77",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/78.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "e7a7679101309247db485e34cd5f079be1b7e85e",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JS",
+      "opcode": "78",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/79.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "59ddbbeb97c534cbb98eac085d9ad16749341175",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JNS",
+      "opcode": "79",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7A.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "a0f382e279d8346c8d1ed5e5c0f23fa11e6345a5",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JP",
+      "opcode": "7A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7B.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "838560dec574b37dbaf2fc95d7cb9ba18b3bb057",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JNP",
+      "opcode": "7B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7C.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "32ba587d6d6521d37bc0bfd7d6dacb6b1561d5a6",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JL",
+      "opcode": "7C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7D.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "4f78537e78b1fdbc09d9104e26c097c2a3c97585",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JGE",
+      "opcode": "7D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7E.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "2d2b9cf3aa578d1180b5da305ff5261f0fb65c71",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JLE",
+      "opcode": "7E",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/7F.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "ee34c612f4883e835393ebbd309060a1c185cbd0",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JG",
+      "opcode": "7F",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.0.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "982a89307ee5ddc30fb709abffae5d7e8b7f98cf",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "80.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.1.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "cb55f26ead1044d5e63c3e686b4f0058b00f8483",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "80.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.2.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "0650303579cde78ad1256e7ac6dc5144471bb402",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "80.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.3.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "b0743073d988f8e8709b071d37f7b69611dd3e17",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "80.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.4.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "3366baaeeeac0e2aa848c6a0eb334d54e4e115b7",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "80.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.5.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "5afa57d44f62c39f3d7c0f096db17ac715102a45",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "80.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.6.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "55c070283c44b9a3ec18bece1feaf7a65424bce1",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "80.6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/80.7.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "2c2a0d96b5af8c12cca7088108f39d1462746192",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "80.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.0.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "a62ee35a4e51797ae04ca248d5ffaac03631ebd3",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "81.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.1.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "dd21c1010d1ade0a67502c0020e1911568a9adba",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "81.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.2.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "65016b74558af4418a35511cae66f23b07114cc9",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "81.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.3.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "9cf728ff64e33c404b4455a7bf01c57ac7d00c0c",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "81.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.4.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "599b292f43b7ce7c318aa0ca11ed6bd8dabf9120",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "81.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.5.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "228b37813fc025c52f810111e7f699ce985e7ae6",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "81.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.6.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "c02104d6511c7b237544f1008e93a5da5cb5510d",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "81.6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/81.7.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "476c1d83a470e9e3090ca90cf469742d7eaf002b",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "81.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.0.MOO.gz",
+      "git_blob": "86198bfeff44ef74d089c1b383ac3a595e72ab4b",
+      "metadata": {
+        "arch": "86",
+        "status": "alias"
+      },
+      "opcode": "82.0",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.1.MOO.gz",
+      "git_blob": "881fe227a8d1dd5d3e72dc15bd4b01c73e196bc6",
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "alias"
+      },
+      "opcode": "82.1",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.2.MOO.gz",
+      "git_blob": "41e48ecbb6a8b069719468186148e699aaca72bf",
+      "metadata": {
+        "arch": "86",
+        "status": "alias"
+      },
+      "opcode": "82.2",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.3.MOO.gz",
+      "git_blob": "24ee7bd1bf3dd2024f8d5cd3d9a4a3810ff09017",
+      "metadata": {
+        "arch": "86",
+        "status": "alias"
+      },
+      "opcode": "82.3",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.4.MOO.gz",
+      "git_blob": "d5c0db43322a38a9402aa1c3aca6eccddd6ac53d",
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "alias"
+      },
+      "opcode": "82.4",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.5.MOO.gz",
+      "git_blob": "2f6fb76f5d0cfa2655d59a5575f08aeef9d2258d",
+      "metadata": {
+        "arch": "86",
+        "status": "alias"
+      },
+      "opcode": "82.5",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.6.MOO.gz",
+      "git_blob": "14a2dcbf50c2b4671b25ec91a1c789b88f5afe80",
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "alias"
+      },
+      "opcode": "82.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/82.7.MOO.gz",
+      "git_blob": "eace10e9358cfd77a4c653e7d0f3a64231214edf",
+      "metadata": {
+        "arch": "86",
+        "status": "alias"
+      },
+      "opcode": "82.7",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.0.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "8c386ddb4dbd3222a9be92ed71af7b5f1010d4c0",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADD",
+      "opcode": "83.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.1.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "304fa9a87a687e6b19e9be518b9e215c7fdbf9e3",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "OR",
+      "opcode": "83.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.2.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "35766f431865b55cd568991727c6f85b3079ecfb",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ADC",
+      "opcode": "83.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.3.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "ca7c4086dc557c1c09fa792f3691e240044d5fc7",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SBB",
+      "opcode": "83.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.4.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "56f500488ab5e5c1f00a83b1367cf006b08f3b6b",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "AND",
+      "opcode": "83.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.5.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "0a3f8801168e020247d8ddaf2742968f5e413ad8",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SUB",
+      "opcode": "83.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.6.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "759b86dffe4f41c82d8cad3721efaae77e71f26f",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "XOR",
+      "opcode": "83.6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/83.7.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "6c9df557f909f6e4f072c87cd0d423c060859739",
+      "group": "binary-alu",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMP",
+      "opcode": "83.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/84.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "51dec8950349a961fd482fe7fe67d76fd3e077df",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "84",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/85.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "dcc7be696640d0f7461abc2288f82bdc2b3fe643",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "85",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/86.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "68547cdf97cce9eb4dfe93b12a6c8debf5d9a026",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "86",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/87.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "efc8698af1e7efc0fb26a90b714d95434d7ccdfb",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "87",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/88.MOO.gz",
+      "forms": [
+        "r/m8,r8"
+      ],
+      "git_blob": "c4413057ead2f3a4b8571565c02022e24ae25628",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "88",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/89.MOO.gz",
+      "forms": [
+        "r/m16,r16"
+      ],
+      "git_blob": "16697200fa95a5e418b524c46a192c922688fb0e",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "89",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8A.MOO.gz",
+      "forms": [
+        "r8,r/m8"
+      ],
+      "git_blob": "75a4210a7924b2dd5525e39d3d5a86bfe15cf275",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "8A",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8B.MOO.gz",
+      "forms": [
+        "r16,r/m16"
+      ],
+      "git_blob": "85a18484b5747dbd97c33bb9a4a157393e050308",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "8B",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8C.MOO.gz",
+      "forms": [
+        "r/m16,ES/CS/SS/DS",
+        "reg>3 invalid"
+      ],
+      "git_blob": "efd70e28944e4b2b140458e3a00560d3e1e450b3",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "8C",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8D.MOO.gz",
+      "forms": [
+        "r16,m",
+        "mod=3 invalid"
+      ],
+      "git_blob": "90f6c96a83ca0b8f338bd3fd3e16e88fcf0a9953",
+      "group": "pointer",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LEA",
+      "opcode": "8D",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8E.MOO.gz",
+      "forms": [
+        "ES/SS/DS,r/m16",
+        "CS destination or reg>3 invalid"
+      ],
+      "git_blob": "4f092520c14d9cf2503a4b698ab14ca64566f51d",
+      "group": "segment",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "8E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/8F.MOO.gz",
+      "forms": [
+        "r/m16 (/0)",
+        "/1..7 invalid"
+      ],
+      "git_blob": "f4a5a69a009ca18113c74a8397e1640be293b1e8",
+      "group": "stack",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "reg": {
+          "0": {
+            "arch": "86",
+            "status": "normal"
+          },
+          "1": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "2": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "3": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "4": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "5": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "6": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "7": {
+            "arch": "86",
+            "status": "undefined"
+          }
+        }
+      },
+      "mnemonic": "POP",
+      "opcode": "8F",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/90.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "21208a613345c00bb215c753a0352acc46553855",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "90",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/91.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "9d63ae1469aedef362f509987ed35e8e5a5bf950",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "91",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/92.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "5d1ebb16e1bca77064b859967bf06203bf81323c",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "92",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/93.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "f2938a5f6a4888070ecf88c76a551611b18c1db9",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "93",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/94.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "7a0ac609ed70004b4108d238880625455dc3516b",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "94",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/95.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "6c94d5185f5d39a1dd4de3dcb4baf4d5c352e6a8",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "95",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/96.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "e2066b8cb8a258f697fa91d1780885a128a296b3",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "96",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/97.MOO.gz",
+      "forms": [
+        "AX,r16 (90 is NOP)"
+      ],
+      "git_blob": "26b78a0b6e7636fa9bd5ce81b8516a2226d3f17f",
+      "group": "exchange",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XCHG",
+      "opcode": "97",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/98.MOO.gz",
+      "forms": [
+        "AX <- signed AL"
+      ],
+      "git_blob": "b8ab22d49fac470f8f0c77315cd1cd933b9fffb9",
+      "group": "conversion",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CBW",
+      "opcode": "98",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/99.MOO.gz",
+      "forms": [
+        "DX:AX <- signed AX"
+      ],
+      "git_blob": "0459f774ebe2b8a85db383c13e3dc70bb34a2a45",
+      "group": "conversion",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CWD",
+      "opcode": "99",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/9A.MOO.gz",
+      "forms": [
+        "ptr16:16"
+      ],
+      "git_blob": "141d6b5bd8c2b98f118671f6280d0e7395c23791",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CALL",
+      "opcode": "9A",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "npx-outside-phase7",
+      "file": "v1_real_mode/9B.MOO.gz",
+      "git_blob": "c8a6cd201b756dac35a74d7ca13806892ff8d547",
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "opcode": "9B",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/9C.MOO.gz",
+      "forms": [
+        "FLAGS"
+      ],
+      "git_blob": "82b7f2ca95fbe65b8073585591e2c7b593bd11b4",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSHF",
+      "opcode": "9C",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/9D.MOO.gz",
+      "forms": [
+        "FLAGS"
+      ],
+      "git_blob": "c52973290cddc4aa2c4af7d5ba46c44ae8d67665",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "POPF",
+      "opcode": "9D",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/9E.MOO.gz",
+      "forms": [
+        "AH"
+      ],
+      "git_blob": "262e7d573667e755201ef88143ec179ff9faeb82",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SAHF",
+      "opcode": "9E",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/9F.MOO.gz",
+      "forms": [
+        "AH"
+      ],
+      "git_blob": "0be18b2b66e289003ef4a1bb52025321d6906092",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LAHF",
+      "opcode": "9F",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A0.MOO.gz",
+      "forms": [
+        "AL,moffs8"
+      ],
+      "git_blob": "6ebc1f05f98d60ef943e5d7ca4695a8a119bf334",
+      "group": "mov",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "A0",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A1.MOO.gz",
+      "forms": [
+        "AX,moffs16"
+      ],
+      "git_blob": "6d85d73c5da4c0f65b302a46c64e0ee1a3f9d73d",
+      "group": "mov",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "A1",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A2.MOO.gz",
+      "forms": [
+        "moffs8,AL"
+      ],
+      "git_blob": "665a6f21d8d9ddf038d18216dd4e9f3dac02593b",
+      "group": "mov",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "A2",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A3.MOO.gz",
+      "forms": [
+        "moffs16,AX"
+      ],
+      "git_blob": "6c9cd34b91b1b81c8f20e18d45f8d0c41c50e5df",
+      "group": "mov",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "A3",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A4.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "c63ca1ed3be44d7f90ac37d2ad7b83ac4d80b394",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOVS",
+      "opcode": "A4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A5.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "0a56848e060f0d0f0c9bb72da3631fe9265a69b5",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOVS",
+      "opcode": "A5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A6.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "aa9d30cd31fcd1cf918fb0835dd0a3d66256365f",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMPS",
+      "opcode": "A6",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A7.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "ee6db9ba4e504c89950e8e46588f6d7af683bf1c",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMPS",
+      "opcode": "A7",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A8.MOO.gz",
+      "forms": [
+        "AL,imm8"
+      ],
+      "git_blob": "81998a981ac390cbf0e06cdfc9ce5c9db4d51c66",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "A8",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/A9.MOO.gz",
+      "forms": [
+        "AX,imm16"
+      ],
+      "git_blob": "f8cf1d25e48bcc049bbc30faa4b8da9be228bd0e",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "A9",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AA.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "e2bf205052a051404c0947c06f8b0a836f68633e",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "STOS",
+      "opcode": "AA",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AB.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "23101a0aba64a2539460ba95ba386742eff7d0ba",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "STOS",
+      "opcode": "AB",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AC.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "bfee697bafee3334de3915ce35aae89e0268f83e",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LODS",
+      "opcode": "AC",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AD.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "158ee0453f13fd69bb01473c5c01c52d6cefc11b",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LODS",
+      "opcode": "AD",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AE.MOO.gz",
+      "forms": [
+        "8-bit nonrepeated",
+        "8-bit repeated"
+      ],
+      "git_blob": "5d7632cdfaadb77682b7e787cae46446568ab902",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SCAS",
+      "opcode": "AE",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/AF.MOO.gz",
+      "forms": [
+        "16-bit nonrepeated",
+        "16-bit repeated"
+      ],
+      "git_blob": "c959aa25cee888402236a7bfc7d124a589fd5acb",
+      "group": "memory-string",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "SCAS",
+      "opcode": "AF",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B0.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "e285641fb4a5a2bcb0491a70cabd85d4e2534b6d",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B1.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "d82da1f3180ec9db5a5cb8266f4851070ac97775",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B2.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "0bb1ea000f73c3840d180854efd4de639076d831",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B3.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "e0486e23ad33ea2c2f6e4d51275fc51f181faf9f",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B4.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "960ddb7ff503698cc6043a80305722651b9d18ad",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B5.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "52e57b46db52f6a88b9c076a41ad7c5b28bc53fc",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B6.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "d0f06bb48794acec5fb698e0817748fe172ffdae",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B7.MOO.gz",
+      "forms": [
+        "r8,imm8"
+      ],
+      "git_blob": "0372097a441c03bf4793ce8fb9009b6fa06fd40b",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B8.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "a8f61f53306b66814af678f58c4d4634fbf49e6a",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B8",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/B9.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "dd25f65e37361c00e3a2cfaa01b091d583acbd4b",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "B9",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BA.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "7fa1ba5c7dc2a9dc8a09313a52c46b82a60d441e",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BA",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BB.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "50f54b037c5725377e9addc0abf9e5dbb2689094",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BB",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BC.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "1d8c023f66332b26d2abb4c5a11a9b024527fd98",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BC",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BD.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "e289e916f8e701c84594eec1d4dd700dcca44df4",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BD",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BE.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "b3c649161912d64d1bd683bd36f57b8496721027",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BE",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/BF.MOO.gz",
+      "forms": [
+        "r16,imm16"
+      ],
+      "git_blob": "24466829dda0dd98c9c3a1119d33db9060d5539e",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "MOV",
+      "opcode": "BF",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.0.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "f317766c420721d0086da933f177fd62d5036360",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "C0.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.1.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "3d1c1f838f5822b1912ac8d9808a6becb2d3fd67",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "C0.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.2.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "303b4508ca4a6b214749b771135ba742c0954683",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "C0.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.3.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "26f42eb942ad5a18f80d917b34e4e368728d3060",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "C0.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.4.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "5a1091b9448b5c6d35ca285a579c062fec6fb4d7",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "C0.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.5.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "f8a8eb6bdbc7eba1f0b0f938f69a362470632e24",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "C0.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/C0.6.MOO.gz",
+      "git_blob": "73c89987d3f59b642aee89095dc26fbfbf6e4e92",
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "undocumented"
+      },
+      "opcode": "C0.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C0.7.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "1a2c425d48ba235b2fa17e4229343aeaf749cbde",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "C0.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.0.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "ffec3d3bbc5aede0c34b0f059cdd504e98712f2c",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "C1.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.1.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "1403b33f9f0db4b36282e6955fdeb807c232a72e",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "C1.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.2.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "15176d2643600584ed0a5fc5d5b0b367a115ebe4",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "C1.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.3.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "a0f3b9e28a4f981d91099e348a6187858348d4e0",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "C1.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.4.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "fcc22ab039d4a31bf4b3cf220c5b722fcddbe483",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a..",
+        "flags-mask": 63471,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "C1.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.5.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "dd39064e1f4cc2954f382f51b824f9e8da1656f6",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a..",
+        "flags-mask": 63471,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "C1.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/C1.6.MOO.gz",
+      "git_blob": "b4fa86a3ef4d6839afd406f0e520a0574469f82f",
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a..",
+        "flags-mask": 63471,
+        "status": "undocumented"
+      },
+      "opcode": "C1.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C1.7.MOO.gz",
+      "forms": [
+        "r/m16,imm8"
+      ],
+      "git_blob": "71bb0307a075ddf048bccd427c9625aec1474c2c",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a..",
+        "flags-mask": 63471,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "C1.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C2.MOO.gz",
+      "forms": [
+        "near imm16"
+      ],
+      "git_blob": "a166d322ff9e7161f6284205097bb58ad115b284",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RET",
+      "opcode": "C2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C3.MOO.gz",
+      "forms": [
+        "near"
+      ],
+      "git_blob": "2e48ed60042b19863ede536b35dce6289e1a0138",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RET",
+      "opcode": "C3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C4.MOO.gz",
+      "forms": [
+        "r16,m16:16",
+        "mod=3 invalid"
+      ],
+      "git_blob": "ae962a3287cd9cda26488571607d8271c0aa8bba",
+      "group": "pointer",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LES",
+      "opcode": "C4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C5.MOO.gz",
+      "forms": [
+        "r16,m16:16",
+        "mod=3 invalid"
+      ],
+      "git_blob": "2abeab4bc0af798af2e85d7360d4d27b61c51eda",
+      "group": "pointer",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LDS",
+      "opcode": "C5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C6.MOO.gz",
+      "forms": [
+        "r/m8,imm8 (/0)",
+        "/1..7 invalid"
+      ],
+      "git_blob": "2cb1304e5f4b31dcb5c1eb111e12c67e4af5ffb9",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "reg": {
+          "0": {
+            "arch": "86",
+            "status": "normal"
+          },
+          "1": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "2": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "3": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "4": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "5": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "6": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "7": {
+            "arch": "86",
+            "status": "undefined"
+          }
+        }
+      },
+      "mnemonic": "MOV",
+      "opcode": "C6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C7.MOO.gz",
+      "forms": [
+        "r/m16,imm16 (/0)",
+        "/1..7 invalid"
+      ],
+      "git_blob": "5cfc252e1eef3b65da44e785eaa3b4acd8cd5366",
+      "group": "mov",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "reg": {
+          "0": {
+            "arch": "86",
+            "status": "normal"
+          },
+          "1": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "2": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "3": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "4": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "5": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "6": {
+            "arch": "86",
+            "status": "undefined"
+          },
+          "7": {
+            "arch": "86",
+            "status": "undefined"
+          }
+        }
+      },
+      "mnemonic": "MOV",
+      "opcode": "C7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C8.MOO.gz",
+      "forms": [
+        "imm16,imm8 (level masked to 5 bits)"
+      ],
+      "git_blob": "60d316928a70d975ab46689c235267369b4c9027",
+      "group": "stack",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "ENTER",
+      "opcode": "C8",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/C9.MOO.gz",
+      "forms": [
+        "word frame"
+      ],
+      "git_blob": "653eebdd89aabb17b3a1e05eee8460e16db326ec",
+      "group": "stack",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "186",
+        "status": "normal"
+      },
+      "mnemonic": "LEAVE",
+      "opcode": "C9",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CA.MOO.gz",
+      "forms": [
+        "imm16"
+      ],
+      "git_blob": "b6442342f58df79c5d8727f3c510ce5b44ec8bd4",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RETF",
+      "opcode": "CA",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CB.MOO.gz",
+      "forms": [
+        "no adjustment"
+      ],
+      "git_blob": "648e6a642f3fcfb098811bc322f0e639d6b400a1",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RETF",
+      "opcode": "CB",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CC.MOO.gz",
+      "forms": [
+        "vector 3"
+      ],
+      "git_blob": "e8d569659ed2be37438af15e1171855e244ea233",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INT3",
+      "opcode": "CC",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CD.MOO.gz",
+      "forms": [
+        "imm8"
+      ],
+      "git_blob": "0c50cf07b2f9b771d2705a022ac78f2cafcd2432",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INT",
+      "opcode": "CD",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CE.MOO.gz",
+      "forms": [
+        "conditional vector 4"
+      ],
+      "git_blob": "8df7eef67c5234f17553908dcc8d187c56911afa",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INTO",
+      "opcode": "CE",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/CF.MOO.gz",
+      "forms": [
+        "real-mode frame"
+      ],
+      "git_blob": "a54a7461a239834aa8f47898efc84c3f7d40d053",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "IRET",
+      "opcode": "CF",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.0.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "5ff63f6d49204576df389cf3248a52acb34ef73b",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "D0.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.1.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "b506b55017a79ad1e6f87793d5863b1b25546dfb",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "D0.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.2.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "ef1f7eb79200803322a6fc3e735656e547877f50",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "D0.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.3.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "b479c993ab0d8f4198d449300f9b7de453840049",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "D0.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.4.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "ad68be8ee4b517c2f09e5d701dab779077df1954",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "D0.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.5.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "2d9ea5809b471529cc3db99e5c0680633edbab5d",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "D0.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/D0.6.MOO.gz",
+      "git_blob": "30e561c195786773968367ef8c849ff6bf7fe749",
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "undocumented"
+      },
+      "opcode": "D0.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D0.7.MOO.gz",
+      "forms": [
+        "r/m8,1"
+      ],
+      "git_blob": "8b3e38e79c839546506b62db8ce902b5faaa4e9a",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "D0.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.0.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "a055f4296d9487392b172cb0658d60624c2d9050",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "D1.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.1.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "0bd99571c28790fc4aa842c4d42c6957d1b71f35",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "D1.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.2.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "c8141097a2f6c7287829c45c2df1c5ea965eb8ad",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "D1.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.3.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "8edd0ff45b556636d7cb2d317432aed083b65881",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "D1.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.4.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "a6ca2b6d488e2d67e848cd60c92b77caf6639f1b",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "D1.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.5.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "e986f56c33897d5692750a09281fc96fbfbec8b2",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "D1.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/D1.6.MOO.gz",
+      "git_blob": "136c655f42e676d9aa3df0c790468445c941bc0c",
+      "metadata": {
+        "arch": "186",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "undocumented"
+      },
+      "opcode": "D1.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D1.7.MOO.gz",
+      "forms": [
+        "r/m16,1"
+      ],
+      "git_blob": "fd89ffe3f7387f657ea650a80c00c0afd791b502",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "D1.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.0.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "e3d9f3de1341809c59ed0e080a98fb66357b2614",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "D2.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.1.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "4a7c0f7e28c6a9dd3c0653b2a1b74aac5624cbd7",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "D2.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.2.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "11e108173ae8c89860c43e67f4b41618a2716505",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "D2.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.3.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "39d7e069a99967677bcc02ca878e4d36c16e979c",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "D2.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.4.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "1e395b3123580a56c8d1d131c23c16f0c095a18f",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "D2.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.5.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "ef4caf532218dedd34195a66ebb4641b1af2e814",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "D2.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/D2.6.MOO.gz",
+      "git_blob": "f06f1494134e96a1703d4a03c2bdac38fc2f3152",
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "undocumented"
+      },
+      "opcode": "D2.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D2.7.MOO.gz",
+      "forms": [
+        "r/m8,CL"
+      ],
+      "git_blob": "bff3fa472b38ac9b865a24bb4a24c7f3cb750250",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "D2.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.0.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "274292e8c0e7f0633521bdf0c727fabcb9dda097",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROL",
+      "opcode": "D3.0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.1.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "c43eb983b68b48d75f8f54c9e1ff8fba8b13fb08",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "ROR",
+      "opcode": "D3.1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.2.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "8c785c38e70537586ff4a556545a62b3229f193e",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCL",
+      "opcode": "D3.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.3.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "e75e33f5b9425074194bf6a10543ed069d694475",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o.......",
+        "flags-mask": 63487,
+        "status": "normal"
+      },
+      "mnemonic": "RCR",
+      "opcode": "D3.3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.4.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "7922c100fdc9f10095a9bdc7a44df511eda9b679",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SHL/SAL",
+      "opcode": "D3.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.5.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "62108972a589d17004029329b990077daaa5f9ed",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SHR",
+      "opcode": "D3.5",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "undocumented-shift-extension",
+      "file": "v1_real_mode/D3.6.MOO.gz",
+      "git_blob": "39274c3495f0b982c61472b82271440661d5e436",
+      "metadata": {
+        "arch": "186",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "undocumented"
+      },
+      "opcode": "D3.6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D3.7.MOO.gz",
+      "forms": [
+        "r/m16,CL"
+      ],
+      "git_blob": "7f7ace2819ffc874c4d0d13511277fd7dc0f921b",
+      "group": "shift-rotate",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "SAR",
+      "opcode": "D3.7",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D4.MOO.gz",
+      "forms": [
+        "imm8; decimal base 10"
+      ],
+      "git_blob": "1c99e9c939700b9a5cce725958139f44a3ca7157",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "AAM",
+      "opcode": "D4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D5.MOO.gz",
+      "forms": [
+        "imm8; decimal base 10"
+      ],
+      "git_blob": "318c33d7ea790b739581fa84594802c9e0511cba",
+      "group": "adjust",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o....a.c",
+        "flags-mask": 63470,
+        "status": "normal"
+      },
+      "mnemonic": "AAD",
+      "opcode": "D5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": "undocumented-salc",
+      "file": "v1_real_mode/D6.MOO.gz",
+      "git_blob": "bda19075232193a5dd8d146feb332ffe2a8c814e",
+      "metadata": {
+        "arch": "v30",
+        "status": "undocumented"
+      },
+      "opcode": "D6",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/D7.MOO.gz",
+      "forms": [
+        "AL,[BX+AL]"
+      ],
+      "git_blob": "f9e3c82ccdf39bd2bf67c351cf7de801eb34ed50",
+      "group": "pointer",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "XLAT",
+      "opcode": "D7",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "npx-outside-phase7",
+      "file": "v1_real_mode/D8.MOO.gz",
+      "git_blob": "28acdad5d704d65eb661d9e4b0351ed3c3335ad3",
+      "metadata": {
+        "arch": "86",
+        "status": "fpu"
+      },
+      "opcode": "D8",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E0.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "a9419859eb4cae024ddb5862ef8b8cc0f3a5102f",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LOOPNE",
+      "opcode": "E0",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E1.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "b670c408384ab40c1a0c776bf3d448054d7d5f50",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LOOPE",
+      "opcode": "E1",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E2.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "326d9b5320e8b804568e6850e58aae9d1ada852b",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "LOOP",
+      "opcode": "E2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E3.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "efefbbd763eb439a4f82f056361bcdca5e36f740",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JCXZ",
+      "opcode": "E3",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E4.MOO.gz",
+      "forms": [
+        "8-bit, port imm8 zero-extended"
+      ],
+      "git_blob": "6972626bd140c6447bf2aeae0bdd7e0b499130da",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "IN",
+      "opcode": "E4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E5.MOO.gz",
+      "forms": [
+        "16-bit, port imm8 zero-extended"
+      ],
+      "git_blob": "9849c1115a1444b47ab0cf96bb928bf055112244",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "IN",
+      "opcode": "E5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E6.MOO.gz",
+      "forms": [
+        "8-bit, port imm8 zero-extended"
+      ],
+      "git_blob": "a8bfb9c1133063af18c11d1e5a6a2b8dd8658d19",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "OUT",
+      "opcode": "E6",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E7.MOO.gz",
+      "forms": [
+        "16-bit, port imm8 zero-extended"
+      ],
+      "git_blob": "092e5ea2de2fc286ae0afb02cb90dd9868e85a6f",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "OUT",
+      "opcode": "E7",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E8.MOO.gz",
+      "forms": [
+        "rel16"
+      ],
+      "git_blob": "a9b553f077223ff7cb378c74a8a5f132b4f5478a",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CALL",
+      "opcode": "E8",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/E9.MOO.gz",
+      "forms": [
+        "rel16"
+      ],
+      "git_blob": "7b4fd4eaf3cc2fc893e79636994997ffc02a806b",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JMP",
+      "opcode": "E9",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/EA.MOO.gz",
+      "forms": [
+        "ptr16:16"
+      ],
+      "git_blob": "8d01bc8d2d6538035daf5c9bbfbca5edbf96c91c",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JMP",
+      "opcode": "EA",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/EB.MOO.gz",
+      "forms": [
+        "rel8"
+      ],
+      "git_blob": "77301df3ffc7490b7f03480d0196b30c8d081553",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JMP",
+      "opcode": "EB",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/EC.MOO.gz",
+      "forms": [
+        "8-bit, port DX"
+      ],
+      "git_blob": "6f628a5fed3e3526e05e53678f5e67b1d5939a68",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "IN",
+      "opcode": "EC",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/ED.MOO.gz",
+      "forms": [
+        "16-bit, port DX"
+      ],
+      "git_blob": "8d18a27e118b9819b225649cb8bbbd9a76bd3505",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "IN",
+      "opcode": "ED",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/EE.MOO.gz",
+      "forms": [
+        "8-bit, port DX"
+      ],
+      "git_blob": "95f779e649173847eede7f6faa3aebdf35e0505e",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "OUT",
+      "opcode": "EE",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/EF.MOO.gz",
+      "forms": [
+        "16-bit, port DX"
+      ],
+      "git_blob": "633e0e177805d05a26d118cb866e9383cb59a0cb",
+      "group": "port-io",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "OUT",
+      "opcode": "EF",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F4.MOO.gz",
+      "forms": [
+        "no operands"
+      ],
+      "git_blob": "c595f8ad8db073aee43eaf6d6a92899521d6117b",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "HLT",
+      "opcode": "F4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F5.MOO.gz",
+      "forms": [
+        "CF"
+      ],
+      "git_blob": "618546cb9de1834ee6831141ba218ef25137c8e7",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CMC",
+      "opcode": "F5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.0.MOO.gz",
+      "forms": [
+        "r/m8,imm8"
+      ],
+      "git_blob": "93a7fd2cdd782803722d50a7068e6c5c3ba5619e",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "F6.0",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/F6.1.MOO.gz",
+      "git_blob": "ebf477c0723b42ce7c0d80955075abe8b4798123",
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "alias"
+      },
+      "opcode": "F6.1",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.2.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "7fb29506674ce399fe6dbb7d2cb1e3dd4e2e556e",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "NOT",
+      "opcode": "F6.2",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.3.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "7d1e237da87b1de0c0391608d5035f90fc4acae0",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "NEG",
+      "opcode": "F6.3",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.4.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "a047485c6800ebff442bc3bb6ca272d37fa20ec8",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "MUL",
+      "opcode": "F6.4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.5.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "ec677cf4d1bf5699a8477d97f75183aa6587e76a",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "IMUL",
+      "opcode": "F6.5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.6.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "48989b496946ba83fd2745386817723401396795",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..szapc",
+        "flags-mask": 63274,
+        "status": "normal"
+      },
+      "mnemonic": "DIV",
+      "opcode": "F6.6",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F6.7.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "2a47a684799912bc4b0c507b476d4d87d1d347d2",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..szapc",
+        "flags-mask": 63274,
+        "status": "normal"
+      },
+      "mnemonic": "IDIV",
+      "opcode": "F6.7",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.0.MOO.gz",
+      "forms": [
+        "r/m16,imm16"
+      ],
+      "git_blob": "5f991d8ff74808832f5170c9f4f10a4b0cbb0774",
+      "group": "unary-test",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "normal"
+      },
+      "mnemonic": "TEST",
+      "opcode": "F7.0",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": "noncanonical-alias-outside-documented-scope",
+      "file": "v1_real_mode/F7.1.MOO.gz",
+      "git_blob": "87bfd7537771ec2859f102ef9f8cceebd060ef7a",
+      "metadata": {
+        "arch": "86",
+        "flags": ".....a..",
+        "flags-mask": 65519,
+        "status": "alias"
+      },
+      "opcode": "F7.1",
+      "scope": "excluded"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.2.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "572857aab670e63633dbb107c1ed0ddb8f6243be",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "NOT",
+      "opcode": "F7.2",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.3.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "365c16b7e123b0c0d08a87cf616677adfcccea64",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "NEG",
+      "opcode": "F7.3",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.4.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "e9c9a2ec16e82c7a9e08080e7aa0f8598480f968",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "MUL",
+      "opcode": "F7.4",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.5.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "12db395d4859be5211f3aa06e59d7de7791c1e55",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "...szap.",
+        "flags-mask": 65323,
+        "status": "normal"
+      },
+      "mnemonic": "IMUL",
+      "opcode": "F7.5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.6.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "f31ce16d756bc47d4c705ca6211bdf3192b6d3ba",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..szapc",
+        "flags-mask": 63274,
+        "status": "normal"
+      },
+      "mnemonic": "DIV",
+      "opcode": "F7.6",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F7.7.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "c61e627408d77706a8a1857486ca0a6548571d0b",
+      "group": "multiply-divide",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "flags": "o..szapc",
+        "flags-mask": 63274,
+        "status": "normal"
+      },
+      "mnemonic": "IDIV",
+      "opcode": "F7.7",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F8.MOO.gz",
+      "forms": [
+        "CF"
+      ],
+      "git_blob": "75d3f5eb70a814b96c1ad17da55e7031f30ee5af",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CLC",
+      "opcode": "F8",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/F9.MOO.gz",
+      "forms": [
+        "CF"
+      ],
+      "git_blob": "171918dc6835fa80874a70a51efe802d7485e42c",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "STC",
+      "opcode": "F9",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FA.MOO.gz",
+      "forms": [
+        "IF"
+      ],
+      "git_blob": "5c406322f4a55572471c16f1a13e7933df6cc24b",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CLI",
+      "opcode": "FA",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FB.MOO.gz",
+      "forms": [
+        "IF"
+      ],
+      "git_blob": "1be98ef4240b705483abb54a73a54a139e228336",
+      "group": "events",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "STI",
+      "opcode": "FB",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FC.MOO.gz",
+      "forms": [
+        "DF"
+      ],
+      "git_blob": "12ec7437069a930a93334c12741ac7f2f5ae87e9",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CLD",
+      "opcode": "FC",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 1000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FD.MOO.gz",
+      "forms": [
+        "DF"
+      ],
+      "git_blob": "87dfc4d3352dc19f7a08ce7ad2019c23f7973469",
+      "group": "flags",
+      "implementation": "implemented-candidate",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "STD",
+      "opcode": "FD",
+      "phase7_validation": "pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FE.0.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "d362dcd7340b82bbaa9906e97db17fc4f0f6ccf1",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "FE.0",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FE.1.MOO.gz",
+      "forms": [
+        "r/m8"
+      ],
+      "git_blob": "2eed921e3588068570ca81501218d9f5e1ee40c7",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "FE.1",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.0.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "46ad47d483335d93dbc791db94403560000947fd",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "INC",
+      "opcode": "FF.0",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.1.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "9b4862d152dd0dc7831c95c1592a505c33ccdb9d",
+      "group": "unary-test",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "DEC",
+      "opcode": "FF.1",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.2.MOO.gz",
+      "forms": [
+        "r/m16 near"
+      ],
+      "git_blob": "0ebc8283711de22e17a10439bdae05a1517c496d",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CALL",
+      "opcode": "FF.2",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.3.MOO.gz",
+      "forms": [
+        "m16:16 far; mod=3 invalid"
+      ],
+      "git_blob": "281f78485614436fe223d907abab92d62e63f4d3",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "CALL",
+      "opcode": "FF.3",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.4.MOO.gz",
+      "forms": [
+        "r/m16 near"
+      ],
+      "git_blob": "e2196f09d0d697d8e9206559e62463604459556d",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JMP",
+      "opcode": "FF.4",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.5.MOO.gz",
+      "forms": [
+        "m16:16 far; mod=3 invalid"
+      ],
+      "git_blob": "37f64d59b7f624673291aa6a25b0a377abcf9848",
+      "group": "far-control",
+      "implementation": "pending",
+      "legacy_family": false,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "JMP",
+      "opcode": "FF.5",
+      "phase7_validation": "pending",
+      "prefix_readmission": "pending",
+      "scope": "required"
+    },
+    {
+      "case_count": 5000,
+      "exclusion_reason": null,
+      "file": "v1_real_mode/FF.6.MOO.gz",
+      "forms": [
+        "r/m16"
+      ],
+      "git_blob": "60060318f6e0b59971743879c5ba349dee85d1e6",
+      "group": "near-control",
+      "implementation": "implemented-candidate",
+      "legacy_family": true,
+      "metadata": {
+        "arch": "86",
+        "status": "normal"
+      },
+      "mnemonic": "PUSH",
+      "opcode": "FF.6",
+      "phase7_validation": "integrated-gate-pending",
+      "prefix_readmission": "implemented-candidate",
+      "scope": "required"
+    }
+  ],
+  "inventory_files": 326,
+  "legacy": {
+    "admitted": 474049,
+    "discovered": 518000,
+    "families": 106,
+    "faults": 1423,
+    "normal": 440574,
+    "phase6_new": 32052,
+    "prefix_excluded": 43951
+  },
+  "phase": 7,
+  "required_files": 307,
+  "schema": 1,
+  "status": "in-progress"
+}

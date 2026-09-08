@@ -27,8 +27,8 @@ PROBES = (
      "allowed && is_memory && within_limit",
      "pending operation cannot resubmit"),
     ("word-limit-wrap", "spk286_operand", "spk286_operand_service",
-     "({1'b0, offset} + 17'd1)",
-     "{1'b0, 16'(offset + 16'd1)}",
+     "({1'b0, offset} + (request_byte ? 17'd0 : 17'd1))",
+     "{1'b0, 16'(offset + (request_byte ? 16'd0 : 16'd1))}",
      "invalid whole word rejected before acceptance"),
 )
 

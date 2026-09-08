@@ -1,20 +1,23 @@
 {
-  "address_width": 7,
-  "compiler_version": "5.0",
-  "encoding_version": 5,
-  "format_version": 5,
-  "instruction_entries": 28,
-  "rom_depth": 128,
+  "address_width": 8,
+  "compiler_version": "8.0",
+  "encoding_version": 8,
+  "format_version": 8,
+  "instruction_entries": 48,
+  "rom_depth": 235,
   "schema_version": 1,
   "source_sha256": {
     "data_move.mc": "0aa4ae7fa92080e5d14b2118327c4f528e31f1e015c3fe0b1f8c5cb31f718823",
-    "word_alu.mc": "b4230a9c35c20bd2c0db9ed84590f33b4777a9f368acc939ad779986feb415ee",
+    "word_alu.mc": "87c682e9ee39d53434830267be179899a12c68bf39f400bd82e77db266e6b8e4",
     "word_stack_control.mc": "adbc7d859f27d0add9d2e86ece19d8a92a25612f4dda4ec655e64e2363c0c415",
-    "z_interrupts.mc": "768647de72c75af863047065cafa29efd6cc519f32ee77dc92a62221ca5bee37"
+    "z_interrupts.mc": "768647de72c75af863047065cafa29efd6cc519f32ee77dc92a62221ca5bee37",
+    "zz_byte_scalar.mc": "0635b236683bba54a31901f4e527f1786a6cf36cab3c2c8115a80ec1415fc755",
+    "zzz_scalar.mc": "a3a2f32697d081b9c958a1b5e9a769d62289eab1566ef5df2fe7043634f0086b",
+    "zzzz_shift.mc": "d56f94b679e8b5ac7da010c6a269ed81fe431312568ddc9056b350f862527f90"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 128,
+  "used_words": 235,
   "validation": "PASS",
   "warnings": [],
   "word_width": 6
