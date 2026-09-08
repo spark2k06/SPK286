@@ -105,9 +105,9 @@ class SingleStepAccountingTests(unittest.TestCase):
 
     def test_positive_and_negative_results_keep_exact_totals(self):
         self.assertEqual(self.invoke("SINGLESTEP_RESULT executed=1 passed=1 failed=0 cycles=10\n"),
-                         (1, 0, 0, 1, 1, 0))
+                         (1, 0, 0, 0, 0, 1, 1, 0))
         self.assertEqual(self.invoke("SINGLESTEP_RESULT executed=1 passed=0 failed=1 cycles=10\n", 1),
-                         (1, 0, 0, 1, 0, 1))
+                         (1, 0, 0, 0, 0, 1, 0, 1))
 
     def test_duplicate_case_identity_is_not_double_counted(self):
         first = case_mapping()

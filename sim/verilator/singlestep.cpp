@@ -147,7 +147,7 @@ std::uint16_t read_bus_word(const std::map<std::uint32_t, std::uint8_t>& memory,
 }
 
 void apply_bus_write(Vspk286& dut, std::map<std::uint32_t, std::uint8_t>& memory) {
-    if (!dut.bus_valid || !dut.bus_write) return;
+    if (!dut.bus_valid || !dut.bus_write || !dut.ready) return;
     const std::uint32_t address = dut.address & 0xFFFFFFU;
     if ((address & 1U) != 0U) {
         memory[address] = static_cast<std::uint8_t>((dut.data_out >> 8) & 0xFFU);
@@ -277,12 +277,26 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
         if (dut.bus_valid) {
             dut.ready = 1;
             dut.data_in = read_bus_word(memory, dut.address);
+            // Code prefetch may run past the sparse initialized stream. Data
+            // reads must have every selected byte supplied by the hardware case.
+            if (dut.bus_status == 5 &&
+                (((dut.address & 1U) == 0 && memory.count(dut.address) == 0) ||
+                 (dut.bus_bhe_n == 0 && memory.count(dut.address | 1U) == 0))) {
+                failed = true;
+                reason = "data read from unspecified sparse RAM";
+                break;
+            }
         } else {
             dut.ready = 0;
             dut.data_in = 0;
         }
         apply_bus_write(dut, memory);
         tick(dut, trace, time);
+        if (dut.operand_blocked || dut.microcode_fault) {
+            failed = true;
+            reason = dut.operand_blocked ? "operand segment bound blocked" : "microcode fault";
+            break;
+        }
         if (dut.unsupported_opcode) {
             failed = true;
             reason = "unsupported opcode observed before target retirement";
@@ -311,6 +325,16 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
         if (!failed && memory != test.expected_ram) {
             failed = true;
             reason = "memory state mismatch";
+            for (const auto& [address, value] : memory) {
+                const auto expected = test.expected_ram.find(address);
+                if (expected == test.expected_ram.end() || expected->second != value) {
+                    std::ostringstream detail;
+                    detail << reason << " at 0x" << std::hex << address << " actual=" << unsigned(value);
+                    if (expected != test.expected_ram.end()) detail << " expected=" << unsigned(expected->second);
+                    reason = detail.str();
+                    break;
+                }
+            }
         }
     }
     if (failed && report_failure) {
@@ -321,6 +345,13 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
                   << " active=" << static_cast<unsigned>(dut.debug_micro_active)
                   << " fault=" << static_cast<unsigned>(dut.microcode_fault)
                   << " queue_count=" << static_cast<unsigned>(dut.debug_prefetch_count) << '\n';
+        std::cout << "  operand: modrm=" << hex16(dut.debug_modrm)
+                  << " displacement=" << hex16(dut.debug_displacement)
+                  << " offset=" << hex16(dut.debug_effective_offset)
+                  << " segment=" << unsigned(dut.debug_operand_segment)
+                  << " blocked=" << unsigned(dut.operand_blocked)
+                  << " bus_status=" << unsigned(dut.bus_status)
+                  << " bus_address=" << std::hex << dut.address << std::dec << '\n';
     }
 
     if (trace != nullptr) {

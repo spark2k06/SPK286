@@ -20,4 +20,9 @@ if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/B8.MOO.gz" && -f "$SINGLESTEP_ROOT/revoc
 else
     echo "SINGLESTEP SMOKE SKIP: external corpus is not present; run make singlestep-fetch"
 fi
+if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/89.MOO.gz" || -f "$SINGLESTEP_ROOT/v1_real_mode/8B.MOO.gz" ]]; then
+    python3 -m tools.run_singlestep --opcode 89 --opcode 8B --smoke
+else
+    echo "SINGLESTEP OPERAND SMOKE SKIP: 89/8B corpus is not present; run make singlestep-fetch"
+fi
 echo "TEST PASS"

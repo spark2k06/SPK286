@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-Phase 2.75 implementation subset.
+Phase 3 implementation subset, including the preserved Phase 2.75 format.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -13,7 +13,8 @@ make microcode-test   # independent compiler/ROM contract tests
 
 ## Language subset
 
-Each source starts with `microcode_format 1`. Entries use uppercase snake case;
+Each source starts with `microcode_format 1` or `microcode_format 2`.
+The production operand programs require format 2. Entries use uppercase snake case;
 local debug labels use lowercase snake case and name the following operation.
 Comments start with `#`. Whitespace/indentation is not semantic.
 
@@ -26,13 +27,39 @@ writeback:
     END
 ```
 
-These are the only three executable statements. `TMP0` is a word temporary;
+These are the three executable statements in format 1. `TMP0` is a word temporary;
 `DST` is the decoder's word-register metadata. Transfers preserve FLAGS.
 `TMP0` must be defined before use in each entry. Every block ends in explicit
 `END`; trailing operations and dangling labels are errors. Labels are debug
 symbols, with no executable branch syntax in this subset. Conditional branches,
-calls, additional operands, arithmetic, bus operands and timing annotations are
+calls, arithmetic and timing annotations are
 deferred and rejected, rather than silently accepted without implementation.
+
+Format 2 adds only the reusable operand acquisition and transfer operations:
+
+```text
+microcode_format 2
+instruction MOV_RM16_R16:
+    DECODE_MODRM
+    READ_REG16 -> TMP0
+writeback:
+    TMP0 -> RM16
+    END
+
+instruction MOV_R16_RM16:
+    DECODE_MODRM
+    READ_RM16 -> TMP0
+writeback:
+    TMP0 -> REG16
+    END
+```
+
+DECODE_MODRM must precede REG16/RM16 operations and cannot be repeated within
+an entry. It consumes the required bytes and captures operand context. REG16
+means the ModR/M reg field; RM16 means either its register or segmented memory
+operand. Read operations define TMP0, and writes require a defined TMP0.
+Format 1 rejects these operations. No physical bus states, EA table, segment
+rules or delays are encoded in the source. All paths retire through END.
 
 ## Compiler and artifacts
 
@@ -59,8 +86,26 @@ They are distributable CPU inputs and must never be manually edited:
 - `spk286_microcode_validation.json`: schema/compiler/format/encoding versions,
   source SHA-256, dimensions, usage, warnings and validation status.
 
-The initial encoding is two bits: 0 invalid, 1 fetch immediate word to TMP0,
-2 transfer TMP0 to DST, 3 END. There are three used words and two address bits.
+Format 1 retains encoding 1: two bits, 0 invalid, 1 fetch immediate word to TMP0,
+2 transfer TMP0 to DST, 3 END. Format 2 uses encoding 2, four control bits:
+
+| Word | Functional operation |
+| --- | --- |
+| 0 | INVALID |
+| 1 | FETCH_IMM16 |
+| 2 | MOVE TMP0 to DST |
+| 3 | END |
+| 4 | DECODE_MODRM |
+| 5 | READ_REG16 to TMP0 |
+| 6 | READ_RM16 to TMP0 |
+| 7 | WRITE_REG16 from TMP0 |
+| 8 | WRITE_RM16 from TMP0 |
+
+The active ROM has depth 11 and four address bits; addresses 11..15 are invalid.
+Entries are
+MOV_R16_IMM16=0, MOV_RM16_R16=3, MOV_R16_RM16=7. Immediate MOV keeps words
+[1,2,3] at its original addresses. The highest input format selects output
+encoding, so historical format 1 sources still compile independently.
 The ROM uses a complete combinational `case` with invalid default; no vendor
 primitive or external initialization file is required. Synthesis may implement
 this tiny ROM as logic. It is not claimed to infer block RAM.
@@ -89,11 +134,15 @@ meaning of existing source statements.
 
 ## Execution contract
 
-The decoder consumes B8..BF and latches `opcode[2:0]` as DST while loading the
-generated entry. `spk286_microsequencer` owns micro-PC, entry and active state;
+The decoder consumes B8..BF, 89 or 8B and loads the generated entry. Immediate
+MOV latches `opcode[2:0]` as DST. `spk286_microsequencer` owns micro-PC, entry and active state;
 its ROM address output selects the generated ROM. The executor owns TMP0 and
 the low/high byte progress bit. Completion advances the sequencer, while queue
-starvation holds it. Each byte handshake advances architectural IP independently
+starvation holds it. For operand operations, the streaming context service
+holds acquisition progress and the logical operand service holds a submitted
+memory request until BIU response acceptance. Pausing preserves pending state
+and held responses; no repeated request or write is permitted. The generic
+microsequencer RTL is unchanged in Phase 3. Each byte handshake advances architectural IP independently
 of the BIU's fetch cursor. END retires exactly once after writeback.
 
 Reset and valid redirects clear microstate and temporary acquisition. Execution
@@ -102,29 +151,26 @@ reset or cancellation. Debug PCs remain at the last operation when inactive;
 consult `debug_micro_active` to distinguish a pending operation from a retired
 one. Source strings are only in the generated map/listing and Python tools.
 
-## Auditoría incorporada en Phase 2.80
+## Independent contract and round-trip audit
 
-`make microcode-audit` comprueba el contrato de Phase 2.75, la ROM RTL emitida
-y su reconstrucción a DSL canónico. `make microcode-test` incluye los tests
-del compilador y de esta auditoría. La regresión habitual ejecuta ambos.
+`make microcode-audit` checks the active phase contract, emitted RTL and its
+reconstruction to canonical DSL. It reads the compiler's package/case-ROM
+template for encodings 1 and 2, using JSON entry/label metadata because names
+are not encoded in ROM words. Recompilation must preserve words, addresses and
+symbols; comments and original source positions are outside the round-trip.
+This is not a general SystemVerilog parser. The five-artifact consistency check
+remains a prerequisite.
 
-El checker lee la plantilla concreta de package/case-ROM de encoding 1 y usa
-los entry points y labels del JSON como metadatos: las palabras de dos bits
-no contienen esos nombres. Reconstruye DSL, lo compila y compara las palabras,
-direcciones y símbolos; los comentarios y las posiciones del fuente original
-no forman parte del round-trip. No es un parser SystemVerilog general: primero
-se exige la consistencia de los cinco artefactos con el compilador existente.
+`tests/fixtures/microcode_phase2_75.json` is unchanged historical evidence:
+entry=0, writeback=1, words=[1,2,3] and the original address width. Tests compile
+the frozen historical source and retain displacement/corruption rejection.
+`tests/fixtures/microcode_phase3.json` deliberately versions the active contract:
+format 2, encoding 2, four-bit control, three entries, labels and eleven words.
+The auditor rejects mismatched versions, operation constants, symbols or words.
+No expected hardware state is changed by this versioning.
 
-`tests/fixtures/microcode_phase2_75.json` fija `MOV_R16_IMM16=0`,
-`MOV_R16_IMM16.writeback=1`, las palabras `[1, 2, 3]` y el ancho de dirección.
-El test de desplazamiento añade otra entrada antes de MOV y demuestra que la
-auditoría rechaza el cambio con ubicación de fuente. Una fase que amplíe la ISA
-deberá versionar deliberadamente su contrato, conservando éste como evidencia
-histórica; no se deben actualizar expectativas para ocultar una regresión.
-
-Los informes ignorados `canonical.mc` y `audit.json` incluyen SHA-256 del fuente
-y de los cinco artefactos. El compilador ya normalizaba CRLF/LF al leer archivos;
-los nuevos tests comprueban esa propiedad y la independencia de `PYTHONHASHSEED`
-en procesos separados. Los hashes de metadatos son del texto UTF-8 normalizado.
-No se cambian el compilador de producción, el source MOV, el formato 1, el
-encoding 1, el RTL ni los bytes de los cinco ficheros generados.
+Ignored `canonical.mc` and `audit.json` reports include source/artifact SHA-256.
+Tests preserve CRLF/LF equivalence and independence of PYTHONHASHSEED across
+processes. Metadata hashes describe normalized UTF-8 source. Compiler version
+2.0 identifies the minimal operand extension; generated outputs remain entirely
+owned by the compiler.

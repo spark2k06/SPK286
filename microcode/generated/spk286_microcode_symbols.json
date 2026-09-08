@@ -1,9 +1,13 @@
 {
   "entries": {
-    "MOV_R16_IMM16": 0
+    "MOV_R16_IMM16": 0,
+    "MOV_R16_RM16": 7,
+    "MOV_RM16_R16": 3
   },
   "labels": {
-    "MOV_R16_IMM16.writeback": 1
+    "MOV_R16_IMM16.writeback": 1,
+    "MOV_R16_RM16.writeback": 9,
+    "MOV_RM16_R16.writeback": 5
   },
   "operations": [
     {
@@ -41,6 +45,110 @@
         "entry": "MOV_R16_IMM16",
         "file": "data_move.mc",
         "line": 8
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 3,
+      "location": {
+        "entry": "MOV_RM16_R16",
+        "file": "data_move.mc",
+        "line": 11
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 4,
+      "location": {
+        "entry": "MOV_RM16_R16",
+        "file": "data_move.mc",
+        "line": 12
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_REG16",
+      "statement": "READ_REG16 -> TMP0",
+      "word": 5
+    },
+    {
+      "address": 5,
+      "location": {
+        "entry": "MOV_RM16_R16",
+        "file": "data_move.mc",
+        "line": 14
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM16",
+      "statement": "TMP0 -> RM16",
+      "word": 8
+    },
+    {
+      "address": 6,
+      "location": {
+        "entry": "MOV_RM16_R16",
+        "file": "data_move.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 7,
+      "location": {
+        "entry": "MOV_R16_RM16",
+        "file": "data_move.mc",
+        "line": 18
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 8,
+      "location": {
+        "entry": "MOV_R16_RM16",
+        "file": "data_move.mc",
+        "line": 19
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 9,
+      "location": {
+        "entry": "MOV_R16_RM16",
+        "file": "data_move.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_REG16",
+      "statement": "TMP0 -> REG16",
+      "word": 7
+    },
+    {
+      "address": 10,
+      "location": {
+        "entry": "MOV_R16_RM16",
+        "file": "data_move.mc",
+        "line": 22
       },
       "operands": [],
       "operation": "END",

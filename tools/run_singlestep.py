@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from collections import Counter
+import json
 import os
 from pathlib import Path
 import re
@@ -27,6 +29,9 @@ REG_ORDER = (
     "sp", "bp", "si", "di", "ip", "flags",
 )
 OPCODES = tuple(f"{value:02X}" for value in range(0xB8, 0xC0))
+MODRM_OPCODES = ("89", "8B")
+SUPPORTED_OPCODES = OPCODES + MODRM_OPCODES
+PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
     re.MULTILINE,
@@ -47,6 +52,27 @@ class PreparedCase:
     expected_masks: tuple[int, ...]
     initial_ram: tuple[tuple[int, int], ...]
     expected_ram: tuple[tuple[int, int], ...]
+
+
+def scope_exclusion(case: SingleStepCase, opcode: str) -> str | None:
+    """Only Phase 3 forms permit explicit, counted prefix/exception exclusions.
+
+    B8..BF admission remains strict. Unknown encodings and malformed lengths
+    are errors; this never catches an arbitrary preparation/execution failure.
+    """
+    if opcode not in MODRM_OPCODES:
+        return None
+    data = case.instruction_bytes
+    prefix_count = 0
+    while prefix_count < len(data) and data[prefix_count] in PREFIXES:
+        prefix_count += 1
+    if prefix_count >= len(data) or data[prefix_count] != int(opcode, 16):
+        raise SingleStepRunnerError(f"case {case.index}: file opcode differs from {opcode}")
+    if prefix_count:
+        return "unsupported_prefix"
+    if case.exception is not None:
+        return "exception_delivery"
+    return None
 
 
 def checked_word(value: object, label: str) -> int:
@@ -129,8 +155,18 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
         raise SingleStepRunnerError(
             f"case {case.index}: file opcode {case.instruction_bytes[0]:02X} differs from {opcode}"
         )
-    if opcode not in OPCODES or len(case.instruction_bytes) != 4:
-        raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
+    if opcode in OPCODES:
+        if len(case.instruction_bytes) != 4:
+            raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
+    elif opcode in MODRM_OPCODES:
+        if len(case.instruction_bytes) < 3:
+            raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
+        mode, rm = case.instruction_bytes[1] >> 6, case.instruction_bytes[1] & 7
+        displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
+        if len(case.instruction_bytes) != 3 + displacement_bytes:
+            raise SingleStepRunnerError(f"case {case.index}: ModR/M displacement length mismatch")
+    else:
+        raise SingleStepRunnerError(f"case {case.index}: unsupported opcode {opcode}")
 
     initial_regs = read_state_registers(initial, "initial")
     initial_flags = initial_regs[REG_ORDER.index("flags")]
@@ -262,7 +298,7 @@ def run_opcode(
     args: argparse.Namespace,
     build_dir: Path,
     executable: Path,
-) -> tuple[int, int, int, int, int, int]:
+) -> tuple[int, int, int, int, int, int, int, int]:
     source_path = source_root / "v1_real_mode" / f"{opcode}.MOO.gz"
     if not source_path.is_file():
         raise SingleStepRunnerError(f"missing SingleStep source: {source_path}")
@@ -275,8 +311,20 @@ def run_opcode(
         indexes.add(case.index)
         if case.test_hash is not None:
             hashes.add(case.test_hash)
+    eligible = []
+    exclusions = []
+    for case in cases:
+        if is_revoked(case, revoked):
+            continue
+        reason = scope_exclusion(case, opcode)
+        if reason is not None:
+            exclusions.append({"index": case.index, "hash": case.test_hash, "reason": reason})
+            if args.index == case.index or (args.test_hash is not None and args.test_hash.lower() == case.test_hash):
+                raise SingleStepRunnerError(f"case {case.index}: requested case excluded: {reason}")
+        else:
+            eligible.append(case)
     selected, selection_skipped = select_cases(
-        cases, revoked, args.sample, args.full, args.index, args.test_hash
+        tuple(eligible), frozenset(), args.sample, args.full, args.index, args.test_hash
     )
     prepared = [prepare_case(case, opcode) for case in selected]
     batch_path = build_dir / "singlestep" / "batches" / f"{opcode}.bin"
@@ -307,7 +355,19 @@ def run_opcode(
     if result.returncode != (1 if failed else 0):
         raise SingleStepRunnerError(f"SingleStep result/status mismatch for {opcode}: status={result.returncode}")
     revoked_count = sum(is_revoked(case, revoked) for case in cases)
-    return len(cases), revoked_count, selection_skipped, executed, passed, failed
+    reasons = Counter(entry["reason"] for entry in exclusions)
+    prefix_skipped, exception_skipped = reasons["unsupported_prefix"], reasons["exception_delivery"]
+    if len(cases) != revoked_count + prefix_skipped + exception_skipped + selection_skipped + executed:
+        raise SingleStepRunnerError(f"SingleStep discovery accounting mismatch for {opcode}")
+    report = {"opcode": opcode, "discovered": len(cases), "revoked": revoked_count,
+              "prefix_skipped": prefix_skipped, "exception_skipped": exception_skipped,
+              "selection_skipped": selection_skipped, "selected": len(prepared),
+              "executed": executed, "passed": passed, "failed": failed, "exclusions": exclusions}
+    report_path = build_dir / "singlestep" / "reports" / f"{opcode}.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print("SINGLESTEP OPCODE " + " ".join(f"{k}={v}" for k, v in report.items() if k != "exclusions"))
+    return len(cases), revoked_count, prefix_skipped, exception_skipped, selection_skipped, executed, passed, failed
 
 
 def parse_args() -> argparse.Namespace:
@@ -315,7 +375,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo", type=Path, default=Path(os.environ.get("SPK286_SINGLESTEP_ROOT", ".cache/singlestep-80286")))
     parser.add_argument("--build-dir", type=Path, default=Path(os.environ.get("SPK286_BUILD_DIR", "build")))
     parser.add_argument("--executable", type=Path)
-    parser.add_argument("--opcode", dest="opcodes", action="append", choices=OPCODES)
+    parser.add_argument("--opcode", dest="opcodes", action="append", choices=SUPPORTED_OPCODES)
     parser.add_argument("--full", action="store_true", help="run every non-revoked case")
     parser.add_argument("--sample", type=int, help="run this many deterministic cases per opcode")
     parser.add_argument("--smoke", action="store_true", help="run the fixed ten-case-per-opcode smoke sample")
@@ -350,14 +410,17 @@ def main() -> int:
         raise SingleStepRunnerError("duplicate --opcode selection")
     revoked = load_revocation_list(revocation_path)
     total_discovered = total_revoked = total_selection_skipped = 0
+    total_prefix_skipped = total_exception_skipped = 0
     total_executed = total_passed = total_failed = 0
     started = time.perf_counter()
     for opcode in opcodes:
-        discovered, revoked_count, selection_skipped, executed, passed, failed = run_opcode(
+        discovered, revoked_count, prefix_skipped, exception_skipped, selection_skipped, executed, passed, failed = run_opcode(
             opcode, source_root, revoked, args, args.build_dir, executable
         )
         total_discovered += discovered
         total_revoked += revoked_count
+        total_prefix_skipped += prefix_skipped
+        total_exception_skipped += exception_skipped
         total_selection_skipped += selection_skipped
         total_executed += executed
         total_passed += passed
@@ -367,6 +430,7 @@ def main() -> int:
     print(
         f"SINGLESTEP SUMMARY opcodes={' '.join(opcodes)} discovered={total_discovered} "
         f"revoked/skipped={total_revoked}/{total_selection_skipped} executed={total_executed} "
+        f"prefix_skipped={total_prefix_skipped} exception_skipped={total_exception_skipped} selected={total_executed} "
         f"passed={total_passed} failed={total_failed} elapsed={elapsed:.3f}s "
         f"tests/second={throughput:.1f}"
     )

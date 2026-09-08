@@ -2,7 +2,7 @@
 
 The repository is deliberately kept outside Git history in ``.cache``.  A
 shallow, blob-filtered sparse checkout retrieves only the metadata, tools, and
-the selected B8..BF MOO files needed by Phase 2.5.
+the B8..BF and 89/8B MOO files needed by the supported MOV families.
 """
 
 from __future__ import annotations
@@ -23,6 +23,8 @@ REQUIRED_PATHS = [
     "/tools/README.md",
     "/v1_real_mode/metadata.json",
     *(f"/v1_real_mode/{opcode}.MOO.gz" for opcode in (f"{value:02X}" for value in range(0xB8, 0xC0))),
+    "/v1_real_mode/89.MOO.gz",
+    "/v1_real_mode/8B.MOO.gz",
 ]
 
 

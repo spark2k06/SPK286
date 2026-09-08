@@ -1,4 +1,4 @@
-"""Audit encoding 1 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 and 2 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -17,7 +17,9 @@ from tools.microcode.compile_microcode import (
 )
 
 # Independent decoding of the documented encoding-1 wire representation.
-STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END"}
+STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
+              4: "DECODE_MODRM", 5: "READ_REG16 -> TMP0", 6: "READ_RM16 -> TMP0",
+              7: "TMP0 -> REG16", 8: "TMP0 -> RM16"}
 
 
 def validate_entries(program, expected):
@@ -39,17 +41,20 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
 
     depth = dimension("MC_DEPTH")
     width = dimension("MC_ADDR_WIDTH")
-    if dimension("MC_WORD_WIDTH") != 2 or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
-        raise ValueError("invalid encoding-1 ROM dimensions")
-    constants = re.findall(r"MC_([A-Z0-9_]+) = 2'd([0-9]+);", package)
+    word_width = dimension("MC_WORD_WIDTH")
+    if word_width not in (2, 4) or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
+        raise ValueError("invalid ROM dimensions")
+    constants = re.findall(rf"MC_([A-Z0-9_]+) = {word_width}'d([0-9]+);", package)
     values = {}
     for name, value in constants:
         if name in values:
             raise ValueError(f"duplicate ROM constant {name}")
         values[name] = int(value)
-    if {name: values.get(name) for name in ("INVALID", "FETCH_IMM16", "MOVE", "END")} != {
-            "INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3}:
-        raise ValueError("unexpected encoding-1 operation constants")
+    expected = {"INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3}
+    if word_width == 4:
+        expected.update(DECODE_MODRM=4, READ_REG16=5, READ_RM16=6, WRITE_REG16=7, WRITE_RM16=8)
+    if {name: values.get(name) for name in expected} != expected:
+        raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
     seen = set()
     for bits, address, operation in re.findall(
@@ -59,7 +64,7 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
             raise ValueError(f"ROM address {address} out of range or wrong width")
         if address in seen:
             raise ValueError(f"duplicate ROM address {address}")
-        if operation not in ("FETCH_IMM16", "MOVE", "END"):
+        if operation not in expected or operation == "INVALID":
             raise ValueError(f"invalid ROM operation {operation} at {address}")
         seen.add(address)
         words[address] = values[operation]
@@ -70,8 +75,8 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
 
 def canonical_source(words, entries, labels=None):
     labels = {} if labels is None else labels
-    if not words or any(type(w) is not int or w not in (0, 1, 2, 3) for w in words):
-        raise ValueError("invalid encoding-1 ROM words")
+    if not words or any(type(w) is not int or w not in (0, *STATEMENTS) for w in words):
+        raise ValueError("invalid ROM words")
     used = len(words)
     while used and words[used - 1] == 0:
         used -= 1
@@ -97,7 +102,7 @@ def canonical_source(words, entries, labels=None):
         if owner != match[1]:
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
-    lines = ["microcode_format 1"]
+    lines = ["microcode_format 2" if any(w > 3 for w in words) else "microcode_format 1"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
             lines.append(f"instruction {by_address[address]}:")
@@ -124,10 +129,14 @@ def audit(output_dir, contract_path):
     words = read_generated_words(artifacts["spk286_microcode_pkg.sv"].decode(),
                                  artifacts["spk286_microcode_rom.sv"].decode())
     symbols = json.loads(artifacts["spk286_microcode_symbols.json"])
+    metadata = json.loads(artifacts["spk286_microcode_validation.json"])
+    for field in ("format_version", "encoding_version", "word_width"):
+        if field in contract and metadata[field] != contract[field]:
+            raise ValueError(f"phase {field} contract changed")
     if (list(words) != contract["words"] or symbols["entries"] != contract["entries"]
             or symbols["labels"] != contract["labels"]
             or program.address_width != contract["address_width"]):
-        raise ValueError("Phase 2.75 ROM/symbol contract changed")
+        raise ValueError("phase ROM/symbol contract changed")
     canonical = canonical_source(words, symbols["entries"], symbols["labels"])
     reconstructed = compile_sources({"canonical.mc": canonical},
                                     address_width=program.address_width, rom_depth=program.depth)
@@ -145,7 +154,7 @@ def audit(output_dir, contract_path):
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "canonical.mc").write_bytes(canonical.encode())
     (output_dir / "audit.json").write_bytes((json.dumps(report, sort_keys=True, indent=2)+"\n").encode())
-    print("MICROCODE AUDIT PASS: Phase 2.75 entries, emitted ROM, source coupling and round-trip")
+    print("MICROCODE AUDIT PASS: phase entries, emitted ROM, source coupling and round-trip")
     return report
 
 
@@ -153,7 +162,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase2_75.json")
+                        default=ROOT / "tests/fixtures/microcode_phase3.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

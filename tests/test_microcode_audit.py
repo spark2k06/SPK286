@@ -18,7 +18,8 @@ SOURCE = "microcode_format 1\ninstruction MOV_R16_IMM16:\nFETCH_IMM16 -> TMP0\nw
 class MicrocodeAuditTests(unittest.TestCase):
     def test_fixed_phase2_75_contract(self):
         contract = json.loads((ROOT / "tests/fixtures/microcode_phase2_75.json").read_text())
-        source = {p.name: p.read_text() for p in (ROOT / "microcode/source").glob("*.mc")}
+        # Preserve the historical contract independently of the active ISA source.
+        source = {"data_move.mc": SOURCE}
         program = compile_sources(source)
         artifacts = generate(program)
         validate_entries(program, contract["entries"])
@@ -53,7 +54,7 @@ class MicrocodeAuditTests(unittest.TestCase):
         self.assertEqual(canonical_source(words, reconstructed.entries, reconstructed.labels), canonical)
 
     def test_canonical_rejects_invalid_words(self):
-        for words in ([], [0], [1, 0, 3], [1, 4, 3], [True, 2, 3]):
+        for words in ([], [0], [1, 0, 3], [1, 9, 3], [True, 2, 3]):
             with self.assertRaisesRegex(ValueError, "invalid"):
                 canonical_source(words, {"MOV": 0})
 

@@ -19,6 +19,14 @@ module spk286_microcode_rom_tb;
         check_word(MOV_ENTRY, spk286_microcode_pkg::MC_FETCH_IMM16);
         check_word(MOV_ENTRY + W'(1), spk286_microcode_pkg::MC_MOVE);
         check_word(MOV_ENTRY + W'(2), spk286_microcode_pkg::MC_END);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16, spk286_microcode_pkg::MC_DECODE_MODRM);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(1), spk286_microcode_pkg::MC_READ_REG16);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(2), spk286_microcode_pkg::MC_WRITE_RM16);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(3), spk286_microcode_pkg::MC_END);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16, spk286_microcode_pkg::MC_DECODE_MODRM);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(1), spk286_microcode_pkg::MC_READ_RM16);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(2), spk286_microcode_pkg::MC_WRITE_REG16);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(3), spk286_microcode_pkg::MC_END);
         for (integer i = spk286_microcode_pkg::MC_DEPTH; i < (1 << W); i = i + 1) begin
             address = W'(i); #1;
             if (valid || word !== spk286_microcode_pkg::MC_INVALID) $fatal(1, "unused ROM address is executable");

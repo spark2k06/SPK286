@@ -1,6 +1,18 @@
-SPK286 microcode compiler 1.0; format 1; encoding 1
+SPK286 microcode compiler 2.0; format 2; encoding 2
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
 0001  2  TMP0 -> DST  # data_move.mc:7
 0002  3  END  # data_move.mc:8
+0003  MOV_RM16_R16:
+0003  4  DECODE_MODRM  # data_move.mc:11
+0004  5  READ_REG16 -> TMP0  # data_move.mc:12
+0005  MOV_RM16_R16.writeback:
+0005  8  TMP0 -> RM16  # data_move.mc:14
+0006  3  END  # data_move.mc:15
+0007  MOV_R16_RM16:
+0007  4  DECODE_MODRM  # data_move.mc:18
+0008  6  READ_RM16 -> TMP0  # data_move.mc:19
+0009  MOV_R16_RM16.writeback:
+0009  7  TMP0 -> REG16  # data_move.mc:21
+000A  3  END  # data_move.mc:22

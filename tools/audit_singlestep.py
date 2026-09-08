@@ -16,7 +16,7 @@ from pathlib import Path
 import runpy
 import subprocess
 
-from tools.run_singlestep import OPCODES, REG_ORDER, RESULT_RE, prepare_case, write_batch
+from tools.run_singlestep import SUPPORTED_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
 from tools.singlestep import is_revoked, load_moo, load_revocation_list
 
 
@@ -37,7 +37,9 @@ def main():
     total = total_cycles = revoked_count = prefixes = exceptions = masked = 0
     identities = set()
     example = None
-    for opcode in OPCODES:
+    memory_examples = {}
+    excluded_count = 0
+    for opcode in SUPPORTED_OPCODES:
         path = args.repo / "v1_real_mode" / f"{opcode}.MOO.gz"
         parsed = load_moo(path)
         with contextlib.redirect_stdout(io.StringIO()):
@@ -69,14 +71,19 @@ def main():
             masked += bool(ours.final.get("reg_masks"))
             if is_revoked(ours, revoked):
                 revoked_count += 1
+            elif scope_exclusion(ours, opcode) is not None:
+                excluded_count += 1
             else:
                 prepared = prepare_case(ours, opcode)
                 if example is None:
                     example = prepared
+                if opcode in ("89", "8B") and ours.instruction_bytes[1] >> 6 != 3:
+                    memory_examples.setdefault(opcode, prepared)
         print(f"CORPUS_AUDIT opcode={opcode} header={parsed.header['test_count']} "
               f"parsed={len(parsed.tests)} upstream_equal={len(upstream)}")
     print(f"CORPUS_AUDIT total={total} unique_hashes={len(identities)} cycles={total_cycles} "
-          f"revoked={revoked_count} prefixes={prefixes} exceptions={exceptions} masked_cases={masked}")
+          f"revoked={revoked_count} prefixes={prefixes} exceptions={exceptions} "
+          f"scope_excluded={excluded_count} masked_cases={masked}")
     require(example is not None, "no supported non-revoked case to probe")
 
     output = args.build_dir / "singlestep-audit"
@@ -122,7 +129,29 @@ def main():
     execute("actual-unsupported", replace(example, initial_ram=tuple(sorted(values.items()))),
             "unsupported opcode observed before target retirement")
     execute("pristine-after", example)
-    print("SINGLESTEP_AUDIT PASS: corpus cross-check; 17 rejected fault probes; 2 pristine executions")
+    require(set(memory_examples) == {"89", "8B"}, "missing supported memory examples")
+    read = memory_examples["8B"]
+    write = memory_examples["89"]
+    execute("pristine-read", read, trace=True)
+    execute("pristine-write", write, trace=True)
+    # Use the independently captured bus address, never an RTL-derived EA.
+    read_address = next(c["address"] for c in read.source.cycles if c["bus_status_name"] == "MEMR")
+    values = dict(read.initial_ram)
+    require(read_address in values, "read probe address missing from initial RAM")
+    del values[read_address]
+    execute("missing-operand-byte", replace(read, initial_ram=tuple(sorted(values.items()))),
+            "data read from unspecified sparse RAM")
+    values = dict(read.initial_ram)
+    values[read_address] ^= 1
+    execute("actual-operand-byte", replace(read, initial_ram=tuple(sorted(values.items()))),
+            "architectural register mismatch")
+    values = dict(write.expected_ram)
+    write_address = next(c["address"] for c in write.source.cycles if c["bus_status_name"] == "MEMW")
+    require(write_address in values, "write probe address missing from final RAM")
+    values[write_address] ^= 1
+    execute("expected-operand-byte", replace(write, expected_ram=tuple(sorted(values.items()))),
+            "memory state mismatch")
+    print("SINGLESTEP_AUDIT PASS: corpus cross-check; 20 rejected fault probes; 4 pristine executions")
 
 
 if __name__ == "__main__":

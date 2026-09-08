@@ -7,7 +7,7 @@ help:
 	@echo "  make microcode       regenerate committed ROM, constants and source maps"
 	@echo "  make microcode-check fail if any generated microcode artifact is stale"
 	@echo "  make microcode-test  run independent Python compiler/ROM tests"
-	@echo "  make microcode-audit verify Phase 2.75 ROM/entry contract and round-trip"
+	@echo "  make microcode-audit verify the active phase ROM/entry contract and round-trip"
 	@echo "  make mcl86-fetch     fetch hash-pinned public references into .cache"
 	@echo "  make mcl86-check     reconstruct and compare both public MCL86 ROMs"
 	@echo "  make mcl86-test      run isolated offline MCL86 toolchain tests"
@@ -24,7 +24,10 @@ help:
 	@echo "  make data-smoke   validate the JSON/MOO data loader"
 	@echo "  make state-smoke  initialize RTL and verify first fetch from JSON state"
 	@echo "  make singlestep-fetch acquire the pinned external 80286 MOO working set"
-	@echo "  make singlestep-smoke run ten deterministic B8..BF cases per opcode"
+	@echo "  make singlestep-smoke run ten supported cases per opcode, B8..BF and 89/8B"
+	@echo "  make singlestep-operands run the complete supported 89/8B corpus"
+	@echo "  make phase3-check run mandatory Phase 3 gates with the pinned external corpus"
+	@echo "  make phase3-boundary-audit prove operand/BIU boundary assertions reject RTL faults"
 	@echo "  make singlestep-mov   run all non-revoked B8..BF cases"
 	@echo "  make singlestep-audit cross-check upstream parsing and inject comparison faults"
 	@echo "  make verify-failure prove negative simulator status propagation"
@@ -100,6 +103,18 @@ singlestep-fetch:
 
 singlestep-smoke: verilator
 	python3 -m tools.run_singlestep --smoke
+	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --smoke
+
+.PHONY: singlestep-operands phase3-check
+singlestep-operands: verilator
+	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --full
+
+phase3-check:
+	bash scripts/validate_phase3.sh
+
+.PHONY: phase3-boundary-audit
+phase3-boundary-audit:
+	python3 -m tools.audit_phase3_boundaries
 
 singlestep-mov: verilator
 	python3 -m tools.run_singlestep --full

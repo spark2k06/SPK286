@@ -40,6 +40,11 @@ module spk286 (
     output logic [7:0]   debug_opcode,
     output logic         instruction_retired,
     output logic         microcode_fault,
+    output logic         operand_blocked,
+    output logic [7:0]   debug_modrm,
+    output logic [15:0]  debug_displacement,
+    output logic [15:0]  debug_effective_offset,
+    output logic [1:0]   debug_operand_segment,
 
     input  logic         fetch_request,
     output logic         fetch_request_ready,
@@ -81,6 +86,7 @@ module spk286 (
     logic restart;
     logic [23:0] fetch_address;
     logic fetch_bus_valid, fetch_bus_bhe_n;
+    logic fetch_bus_ready;
     logic fetch_response_ready;
     logic fetch_request_internal, fetch_request_ready_internal;
     logic fetch_response_valid;
@@ -107,6 +113,21 @@ module spk286 (
     logic effective_gpr_write_en, effective_ip_write_en, effective_flags_write_en;
     logic [2:0] effective_gpr_write_index;
     logic [15:0] effective_gpr_write_data, effective_ip_write_data;
+    logic [127:0] register_state;
+    logic operand_decode_enable, operand_decode_done, operand_byte_ready;
+    logic [1:0] operand_mode, operand_segment;
+    logic [2:0] operand_reg, operand_rm;
+    logic operand_register_direct;
+    logic [15:0] operand_displacement, operand_offset;
+    logic operand_request, operand_write, operand_select_rm, operand_done;
+    logic [15:0] operand_write_data, operand_read_data;
+    logic operand_gpr_write_en;
+    logic [2:0] operand_gpr_write_index;
+    logic [15:0] operand_gpr_write_data;
+    logic memory_request, memory_request_ready, memory_write;
+    logic [23:0] memory_address;
+    logic [15:0] memory_write_data, memory_read_data;
+    logic memory_response_valid, memory_response_ready;
 
     // A CS reload requires a coordinated IP write and fetch restart. Reject a
     // malformed controller transaction as a whole, without partial state writes.
@@ -116,7 +137,7 @@ module spk286 (
     assign commit_allowed = !control_error;
     assign restart = redirect && commit_allowed;
     assign queue_flush = restart;
-    assign execution_allowed = execute_enable && commit_allowed && !reset && !restart;
+    assign execution_allowed = execute_enable && commit_allowed && !reset && !restart && !operand_blocked;
 
     // The Phase 1 state ports remain the setup/debug path. Once execution is
     // enabled, the microcode path owns GPR/IP writeback, while an explicit redirect
@@ -133,7 +154,7 @@ module spk286 (
     // Keep two bytes of bus capacity available. This lets the current fetch
     // service preserve both bytes of every word response without a second
     // response staging slot in the instruction queue.
-    assign fetch_request_internal = execute_enable && !unsupported_q && !microcode_fault &&
+    assign fetch_request_internal = execute_enable && !unsupported_q && !microcode_fault && !operand_blocked &&
                                     (queue_count <= 4'd4);
     assign fetch_response_ready = execute_enable ? queue_fill_ready : fetch_ready;
 
@@ -148,14 +169,15 @@ module spk286 (
         .ip_write_en(effective_ip_write_en && commit_allowed), .ip_write_data(effective_ip_write_data),
         .flags_write_en(effective_flags_write_en && commit_allowed),
         .flags_write_data(flags_write_data), .flags_write_mask(flags_write_mask),
-        .gpr_state(debug_gpr), .ip(debug_ip), .flags(debug_flags)
+        .gpr_state(register_state), .ip(debug_ip), .flags(debug_flags)
     );
 
     spk286_segments segments (
         .clk(clk), .reset(reset),
         .load_en(segment_load_en && commit_allowed),
         .load_index(segment_load_index), .load_selector(segment_load_selector),
-        .read_index(segment_read_index), .offset(segment_offset),
+        .read_index(execute_enable ? operand_segment : segment_read_index),
+        .offset(execute_enable ? operand_offset : segment_offset),
         .selector(segment_selector), .base(segment_base), .limit(segment_limit),
         .access_rights(segment_access), .physical_address(segment_address),
         .selector_state(debug_segment_selectors), .base_state(debug_segment_bases),
@@ -163,7 +185,7 @@ module spk286 (
     );
 
     spk286_fetch fetch (
-        .clk(clk), .reset(reset), .ready(ready), .data_in(data_in),
+        .clk(clk), .reset(reset), .ready(fetch_bus_ready), .data_in(data_in),
         .code_base(debug_segment_bases[24 +: 24]),
         .code_limit(debug_segment_limits[16 +: 16]),
         .restart(restart), .restart_ip(ip_write_data),
@@ -189,9 +211,16 @@ module spk286 (
     assign fetch_data = fetch_response_data;
     assign fetch_ip = fetch_response_ip;
     assign fetch_count = fetch_response_count;
-    assign bus_valid = fetch_bus_valid;
-    assign bus_bhe_n = fetch_bus_bhe_n;
-    assign address = fetch_address;
+    spk286_biu biu (
+        .clk(clk), .reset(reset), .cancel_data(restart), .ready(ready), .data_in(data_in),
+        .code_valid(fetch_bus_valid), .code_bhe_n(fetch_bus_bhe_n),
+        .code_address(fetch_address), .code_ready(fetch_bus_ready),
+        .data_request(memory_request), .data_request_ready(memory_request_ready),
+        .data_write(memory_write), .data_address(memory_address), .data_write_data(memory_write_data),
+        .data_response_valid(memory_response_valid), .data_response_ready(memory_response_ready),
+        .data_read_data(memory_read_data), .address(address), .data_out(data_out), .data_oe(data_oe),
+        .bus_valid(bus_valid), .bus_write(bus_write), .bus_bhe_n(bus_bhe_n), .bus_status(bus_status)
+    );
 
     spk286_decoder decoder (
         .opcode(queue_consume_data), .supported(decode_supported),
@@ -222,8 +251,38 @@ module spk286 (
         .clk(clk), .reset(reset), .cancel(restart), .start(micro_start),
         .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done),
         .byte_valid(queue_consume_valid), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
+        .decode_operand(operand_decode_enable), .decode_done(operand_decode_done),
+        .decode_byte_ready(operand_byte_ready), .operand_request(operand_request),
+        .operand_write(operand_write), .operand_select_rm(operand_select_rm),
+        .operand_write_data(operand_write_data), .operand_done(operand_done),
+        .operand_read_data(operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
+        .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
         .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data)
+    );
+
+    spk286_operand_decode operand_decode (
+        .clk(clk), .reset(reset), .cancel(restart), .start(micro_start), .enable(operand_decode_enable),
+        .byte_valid(queue_consume_valid), .byte_data(queue_consume_data),
+        .byte_ready(operand_byte_ready), .done(operand_decode_done),
+        .bx(register_state[48 +: 16]), .bp(register_state[80 +: 16]),
+        .si(register_state[96 +: 16]), .di(register_state[112 +: 16]),
+        .mode(operand_mode), .reg_index(operand_reg), .rm_index(operand_rm),
+        .register_direct(operand_register_direct), .displacement(operand_displacement),
+        .effective_offset(operand_offset), .segment_index(operand_segment)
+    );
+    spk286_operand operand (
+        .clk(clk), .reset(reset), .cancel(restart), .request_valid(operand_request),
+        .request_write(operand_write), .select_rm(operand_select_rm), .write_data(operand_write_data),
+        .done(operand_done), .read_data(operand_read_data), .register_state(register_state),
+        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct),
+        .physical_address(segment_address), .offset(operand_offset), .segment_limit(segment_limit),
+        .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
+        .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
+        .memory_request(memory_request), .memory_request_ready(memory_request_ready),
+        .memory_write(memory_write), .memory_address(memory_address), .memory_write_data(memory_write_data),
+        .memory_response_valid(memory_response_valid), .memory_response_ready(memory_response_ready),
+        .memory_read_data(memory_read_data)
     );
 
     // Decode and the executor share one byte-consumption interface. Unsupported
@@ -246,6 +305,11 @@ module spk286 (
     end
 
     assign debug_cs = debug_segment_selectors[16 +: 16];
+    assign debug_gpr = register_state;
+    assign debug_modrm = {operand_mode, operand_reg, operand_rm};
+    assign debug_displacement = operand_displacement;
+    assign debug_effective_offset = operand_offset;
+    assign debug_operand_segment = operand_segment;
     assign debug_cs_base = debug_segment_bases[24 +: 24];
     assign unsupported_opcode = unsupported_q;
     assign debug_opcode = opcode_q;
@@ -255,10 +319,6 @@ module spk286 (
     assign debug_micro_instruction = micro_word;
     assign debug_micro_active = micro_active;
     assign debug_bus_state = bus_valid ? 4'h1 : 4'h0;
-    assign bus_status = bus_valid ? 4'hD : 4'hF;
-    assign data_out = 16'h0000;
-    assign data_oe = 1'b0;
-    assign bus_write = 1'b0;
     assign bus_lock = 1'b0;
     assign hlda = 1'b0;
 endmodule

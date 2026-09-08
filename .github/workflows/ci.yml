@@ -17,3 +17,5 @@ jobs:
         run: make regression
       - name: Validate pinned MCL86 reference reconstruction
         run: make mcl86-fetch mcl86-check
+      - name: Validate complete supported hardware-vector families
+        run: make singlestep-fetch singlestep-operands singlestep-mov singlestep-audit

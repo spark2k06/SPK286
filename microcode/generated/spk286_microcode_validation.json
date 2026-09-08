@@ -1,18 +1,18 @@
 {
-  "address_width": 2,
-  "compiler_version": "1.0",
-  "encoding_version": 1,
-  "format_version": 1,
-  "instruction_entries": 1,
-  "rom_depth": 3,
+  "address_width": 4,
+  "compiler_version": "2.0",
+  "encoding_version": 2,
+  "format_version": 2,
+  "instruction_entries": 3,
+  "rom_depth": 11,
   "schema_version": 1,
   "source_sha256": {
-    "data_move.mc": "da7aef70bc2c61c3c9019be91aab7b9c1fe30d11390b299cba762e926b09b88b"
+    "data_move.mc": "0aa4ae7fa92080e5d14b2118327c4f528e31f1e015c3fe0b1f8c5cb31f718823"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 3,
+  "used_words": 11,
   "validation": "PASS",
   "warnings": [],
-  "word_width": 2
+  "word_width": 4
 }
