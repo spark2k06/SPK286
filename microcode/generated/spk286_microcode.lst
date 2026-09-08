@@ -1,4 +1,4 @@
-SPK286 microcode compiler 2.0; format 2; encoding 2
+SPK286 microcode compiler 3.0; format 3; encoding 3
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -16,3 +16,47 @@ SPK286 microcode compiler 2.0; format 2; encoding 2
 0009  MOV_R16_RM16.writeback:
 0009  7  TMP0 -> REG16  # data_move.mc:21
 000A  3  END  # data_move.mc:22
+000B  ALU_RM16_R16:
+000B  4  DECODE_MODRM  # word_alu.mc:6
+000C  6  READ_RM16 -> TMP0  # word_alu.mc:7
+000D  9  READ_REG16 -> TMP1  # word_alu.mc:8
+000E  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:9
+000F  ALU_RM16_R16.writeback:
+000F  10  TMP2 -> RM16 IF_WRITE  # word_alu.mc:11
+0010  12  COMMIT_FLAGS  # word_alu.mc:12
+0011  3  END  # word_alu.mc:13
+0012  ALU_R16_RM16:
+0012  4  DECODE_MODRM  # word_alu.mc:16
+0013  5  READ_REG16 -> TMP0  # word_alu.mc:17
+0014  A  READ_RM16 -> TMP1  # word_alu.mc:18
+0015  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:19
+0016  ALU_R16_RM16.writeback:
+0016  F  TMP2 -> REG16 IF_WRITE  # word_alu.mc:21
+0017  12  COMMIT_FLAGS  # word_alu.mc:22
+0018  3  END  # word_alu.mc:23
+0019  ALU_AX_IMM16:
+0019  D  READ_DST16 -> TMP0  # word_alu.mc:26
+001A  B  FETCH_IMM16 -> TMP1  # word_alu.mc:27
+001B  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:28
+001C  ALU_AX_IMM16.writeback:
+001C  11  TMP2 -> DST IF_WRITE  # word_alu.mc:30
+001D  12  COMMIT_FLAGS  # word_alu.mc:31
+001E  3  END  # word_alu.mc:32
+001F  ALU_RM16_IMM16:
+001F  4  DECODE_MODRM  # word_alu.mc:35
+0020  6  READ_RM16 -> TMP0  # word_alu.mc:36
+0021  B  FETCH_IMM16 -> TMP1  # word_alu.mc:37
+0022  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:38
+0023  ALU_RM16_IMM16.writeback:
+0023  10  TMP2 -> RM16 IF_WRITE  # word_alu.mc:40
+0024  12  COMMIT_FLAGS  # word_alu.mc:41
+0025  3  END  # word_alu.mc:42
+0026  ALU_RM16_IMM8S:
+0026  4  DECODE_MODRM  # word_alu.mc:45
+0027  6  READ_RM16 -> TMP0  # word_alu.mc:46
+0028  C  FETCH_IMM8S -> TMP1  # word_alu.mc:47
+0029  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:48
+002A  ALU_RM16_IMM8S.writeback:
+002A  10  TMP2 -> RM16 IF_WRITE  # word_alu.mc:50
+002B  12  COMMIT_FLAGS  # word_alu.mc:51
+002C  3  END  # word_alu.mc:52

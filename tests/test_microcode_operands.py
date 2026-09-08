@@ -30,7 +30,7 @@ class OperandMicrocodeTests(unittest.TestCase):
 
     def test_current_contract_and_rom_roundtrip(self):
         contract = json.loads((ROOT / "tests/fixtures/microcode_phase3.json").read_text())
-        p = compile_sources({f.name: f.read_text() for f in (ROOT / "microcode/source").glob("*.mc")})
+        p = compile_sources({"data_move.mc": (ROOT / "tests/fixtures/microcode_phase3.mc").read_text()})
         a = generate(p)
         validate_entries(p, contract["entries"])
         words = read_generated_words(a["spk286_microcode_pkg.sv"], a["spk286_microcode_rom.sv"])

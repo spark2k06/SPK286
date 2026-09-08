@@ -1,0 +1,16 @@
+{
+  "baseline": "Phase 4 word ALU contract; retains all Phase 3 MOV words and entries",
+  "address_width": 6,
+  "format_version": 3,
+  "encoding_version": 3,
+  "word_width": 5,
+  "entries": {"MOV_R16_IMM16": 0, "MOV_RM16_R16": 3, "MOV_R16_RM16": 7,
+    "ALU_RM16_R16": 11, "ALU_R16_RM16": 18, "ALU_AX_IMM16": 25,
+    "ALU_RM16_IMM16": 31, "ALU_RM16_IMM8S": 38},
+  "labels": {"MOV_R16_IMM16.writeback": 1, "MOV_RM16_R16.writeback": 5,
+    "MOV_R16_RM16.writeback": 9, "ALU_RM16_R16.writeback": 15,
+    "ALU_R16_RM16.writeback": 22, "ALU_AX_IMM16.writeback": 28,
+    "ALU_RM16_IMM16.writeback": 35, "ALU_RM16_IMM8S.writeback": 42},
+  "words": [1,2,3,4,5,8,3,4,6,7,3,4,6,9,14,16,18,3,4,5,10,14,15,18,3,
+    13,11,14,17,18,3,4,6,11,14,16,18,3,4,6,12,14,16,18,3]
+}

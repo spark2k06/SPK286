@@ -30,7 +30,9 @@ REG_ORDER = (
 )
 OPCODES = tuple(f"{value:02X}" for value in range(0xB8, 0xC0))
 MODRM_OPCODES = ("89", "8B")
-SUPPORTED_OPCODES = OPCODES + MODRM_OPCODES
+ALU_OPCODES = tuple(f'{group*8+form:02X}' for group in range(8) for form in (1, 3, 5)) + tuple(
+    f'{opcode}.{group}' for opcode in ('81', '83') for group in range(8))
+SUPPORTED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -55,19 +57,21 @@ class PreparedCase:
 
 
 def scope_exclusion(case: SingleStepCase, opcode: str) -> str | None:
-    """Only Phase 3 forms permit explicit, counted prefix/exception exclusions.
+    """ModR/M and Phase 4 forms permit explicit, counted prefix/exception exclusions.
 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
     while prefix_count < len(data) and data[prefix_count] in PREFIXES:
         prefix_count += 1
-    if prefix_count >= len(data) or data[prefix_count] != int(opcode, 16):
+    if prefix_count >= len(data) or data[prefix_count] != int(opcode.split('.')[0], 16):
         raise SingleStepRunnerError(f"case {case.index}: file opcode differs from {opcode}")
+    if '.' in opcode and (prefix_count+1 >= len(data) or (data[prefix_count+1] >> 3) & 7 != int(opcode[-1])):
+        raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
     if prefix_count:
         return "unsupported_prefix"
     if case.exception is not None:
@@ -151,19 +155,26 @@ def prepare_case(case: SingleStepCase, opcode: str) -> PreparedCase:
         raise SingleStepRunnerError(f"case {case.index}: final queue is unexpectedly non-empty")
     if len(case.instruction_bytes) < 2 or case.instruction_bytes[-1] != 0xF4:
         raise SingleStepRunnerError(f"case {case.index}: expected terminating HALT byte F4")
-    if case.instruction_bytes[0] != int(opcode, 16):
+    byte_opcode = int(opcode.split('.')[0], 16)
+    if case.instruction_bytes[0] != byte_opcode:
         raise SingleStepRunnerError(
             f"case {case.index}: file opcode {case.instruction_bytes[0]:02X} differs from {opcode}"
         )
     if opcode in OPCODES:
         if len(case.instruction_bytes) != 4:
             raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
-    elif opcode in MODRM_OPCODES:
+    elif opcode in ALU_OPCODES and byte_opcode < 0x40 and byte_opcode & 7 == 5:
+        if len(case.instruction_bytes) != 4:
+            raise SingleStepRunnerError(f"case {case.index}: accumulator immediate length mismatch")
+    elif opcode in MODRM_OPCODES + ALU_OPCODES:
         if len(case.instruction_bytes) < 3:
             raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
         mode, rm = case.instruction_bytes[1] >> 6, case.instruction_bytes[1] & 7
         displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
-        if len(case.instruction_bytes) != 3 + displacement_bytes:
+        immediate_bytes = 2 if byte_opcode == 0x81 else (1 if byte_opcode == 0x83 else 0)
+        if '.' in opcode and (case.instruction_bytes[1] >> 3) & 7 != int(opcode[-1]):
+            raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
+        if len(case.instruction_bytes) != 3 + displacement_bytes + immediate_bytes:
             raise SingleStepRunnerError(f"case {case.index}: ModR/M displacement length mismatch")
     else:
         raise SingleStepRunnerError(f"case {case.index}: unsupported opcode {opcode}")
@@ -376,6 +387,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--build-dir", type=Path, default=Path(os.environ.get("SPK286_BUILD_DIR", "build")))
     parser.add_argument("--executable", type=Path)
     parser.add_argument("--opcode", dest="opcodes", action="append", choices=SUPPORTED_OPCODES)
+    parser.add_argument("--alu", action="store_true", help="select every admitted Phase 4 ALU form")
     parser.add_argument("--full", action="store_true", help="run every non-revoked case")
     parser.add_argument("--sample", type=int, help="run this many deterministic cases per opcode")
     parser.add_argument("--smoke", action="store_true", help="run the fixed ten-case-per-opcode smoke sample")
@@ -387,6 +399,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.alu:
+        if args.opcodes:
+            raise SingleStepRunnerError('--alu cannot be combined with --opcode')
+        args.opcodes = list(ALU_OPCODES)
     if args.full and (args.sample is not None or args.smoke or args.index is not None or args.test_hash is not None):
         raise SingleStepRunnerError("--full cannot be combined with a sample or single-case selector")
     if args.smoke and args.sample is not None:

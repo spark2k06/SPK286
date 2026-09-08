@@ -25,4 +25,9 @@ if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/89.MOO.gz" || -f "$SINGLESTEP_ROOT/v1_re
 else
     echo "SINGLESTEP OPERAND SMOKE SKIP: 89/8B corpus is not present; run make singlestep-fetch"
 fi
+if [[ -f "$SINGLESTEP_ROOT/v1_real_mode/01.MOO.gz" ]]; then
+    python3 -m tools.run_singlestep --alu --smoke
+else
+    echo "SINGLESTEP ALU SMOKE SKIP: external ALU corpus absent; release gate requires it"
+fi
 echo "TEST PASS"

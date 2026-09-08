@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-Phase 3 implementation subset, including the preserved Phase 2.75 format.
+preserved Phase 2.75/3 formats and the active Phase 4 extension below.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -101,7 +101,7 @@ Format 1 retains encoding 1: two bits, 0 invalid, 1 fetch immediate word to TMP0
 | 7 | WRITE_REG16 from TMP0 |
 | 8 | WRITE_RM16 from TMP0 |
 
-The active ROM has depth 11 and four address bits; addresses 11..15 are invalid.
+The preserved Phase 3 ROM has depth 11 and four address bits; addresses 11..15 are invalid.
 Entries are
 MOV_R16_IMM16=0, MOV_RM16_R16=3, MOV_R16_RM16=7. Immediate MOV keeps words
 [1,2,3] at its original addresses. The highest input format selects output
@@ -174,3 +174,48 @@ Tests preserve CRLF/LF equivalence and independence of PYTHONHASHSEED across
 processes. Metadata hashes describe normalized UTF-8 source. Compiler version
 2.0 identifies the minimal operand extension; generated outputs remain entirely
 owned by the compiler.
+
+## Active Phase 4 format 3
+
+Format/encoding 3 adds only ten controls, keeping all format-2 controls and MOV
+entries unchanged. The current package uses five control bits, six address bits
+and 45 used ROM words; addresses 45..63 are invalid. Compiler version is 3.0.
+The active contract is tests/fixtures/microcode_phase4.json. The immutable
+Phase 3 fixture is checked using frozen microcode_phase3.mc; format 1 remains
+independently checked. No hardware-vector expected state is changed by versioning.
+
+| Word | Source statement / meaning |
+| --- | --- |
+| 9 | READ_REG16 -> TMP1 |
+| 10 | READ_RM16 -> TMP1 |
+| 11 | FETCH_IMM16 -> TMP1 |
+| 12 | FETCH_IMM8S -> TMP1 (sign extended) |
+| 13 | READ_DST16 -> TMP0 |
+| 14 | ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED |
+| 15 | TMP2 -> REG16 IF_WRITE |
+| 16 | TMP2 -> RM16 IF_WRITE |
+| 17 | TMP2 -> DST IF_WRITE |
+| 18 | COMMIT_FLAGS |
+
+DECODED is an explicit compiler-validated selector for stable instruction
+semantic metadata from spk286_alu_decode: functional ALU operation, write
+permission, defined and undefined FLAGS masks. It is not a second opcode
+decoder in the executor or sequencer. FLAGS_DECODED declares candidate-mask
+policy without committing architectural FLAGS. Static ALU selectors and other
+mask policies are not silently accepted. Source syntax, operation encoding,
+source locations and canonical round-trip remain coupled and deterministic.
+
+Five shared entries in word_alu.mc are ALU_RM16_R16=11, ALU_R16_RM16=18,
+ALU_AX_IMM16=25, ALU_RM16_IMM16=31 and ALU_RM16_IMM8S=38. TMP0 is always A,
+TMP1 always B and TMP2 the result. CMP uses decoded SUB and IF_WRITE=false.
+The disposition operation then discards the result without an operand request.
+This explicit semantic step is not historical latency padding.
+
+The compiler rejects undefined temporaries, missing/duplicate context, invalid
+ALU/FLAGS selectors, illegal destination, pending-result overwrite, repeated
+result disposition, FLAGS before result disposition, missing FLAGS commit,
+work after commit and work after END. Earlier formats reject the extensions.
+COMMIT_FLAGS follows full register/logical-memory completion; END follows FLAGS.
+The executor holds candidates/validity separately from architectural storage.
+Pause holds all semantic state; reset/redirect/start clear new temporary and
+candidate state. The generic microsequencer, BIU and operand service are unchanged.

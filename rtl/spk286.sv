@@ -128,6 +128,10 @@ module spk286 (
     logic [23:0] memory_address;
     logic [15:0] memory_write_data, memory_read_data;
     logic memory_response_valid, memory_response_ready;
+    logic [2:0] alu_operation;
+    logic result_write_allowed, internal_flags_write_en;
+    logic [15:0] decoded_flags_mask, decoded_undefined_mask;
+    logic [15:0] internal_flags_write_data, internal_flags_write_mask;
 
     // A CS reload requires a coordinated IP write and fetch restart. Reject a
     // malformed controller transaction as a whole, without partial state writes.
@@ -149,7 +153,7 @@ module spk286 (
                                    (execute_enable ? internal_ip_write_en : ip_write_en);
     assign effective_ip_write_data = restart ? ip_write_data :
                                      (execute_enable ? internal_ip_write_data : ip_write_data);
-    assign effective_flags_write_en = execute_enable ? 1'b0 : flags_write_en;
+    assign effective_flags_write_en = execute_enable ? internal_flags_write_en : flags_write_en;
 
     // Keep two bytes of bus capacity available. This lets the current fetch
     // service preserve both bytes of every word response without a second
@@ -168,7 +172,8 @@ module spk286 (
         .write_index(effective_gpr_write_index), .write_data(effective_gpr_write_data),
         .ip_write_en(effective_ip_write_en && commit_allowed), .ip_write_data(effective_ip_write_data),
         .flags_write_en(effective_flags_write_en && commit_allowed),
-        .flags_write_data(flags_write_data), .flags_write_mask(flags_write_mask),
+        .flags_write_data(execute_enable ? internal_flags_write_data : flags_write_data),
+        .flags_write_mask(execute_enable ? internal_flags_write_mask : flags_write_mask),
         .gpr_state(register_state), .ip(debug_ip), .flags(debug_flags)
     );
 
@@ -258,7 +263,18 @@ module spk286 (
         .operand_read_data(operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
         .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
         .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
-        .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data)
+        .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
+        .destination_read_data(register_state[destination_q * 16 +: 16]),
+        .carry_in(debug_flags[0]), .alu_operation(alu_operation), .result_write_allowed(result_write_allowed),
+        .decoded_flags_mask(decoded_flags_mask), .decoded_undefined_mask(decoded_undefined_mask),
+        .flags_write_en(internal_flags_write_en), .flags_write_data(internal_flags_write_data),
+        .flags_write_mask(internal_flags_write_mask)
+    );
+
+    spk286_alu_decode alu_decode (
+        .opcode(opcode_q), .group_extension(operand_reg), .operation(alu_operation),
+        .write_result(result_write_allowed), .flags_mask(decoded_flags_mask),
+        .undefined_mask(decoded_undefined_mask)
     );
 
     spk286_operand_decode operand_decode (

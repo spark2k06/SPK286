@@ -27,6 +27,9 @@ help:
 	@echo "  make singlestep-smoke run ten supported cases per opcode, B8..BF and 89/8B"
 	@echo "  make singlestep-operands run the complete supported 89/8B corpus"
 	@echo "  make phase3-check run mandatory Phase 3 gates with the pinned external corpus"
+	@echo "  make phase4-check run all inherited and word ALU release gates"
+	@echo "  make singlestep-alu run all admitted Phase 4 hardware forms"
+	@echo "  make alu-audit reject eight isolated ALU/datapath mutants"
 	@echo "  make phase3-boundary-audit prove operand/BIU boundary assertions reject RTL faults"
 	@echo "  make singlestep-mov   run all non-revoked B8..BF cases"
 	@echo "  make singlestep-audit cross-check upstream parsing and inject comparison faults"
@@ -99,13 +102,27 @@ verify-failure:
 	./scripts/verify_failure_path.sh
 
 singlestep-fetch:
-	python3 tools/fetch_singlestep.py
+	python3 -m tools.fetch_singlestep
 
 singlestep-smoke: verilator
 	python3 -m tools.run_singlestep --smoke
 	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --smoke
 
 .PHONY: singlestep-operands phase3-check
+.PHONY: singlestep-alu singlestep-alu-smoke
+.PHONY: phase4-check alu-audit
+phase4-check:
+	bash scripts/validate_phase4.sh
+
+alu-audit:
+	python3 -m tools.audit_alu
+
+singlestep-alu: verilator
+	python3 -m tools.run_singlestep --alu --full
+
+singlestep-alu-smoke: verilator
+	python3 -m tools.run_singlestep --alu --smoke
+
 singlestep-operands: verilator
 	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --full
 

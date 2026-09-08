@@ -54,7 +54,7 @@ class MicrocodeAuditTests(unittest.TestCase):
         self.assertEqual(canonical_source(words, reconstructed.entries, reconstructed.labels), canonical)
 
     def test_canonical_rejects_invalid_words(self):
-        for words in ([], [0], [1, 0, 3], [1, 9, 3], [True, 2, 3]):
+        for words in ([], [0], [1, 0, 3], [1, 31, 3], [True, 2, 3]):
             with self.assertRaisesRegex(ValueError, "invalid"):
                 canonical_source(words, {"MOV": 0})
 

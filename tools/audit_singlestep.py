@@ -14,6 +14,7 @@ import io
 import os
 from pathlib import Path
 import runpy
+import struct
 import subprocess
 
 from tools.run_singlestep import SUPPORTED_OPCODES, REG_ORDER, RESULT_RE, prepare_case, scope_exclusion, write_batch
@@ -23,6 +24,60 @@ from tools.singlestep import is_revoked, load_moo, load_revocation_list
 def require(condition, message):
     if not condition:
         raise RuntimeError(message)
+
+
+def independent_wire_masks(data):
+    """Read MOO 1.1 RMSK independently; the pinned moo2json omits this chunk.
+
+    This audit-only reader shares no chunk/register parsing with production.
+    See dbalsom/moo doc/moo_format_v1.md, RMSK and file structure sections.
+    """
+    names = 'ax bx cx dx cs ss ds es sp bp si di ip flags'.split()
+
+    def chunks(payload):
+        stream = io.BytesIO(payload)
+        while header := stream.read(8):
+            require(len(header) == 8, 'mask audit: truncated chunk header')
+            tag, size = struct.unpack('<4sI', header)
+            body = stream.read(size)
+            require(len(body) == size, 'mask audit: truncated chunk payload')
+            yield tag, body
+
+    def masks(payload):
+        require(len(payload) >= 2 and len(payload) % 2 == 0, 'mask audit: malformed RMSK')
+        words = list(struct.unpack('<' + 'H' * (len(payload) // 2), payload))
+        bits = words.pop(0)
+        require(bits < 1 << len(names) and bits.bit_count() == len(words),
+                'mask audit: RMSK presence/value mismatch')
+        return dict(zip((name for bit, name in enumerate(names) if bits & (1 << bit)), words))
+
+    common, records = {}, {}
+    for tag, body in chunks(data):
+        if tag == b'RMSK':
+            require(not records, 'mask audit: late common RMSK')
+            common = masks(body)
+        elif tag == b'TEST':
+            require(len(body) >= 4, 'mask audit: truncated TEST index')
+            index = int.from_bytes(body[:4], 'little')
+            require(index not in records, 'mask audit: duplicate TEST index')
+            effective = dict(common)
+            for child, state in chunks(body[4:]):
+                require(child != b'RMSK', 'mask audit: RMSK must be common or in FINA')
+                if child == b'FINA':
+                    for field, value in chunks(state):
+                        if field == b'RMSK':
+                            for name, mask in masks(value).items():
+                                effective[name] = effective.get(name, 0xffff) & mask
+            records[index] = effective
+    return records
+
+
+def compare_final_state(actual, upstream, wire_masks):
+    # Validate every mask before comparing fields that upstream can represent.
+    # Never discard a field merely because moo2json does not implement it.
+    require(actual.get('reg_masks', {}) == wire_masks, 'final RMSK differs from independent wire audit')
+    common = {key: value for key, value in actual.items() if key != 'reg_masks'}
+    require(common == upstream, 'final state differs from upstream parser')
 
 
 def main():
@@ -42,17 +97,21 @@ def main():
     for opcode in SUPPORTED_OPCODES:
         path = args.repo / "v1_real_mode" / f"{opcode}.MOO.gz"
         parsed = load_moo(path)
+        raw = gzip.decompress(path.read_bytes())
+        wire_masks = independent_wire_masks(raw)
         with contextlib.redirect_stdout(io.StringIO()):
-            cpu, upstream = reference(gzip.decompress(path.read_bytes()))
+            cpu, upstream = reference(raw)
         require(cpu == parsed.header["cpu_id"], f"{opcode}: CPU mismatch")
         require(len(upstream) == len(parsed.tests) == parsed.header["test_count"], f"{opcode}: count mismatch")
+        require(set(wire_masks) == {case.index for case in parsed.tests}, f'{opcode}: mask record identities')
         indexes = set()
         for ours, theirs in zip(parsed.tests, upstream):
             for field, actual in (("idx", ours.index), ("name", ours.name),
                                   ("bytes", list(ours.instruction_bytes)),
-                                  ("initial", ours.initial), ("final", ours.final),
+                                  ("initial", ours.initial),
                                   ("hash", ours.test_hash), ("exception", ours.exception)):
                 require(actual == theirs.get(field), f"{opcode}/{ours.index}: {field} differs from upstream parser")
+            compare_final_state(ours.final, theirs['final'], wire_masks[ours.index])
             require(ours.index not in indexes, f"{opcode}: duplicate index")
             require(ours.test_hash is not None and ours.test_hash not in identities, "missing/duplicate global hash")
             indexes.add(ours.index)
@@ -66,7 +125,7 @@ def main():
                 require(comparable == expected, f"{opcode}/{ours.index}: decoded cycle differs")
             total_cycles += len(ours.cycles)
             total += 1
-            prefixes += ours.instruction_bytes[0] != int(opcode, 16)
+            prefixes += ours.instruction_bytes[0] != int(opcode.split('.')[0], 16)
             exceptions += ours.exception is not None
             masked += bool(ours.final.get("reg_masks"))
             if is_revoked(ours, revoked):

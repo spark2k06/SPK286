@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 from tools.run_singlestep import SingleStepRunnerError, prepare_case, run_opcode, select_cases
 from tools.singlestep import SingleStepCase, SingleStepFormatError, load_moo
+from tools.audit_singlestep import independent_wire_masks, compare_final_state
 from test_singlestep import chunk, regs
 from test_singlestep_runner import REGS
 
@@ -140,6 +141,31 @@ class SingleStepAccountingTests(unittest.TestCase):
 
 
 class MooIntegrityTests(unittest.TestCase):
+    def test_independent_common_and_per_case_wire_masks(self):
+        common = chunk('RMSK', regs([0xf7ee], 1 << 13))
+        test0 = chunk('TEST', struct.pack('<I', 0) + chunk('FINA', b''))
+        test1 = chunk('TEST', struct.pack('<I', 1) + chunk('FINA',
+                      chunk('RMSK', regs([0x00ff, 0x7fff], (1 << 0) | (1 << 13)))))
+        self.assertEqual(independent_wire_masks(common + test0 + test1),
+                         {0: {'flags': 0xf7ee}, 1: {'flags': 0x77ee, 'ax': 0x00ff}})
+        self.assertEqual(independent_wire_masks(test0), {0: {}})
+
+    def test_mask_audit_rejects_missing_changed_and_extra_state(self):
+        upstream = {'regs': {'flags': 0x486}, 'ram': [], 'queue': []}
+        actual = {**upstream, 'reg_masks': {'flags': 0xf7ee}}
+        compare_final_state(actual, upstream, {'flags': 0xf7ee})
+        for bad in (upstream, {**actual, 'reg_masks': {'flags': 0xffff}},
+                    {**actual, 'reg_masks': {'flags': 0xf7ee, 'ax': 0}},
+                    {**actual, 'regs': {'flags': 0x482}}, {**actual, 'unexpected': 1}):
+            with self.subTest(bad=bad), self.assertRaises(RuntimeError):
+                compare_final_state(bad, upstream, {'flags': 0xf7ee})
+
+    def test_mask_wire_audit_rejects_truncation_and_invalid_presence(self):
+        for data in (b'RMSK', b'RMSK\x04\0\0\0\x00', chunk('RMSK', b'\0'),
+                     chunk('RMSK', regs([], 1 << 13)), chunk('RMSK', regs([1], 1 << 14))):
+            with self.subTest(data=data), self.assertRaises(RuntimeError):
+                independent_wire_masks(data)
+
     def test_header_count_version_and_cpu_are_validated(self):
         test = chunk("TEST", struct.pack("<I", 0))
         for version, count, cpu in (([2, 0], 1, b"C286"), ([1, 2], 1, b"C286"),

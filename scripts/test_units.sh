@@ -14,10 +14,19 @@ tests=(spk286_registers spk286_segments spk286_fetch spk286_core spk286_prefetch
        spk286_microsequencer spk286_microcode_rom spk286_decoder
        spk286_execution spk286_microcode_execution spk286_modrm spk286_effective_address
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle
-       spk286_operand_service)
+       spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
+    run_args=()
+    if [[ "$name" == spk286_alu ]]; then
+        python3 -m tools.alu_reference --output "$BUILD_DIR/alu-vectors.txt"
+        run_args=("+alu_vectors=$BUILD_DIR/alu-vectors.txt")
+    fi
+    if [[ "$name" == spk286_alu_instructions ]]; then
+        python3 -m tools.alu_instruction_vectors --output "$BUILD_DIR/alu-instructions.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/alu-instructions.txt")
+    fi
     tb="${name}_tb"
     test -f "sim/unit/$tb.sv"
     if [[ "$simulator" != iverilog ]]; then
@@ -29,12 +38,12 @@ for name in "${tests[@]}"; do
                 cat "$obj/build.log"; exit 1;
             }
         cat "$obj/build.log"
-        "$obj/$tb"
+        "$obj/$tb" "${run_args[@]}"
     fi
     if [[ "$simulator" != verilator ]]; then
         obj="$BUILD_DIR/iverilog/$tb"
         mkdir -p "$obj"
         iverilog -g2012 -Wall -Irtl -Isim/unit -s "$tb" -o "$obj/$tb.vvp" "${rtl_sources[@]}" "sim/unit/$tb.sv"
-        vvp "$obj/$tb.vvp"
+        vvp "$obj/$tb.vvp" "${run_args[@]}"
     fi
 done

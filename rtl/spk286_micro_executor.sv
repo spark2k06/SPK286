@@ -25,45 +25,99 @@ module spk286_micro_executor (
     input  logic [15:0] operand_gpr_write_data,
     output logic gpr_write_en,
     output logic [2:0] gpr_write_index,
-    output logic [15:0] gpr_write_data
+    output logic [15:0] gpr_write_data,
+    input logic [15:0] destination_read_data,
+    input logic carry_in,
+    input logic [2:0] alu_operation,
+    input logic result_write_allowed,
+    input logic [15:0] decoded_flags_mask, decoded_undefined_mask,
+    output logic flags_write_en,
+    output logic [15:0] flags_write_data, flags_write_mask
 );
-    logic [15:0] tmp0_q;
-    logic high_byte_q;
-    logic fetch_word, move_word, allowed, read_operand;
+    logic [15:0] tmp0_q, tmp1_q, tmp2_q, flags_q, flags_mask_q;
+    logic [2:0] temporary_valid_q;
+    logic high_byte_q, flags_valid_q, result_disposed_q;
+    logic fetch_word, fetch_tmp1, fetch_signed_byte, move_word, allowed, read_operand;
+    logic read_tmp1, read_destination, compute_alu, result_operation, discard_result;
+    logic result_to_dst, commit_result, commit_flags;
+    logic [15:0] alu_result, alu_flags;
+
+    spk286_alu alu (.operation(alu_operation), .operand_a(tmp0_q), .operand_b(tmp1_q),
+                   .carry_in(carry_in), .result(alu_result), .candidate_flags(alu_flags));
     assign allowed = operation_valid && !reset && !cancel && !start;
-    assign fetch_word = operation_valid && !reset && !cancel && !start &&
-                        operation == spk286_microcode_pkg::MC_FETCH_IMM16;
-    assign move_word = operation_valid && !reset && !cancel && !start &&
-                       operation == spk286_microcode_pkg::MC_MOVE;
+    assign fetch_tmp1 = operation == spk286_microcode_pkg::MC_FETCH_IMM16_TMP1;
+    assign fetch_word = allowed && (operation == spk286_microcode_pkg::MC_FETCH_IMM16 || fetch_tmp1);
+    assign fetch_signed_byte = allowed && operation == spk286_microcode_pkg::MC_FETCH_IMM8S_TMP1;
+    assign move_word = allowed && operation == spk286_microcode_pkg::MC_MOVE && temporary_valid_q[0];
+    assign read_destination = allowed && operation == spk286_microcode_pkg::MC_READ_DST16;
     assign decode_operand = allowed && operation == spk286_microcode_pkg::MC_DECODE_MODRM;
+    assign read_tmp1 = operation == spk286_microcode_pkg::MC_READ_REG16_TMP1 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1;
+    assign result_operation = operation == spk286_microcode_pkg::MC_WRITE_RESULT_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM16 ||
+                              operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST;
+    assign commit_result = allowed && result_operation && temporary_valid_q[2] && !result_disposed_q;
+    assign discard_result = commit_result && !result_write_allowed;
+    assign result_to_dst = commit_result && result_write_allowed && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST;
     assign operand_request = allowed &&
-                             (operation == spk286_microcode_pkg::MC_READ_REG16 ||
-                              operation == spk286_microcode_pkg::MC_READ_RM16 ||
-                              operation == spk286_microcode_pkg::MC_WRITE_REG16 ||
-                              operation == spk286_microcode_pkg::MC_WRITE_RM16);
-    assign operand_write = operation == spk286_microcode_pkg::MC_WRITE_REG16 ||
-                           operation == spk286_microcode_pkg::MC_WRITE_RM16;
-    assign operand_select_rm = operation == spk286_microcode_pkg::MC_READ_RM16 ||
-                               operation == spk286_microcode_pkg::MC_WRITE_RM16;
-    assign operand_write_data = tmp0_q;
+                             (operation == spk286_microcode_pkg::MC_READ_REG16 || operation == spk286_microcode_pkg::MC_READ_RM16 || read_tmp1 ||
+                              ((operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16) && temporary_valid_q[0]) ||
+                              (commit_result && result_write_allowed && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST));
+    assign operand_write = operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || result_operation;
+    assign operand_select_rm = operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
+                               operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM16;
+    assign operand_write_data = result_operation ? tmp2_q : tmp0_q;
     assign read_operand = operand_request && !operand_write;
-    assign byte_ready = fetch_word || decode_byte_ready;
-    assign operation_done = move_word || (fetch_word && byte_valid && high_byte_q) ||
+    assign compute_alu = allowed && operation == spk286_microcode_pkg::MC_ALU && temporary_valid_q[0] && temporary_valid_q[1] && !flags_valid_q;
+    assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
+    assign byte_ready = fetch_word || fetch_signed_byte || decode_byte_ready;
+    assign operation_done = move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
+                            (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
                             (decode_operand && decode_done) || (operand_request && operand_done);
-    assign gpr_write_en = move_word || operand_gpr_write_en;
-    assign gpr_write_index = move_word ? destination : operand_gpr_write_index;
-    assign gpr_write_data = move_word ? tmp0_q : operand_gpr_write_data;
+    assign gpr_write_en = move_word || result_to_dst || operand_gpr_write_en;
+    assign gpr_write_index = move_word || result_to_dst ? destination : operand_gpr_write_index;
+    assign gpr_write_data = result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data);
+    assign flags_write_en = commit_flags;
+    assign flags_write_data = flags_q;
+    assign flags_write_mask = flags_mask_q;
 
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
-            tmp0_q <= 16'h0000;
-            high_byte_q <= 1'b0;
-        end else if (fetch_word && byte_valid) begin
-            if (high_byte_q) tmp0_q[15:8] <= byte_data;
-            else tmp0_q[7:0] <= byte_data;
-            high_byte_q <= !high_byte_q;
-        end else if (read_operand && operand_done) begin
-            tmp0_q <= operand_read_data;
+            tmp0_q <= 16'h0000; tmp1_q <= 16'h0000; tmp2_q <= 16'h0000;
+            flags_q <= 16'h0000; flags_mask_q <= 16'h0000;
+            high_byte_q <= 1'b0; temporary_valid_q <= 3'b000;
+            flags_valid_q <= 1'b0; result_disposed_q <= 1'b0;
+        end else begin
+            if (fetch_word && byte_valid) begin
+                if (fetch_tmp1) begin
+                    if (high_byte_q) tmp1_q[15:8] <= byte_data;
+                    else tmp1_q[7:0] <= byte_data;
+                    temporary_valid_q[1] <= high_byte_q;
+                end else begin
+                    if (high_byte_q) tmp0_q[15:8] <= byte_data;
+                    else tmp0_q[7:0] <= byte_data;
+                    temporary_valid_q[0] <= high_byte_q;
+                end
+                high_byte_q <= !high_byte_q;
+            end
+            if (fetch_signed_byte && byte_valid) begin
+                tmp1_q <= {{8{byte_data[7]}}, byte_data};
+                temporary_valid_q[1] <= 1'b1;
+            end
+            if (read_operand && operand_done) begin
+                if (read_tmp1) begin tmp1_q <= operand_read_data; temporary_valid_q[1] <= 1'b1; end
+                else begin tmp0_q <= operand_read_data; temporary_valid_q[0] <= 1'b1; end
+            end
+            if (read_destination) begin tmp0_q <= destination_read_data; temporary_valid_q[0] <= 1'b1; end
+            if (compute_alu) begin
+                tmp2_q <= alu_result; temporary_valid_q[2] <= 1'b1;
+                flags_q <= alu_flags;
+                flags_mask_q <= decoded_flags_mask & ~decoded_undefined_mask;
+                flags_valid_q <= 1'b1; result_disposed_q <= 1'b0;
+            end
+            if (commit_result && operation_done) begin
+                temporary_valid_q[2] <= 1'b0;
+                result_disposed_q <= 1'b1;
+            end
+            if (commit_flags) flags_valid_q <= 1'b0;
         end
     end
 endmodule

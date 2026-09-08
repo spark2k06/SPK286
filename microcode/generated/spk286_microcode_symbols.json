@@ -1,10 +1,20 @@
 {
   "entries": {
+    "ALU_AX_IMM16": 25,
+    "ALU_R16_RM16": 18,
+    "ALU_RM16_IMM16": 31,
+    "ALU_RM16_IMM8S": 38,
+    "ALU_RM16_R16": 11,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
     "MOV_RM16_R16": 3
   },
   "labels": {
+    "ALU_AX_IMM16.writeback": 28,
+    "ALU_R16_RM16.writeback": 22,
+    "ALU_RM16_IMM16.writeback": 35,
+    "ALU_RM16_IMM8S.writeback": 42,
+    "ALU_RM16_R16.writeback": 15,
     "MOV_R16_IMM16.writeback": 1,
     "MOV_R16_RM16.writeback": 9,
     "MOV_RM16_R16.writeback": 5
@@ -149,6 +159,474 @@
         "entry": "MOV_R16_RM16",
         "file": "data_move.mc",
         "line": 22
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 11,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 12,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 7
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 13,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 8
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_REG16_TMP1",
+      "statement": "READ_REG16 -> TMP1",
+      "word": 9
+    },
+    {
+      "address": 14,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 9
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 15,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 16,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 17,
+      "location": {
+        "entry": "ALU_RM16_R16",
+        "file": "word_alu.mc",
+        "line": 13
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 18,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 16
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 19,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 17
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_REG16",
+      "statement": "READ_REG16 -> TMP0",
+      "word": 5
+    },
+    {
+      "address": 20,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 18
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_RM16_TMP1",
+      "statement": "READ_RM16 -> TMP1",
+      "word": 10
+    },
+    {
+      "address": 21,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 19
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 22,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_REG16",
+      "statement": "TMP2 -> REG16 IF_WRITE",
+      "word": 15
+    },
+    {
+      "address": 23,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 22
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 24,
+      "location": {
+        "entry": "ALU_R16_RM16",
+        "file": "word_alu.mc",
+        "line": 23
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 25,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 26
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 26,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 27
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 27,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 28
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 28,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_DST",
+      "statement": "TMP2 -> DST IF_WRITE",
+      "word": 17
+    },
+    {
+      "address": 29,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 31
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 30,
+      "location": {
+        "entry": "ALU_AX_IMM16",
+        "file": "word_alu.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 31,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 35
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 32,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 36
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 33,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 37
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 34,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 38
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 35,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 36,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 37,
+      "location": {
+        "entry": "ALU_RM16_IMM16",
+        "file": "word_alu.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 38,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 45
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 39,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 46
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 40,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 47
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8S_TMP1",
+      "statement": "FETCH_IMM8S -> TMP1",
+      "word": 12
+    },
+    {
+      "address": 41,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 48
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 42,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 50
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 43,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 51
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 44,
+      "location": {
+        "entry": "ALU_RM16_IMM8S",
+        "file": "word_alu.mc",
+        "line": 52
       },
       "operands": [],
       "operation": "END",
