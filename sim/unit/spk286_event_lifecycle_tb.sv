@@ -198,15 +198,32 @@ module spk286_event_lifecycle_tb;
             until_event(1,13); check(retires==0 && stackword('h01fa)==16'h0100 && debug_nmi_pending,"precise source fault and retained NMI");
             until_event(2,2); check(retires==0,"fault does not create a false TF retirement trap"); next_case();
 
-            // Invalid admitted group encodings are #UD, legal unimplemented ones stay explicit.
+            // Invalid admitted group encodings remain #UD after far-memory admission.
             for(integer group_value=1;group_value<8;group_value=group_value+1) begin
                 setup(2,'h0200); memory[65792]=8'h8F; memory[65793]=8'hC0+8'(group_value*8);
                 until_event(1,6); check(retires==0 && stackword('h01fa)==16'h0100,"invalid POP group #UD start IP"); next_case();
             end
             setup(2,'h0200); memory[65792]=8'hFF; memory[65793]=8'hD8;
             until_event(1,6); check(retires==0,"far register form is invalid"); next_case();
-            setup(2,'h0200); memory[65792]=8'hFF; memory[65793]=8'h18;
-            repeat(100) service(); check(unsupported_opcode && deliveries==0 && retires==0 && writes==0,"legal far memory form remains unsupported"); next_case();
+            setup(2,'h0200); memory[65792]=8'hFF; memory[65793]=8'h1E;
+            memory[65794]=8'h00; memory[65795]=8'h04;
+            putword(262144+1024,'h0120); putword(262144+1026,'h1000); memory[65536+288]=8'hF4;
+            until_retired(1);
+            check(!unsupported_opcode && deliveries==0 && debug_ip==16'h0120 && debug_cs==16'h1000 &&
+                  debug_gpr[79:64]==16'h01FC && stackword('h01FC)==16'h0104 && stackword('h01FE)==16'h1000 &&
+                  debug_flags==2 && writes==2,"legal far memory CALL commits target and return link"); next_case();
+
+            // A far CALL/RETF pair inside an NMI handler must retain NMI blocking;
+            // only the following IRET releases the second captured NMI edge.
+            setup(2,'h0200); after_opcode(); nmi=1; until_event(1,2);
+            memory[65536+1040]=8'h9A; memory[65536+1041]=8'h00; memory[65536+1042]=8'h05;
+            memory[65536+1043]=8'h00; memory[65536+1044]=8'h10; memory[65536+1045]=8'hCF;
+            memory[65536+1280]=8'hCB;
+            nmi=0; service(); nmi=1; service();
+            until_retired(3);
+            check(deliveries==1 && debug_nmi_pending && debug_nmi_blocked && debug_ip==16'h0415 &&
+                  debug_gpr[79:64]==16'h01FA,"RETF preserves pending NMI inhibition through far call round trip");
+            until_event(2,2); check(retires==4 && !debug_nmi_pending,"only IRET releases NMI after RETF"); next_case();
         end
 
         // Every possible external vector traverses actual INTA, including 2:
@@ -343,7 +360,7 @@ module spk286_event_lifecycle_tb;
         until_event(1,2); check(!shutdown && !halted,"NMI recovers shutdown with usable stack");
         reset=1; waiting=0; chain=0; tick(); reset=0;
         check(!shutdown && !halted && !debug_nmi_pending && !debug_nmi_blocked && debug_cs_base==24'hFF0000 && debug_ip==16'hFFF0,"reset clears event state and restores special CS cache"); next_case();
-        check(cases==463,"complete lifecycle scenario set");
+        check(cases==468,"complete lifecycle scenario set");
         $display("EVENT_LIFECYCLE PASS: %0d scenarios; %0d checks",cases,checks);
         $finish;
     end

@@ -3,7 +3,7 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-preserved Phase 2.75/3/4 formats and the incremental extensions below; format 11 is current.
+preserved Phase 2.75/3/4 formats and the incremental extensions below; format 14 is current.
 
 ```text
 make microcode        # regenerate all five committed artifacts
@@ -353,3 +353,43 @@ all prior 328 words and entry addresses remain unchanged. Frozen format-10
 sources and the independent format-11 literal fixture check both contracts.
 No microinstruction represents an idle delay or duplicates opcode decoding.
 See docs/PHASE7_DECIMAL_ADJUST.md for arithmetic, exception and lifetime rules.
+
+## Active format 12 segment transfers
+
+READ_SEG16_TMP0 (76) and WRITE_SEG16_TMP0 (77) transfer a decoded architectural
+selector through the existing temporary and sole segment/cache owner. The
+source index comes from captured opcode/ModR/M metadata, independently of EA
+segment selection. The four programs are MOV_RM16_SEG, MOV_SEG_RM16, PUSH_SEG
+and POP_SEG. Source completion precedes cache write; POP commits old-stack
+SP before loading the new selector. The generated image has 71 entries and
+356 words; all 342 previous words are preserved. The compiler rejects incomplete
+segment transfer protocols. SS inhibition belongs to the event owner, not to
+microcode delays. See PHASE7_SEGMENT_TRANSFER.md and D-033.
+
+## Active format 13 stack/frame and bounds programs
+
+Five explicit programs express PUSHA, POPA, ENTER, LEAVE and BOUND. Generic
+register transfers, auxiliary/allocation temporaries and a five-bit counter
+support the frame loop; generated instruction-local branch targets carry an
+explicit valid bit. The existing microsequencer owns and validates branches.
+The image has 76 entries/433 words, nine address bits and seven control bits;
+all 356 prior words and entry addresses are preserved. ENTER uses a transient
+stack cursor and per-transfer checks: a fault preserves original architectural
+SP/BP while retaining accepted memory writes. BOUND checks both modular word
+starts and permits the physically observed FFFE-to-0000 even wrap. See D-034
+and PHASE7_STACK_FRAME.md for sources and independent literal contracts.
+
+## Active format 14 far pointer and context transfers
+
+CHECK_PUSH2 (113) and CHECK_POP2 (114) validate the full four-byte return frame;
+ADD_ALLOCATION_SP (115) applies RETF's unsigned immediate allocation. Seven
+complete source protocols express LDS/LES, direct/memory far CALL and JMP, and
+RETF with or without allocation. Both words precede pointer installation, and
+CALL acquires a memory pointer before creating its return link. Context commit
+uses the existing CS:IP owner and flush path. FLAGS and NMI blocking are unchanged.
+The image has 83 entries/492 words, nine-bit addresses and seven-bit controls.
+All 433 prior words, entries and frame-loop destinations remain stable. Frozen
+format-13 sources and the independent literal format-14 fixture prevent silent
+encoding or protocol drift. The separate arithmetic prototype must rebase its
+human-readable source before integration because its tentative controls conflict.
+See PHASE7_FAR_TRANSFERS.md for physical evidence and precise fault/lifecycle rules.

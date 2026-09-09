@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 11 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 13 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -38,8 +38,9 @@ STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
               50: 'FETCH_IMM8 -> TMP1', 51: 'READ_REG8 -> TMP1', 52: 'READ_RM8 -> TMP1',
               53: 'READ_DST8 -> TMP0', 54: 'TMP0 -> DST8', 55: 'TMP2 -> REG8 IF_WRITE',
               56: 'TMP2 -> RM8 IF_WRITE', 57: 'TMP2 -> DST8 IF_WRITE',
-              58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1', 64: 'READ_EA -> TMP0', 65: 'TMP1 -> REG8', 66: 'TMP1 -> REG16', 67: 'READ_TARGET16 -> TMP1', 68: 'TMP1 -> SOURCE16', 69: 'SET_ADDRESS TMP1', 70: 'ADD_BASE TMP0 -> TMP1', 71: 'DISPATCH DECODED', 72: 'CONST_ZERO -> TMP1', 73: 'CONST_ONES -> TMP1', 74: 'ADJUST DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 75: 'CHECK_ARITHMETIC'}
+              58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1', 64: 'READ_EA -> TMP0', 65: 'TMP1 -> REG8', 66: 'TMP1 -> REG16', 67: 'READ_TARGET16 -> TMP1', 68: 'TMP1 -> SOURCE16', 69: 'SET_ADDRESS TMP1', 70: 'ADD_BASE TMP0 -> TMP1', 71: 'DISPATCH DECODED', 72: 'CONST_ZERO -> TMP1', 73: 'CONST_ONES -> TMP1', 74: 'ADJUST DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 75: 'CHECK_ARITHMETIC', 76: 'READ_SEG16 -> TMP0', 77: 'TMP0 -> SEG16'}
 
+STATEMENTS.update({78: 'READ_AX -> TMP0', 79: 'READ_CX -> TMP0', 80: 'READ_DX -> TMP0', 81: 'READ_BX -> TMP0', 82: 'READ_SP -> TMP0', 83: 'READ_BP -> TMP0', 84: 'READ_SI -> TMP0', 85: 'READ_DI -> TMP0', 86: 'TMP0 -> AX', 87: 'TMP0 -> CX', 88: 'TMP0 -> DX', 89: 'TMP0 -> BX', 90: 'TMP0 -> SP', 91: 'TMP0 -> BP', 92: 'TMP0 -> SI', 93: 'TMP0 -> DI', 94: 'SAVE_AUX TMP0', 95: 'RESTORE_AUX -> TMP0', 96: 'SAVE_ALLOCATION TMP0', 97: 'LOAD_COUNTER TMP1', 98: 'DECREMENT_COUNTER', 99: 'BRANCH_ZERO', 100: 'BRANCH_NONZERO', 101: 'CHECK_PUSH8', 102: 'CHECK_POP8', 103: 'BEGIN_STACK_CURSOR', 104: 'CHECK_STACK TMP0', 105: 'SET_STACK_ADDRESS TMP0', 106: 'READ_STACK_ADDRESS -> TMP0', 107: 'DECREMENT_STACK_ADDRESS', 108: 'ALLOCATE_STACK', 109: 'CHECK_RM32', 110: 'SET_EA_PLUS2', 111: 'CHECK_BOUNDS', 112: 'READ_STACK_CURSOR -> TMP0'})
 
 def validate_entries(program, expected):
     for name, address in expected.items():
@@ -49,6 +50,9 @@ def validate_entries(program, expected):
         if actual != address:
             raise CompileError(program.operations[actual].location,
                                f"entry {name} moved: expected {address}, got {actual}")
+
+
+STATEMENTS.update({113:'CHECK_PUSH2',114:'CHECK_POP2',115:'ADD_ALLOCATION_SP'})
 
 
 def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
@@ -101,6 +105,12 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
         expected.update(DISPATCH_DECODED=71, CONST_ZERO_TMP1=72, CONST_ONES_TMP1=73)
     if dimension('MC_FORMAT_VERSION') >= 11:
         expected.update(ADJUST=74, CHECK_ARITHMETIC=75)
+    if dimension('MC_FORMAT_VERSION') >= 12:
+        expected.update(READ_SEG16_TMP0=76, WRITE_SEG16_TMP0=77)
+    if dimension('MC_FORMAT_VERSION') >= 14:
+        expected.update({'CHECK_PUSH2':113,'CHECK_POP2':114,'ADD_ALLOCATION_SP':115})
+    if dimension('MC_FORMAT_VERSION') >= 13:
+        expected.update({'READ_AX_TMP0': 78, 'READ_CX_TMP0': 79, 'READ_DX_TMP0': 80, 'READ_BX_TMP0': 81, 'READ_SP_TMP0': 82, 'READ_BP_TMP0': 83, 'READ_SI_TMP0': 84, 'READ_DI_TMP0': 85, 'WRITE_AX_TMP0': 86, 'WRITE_CX_TMP0': 87, 'WRITE_DX_TMP0': 88, 'WRITE_BX_TMP0': 89, 'WRITE_SP_TMP0': 90, 'WRITE_BP_TMP0': 91, 'WRITE_SI_TMP0': 92, 'WRITE_DI_TMP0': 93, 'SAVE_AUX_TMP0': 94, 'RESTORE_AUX_TMP0': 95, 'SAVE_ALLOCATION_TMP0': 96, 'LOAD_COUNTER_TMP1': 97, 'DECREMENT_COUNTER': 98, 'BRANCH_ZERO': 99, 'BRANCH_NONZERO': 100, 'CHECK_PUSH8': 101, 'CHECK_POP8': 102, 'BEGIN_STACK_CURSOR': 103, 'CHECK_STACK_TMP0': 104, 'SET_STACK_ADDRESS_TMP0': 105, 'READ_STACK_ADDRESS_TMP0': 106, 'DECREMENT_STACK_ADDRESS': 107, 'ALLOCATE_STACK': 108, 'CHECK_RM32': 109, 'SET_EA_PLUS2': 110, 'CHECK_BOUNDS': 111, 'READ_STACK_CURSOR_TMP0': 112})
     if {name: values.get(name) for name in expected} != expected:
         raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
@@ -121,8 +131,24 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
     return tuple(words)
 
 
-def canonical_source(words, entries, labels=None):
+def read_generated_branches(package: str) -> dict[int, int]:
+    entries = re.findall(r"([0-9]+)'d([0-9]+): micro_branch_target = \{1'b1, ([0-9]+)'d([0-9]+)\};",package)
+    width=int(re.search(r'MC_ADDR_WIDTH = ([0-9]+);',package)[1])
+    depth=int(re.search(r'MC_DEPTH = ([0-9]+);',package)[1])
+    result={}
+    for a,pc,b,target in entries:
+        pc,target=int(pc),int(target)
+        if int(a)!=width or int(b)!=width or pc in result or not 0<=pc<depth or not 0<=target<depth:
+            raise ValueError('invalid generated branch target')
+        result[pc]=target
+    return result
+
+
+def canonical_source(words, entries, labels=None, branch_targets=None):
     labels = {} if labels is None else labels
+    branch_targets = {} if branch_targets is None else branch_targets
+    if set(branch_targets) != {i for i,w in enumerate(words) if w in (99,100)}:
+        raise ValueError("missing or extraneous branch target metadata")
     if not words or any(type(w) is not int or w not in (0, *STATEMENTS) for w in words):
         raise ValueError("invalid ROM words")
     used = len(words)
@@ -151,15 +177,23 @@ def canonical_source(words, entries, labels=None):
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
     unary = any(tuple(words[i:i+7]) in ((4,47,61,14,56,18,3), (4,6,61,14,16,18,3)) for i in range(len(words)-6))
-    version = 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
+    version = 14 if any(w > 112 for w in words) else 13 if any(w > 77 for w in words) else 12 if any(w > 75 for w in words) else 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
+            owner_entry=by_address[address]
             lines.append(f"instruction {by_address[address]}:")
         elif address and words[address - 1] in (3, 71):
             raise ValueError(f"missing entry after END at {address-1}")
         lines.extend(f"{label}:" for label in label_addresses.get(address, []))
-        lines.append(f"    {STATEMENTS[word]}")
+        statement=STATEMENTS[word]
+        if word in (99,100):
+            target=branch_targets[address]
+            candidates=[name for name,pc in labels.items() if pc==target and name.startswith(owner_entry + '.')]
+            if not candidates:
+                raise ValueError('branch target has no instruction-local label')
+            statement += ' ' + sorted(candidates)[0].split('.')[1]
+        lines.append(f"    {statement}")
     source = "\n".join(lines) + "\n"
     # Reuse semantic validation, including TMP0 lifetime and the terminal END.
     compile_sources({"canonical.mc": source}, rom_depth=len(words))
@@ -187,14 +221,19 @@ def audit(output_dir, contract_path):
             or symbols["labels"] != contract["labels"]
             or program.address_width != contract["address_width"]):
         raise ValueError("phase ROM/symbol contract changed")
-    canonical = canonical_source(words, symbols["entries"], symbols["labels"])
+    branches=read_generated_branches(artifacts['spk286_microcode_pkg.sv'].decode())
+    if branches!=program.branch_targets or {str(k):v for k,v in branches.items()}!=symbols.get('branch_targets',{}):
+        raise ValueError('source/RTL branch target mismatch')
+    if {str(k):v for k,v in branches.items()}!=contract.get('branch_targets',{}):
+        raise ValueError('independent branch target contract changed')
+    canonical = canonical_source(words, symbols["entries"], symbols["labels"],branches)
     reconstructed = compile_sources({"canonical.mc": canonical},
                                     address_width=program.address_width, rom_depth=program.depth)
     roundtrip_words = read_generated_words(generate(reconstructed)["spk286_microcode_pkg.sv"],
                                           generate(reconstructed)["spk286_microcode_rom.sv"])
     if words != roundtrip_words or list(words) != [encode(op) for op in program.operations]:
         raise ValueError("source/RTL/round-trip word mismatch")
-    if program.entries != reconstructed.entries or program.labels != reconstructed.labels:
+    if program.entries != reconstructed.entries or program.labels != reconstructed.labels or program.branch_targets != reconstructed.branch_targets:
         raise ValueError("round-trip symbol mismatch")
     report = {"schema_version": 1, "validation": "PASS", "roundtrip": "PASS",
               "baseline": contract["baseline"], "entries": program.entries,
@@ -212,7 +251,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase7_adjust.json")
+                        default=ROOT / "tests/fixtures/microcode_phase7_far.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

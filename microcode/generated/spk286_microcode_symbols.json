@@ -1,4 +1,9 @@
 {
+  "branch_targets": {
+    "404": 414,
+    "406": 412,
+    "411": 407
+  },
   "entries": {
     "ADJUST_DIRECT": 328,
     "ADJUST_RADIX": 335,
@@ -12,9 +17,13 @@
     "ALU_RM8_IMM8": 167,
     "ALU_RM8_R8": 147,
     "BRANCH_REL8": 77,
+    "CALL_FAR_IMM": 443,
+    "CALL_FAR_RM": 458,
     "CALL_REL16": 67,
+    "CHECK_BOUNDS": 424,
     "CONTROL_FLAGS": 174,
     "CONTROL_IF": 102,
+    "ENTER_FRAME": 393,
     "EVENT_ENTRY": 116,
     "EXCHANGE_RM16_R16": 245,
     "EXCHANGE_RM8_R8": 239,
@@ -29,12 +38,16 @@
     "INC_DEC_RM16": 321,
     "INC_DEC_RM8": 314,
     "INTERRUPT_RETURN": 111,
+    "JMP_FAR_IMM": 454,
+    "JMP_FAR_RM": 472,
     "JMP_REL16": 73,
+    "LEAVE_FRAME": 418,
     "LEA_R16_M": 235,
     "LOAD_BASE_INDEX8": 276,
     "LOAD_DIRECT16": 261,
     "LOAD_DIRECT8": 256,
     "LOAD_FLAGS_BYTE": 176,
+    "LOAD_POINTER": 433,
     "LOOP_REL8": 81,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
@@ -42,19 +55,27 @@
     "MOV_R8_RM8": 135,
     "MOV_RM16_IMM16": 143,
     "MOV_RM16_R16": 3,
+    "MOV_RM16_SEG": 342,
     "MOV_RM8_IMM8": 139,
     "MOV_RM8_R8": 131,
+    "MOV_SEG_RM16": 346,
     "NEG_RM16": 307,
     "NEG_RM8": 300,
     "NOT_RM16": 293,
     "NOT_RM8": 286,
+    "POP_ALL": 376,
     "POP_FLAGS": 99,
     "POP_R16": 48,
     "POP_RM16": 57,
+    "POP_SEG": 353,
+    "PUSH_ALL": 356,
     "PUSH_FLAGS": 96,
     "PUSH_IMM16": 51,
     "PUSH_IMM8S": 54,
     "PUSH_R16": 45,
+    "PUSH_SEG": 350,
+    "RET_FAR": 479,
+    "RET_FAR_IMM": 484,
     "RET_IMM16": 90,
     "RET_NEAR": 86,
     "SHIFT_RM16_CL": 221,
@@ -74,6 +95,9 @@
     "ALU_RM16_IMM16.writeback": 35,
     "ALU_RM16_IMM8S.writeback": 42,
     "ALU_RM16_R16.writeback": 15,
+    "ENTER_FRAME.copy_parent": 407,
+    "ENTER_FRAME.finish": 414,
+    "ENTER_FRAME.push_frame": 412,
     "MOV_R16_IMM16.writeback": 1,
     "MOV_R16_RM16.writeback": 9,
     "MOV_RM16_R16.writeback": 5
@@ -4667,6 +4691,1940 @@
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
         "line": 18
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 342,
+      "location": {
+        "entry": "MOV_RM16_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 343,
+      "location": {
+        "entry": "MOV_RM16_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_SEG16_TMP0",
+      "statement": "READ_SEG16 -> TMP0",
+      "word": 76
+    },
+    {
+      "address": 344,
+      "location": {
+        "entry": "MOV_RM16_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 6
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_RM16",
+      "statement": "TMP0 -> RM16",
+      "word": 8
+    },
+    {
+      "address": 345,
+      "location": {
+        "entry": "MOV_RM16_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 346,
+      "location": {
+        "entry": "MOV_SEG_RM16",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 347,
+      "location": {
+        "entry": "MOV_SEG_RM16",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 348,
+      "location": {
+        "entry": "MOV_SEG_RM16",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_SEG16_TMP0",
+      "statement": "TMP0 -> SEG16",
+      "word": 77
+    },
+    {
+      "address": 349,
+      "location": {
+        "entry": "MOV_SEG_RM16",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 350,
+      "location": {
+        "entry": "PUSH_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 14
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_SEG16_TMP0",
+      "statement": "READ_SEG16 -> TMP0",
+      "word": 76
+    },
+    {
+      "address": 351,
+      "location": {
+        "entry": "PUSH_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 15
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 352,
+      "location": {
+        "entry": "PUSH_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 16
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 353,
+      "location": {
+        "entry": "POP_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 18
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 354,
+      "location": {
+        "entry": "POP_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 19
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_SEG16_TMP0",
+      "statement": "TMP0 -> SEG16",
+      "word": 77
+    },
+    {
+      "address": 355,
+      "location": {
+        "entry": "POP_SEG",
+        "file": "zzzzzzzz_segments.mc",
+        "line": 20
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 356,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "CHECK_PUSH8",
+      "statement": "CHECK_PUSH8",
+      "word": 101
+    },
+    {
+      "address": 357,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 5
+      },
+      "operands": [],
+      "operation": "READ_SP_TMP0",
+      "statement": "READ_SP -> TMP0",
+      "word": 82
+    },
+    {
+      "address": 358,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 359,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "READ_AX_TMP0",
+      "statement": "READ_AX -> TMP0",
+      "word": 78
+    },
+    {
+      "address": 360,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 8
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 361,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "READ_CX_TMP0",
+      "statement": "READ_CX -> TMP0",
+      "word": 79
+    },
+    {
+      "address": 362,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 10
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 363,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 11
+      },
+      "operands": [],
+      "operation": "READ_DX_TMP0",
+      "statement": "READ_DX -> TMP0",
+      "word": 80
+    },
+    {
+      "address": 364,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 12
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 365,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 13
+      },
+      "operands": [],
+      "operation": "READ_BX_TMP0",
+      "statement": "READ_BX -> TMP0",
+      "word": 81
+    },
+    {
+      "address": 366,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 14
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 367,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 368,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 16
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 369,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "READ_BP_TMP0",
+      "statement": "READ_BP -> TMP0",
+      "word": 83
+    },
+    {
+      "address": 370,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 18
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 371,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "READ_SI_TMP0",
+      "statement": "READ_SI -> TMP0",
+      "word": 84
+    },
+    {
+      "address": 372,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 20
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 373,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 21
+      },
+      "operands": [],
+      "operation": "READ_DI_TMP0",
+      "statement": "READ_DI -> TMP0",
+      "word": 85
+    },
+    {
+      "address": 374,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 22
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 375,
+      "location": {
+        "entry": "PUSH_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 23
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 376,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "CHECK_POP8",
+      "statement": "CHECK_POP8",
+      "word": 102
+    },
+    {
+      "address": 377,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 27
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 378,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 28
+      },
+      "operands": [],
+      "operation": "WRITE_DI_TMP0",
+      "statement": "TMP0 -> DI",
+      "word": 93
+    },
+    {
+      "address": 379,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 29
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 380,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 30
+      },
+      "operands": [],
+      "operation": "WRITE_SI_TMP0",
+      "statement": "TMP0 -> SI",
+      "word": 92
+    },
+    {
+      "address": 381,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 31
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 382,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "WRITE_BP_TMP0",
+      "statement": "TMP0 -> BP",
+      "word": 91
+    },
+    {
+      "address": 383,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 33
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 384,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 34
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 385,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 35
+      },
+      "operands": [],
+      "operation": "WRITE_BX_TMP0",
+      "statement": "TMP0 -> BX",
+      "word": 89
+    },
+    {
+      "address": 386,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 36
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 387,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 37
+      },
+      "operands": [],
+      "operation": "WRITE_DX_TMP0",
+      "statement": "TMP0 -> DX",
+      "word": 88
+    },
+    {
+      "address": 388,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 389,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 39
+      },
+      "operands": [],
+      "operation": "WRITE_CX_TMP0",
+      "statement": "TMP0 -> CX",
+      "word": 87
+    },
+    {
+      "address": 390,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 391,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "WRITE_AX_TMP0",
+      "statement": "TMP0 -> AX",
+      "word": 86
+    },
+    {
+      "address": 392,
+      "location": {
+        "entry": "POP_ALL",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 393,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 45
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 394,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 46
+      },
+      "operands": [],
+      "operation": "SAVE_ALLOCATION_TMP0",
+      "statement": "SAVE_ALLOCATION TMP0",
+      "word": 96
+    },
+    {
+      "address": 395,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 47
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8_TMP1",
+      "statement": "FETCH_IMM8 -> TMP1",
+      "word": 50
+    },
+    {
+      "address": 396,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "LOAD_COUNTER_TMP1",
+      "statement": "LOAD_COUNTER TMP1",
+      "word": 97
+    },
+    {
+      "address": 397,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "BEGIN_STACK_CURSOR",
+      "statement": "BEGIN_STACK_CURSOR",
+      "word": 103
+    },
+    {
+      "address": 398,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 50
+      },
+      "operands": [],
+      "operation": "READ_BP_TMP0",
+      "statement": "READ_BP -> TMP0",
+      "word": 83
+    },
+    {
+      "address": 399,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 51
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 400,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 52
+      },
+      "operands": [],
+      "operation": "READ_STACK_CURSOR_TMP0",
+      "statement": "READ_STACK_CURSOR -> TMP0",
+      "word": 112
+    },
+    {
+      "address": 401,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 53
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 402,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 54
+      },
+      "operands": [],
+      "operation": "READ_BP_TMP0",
+      "statement": "READ_BP -> TMP0",
+      "word": 83
+    },
+    {
+      "address": 403,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 55
+      },
+      "operands": [],
+      "operation": "SET_STACK_ADDRESS_TMP0",
+      "statement": "SET_STACK_ADDRESS TMP0",
+      "word": 105
+    },
+    {
+      "address": 404,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 56
+      },
+      "operands": [
+        "finish"
+      ],
+      "operation": "BRANCH_ZERO",
+      "statement": "BRANCH_ZERO finish",
+      "word": 99
+    },
+    {
+      "address": 405,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "DECREMENT_COUNTER",
+      "statement": "DECREMENT_COUNTER",
+      "word": 98
+    },
+    {
+      "address": 406,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 58
+      },
+      "operands": [
+        "push_frame"
+      ],
+      "operation": "BRANCH_ZERO",
+      "statement": "BRANCH_ZERO push_frame",
+      "word": 99
+    },
+    {
+      "address": 407,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 60
+      },
+      "operands": [],
+      "operation": "DECREMENT_STACK_ADDRESS",
+      "statement": "DECREMENT_STACK_ADDRESS",
+      "word": 107
+    },
+    {
+      "address": 408,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 61
+      },
+      "operands": [],
+      "operation": "READ_STACK_ADDRESS_TMP0",
+      "statement": "READ_STACK_ADDRESS -> TMP0",
+      "word": 106
+    },
+    {
+      "address": 409,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 62
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 410,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 63
+      },
+      "operands": [],
+      "operation": "DECREMENT_COUNTER",
+      "statement": "DECREMENT_COUNTER",
+      "word": 98
+    },
+    {
+      "address": 411,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 64
+      },
+      "operands": [
+        "copy_parent"
+      ],
+      "operation": "BRANCH_NONZERO",
+      "statement": "BRANCH_NONZERO copy_parent",
+      "word": 100
+    },
+    {
+      "address": 412,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 66
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 413,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 67
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 414,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 69
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 415,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 70
+      },
+      "operands": [],
+      "operation": "WRITE_BP_TMP0",
+      "statement": "TMP0 -> BP",
+      "word": 91
+    },
+    {
+      "address": 416,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 71
+      },
+      "operands": [],
+      "operation": "ALLOCATE_STACK",
+      "statement": "ALLOCATE_STACK",
+      "word": 108
+    },
+    {
+      "address": 417,
+      "location": {
+        "entry": "ENTER_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 72
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 418,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 75
+      },
+      "operands": [],
+      "operation": "READ_BP_TMP0",
+      "statement": "READ_BP -> TMP0",
+      "word": 83
+    },
+    {
+      "address": 419,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 76
+      },
+      "operands": [],
+      "operation": "CHECK_STACK_TMP0",
+      "statement": "CHECK_STACK TMP0",
+      "word": 104
+    },
+    {
+      "address": 420,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 77
+      },
+      "operands": [],
+      "operation": "WRITE_SP_TMP0",
+      "statement": "TMP0 -> SP",
+      "word": 90
+    },
+    {
+      "address": 421,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 78
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 422,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 79
+      },
+      "operands": [],
+      "operation": "WRITE_BP_TMP0",
+      "statement": "TMP0 -> BP",
+      "word": 91
+    },
+    {
+      "address": 423,
+      "location": {
+        "entry": "LEAVE_FRAME",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 80
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 424,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 83
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 425,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 84
+      },
+      "operands": [],
+      "operation": "CHECK_RM32",
+      "statement": "CHECK_RM32",
+      "word": 109
+    },
+    {
+      "address": 426,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 85
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 427,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 86
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 428,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 87
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_REG16_TMP1",
+      "statement": "READ_REG16 -> TMP1",
+      "word": 9
+    },
+    {
+      "address": 429,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 88
+      },
+      "operands": [],
+      "operation": "SET_EA_PLUS2",
+      "statement": "SET_EA_PLUS2",
+      "word": 110
+    },
+    {
+      "address": 430,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 89
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 431,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 90
+      },
+      "operands": [],
+      "operation": "CHECK_BOUNDS",
+      "statement": "CHECK_BOUNDS",
+      "word": 111
+    },
+    {
+      "address": 432,
+      "location": {
+        "entry": "CHECK_BOUNDS",
+        "file": "zzzzzzzzz_stack_frame.mc",
+        "line": 91
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 433,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 5
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 434,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "CHECK_RM32",
+      "statement": "CHECK_RM32",
+      "word": 109
+    },
+    {
+      "address": 435,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 7
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 436,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 8
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 437,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "SET_EA_PLUS2",
+      "statement": "SET_EA_PLUS2",
+      "word": 110
+    },
+    {
+      "address": 438,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 439,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_SEG16_TMP0",
+      "statement": "TMP0 -> SEG16",
+      "word": 77
+    },
+    {
+      "address": 440,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 441,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 13
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "WRITE_REG16",
+      "statement": "TMP0 -> REG16",
+      "word": 7
+    },
+    {
+      "address": 442,
+      "location": {
+        "entry": "LOAD_POINTER",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 14
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 443,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 17
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 444,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 18
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 445,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "CHECK_PUSH2",
+      "statement": "CHECK_PUSH2",
+      "word": 113
+    },
+    {
+      "address": 446,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 20
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 447,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_SEG16_TMP0",
+      "statement": "READ_SEG16 -> TMP0",
+      "word": 76
+    },
+    {
+      "address": 448,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 22
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 449,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 23
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_IP16",
+      "statement": "READ_IP16 -> TMP0",
+      "word": 23
+    },
+    {
+      "address": 450,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 24
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 451,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 25
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 452,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 453,
+      "location": {
+        "entry": "CALL_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 27
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 454,
+      "location": {
+        "entry": "JMP_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 455,
+      "location": {
+        "entry": "JMP_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 31
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 456,
+      "location": {
+        "entry": "JMP_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 457,
+      "location": {
+        "entry": "JMP_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 33
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 458,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 36
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 459,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 37
+      },
+      "operands": [],
+      "operation": "CHECK_RM32",
+      "statement": "CHECK_RM32",
+      "word": 109
+    },
+    {
+      "address": 460,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 461,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 39
+      },
+      "operands": [],
+      "operation": "SET_EA_PLUS2",
+      "statement": "SET_EA_PLUS2",
+      "word": 110
+    },
+    {
+      "address": 462,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 40
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_RM16_TMP1",
+      "statement": "READ_RM16 -> TMP1",
+      "word": 10
+    },
+    {
+      "address": 463,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "CHECK_PUSH2",
+      "statement": "CHECK_PUSH2",
+      "word": 113
+    },
+    {
+      "address": 464,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "SAVE_AUX_TMP0",
+      "statement": "SAVE_AUX TMP0",
+      "word": 94
+    },
+    {
+      "address": 465,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 43
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_SEG16_TMP0",
+      "statement": "READ_SEG16 -> TMP0",
+      "word": 76
+    },
+    {
+      "address": 466,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 44
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 467,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 45
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_IP16",
+      "statement": "READ_IP16 -> TMP0",
+      "word": 23
+    },
+    {
+      "address": 468,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 46
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 469,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 47
+      },
+      "operands": [],
+      "operation": "RESTORE_AUX_TMP0",
+      "statement": "RESTORE_AUX -> TMP0",
+      "word": 95
+    },
+    {
+      "address": 470,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 471,
+      "location": {
+        "entry": "CALL_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 472,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 52
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 473,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 53
+      },
+      "operands": [],
+      "operation": "CHECK_RM32",
+      "statement": "CHECK_RM32",
+      "word": 109
+    },
+    {
+      "address": 474,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 54
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 475,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 55
+      },
+      "operands": [],
+      "operation": "SET_EA_PLUS2",
+      "statement": "SET_EA_PLUS2",
+      "word": 110
+    },
+    {
+      "address": 476,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 56
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_RM16_TMP1",
+      "statement": "READ_RM16 -> TMP1",
+      "word": 10
+    },
+    {
+      "address": 477,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 478,
+      "location": {
+        "entry": "JMP_FAR_RM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 58
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 479,
+      "location": {
+        "entry": "RET_FAR",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 61
+      },
+      "operands": [],
+      "operation": "CHECK_POP2",
+      "statement": "CHECK_POP2",
+      "word": 114
+    },
+    {
+      "address": 480,
+      "location": {
+        "entry": "RET_FAR",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 62
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 481,
+      "location": {
+        "entry": "RET_FAR",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 63
+      },
+      "operands": [],
+      "operation": "POP16_TMP1",
+      "statement": "POP16 -> TMP1",
+      "word": 43
+    },
+    {
+      "address": 482,
+      "location": {
+        "entry": "RET_FAR",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 64
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 483,
+      "location": {
+        "entry": "RET_FAR",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 65
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 484,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 68
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "FETCH_IMM16",
+      "statement": "FETCH_IMM16 -> TMP0",
+      "word": 1
+    },
+    {
+      "address": 485,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 69
+      },
+      "operands": [],
+      "operation": "SAVE_ALLOCATION_TMP0",
+      "statement": "SAVE_ALLOCATION TMP0",
+      "word": 96
+    },
+    {
+      "address": 486,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 70
+      },
+      "operands": [],
+      "operation": "CHECK_POP2",
+      "statement": "CHECK_POP2",
+      "word": 114
+    },
+    {
+      "address": 487,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 71
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "POP16",
+      "statement": "POP16 -> TMP0",
+      "word": 22
+    },
+    {
+      "address": 488,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 72
+      },
+      "operands": [],
+      "operation": "POP16_TMP1",
+      "statement": "POP16 -> TMP1",
+      "word": 43
+    },
+    {
+      "address": 489,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 73
+      },
+      "operands": [],
+      "operation": "ADD_ALLOCATION_SP",
+      "statement": "ADD_ALLOCATION_SP",
+      "word": 115
+    },
+    {
+      "address": 490,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 74
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 491,
+      "location": {
+        "entry": "RET_FAR_IMM",
+        "file": "zzzzzzzzzz_far_pointer.mc",
+        "line": 75
       },
       "operands": [],
       "operation": "END",

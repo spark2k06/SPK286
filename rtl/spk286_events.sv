@@ -2,7 +2,7 @@
 `timescale 1ns/1ps
 module spk286_events (
     input logic clk, reset, cancel, enable,
-    input logic intr, nmi,
+    input logic intr, nmi, ss_load,
     input logic instruction_start, opcode_dispatch, instruction_active, retired,
     input logic [7:0] opcode,
     input logic [15:0] ip, cs, flags,
@@ -19,7 +19,7 @@ module spk286_events (
     output logic [15:0] event_ip, event_cs, event_flags,
     output logic event_needs_ack,
     output logic halted, shutdown,
-    output logic nmi_pending, nmi_blocked, sti_shadow,
+    output logic nmi_pending, nmi_blocked, sti_shadow, ss_shadow,
     output logic [15:0] instruction_ip,
     output logic [2:0] event_kind
 );
@@ -44,9 +44,9 @@ module spk286_events (
             end else if (software_request && !shutdown) begin
                 selected_kind = KIND_SOFTWARE; selected_vector = software_vector;
             end else if (boundary) begin
-                if (trap_due && !shutdown) begin selected_kind = KIND_TRAP; selected_vector = 8'd1; end
-                else if ((nmi_pending || nmi_edge) && !nmi_blocked) begin selected_kind = KIND_NMI; selected_vector = 8'd2; end
-                else if (intr && flags[9] && !sti_shadow && !shutdown) begin selected_kind = KIND_INTR; end
+                if (trap_due && !ss_shadow && !shutdown) begin selected_kind = KIND_TRAP; selected_vector = 8'd1; end
+                else if ((nmi_pending || nmi_edge) && !nmi_blocked && !ss_shadow) begin selected_kind = KIND_NMI; selected_vector = 8'd2; end
+                else if (intr && flags[9] && !sti_shadow && !ss_shadow && !shutdown) begin selected_kind = KIND_INTR; end
                 // An unavailable next opcode is not a fault of the instruction
                 // that just completed. Its owed trap/external boundary comes first.
                 else if (fault_request && !shutdown) begin selected_kind = KIND_FAULT; selected_vector = fault_vector; end
@@ -62,7 +62,7 @@ module spk286_events (
             event_vector <= 8'd0; event_ip <= 16'd0; event_cs <= 16'd0; event_flags <= 16'd0;
             event_needs_ack <= 1'b0;
             nmi_previous_q <= 1'b0; nmi_pending <= 1'b0; nmi_blocked <= 1'b0;
-            sti_shadow <= 1'b0; halted <= 1'b0; shutdown <= 1'b0;
+            sti_shadow <= 1'b0; ss_shadow <= 1'b0; halted <= 1'b0; shutdown <= 1'b0;
             trap_sample_q <= 1'b0; trap_pending_q <= 1'b0;
             instruction_ip <= 16'd0; instruction_cs_q <= 16'd0;
         end else begin
@@ -73,7 +73,11 @@ module spk286_events (
                 instruction_ip <= ip; instruction_cs_q <= cs;
                 trap_sample_q <= flags[8];
             end
+            // A successful SS cache commit protects the following instruction.
+            // Its prefixes retain the shadow; its opcode starts the protected body.
+            if (ss_load) ss_shadow <= 1'b1;
             if (opcode_dispatch) begin
+                ss_shadow <= 1'b0;
                 // Candidate policy: release at IRET start. The failed-IRET
                 // distinction still requires 286 evidence; the release gate
                 // records it in docs/phase6_evidence.json. Boundaries remain safe.
@@ -81,7 +85,7 @@ module spk286_events (
                 if (opcode == 8'hFB && !flags[9]) sti_shadow <= 1'b1;
                 else sti_shadow <= 1'b0;
             end
-            if (retired && !event_active && trap_sample_q) trap_pending_q <= 1'b1;
+            if (retired && !event_active && trap_sample_q && !ss_shadow) trap_pending_q <= 1'b1;
             if (halt_request) halted <= 1'b1;
             if (cancel_operation) begin
                 cancel_operation <= 1'b0;
@@ -103,7 +107,7 @@ module spk286_events (
                 event_ip <= selected_kind == KIND_FAULT && instruction_active ? instruction_ip : ip;
                 event_cs <= selected_kind == KIND_FAULT && instruction_active ? instruction_cs_q : cs;
                 event_flags <= flags;
-                trap_pending_q <= 1'b0; trap_sample_q <= 1'b0; sti_shadow <= 1'b0;
+                trap_pending_q <= 1'b0; trap_sample_q <= 1'b0; sti_shadow <= 1'b0; ss_shadow <= 1'b0;
                 halted <= 1'b0; shutdown <= 1'b0;
                 if (selected_kind == KIND_NMI) begin
                     // If an older edge is being accepted, a simultaneous new

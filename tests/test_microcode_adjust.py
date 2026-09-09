@@ -6,8 +6,8 @@ from tools.microcode.audit_microcode import canonical_source,read_generated_word
 
 
 class AdjustMicrocodeTests(unittest.TestCase):
-    def test_active_adjust_image_and_canonical_reconstruction(self):
-        sources={p.name:p.read_text() for p in (ROOT/'microcode/source').glob('*.mc')}
+    def test_frozen_adjust_image_and_canonical_reconstruction(self):
+        sources=json.loads((ROOT/'tests/fixtures/microcode_phase7_adjust_sources.json').read_text())
         program=compile_sources(sources);artifacts=generate(program)
         contract=json.loads((ROOT/'tests/fixtures/microcode_phase7_adjust.json').read_text())
         words=read_generated_words(artifacts['spk286_microcode_pkg.sv'],artifacts['spk286_microcode_rom.sv'])
@@ -16,7 +16,6 @@ class AdjustMicrocodeTests(unittest.TestCase):
         self.assertEqual(list(words),contract['words']);self.assertEqual(program.entries,contract['entries']);self.assertEqual(program.labels,contract['labels'])
         rebuilt=compile_sources({'canonical.mc':canonical_source(words,program.entries,program.labels)})
         self.assertEqual([op.operation for op in rebuilt.operations],[op.operation for op in program.operations])
-        self.assertTrue(emit(artifacts,ROOT/'microcode/generated',check=True))
 
     def test_adjust_protocol_requires_flags_then_fault_check(self):
         for first in (['READ_DST16 -> TMP0','CONST_ZERO -> TMP1'],['FETCH_IMM8 -> TMP1','READ_DST16 -> TMP0']):

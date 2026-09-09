@@ -1,4 +1,4 @@
-SPK286 microcode compiler 11.0; format 11; encoding 11
+SPK286 microcode compiler 14.0; format 14; encoding 14
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -416,3 +416,172 @@ SPK286 microcode compiler 11.0; format 11; encoding 11
 0153  12  COMMIT_FLAGS  # zzzzzzz_adjust.mc:16
 0154  4B  CHECK_ARITHMETIC  # zzzzzzz_adjust.mc:17
 0155  3  END  # zzzzzzz_adjust.mc:18
+0156  MOV_RM16_SEG:
+0156  4  DECODE_MODRM  # zzzzzzzz_segments.mc:4
+0157  4C  READ_SEG16 -> TMP0  # zzzzzzzz_segments.mc:5
+0158  8  TMP0 -> RM16  # zzzzzzzz_segments.mc:6
+0159  3  END  # zzzzzzzz_segments.mc:7
+015A  MOV_SEG_RM16:
+015A  4  DECODE_MODRM  # zzzzzzzz_segments.mc:9
+015B  6  READ_RM16 -> TMP0  # zzzzzzzz_segments.mc:10
+015C  4D  TMP0 -> SEG16  # zzzzzzzz_segments.mc:11
+015D  3  END  # zzzzzzzz_segments.mc:12
+015E  PUSH_SEG:
+015E  4C  READ_SEG16 -> TMP0  # zzzzzzzz_segments.mc:14
+015F  15  PUSH16 DECODED TMP0  # zzzzzzzz_segments.mc:15
+0160  3  END  # zzzzzzzz_segments.mc:16
+0161  POP_SEG:
+0161  16  POP16 -> TMP0  # zzzzzzzz_segments.mc:18
+0162  4D  TMP0 -> SEG16  # zzzzzzzz_segments.mc:19
+0163  3  END  # zzzzzzzz_segments.mc:20
+0164  PUSH_ALL:
+0164  65  CHECK_PUSH8  # zzzzzzzzz_stack_frame.mc:4
+0165  52  READ_SP -> TMP0  # zzzzzzzzz_stack_frame.mc:5
+0166  5E  SAVE_AUX TMP0  # zzzzzzzzz_stack_frame.mc:6
+0167  4E  READ_AX -> TMP0  # zzzzzzzzz_stack_frame.mc:7
+0168  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:8
+0169  4F  READ_CX -> TMP0  # zzzzzzzzz_stack_frame.mc:9
+016A  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:10
+016B  50  READ_DX -> TMP0  # zzzzzzzzz_stack_frame.mc:11
+016C  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:12
+016D  51  READ_BX -> TMP0  # zzzzzzzzz_stack_frame.mc:13
+016E  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:14
+016F  5F  RESTORE_AUX -> TMP0  # zzzzzzzzz_stack_frame.mc:15
+0170  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:16
+0171  53  READ_BP -> TMP0  # zzzzzzzzz_stack_frame.mc:17
+0172  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:18
+0173  54  READ_SI -> TMP0  # zzzzzzzzz_stack_frame.mc:19
+0174  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:20
+0175  55  READ_DI -> TMP0  # zzzzzzzzz_stack_frame.mc:21
+0176  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:22
+0177  3  END  # zzzzzzzzz_stack_frame.mc:23
+0178  POP_ALL:
+0178  66  CHECK_POP8  # zzzzzzzzz_stack_frame.mc:26
+0179  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:27
+017A  5D  TMP0 -> DI  # zzzzzzzzz_stack_frame.mc:28
+017B  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:29
+017C  5C  TMP0 -> SI  # zzzzzzzzz_stack_frame.mc:30
+017D  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:31
+017E  5B  TMP0 -> BP  # zzzzzzzzz_stack_frame.mc:32
+017F  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:33
+0180  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:34
+0181  59  TMP0 -> BX  # zzzzzzzzz_stack_frame.mc:35
+0182  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:36
+0183  58  TMP0 -> DX  # zzzzzzzzz_stack_frame.mc:37
+0184  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:38
+0185  57  TMP0 -> CX  # zzzzzzzzz_stack_frame.mc:39
+0186  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:40
+0187  56  TMP0 -> AX  # zzzzzzzzz_stack_frame.mc:41
+0188  3  END  # zzzzzzzzz_stack_frame.mc:42
+0189  ENTER_FRAME:
+0189  1  FETCH_IMM16 -> TMP0  # zzzzzzzzz_stack_frame.mc:45
+018A  60  SAVE_ALLOCATION TMP0  # zzzzzzzzz_stack_frame.mc:46
+018B  32  FETCH_IMM8 -> TMP1  # zzzzzzzzz_stack_frame.mc:47
+018C  61  LOAD_COUNTER TMP1  # zzzzzzzzz_stack_frame.mc:48
+018D  67  BEGIN_STACK_CURSOR  # zzzzzzzzz_stack_frame.mc:49
+018E  53  READ_BP -> TMP0  # zzzzzzzzz_stack_frame.mc:50
+018F  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:51
+0190  70  READ_STACK_CURSOR -> TMP0  # zzzzzzzzz_stack_frame.mc:52
+0191  5E  SAVE_AUX TMP0  # zzzzzzzzz_stack_frame.mc:53
+0192  53  READ_BP -> TMP0  # zzzzzzzzz_stack_frame.mc:54
+0193  69  SET_STACK_ADDRESS TMP0  # zzzzzzzzz_stack_frame.mc:55
+0194  63  BRANCH_ZERO finish  # zzzzzzzzz_stack_frame.mc:56
+0195  62  DECREMENT_COUNTER  # zzzzzzzzz_stack_frame.mc:57
+0196  63  BRANCH_ZERO push_frame  # zzzzzzzzz_stack_frame.mc:58
+0197  ENTER_FRAME.copy_parent:
+0197  6B  DECREMENT_STACK_ADDRESS  # zzzzzzzzz_stack_frame.mc:60
+0198  6A  READ_STACK_ADDRESS -> TMP0  # zzzzzzzzz_stack_frame.mc:61
+0199  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:62
+019A  62  DECREMENT_COUNTER  # zzzzzzzzz_stack_frame.mc:63
+019B  64  BRANCH_NONZERO copy_parent  # zzzzzzzzz_stack_frame.mc:64
+019C  ENTER_FRAME.push_frame:
+019C  5F  RESTORE_AUX -> TMP0  # zzzzzzzzz_stack_frame.mc:66
+019D  15  PUSH16 DECODED TMP0  # zzzzzzzzz_stack_frame.mc:67
+019E  ENTER_FRAME.finish:
+019E  5F  RESTORE_AUX -> TMP0  # zzzzzzzzz_stack_frame.mc:69
+019F  5B  TMP0 -> BP  # zzzzzzzzz_stack_frame.mc:70
+01A0  6C  ALLOCATE_STACK  # zzzzzzzzz_stack_frame.mc:71
+01A1  3  END  # zzzzzzzzz_stack_frame.mc:72
+01A2  LEAVE_FRAME:
+01A2  53  READ_BP -> TMP0  # zzzzzzzzz_stack_frame.mc:75
+01A3  68  CHECK_STACK TMP0  # zzzzzzzzz_stack_frame.mc:76
+01A4  5A  TMP0 -> SP  # zzzzzzzzz_stack_frame.mc:77
+01A5  16  POP16 -> TMP0  # zzzzzzzzz_stack_frame.mc:78
+01A6  5B  TMP0 -> BP  # zzzzzzzzz_stack_frame.mc:79
+01A7  3  END  # zzzzzzzzz_stack_frame.mc:80
+01A8  CHECK_BOUNDS:
+01A8  4  DECODE_MODRM  # zzzzzzzzz_stack_frame.mc:83
+01A9  6D  CHECK_RM32  # zzzzzzzzz_stack_frame.mc:84
+01AA  6  READ_RM16 -> TMP0  # zzzzzzzzz_stack_frame.mc:85
+01AB  5E  SAVE_AUX TMP0  # zzzzzzzzz_stack_frame.mc:86
+01AC  9  READ_REG16 -> TMP1  # zzzzzzzzz_stack_frame.mc:87
+01AD  6E  SET_EA_PLUS2  # zzzzzzzzz_stack_frame.mc:88
+01AE  6  READ_RM16 -> TMP0  # zzzzzzzzz_stack_frame.mc:89
+01AF  6F  CHECK_BOUNDS  # zzzzzzzzz_stack_frame.mc:90
+01B0  3  END  # zzzzzzzzz_stack_frame.mc:91
+01B1  LOAD_POINTER:
+01B1  4  DECODE_MODRM  # zzzzzzzzzz_far_pointer.mc:5
+01B2  6D  CHECK_RM32  # zzzzzzzzzz_far_pointer.mc:6
+01B3  6  READ_RM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:7
+01B4  5E  SAVE_AUX TMP0  # zzzzzzzzzz_far_pointer.mc:8
+01B5  6E  SET_EA_PLUS2  # zzzzzzzzzz_far_pointer.mc:9
+01B6  6  READ_RM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:10
+01B7  4D  TMP0 -> SEG16  # zzzzzzzzzz_far_pointer.mc:11
+01B8  5F  RESTORE_AUX -> TMP0  # zzzzzzzzzz_far_pointer.mc:12
+01B9  7  TMP0 -> REG16  # zzzzzzzzzz_far_pointer.mc:13
+01BA  3  END  # zzzzzzzzzz_far_pointer.mc:14
+01BB  CALL_FAR_IMM:
+01BB  1  FETCH_IMM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:17
+01BC  B  FETCH_IMM16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:18
+01BD  71  CHECK_PUSH2  # zzzzzzzzzz_far_pointer.mc:19
+01BE  5E  SAVE_AUX TMP0  # zzzzzzzzzz_far_pointer.mc:20
+01BF  4C  READ_SEG16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:21
+01C0  15  PUSH16 DECODED TMP0  # zzzzzzzzzz_far_pointer.mc:22
+01C1  17  READ_IP16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:23
+01C2  15  PUSH16 DECODED TMP0  # zzzzzzzzzz_far_pointer.mc:24
+01C3  5F  RESTORE_AUX -> TMP0  # zzzzzzzzzz_far_pointer.mc:25
+01C4  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:26
+01C5  3  END  # zzzzzzzzzz_far_pointer.mc:27
+01C6  JMP_FAR_IMM:
+01C6  1  FETCH_IMM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:30
+01C7  B  FETCH_IMM16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:31
+01C8  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:32
+01C9  3  END  # zzzzzzzzzz_far_pointer.mc:33
+01CA  CALL_FAR_RM:
+01CA  4  DECODE_MODRM  # zzzzzzzzzz_far_pointer.mc:36
+01CB  6D  CHECK_RM32  # zzzzzzzzzz_far_pointer.mc:37
+01CC  6  READ_RM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:38
+01CD  6E  SET_EA_PLUS2  # zzzzzzzzzz_far_pointer.mc:39
+01CE  A  READ_RM16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:40
+01CF  71  CHECK_PUSH2  # zzzzzzzzzz_far_pointer.mc:41
+01D0  5E  SAVE_AUX TMP0  # zzzzzzzzzz_far_pointer.mc:42
+01D1  4C  READ_SEG16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:43
+01D2  15  PUSH16 DECODED TMP0  # zzzzzzzzzz_far_pointer.mc:44
+01D3  17  READ_IP16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:45
+01D4  15  PUSH16 DECODED TMP0  # zzzzzzzzzz_far_pointer.mc:46
+01D5  5F  RESTORE_AUX -> TMP0  # zzzzzzzzzz_far_pointer.mc:47
+01D6  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:48
+01D7  3  END  # zzzzzzzzzz_far_pointer.mc:49
+01D8  JMP_FAR_RM:
+01D8  4  DECODE_MODRM  # zzzzzzzzzz_far_pointer.mc:52
+01D9  6D  CHECK_RM32  # zzzzzzzzzz_far_pointer.mc:53
+01DA  6  READ_RM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:54
+01DB  6E  SET_EA_PLUS2  # zzzzzzzzzz_far_pointer.mc:55
+01DC  A  READ_RM16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:56
+01DD  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:57
+01DE  3  END  # zzzzzzzzzz_far_pointer.mc:58
+01DF  RET_FAR:
+01DF  72  CHECK_POP2  # zzzzzzzzzz_far_pointer.mc:61
+01E0  16  POP16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:62
+01E1  2B  POP16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:63
+01E2  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:64
+01E3  3  END  # zzzzzzzzzz_far_pointer.mc:65
+01E4  RET_FAR_IMM:
+01E4  1  FETCH_IMM16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:68
+01E5  60  SAVE_ALLOCATION TMP0  # zzzzzzzzzz_far_pointer.mc:69
+01E6  72  CHECK_POP2  # zzzzzzzzzz_far_pointer.mc:70
+01E7  16  POP16 -> TMP0  # zzzzzzzzzz_far_pointer.mc:71
+01E8  2B  POP16 -> TMP1  # zzzzzzzzzz_far_pointer.mc:72
+01E9  73  ADD_ALLOCATION_SP  # zzzzzzzzzz_far_pointer.mc:73
+01EA  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:74
+01EB  3  END  # zzzzzzzzzz_far_pointer.mc:75

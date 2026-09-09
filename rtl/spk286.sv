@@ -121,6 +121,9 @@ module spk286 (
     logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] micro_word;
     logic dispatch_request, dispatch_valid, reverse_operands, arithmetic_fault;
     logic [2:0] adjust_kind;
+    logic counter_branch_request, range_fault, bounds_fault;
+    logic [spk286_microcode_pkg::MC_ADDR_WIDTH:0] counter_branch_target;
+    assign counter_branch_target = spk286_microcode_pkg::micro_branch_target(micro_pc);
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] dispatch_entry;
     logic micro_active, micro_valid, micro_end, operation_valid, operation_done;
     logic executor_done, executor_byte_ready;
@@ -159,6 +162,9 @@ module spk286 (
     logic [15:0] context_cs, vector_offset;
     logic ack_request, ack_request_ready, ack_response_valid, ack_response_ready, ack_pending_q, ack_done;
     logic [7:0] ack_vector;
+    logic internal_segment_write, unused_ss_shadow;
+    logic [1:0] decoded_segment_index;
+    logic [15:0] internal_segment_data;
     logic semantic_cancel;
     logic [3:0] biu_status;
     logic [23:0] biu_address;
@@ -216,8 +222,8 @@ module spk286 (
 
     spk286_segments segments (
         .clk(clk), .reset(reset),
-        .load_en((segment_load_en || context_commit) && commit_allowed),
-        .load_index(context_commit ? 2'd1 : segment_load_index), .load_selector(context_commit ? context_cs : segment_load_selector),
+        .load_en((segment_load_en || context_commit || internal_segment_write) && commit_allowed),
+        .load_index(context_commit ? 2'd1 : internal_segment_write ? decoded_segment_index : segment_load_index), .load_selector(context_commit ? context_cs : internal_segment_write ? internal_segment_data : segment_load_selector),
         .read_index(execute_enable ? service_segment : segment_read_index),
         .offset(execute_enable ? service_offset : segment_offset),
         .selector(segment_selector), .base(segment_base), .limit(segment_limit),
@@ -305,7 +311,9 @@ module spk286 (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .enable(execution_allowed),
         .start(micro_start), .start_entry(event_dispatch ? spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY : decode_entry), .start_ready(decode_ready),
         .rom_valid(micro_valid), .rom_end(micro_end), .operation_done(operation_done),
-        .branch_request(dispatch_request), .branch_target(dispatch_entry), .branch_target_valid(dispatch_valid),
+        .branch_request(dispatch_request || counter_branch_request),
+        .branch_target(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] : dispatch_entry),
+        .branch_target_valid(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH] : dispatch_valid),
         .operation_valid(operation_valid), .active(micro_active),
         .micro_pc(micro_pc), .micro_entry(micro_entry),
         .retired(raw_retired), .fault(microcode_fault)
@@ -333,7 +341,10 @@ module spk286 (
         .address_override(address_override), .address_offset(address_offset),
         .direct_flags_data(direct_flags_data), .direct_flags_mask(direct_flags_mask),
         .destination_byte_data(register_state[destination_q[1:0] * 16 + (destination_q[2] ? 8 : 0) +: 8]),
-        .shift_kind(operand_reg), .adjust_kind(adjust_kind), .arithmetic_fault(arithmetic_fault), .alu_byte(alu_byte), .reverse_operands(reverse_operands), .carry_in(debug_flags[0]), .alu_operation(alu_operation), .result_write_allowed(result_write_allowed),
+        .shift_kind(operand_reg), .adjust_kind(adjust_kind), .arithmetic_fault(arithmetic_fault),
+        .register_state(register_state), .counter_branch_request(counter_branch_request), .range_fault(range_fault), .bounds_fault(bounds_fault),
+        .segment_read_value(debug_segment_selectors[decoded_segment_index*16 +: 16]),
+        .segment_write(internal_segment_write), .segment_write_data(internal_segment_data), .alu_byte(alu_byte), .reverse_operands(reverse_operands), .carry_in(debug_flags[0]), .alu_operation(alu_operation), .result_write_allowed(result_write_allowed),
         .architectural_flags(debug_flags), .if_value(opcode_q == 8'hFB),
         .event_flags(event_flags), .event_cs(event_cs), .event_ip(event_ip), .event_vector(debug_event_vector),
         .event_needs_ack(event_needs_ack), .ack_done(ack_done), .ack_request(ack_request),
@@ -358,7 +369,7 @@ module spk286 (
         .opcode(opcode_q), .group_extension(operand_reg), .condition_taken(condition_taken),
         .zero(debug_flags[6]), .count(register_state[16 +: 16]), .push_enabled(push_enabled),
         .push_return_ip(push_return_ip), .branch_taken(branch_taken), .decrement_count(decrement_count),
-        .form_supported(form_supported), .adjust_kind(adjust_kind), .dispatch_entry(dispatch_entry), .dispatch_valid(dispatch_valid)
+        .form_supported(form_supported), .adjust_kind(adjust_kind), .segment_index(decoded_segment_index), .dispatch_entry(dispatch_entry), .dispatch_valid(dispatch_valid)
     );
 
     spk286_alu_decode alu_decode (
@@ -429,14 +440,14 @@ module spk286 (
     assign debug_micro_active = micro_active;
     assign debug_bus_state = bus_valid ? 4'h1 : 4'h0;
     assign invalid_form = operand_context_valid && micro_active && !event_active &&
-                          ((opcode_q == 8'hFE && operand_reg > 1) || (opcode_q == 8'h8D && operand_register_direct) || ((opcode_q == 8'h8F || opcode_q == 8'hC6 || opcode_q == 8'hC7) && operand_reg != 0) ||
+                          (((opcode_q == 8'h8C && operand_reg > 3) || (opcode_q == 8'h8E && (operand_reg > 3 || operand_reg == 1))) || (opcode_q == 8'hFE && operand_reg > 1) || ((opcode_q == 8'h8D || opcode_q == 8'h62 || opcode_q == 8'hC4 || opcode_q == 8'hC5) && operand_register_direct) || ((opcode_q == 8'h8F || opcode_q == 8'hC6 || opcode_q == 8'hC7) && operand_reg != 0) ||
                            (opcode_q == 8'hFF && (operand_reg == 7 ||
                             (operand_register_direct && (operand_reg == 3 || operand_reg == 5)))));
     assign demanded_code_fault = execution_allowed && !event_active && !raw_retired && !event_completed &&
                                  !queue_consume_valid && !fetch_response_valid && !fetch_bus_valid && fetch_blocked &&
                                  (micro_active ? executor_byte_ready : decode_ready);
-    assign fault_request = arithmetic_fault || operand_blocked || invalid_form || demanded_code_fault || length_fault;
-    assign fault_vector = invalid_form ? 8'd6 : arithmetic_fault ? 8'd0 : 8'd13;
+    assign fault_request = range_fault || bounds_fault || arithmetic_fault || operand_blocked || invalid_form || demanded_code_fault || length_fault;
+    assign fault_vector = invalid_form ? 8'd6 : bounds_fault ? 8'd5 : arithmetic_fault ? 8'd0 : 8'd13;
     assign software_taken = software_request && (opcode_q != 8'hCE || debug_flags[11]);
     assign selected_software_vector = opcode_q == 8'hCD ? software_vector : (opcode_q == 8'hCC ? 8'd3 : 8'd4);
     assign instruction_retired = (raw_retired && !event_active) || (event_completed && event_software);
@@ -453,7 +464,7 @@ module spk286 (
     end
     spk286_events events (
         .clk(clk), .reset(reset), .cancel(restart), .enable(execute_enable && commit_allowed && !reset && !restart),
-        .intr(intr), .nmi(nmi), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
+        .intr(intr), .nmi(nmi), .ss_load(internal_segment_write && decoded_segment_index == 2'd2), .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
         .retired(raw_retired), .opcode(queue_consume_data), .ip(debug_ip), .cs(debug_cs), .flags(debug_flags),
         .fault_request(fault_request), .fault_vector(fault_vector),
         .software_request(software_taken), .software_vector(selected_software_vector),

@@ -213,3 +213,15 @@ phase7-unary-check:
 .PHONY: phase7-adjust-check
 phase7-adjust-check:
 	bash scripts/validate_phase7_adjust.sh
+
+.PHONY: phase7-segment-check
+phase7-segment-check:
+	bash scripts/validate_phase7_segment.sh
+
+.PHONY: phase7-stack-frame-check
+phase7-stack-frame-check:
+	bash scripts/validate_phase7_stack_frame.sh
+
+.PHONY: phase7-far-check
+phase7-far-check:
+	./scripts/validate_phase7_far.sh

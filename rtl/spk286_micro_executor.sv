@@ -54,11 +54,62 @@ module spk286_micro_executor (
     input logic alu_byte, reverse_operands,
     input logic [2:0] shift_kind, adjust_kind,
     output logic arithmetic_fault,
+    input logic [127:0] register_state,
+    output logic counter_branch_request, range_fault, bounds_fault,
+    input logic [15:0] segment_read_value,
+    output logic segment_write,
+    output logic [15:0] segment_write_data,
     input logic result_write_allowed,
     input logic [15:0] decoded_flags_mask, decoded_undefined_mask,
     output logic flags_write_en,
     output logic [15:0] flags_write_data, flags_write_mask
 );
+    logic check_push2,check_pop2,add_allocation_sp;
+    assign check_push2=allowed && operation==spk286_microcode_pkg::MC_CHECK_PUSH2;
+    assign check_pop2=allowed && operation==spk286_microcode_pkg::MC_CHECK_POP2;
+    assign add_allocation_sp=allowed && operation==spk286_microcode_pkg::MC_ADD_ALLOCATION_SP && allocation_valid_q;
+    logic [15:0] auxiliary_q, allocation_q, frame_address_q;
+    logic auxiliary_valid_q, allocation_valid_q, frame_address_valid_q, counter_valid_q;
+    logic [4:0] counter_q;
+    logic frame_read_gpr, frame_write_gpr, save_auxiliary, restore_auxiliary;
+    logic save_allocation, load_counter, decrement_counter, counter_branch;
+    logic check_push8, check_pop8, begin_stack_cursor, read_stack_cursor, check_stack_word, check_rm32, check_bounds;
+    logic set_frame_address, read_frame_address, decrement_frame_address, allocate_stack, set_ea_plus2;
+    logic push8_invalid, pop8_invalid, stack_cursor_valid_q, stack_arch_write;
+    logic [15:0] stack_cursor_q;
+    assign stack_arch_write = stack_write_sp && !stack_cursor_valid_q;
+    logic [2:0] frame_read_index, frame_write_index;
+    logic [15:0] stack_native_offset;
+    assign frame_read_gpr = allowed && operation >= spk286_microcode_pkg::MC_READ_AX_TMP0 && operation <= spk286_microcode_pkg::MC_READ_DI_TMP0;
+    assign frame_write_gpr = allowed && operation >= spk286_microcode_pkg::MC_WRITE_AX_TMP0 && operation <= spk286_microcode_pkg::MC_WRITE_DI_TMP0 && temporary_valid_q[0];
+    assign frame_read_index = 3'(operation - spk286_microcode_pkg::MC_READ_AX_TMP0);
+    assign frame_write_index = 3'(operation - spk286_microcode_pkg::MC_WRITE_AX_TMP0);
+    assign save_auxiliary = allowed && operation == spk286_microcode_pkg::MC_SAVE_AUX_TMP0 && temporary_valid_q[0];
+    assign restore_auxiliary = allowed && operation == spk286_microcode_pkg::MC_RESTORE_AUX_TMP0 && auxiliary_valid_q;
+    assign save_allocation = allowed && operation == spk286_microcode_pkg::MC_SAVE_ALLOCATION_TMP0 && temporary_valid_q[0];
+    assign load_counter = allowed && operation == spk286_microcode_pkg::MC_LOAD_COUNTER_TMP1 && temporary_valid_q[1];
+    assign decrement_counter = allowed && operation == spk286_microcode_pkg::MC_DECREMENT_COUNTER && counter_valid_q && counter_q != 0;
+    assign counter_branch = allowed && counter_valid_q && (operation == spk286_microcode_pkg::MC_BRANCH_ZERO || operation == spk286_microcode_pkg::MC_BRANCH_NONZERO);
+    assign counter_branch_request = counter_branch && ((operation == spk286_microcode_pkg::MC_BRANCH_ZERO) == (counter_q == 0));
+    assign check_push8 = allowed && operation == spk286_microcode_pkg::MC_CHECK_PUSH8;
+    assign check_pop8 = allowed && operation == spk286_microcode_pkg::MC_CHECK_POP8;
+    assign begin_stack_cursor = allowed && operation == spk286_microcode_pkg::MC_BEGIN_STACK_CURSOR;
+    assign read_stack_cursor = allowed && operation == spk286_microcode_pkg::MC_READ_STACK_CURSOR_TMP0 && stack_cursor_valid_q;
+    assign check_stack_word = allowed && operation == spk286_microcode_pkg::MC_CHECK_STACK_TMP0 && temporary_valid_q[0];
+    assign check_rm32 = allowed && operation == spk286_microcode_pkg::MC_CHECK_RM32;
+    assign check_bounds = allowed && operation == spk286_microcode_pkg::MC_CHECK_BOUNDS && auxiliary_valid_q && &temporary_valid_q[1:0];
+    assign range_fault = (check_push2 && stack_pointer[0] && stack_pointer<16'd4) ||
+                         (check_pop2 && stack_pointer[0] && stack_pointer>=16'hFFFD) || (check_push8 && push8_invalid) || (check_pop8 && pop8_invalid) ||
+                         (check_stack_word && tmp0_q == 16'hFFFF) ||
+                         (check_rm32 && effective_offset[0] && effective_offset > 16'hFFFC);
+    assign bounds_fault = check_bounds && ($signed(tmp1_q) < $signed(auxiliary_q) || $signed(tmp1_q) > $signed(tmp0_q));
+    assign set_frame_address = allowed && operation == spk286_microcode_pkg::MC_SET_STACK_ADDRESS_TMP0 && temporary_valid_q[0];
+    assign read_frame_address = allowed && operation == spk286_microcode_pkg::MC_READ_STACK_ADDRESS_TMP0 && frame_address_valid_q;
+    assign decrement_frame_address = allowed && operation == spk286_microcode_pkg::MC_DECREMENT_STACK_ADDRESS && frame_address_valid_q;
+    assign allocate_stack = allowed && operation == spk286_microcode_pkg::MC_ALLOCATE_STACK && allocation_valid_q && stack_cursor_valid_q;
+    assign set_ea_plus2 = allowed && operation == spk286_microcode_pkg::MC_SET_EA_PLUS2;
+    assign stack_offset = read_frame_address ? frame_address_q : stack_native_offset;
+
     logic adjust_request, adjust_complete, adjust_valid, adjust_write, adjust_fault;
     logic unused_adjust_ready, arithmetic_fault_q, check_arithmetic;
     logic [15:0] adjust_result, adjust_flags, adjust_mask;
@@ -66,6 +117,10 @@ module spk286_micro_executor (
     assign adjust_complete = adjust_request && adjust_valid;
     assign check_arithmetic = allowed && operation == spk286_microcode_pkg::MC_CHECK_ARITHMETIC;
     assign arithmetic_fault = check_arithmetic && arithmetic_fault_q;
+    logic read_segment;
+    assign read_segment = allowed && operation == spk286_microcode_pkg::MC_READ_SEG16_TMP0;
+    assign segment_write = allowed && operation == spk286_microcode_pkg::MC_WRITE_SEG16_TMP0 && temporary_valid_q[0];
+    assign segment_write_data = tmp0_q;
     logic constant_zero, constant_ones;
     assign constant_zero = allowed && operation == spk286_microcode_pkg::MC_CONST_ZERO_TMP1;
     assign constant_ones = allowed && operation == spk286_microcode_pkg::MC_CONST_ONES_TMP1;
@@ -112,15 +167,15 @@ module spk286_micro_executor (
     logic read_event_flags, read_event_cs, read_event_ip, vector_ip, vector_cs;
     logic commit_context, ack_operation, request_event, halt_operation, iret_commit;
     spk286_stack stack_service (
-        .request(stack_request), .push(push_transfer), .adjust(adjust_stack), .operand_done(operand_done),
-        .sp(stack_pointer), .adjustment(tmp1_q), .offset(stack_offset), .next_sp(stack_next_sp), .write_sp(stack_write_sp)
+        .request(push_transfer || pop_operation), .push(push_transfer), .adjust(adjust_stack), .operand_done(operand_done),
+        .sp(stack_cursor_valid_q ? stack_cursor_q : stack_pointer), .adjustment(tmp1_q), .offset(stack_native_offset), .next_sp(stack_next_sp), .write_sp(stack_write_sp)
     );
     assign push_operation = allowed && operation == spk286_microcode_pkg::MC_PUSH16 && temporary_valid_q[0];
     assign push_transfer = push_operation && push_enabled;
     assign pop_operation = allowed && (operation == spk286_microcode_pkg::MC_POP16 ||
                                       operation == spk286_microcode_pkg::MC_POP16_TMP1 ||
                                       operation == spk286_microcode_pkg::MC_POP16_TMP2);
-    assign stack_request = push_transfer || pop_operation;
+    assign stack_request = push_transfer || pop_operation || read_frame_address;
     assign read_ip = allowed && operation == spk286_microcode_pkg::MC_READ_IP16;
     assign target_relative = allowed && operation == spk286_microcode_pkg::MC_TARGET_REL16 && temporary_valid_q[1];
     assign target_absolute = allowed && operation == spk286_microcode_pkg::MC_TARGET_ABS16 && temporary_valid_q[0];
@@ -157,6 +212,10 @@ module spk286_micro_executor (
     assign halt_operation = allowed && operation == spk286_microcode_pkg::MC_HALT;
     assign halt_request = halt_operation;
 
+
+    spk286_stack_range stack_range (
+        .sp(stack_pointer), .push8_invalid(push8_invalid), .pop8_invalid(pop8_invalid)
+    );
 
     spk286_adjust adjust_service (
         .clk(clk), .reset(reset), .cancel(cancel || start), .enable(operation_valid),
@@ -200,23 +259,28 @@ module spk286_micro_executor (
     assign compute_alu = allowed && operation == spk286_microcode_pkg::MC_ALU && temporary_valid_q[0] && temporary_valid_q[1] && !flags_valid_q;
     assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
     assign byte_ready = fetch_word || fetch_signed_byte || fetch_byte || fetch_byte_tmp1 || decode_byte_ready;
-    assign operation_done = adjust_complete || (check_arithmetic && !arithmetic_fault_q) || dispatch_request || constant_zero || constant_ones || read_ea || read_target || move_source || set_address || add_base || shift_complete || count_low || direct_flags || sign_extend_byte || sign_fill_word || constant_one || read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
+    assign operation_done = add_allocation_sp || ((check_push2 || check_pop2) && !range_fault) || frame_read_gpr || frame_write_gpr || save_auxiliary || restore_auxiliary || save_allocation || load_counter ||
+                            decrement_counter || counter_branch || begin_stack_cursor || read_stack_cursor || set_frame_address || decrement_frame_address || allocate_stack || set_ea_plus2 ||
+                            ((check_push8 || check_pop8 || check_stack_word || check_rm32) && !range_fault) || (check_bounds && !bounds_fault) || read_segment || segment_write || adjust_complete || (check_arithmetic && !arithmetic_fault_q) || dispatch_request || constant_zero || constant_ones || read_ea || read_target || move_source || set_address || add_base || shift_complete || count_low || direct_flags || sign_extend_byte || sign_fill_word || constant_one || read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
                             context_commit || request_event || halt_operation || (ack_operation && (!event_needs_ack || ack_done)) || ((fetch_byte || fetch_byte_tmp1) && byte_valid) ||
                             read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
                             (push_operation && !push_enabled) || (redirect_operation && (!branch_taken || redirect_ready)) || move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
                             (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
                             (decode_operand && decode_done) || (operand_request && operand_done);
-    assign gpr_write_en = move_source || stack_write_sp || (count_operation && decrement_count) || move_word || result_to_dst || operand_gpr_write_en;
-    assign gpr_write_byte = !stack_write_sp && !count_operation && ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
+    assign gpr_write_en = add_allocation_sp || frame_write_gpr || allocate_stack || move_source || stack_arch_write || (count_operation && decrement_count) || move_word || result_to_dst || operand_gpr_write_en;
+    assign gpr_write_byte = !add_allocation_sp && !frame_write_gpr && !allocate_stack && !stack_arch_write && !count_operation && ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
                             (result_to_dst && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8) || operand_gpr_write_byte);
-    assign gpr_write_index = move_source ? source_index : stack_write_sp ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
-    assign gpr_write_data = move_source ? tmp1_q : stack_write_sp ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
+    assign gpr_write_index = add_allocation_sp ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
+    assign gpr_write_data = add_allocation_sp ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
     assign flags_write_en = direct_flags || commit_flags || restore_flags || set_if || clear_if_tf || iret_commit;
     assign flags_write_data = direct_flags ? direct_flags_data : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : (clear_if_tf ? 16'd0 : flags_q)));
     assign flags_write_mask = direct_flags ? direct_flags_mask : restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : flags_mask_q));
 
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
+            stack_cursor_q <= 16'd0; stack_cursor_valid_q <= 1'b0;
+            auxiliary_q <= 16'd0; allocation_q <= 16'd0; frame_address_q <= 16'd0; counter_q <= 5'd0;
+            auxiliary_valid_q <= 1'b0; allocation_valid_q <= 1'b0; frame_address_valid_q <= 1'b0; counter_valid_q <= 1'b0;
             arithmetic_fault_q <= 1'b0;
             address_override <= 1'b0; address_offset <= 16'd0;
             target_q <= 16'h0000; target_valid_q <= 1'b0;
@@ -225,6 +289,19 @@ module spk286_micro_executor (
             high_byte_q <= 1'b0; temporary_valid_q <= 3'b000;
             flags_valid_q <= 1'b0; result_disposed_q <= 1'b0; result_suppress_q <= 1'b0;
         end else begin
+            if (begin_stack_cursor) begin stack_cursor_q <= stack_pointer; stack_cursor_valid_q <= 1'b1; end
+            if (stack_write_sp && stack_cursor_valid_q) stack_cursor_q <= stack_next_sp;
+            if (read_stack_cursor) begin tmp0_q <= stack_cursor_q; temporary_valid_q[0] <= 1'b1; end
+            if (frame_read_gpr) begin tmp0_q <= register_state[frame_read_index*16 +: 16]; temporary_valid_q[0] <= 1'b1; end
+            if (save_auxiliary) begin auxiliary_q <= tmp0_q; auxiliary_valid_q <= 1'b1; end
+            if (restore_auxiliary) begin tmp0_q <= auxiliary_q; temporary_valid_q[0] <= 1'b1; end
+            if (save_allocation) begin allocation_q <= tmp0_q; allocation_valid_q <= 1'b1; end
+            if (load_counter) begin counter_q <= tmp1_q[4:0]; counter_valid_q <= 1'b1; end
+            if (decrement_counter) counter_q <= counter_q - 5'd1;
+            if (set_frame_address) begin frame_address_q <= tmp0_q; frame_address_valid_q <= 1'b1; end
+            if (decrement_frame_address) frame_address_q <= frame_address_q - 16'd2;
+            if (set_ea_plus2) begin address_override <= 1'b1; address_offset <= effective_offset + 16'd2; end
+            if (read_segment) begin tmp0_q <= segment_read_value; temporary_valid_q[0] <= 1'b1; end
             if (read_ea) begin tmp0_q <= effective_offset; temporary_valid_q[0] <= 1'b1; end
             if (read_target) begin tmp1_q <= target_read_data; temporary_valid_q[1] <= 1'b1; end
             if (add_base) begin tmp1_q <= address_base + tmp0_q; temporary_valid_q[1] <= 1'b1; end

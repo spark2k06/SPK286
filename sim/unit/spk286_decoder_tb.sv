@@ -10,7 +10,7 @@ module spk286_decoder_tb;
     initial begin
         for (integer i = 0; i < 256; i = i + 1) begin
             opcode = 8'(i); #1;
-            if (supported !== (i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
+            if (supported !== (i == 196 || i == 197 || i == 154 || i == 234 || i == 202 || i == 203 || i == 96 || i == 97 || i == 98 || i == 200 || i == 201 || i == 6 || i == 7 || i == 14 || i == 22 || i == 23 || i == 30 || i == 31 || i == 140 || i == 142 || i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
                               (i >= 80 && i <= 95) || (i >= 112 && i <= 127) || i == 104 || i == 106 || i == 143 || i == 255 ||
                               i == 194 || i == 195 || (i >= 224 && i <= 227) || i == 232 || i == 233 || i == 235 ||
                               (i >= 176 && i <= 191) || i == 136 || i == 138 || i == 198 || i == 199 || i == 128 || i == 137 || i == 139 || i == 129 || i == 131 ||
@@ -48,6 +48,20 @@ module spk286_decoder_tb;
             if ((i==39 || i==47 || i==55 || i==63 || i==212 || i==213) && (destination!=0 || source_index!=0 ||
                 entry!=(i>=212?spk286_microcode_pkg::MC_ENTRY_ADJUST_RADIX:spk286_microcode_pkg::MC_ENTRY_ADJUST_DIRECT)))
                 $fatal(1,"adjust source/destination/entry metadata");
+            if ((i==6 || i==14 || i==22 || i==30) && entry!=spk286_microcode_pkg::MC_ENTRY_PUSH_SEG) $fatal(1,"segment push entry");
+            if ((i==7 || i==23 || i==31) && entry!=spk286_microcode_pkg::MC_ENTRY_POP_SEG) $fatal(1,"segment pop entry");
+            if (i==140 && entry!=spk286_microcode_pkg::MC_ENTRY_MOV_RM16_SEG) $fatal(1,"segment read entry");
+            if (i==142 && entry!=spk286_microcode_pkg::MC_ENTRY_MOV_SEG_RM16) $fatal(1,"segment write entry");
+            if (i==96 && entry!=spk286_microcode_pkg::MC_ENTRY_PUSH_ALL) $fatal(1,"PUSHA entry");
+            if (i==97 && entry!=spk286_microcode_pkg::MC_ENTRY_POP_ALL) $fatal(1,"POPA entry");
+            if (i==98 && entry!=spk286_microcode_pkg::MC_ENTRY_CHECK_BOUNDS) $fatal(1,"BOUND entry");
+            if (i==200 && entry!=spk286_microcode_pkg::MC_ENTRY_ENTER_FRAME) $fatal(1,"ENTER entry");
+            if (i==201 && entry!=spk286_microcode_pkg::MC_ENTRY_LEAVE_FRAME) $fatal(1,"LEAVE entry");
+            if((i==196 || i==197) && entry!=spk286_microcode_pkg::MC_ENTRY_LOAD_POINTER) $fatal(1,"far pointer load entry");
+            if(i==154 && entry!=spk286_microcode_pkg::MC_ENTRY_CALL_FAR_IMM) $fatal(1,"far immediate call entry");
+            if(i==234 && entry!=spk286_microcode_pkg::MC_ENTRY_JMP_FAR_IMM) $fatal(1,"far immediate jump entry");
+            if(i==202 && entry!=spk286_microcode_pkg::MC_ENTRY_RET_FAR_IMM) $fatal(1,"far adjusted return entry");
+            if(i==203 && entry!=spk286_microcode_pkg::MC_ENTRY_RET_FAR) $fatal(1,"far return entry");
             checks = checks + 1;
         end
         $display("DECODER PASS: %0d opcode checks; MOV and word ALU forms", checks);

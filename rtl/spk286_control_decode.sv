@@ -8,13 +8,16 @@ module spk286_control_decode (
     output logic push_enabled, push_return_ip, branch_taken, decrement_count, form_supported,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] dispatch_entry,
     output logic [2:0] adjust_kind,
+    output logic [1:0] segment_index,
     output logic dispatch_valid
 );
+    assign segment_index = opcode == 8'hC5 ? 2'd3 : opcode == 8'hC4 ? 2'd0 : opcode == 8'h9A || (opcode == 8'hFF && group_extension == 3'd3) ? 2'd1 : opcode == 8'h8C || opcode == 8'h8E ? group_extension[1:0] : opcode[4:3];
     assign adjust_kind = opcode == 8'h2F ? 3'd1 : opcode == 8'h37 ? 3'd2 : opcode == 8'h3F ? 3'd3 : opcode == 8'hD4 ? 3'd4 : opcode == 8'hD5 ? 3'd5 : 3'd0;
-    assign form_supported = opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 ? group_extension != 3'd6 :
+    assign form_supported = opcode == 8'h8C ? group_extension < 4 :
+                            opcode == 8'h8E ? group_extension < 4 && group_extension != 1 : opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 ? group_extension != 3'd6 :
                             opcode == 8'hFE ? group_extension < 2 :
                             opcode == 8'hF6 || opcode == 8'hF7 ? (group_extension == 0 || group_extension == 2 || group_extension == 3) :
-                            opcode == 8'hFF ? (group_extension < 2 || group_extension == 3'd2 || group_extension == 3'd4 || group_extension == 3'd6) :
+                            opcode == 8'hFF ? group_extension != 3'd7 :
                             opcode != 8'h8F || group_extension == 3'd0;
     always_comb begin
         dispatch_valid = 1'b1;
@@ -30,6 +33,8 @@ module spk286_control_decode (
             case (group_extension)
                 3'd0, 3'd1: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM16;
                 3'd2, 3'd4, 3'd6: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_GROUP5_NEAR;
+                3'd3: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_CALL_FAR_RM;
+                3'd5: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_JMP_FAR_RM;
                 default: dispatch_valid = 1'b0;
             endcase
         end else dispatch_valid = 1'b0;
