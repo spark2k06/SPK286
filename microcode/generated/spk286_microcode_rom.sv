@@ -621,6 +621,8 @@ module spk286_microcode_rom (
             10'd609: word = spk286_microcode_pkg::MC_IO_WRITE16;
             10'd610: word = spk286_microcode_pkg::MC_BRANCH_REPEAT_CONTINUE;
             10'd611: word = spk286_microcode_pkg::MC_END;
+            10'd612: word = spk286_microcode_pkg::MC_DECODE_MODRM;
+            10'd613: word = spk286_microcode_pkg::MC_END;
             default: valid = 1'b0;
         endcase
     end

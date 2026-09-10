@@ -42,6 +42,7 @@
     "CONTROL_FLAGS": 174,
     "CONTROL_IF": 102,
     "ENTER_FRAME": 393,
+    "ESC_NO_COPROCESSOR": 612,
     "EVENT_ENTRY": 116,
     "EXCHANGE_RM16_R16": 245,
     "EXCHANGE_RM8_R8": 239,
@@ -8236,6 +8237,30 @@
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
         "line": 70
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 612,
+      "location": {
+        "entry": "ESC_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 613,
+      "location": {
+        "entry": "ESC_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 8
       },
       "operands": [],
       "operation": "END",

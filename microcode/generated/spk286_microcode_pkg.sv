@@ -6,7 +6,7 @@ package spk286_microcode_pkg;
     localparam integer MC_FORMAT_VERSION = 17;
     localparam integer MC_ADDR_WIDTH = 10;
     localparam integer MC_WORD_WIDTH = 8;
-    localparam integer MC_DEPTH = 612;
+    localparam integer MC_DEPTH = 614;
     localparam logic [MC_WORD_WIDTH-1:0] MC_INVALID = 8'd0;
     localparam logic [MC_WORD_WIDTH-1:0] MC_FETCH_IMM16 = 8'd1;
     localparam logic [MC_WORD_WIDTH-1:0] MC_MOVE = 8'd2;
@@ -243,6 +243,7 @@ package spk286_microcode_pkg;
     localparam logic [MC_ADDR_WIDTH-1:0] MC_ENTRY_STRING_INPUT_WORD = 10'd588;
     localparam logic [MC_ADDR_WIDTH-1:0] MC_ENTRY_STRING_OUTPUT_BYTE = 10'd596;
     localparam logic [MC_ADDR_WIDTH-1:0] MC_ENTRY_STRING_OUTPUT_WORD = 10'd604;
+    localparam logic [MC_ADDR_WIDTH-1:0] MC_ENTRY_ESC_NO_COPROCESSOR = 10'd612;
     function automatic logic [MC_ADDR_WIDTH:0] micro_branch_target(input logic [MC_ADDR_WIDTH-1:0] pc);
         begin
             micro_branch_target = '0;

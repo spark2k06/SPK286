@@ -19,6 +19,8 @@ jobs:
         env:
           SPK286_BUILD_JOBS: 4
         run: make phase7-check
+      - name: Validate Phase 8 BIU/ESC mutation controls
+        run: make phase8-audit
       - name: Classify strict Phase 6 architectural evidence (pending is not approval)
         run: |
           set -euo pipefail

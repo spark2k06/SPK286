@@ -740,3 +740,6 @@ SPK286 microcode compiler 17.0; format 17; encoding 17
 0262  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:68
 0263  STRING_OUTPUT_WORD.done:
 0263  3  END  # zzzzzzzzzzzzz_io.mc:70
+0264  ESC_NO_COPROCESSOR:
+0264  4  DECODE_MODRM  # zzzzzzzzzzzzzzzz_esc.mc:7
+0265  3  END  # zzzzzzzzzzzzzzzz_esc.mc:8

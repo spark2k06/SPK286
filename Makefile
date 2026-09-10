@@ -30,6 +30,7 @@ help:
 	@echo "  make phase5-check run all inherited and stack/control-flow release gates"
 	@echo "  make phase6-check run the complete event release gate in a fresh build directory"
 	@echo "  make phase6-exec-check run all executable checks with explicit provisional evidence status"
+	@echo "  make phase8-check run the ordered Phase 8 development gate with logs"
 	@echo "  make singlestep-phase6 run all 474049 admitted Phase 6 hardware cases"
 	@echo "  make event-audit reject isolated event/arbitration/INTA RTL mutations"
 	@echo "  make stack-control-audit reject twelve isolated stack/control RTL mutants"
@@ -184,9 +185,15 @@ singlestep-events-smoke: verilator
 singlestep-phase6: verilator
 	python3 -m tools.run_singlestep --phase6 --full
 
-.PHONY: phase7-check phase7-byte-prefix-check
+.PHONY: phase7-check phase7-byte-prefix-check phase8-audit phase8-check
 phase7-byte-prefix-check:
 	bash scripts/validate_phase7_byte_prefix.sh
+
+phase8-audit:
+	python3 -m tools.audit_phase8
+
+phase8-check:
+	bash scripts/validate_phase8.sh
 
 # Full scope cannot pass by running only the byte/prefix increment.
 phase7-check:
