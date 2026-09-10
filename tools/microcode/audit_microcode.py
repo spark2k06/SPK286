@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 13 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 17 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -41,6 +41,8 @@ STATEMENTS = {1: "FETCH_IMM16 -> TMP0", 2: "TMP0 -> DST", 3: "END",
               58: 'FLAGS DECODED', 59: 'SIGN_EXTEND8 TMP0', 60: 'SIGN_FILL16 TMP0', 61: 'CONST_ONE -> TMP1', 62: 'SHIFT DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 63: 'COUNT_LOW -> TMP1', 64: 'READ_EA -> TMP0', 65: 'TMP1 -> REG8', 66: 'TMP1 -> REG16', 67: 'READ_TARGET16 -> TMP1', 68: 'TMP1 -> SOURCE16', 69: 'SET_ADDRESS TMP1', 70: 'ADD_BASE TMP0 -> TMP1', 71: 'DISPATCH DECODED', 72: 'CONST_ZERO -> TMP1', 73: 'CONST_ONES -> TMP1', 74: 'ADJUST DECODED TMP0 TMP1 -> TMP2 FLAGS_DECODED', 75: 'CHECK_ARITHMETIC', 76: 'READ_SEG16 -> TMP0', 77: 'TMP0 -> SEG16'}
 
 STATEMENTS.update({78: 'READ_AX -> TMP0', 79: 'READ_CX -> TMP0', 80: 'READ_DX -> TMP0', 81: 'READ_BX -> TMP0', 82: 'READ_SP -> TMP0', 83: 'READ_BP -> TMP0', 84: 'READ_SI -> TMP0', 85: 'READ_DI -> TMP0', 86: 'TMP0 -> AX', 87: 'TMP0 -> CX', 88: 'TMP0 -> DX', 89: 'TMP0 -> BX', 90: 'TMP0 -> SP', 91: 'TMP0 -> BP', 92: 'TMP0 -> SI', 93: 'TMP0 -> DI', 94: 'SAVE_AUX TMP0', 95: 'RESTORE_AUX -> TMP0', 96: 'SAVE_ALLOCATION TMP0', 97: 'LOAD_COUNTER TMP1', 98: 'DECREMENT_COUNTER', 99: 'BRANCH_ZERO', 100: 'BRANCH_NONZERO', 101: 'CHECK_PUSH8', 102: 'CHECK_POP8', 103: 'BEGIN_STACK_CURSOR', 104: 'CHECK_STACK TMP0', 105: 'SET_STACK_ADDRESS TMP0', 106: 'READ_STACK_ADDRESS -> TMP0', 107: 'DECREMENT_STACK_ADDRESS', 108: 'ALLOCATE_STACK', 109: 'CHECK_RM32', 110: 'SET_EA_PLUS2', 111: 'CHECK_BOUNDS', 112: 'READ_STACK_CURSOR -> TMP0'})
+STATEMENTS.update({116: 'MULDIV8 DECODED TMP0', 117: 'MULDIV16 DECODED TMP0', 118: 'IMUL16 TMP0 TMP1', 119: 'RESULT_LOW -> AX', 120: 'RESULT_HIGH -> DX'})
+
 
 def validate_entries(program, expected):
     for name, address in expected.items():
@@ -52,7 +54,13 @@ def validate_entries(program, expected):
                                f"entry {name} moved: expected {address}, got {actual}")
 
 
-STATEMENTS.update({113:'CHECK_PUSH2',114:'CHECK_POP2',115:'ADD_ALLOCATION_SP'})
+STATEMENTS.update({113: 'CHECK_PUSH2', 114: 'CHECK_POP2', 115: 'ADD_ALLOCATION_SP'})
+
+
+STATEMENTS.update({121: 'BRANCH_REPEAT_EMPTY', 122: 'STEP_STRING_SOURCE', 123: 'STEP_STRING_DEST', 124: 'REPEAT_COUNT', 125: 'READ_STRING_TMP0', 126: 'READ_STRING_TMP1', 127: 'WRITE_STRING_TMP0', 128: 'BRANCH_REPEAT_CONTINUE', 129: 'READ_STRING_ACCUMULATOR', 130: 'WRITE_STRING_ACCUMULATOR', 3: 'END', 14: 'ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED', 17: 'TMP2 -> DST IF_WRITE', 18: 'COMMIT_FLAGS'})
+
+
+STATEMENTS.update({131: 'IO_READ8 TMP1 -> TMP0', 132: 'IO_READ16 TMP1 -> TMP0', 133: 'IO_WRITE8 TMP1 TMP0', 134: 'IO_WRITE16 TMP1 TMP0', 135: 'FETCH_PORT DECODED -> TMP1'})
 
 
 def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
@@ -65,7 +73,7 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
     depth = dimension("MC_DEPTH")
     width = dimension("MC_ADDR_WIDTH")
     word_width = dimension("MC_WORD_WIDTH")
-    if word_width not in (2, 4, 5, 6, 7) or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
+    if word_width not in (2, 4, 5, 6, 7, 8) or not 1 <= width <= 12 or not 1 <= depth <= 1 << width:
         raise ValueError("invalid ROM dimensions")
     constants = re.findall(rf"MC_([A-Z0-9_]+) = {word_width}'d([0-9]+);", package)
     values = {}
@@ -107,10 +115,16 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
         expected.update(ADJUST=74, CHECK_ARITHMETIC=75)
     if dimension('MC_FORMAT_VERSION') >= 12:
         expected.update(READ_SEG16_TMP0=76, WRITE_SEG16_TMP0=77)
+    if dimension('MC_FORMAT_VERSION') >= 17:
+        expected.update({'IO_READ8': 131, 'IO_READ16': 132, 'IO_WRITE8': 133, 'IO_WRITE16': 134, 'FETCH_PORT': 135})
+    if dimension('MC_FORMAT_VERSION') >= 16:
+        expected.update({'BRANCH_REPEAT_EMPTY': 121, 'STEP_STRING_SOURCE': 122, 'STEP_STRING_DEST': 123, 'REPEAT_COUNT': 124, 'READ_STRING_TMP0': 125, 'READ_STRING_TMP1': 126, 'WRITE_STRING_TMP0': 127, 'BRANCH_REPEAT_CONTINUE': 128, 'READ_STRING_ACCUMULATOR': 129, 'WRITE_STRING_ACCUMULATOR': 130})
     if dimension('MC_FORMAT_VERSION') >= 14:
         expected.update({'CHECK_PUSH2':113,'CHECK_POP2':114,'ADD_ALLOCATION_SP':115})
     if dimension('MC_FORMAT_VERSION') >= 13:
         expected.update({'READ_AX_TMP0': 78, 'READ_CX_TMP0': 79, 'READ_DX_TMP0': 80, 'READ_BX_TMP0': 81, 'READ_SP_TMP0': 82, 'READ_BP_TMP0': 83, 'READ_SI_TMP0': 84, 'READ_DI_TMP0': 85, 'WRITE_AX_TMP0': 86, 'WRITE_CX_TMP0': 87, 'WRITE_DX_TMP0': 88, 'WRITE_BX_TMP0': 89, 'WRITE_SP_TMP0': 90, 'WRITE_BP_TMP0': 91, 'WRITE_SI_TMP0': 92, 'WRITE_DI_TMP0': 93, 'SAVE_AUX_TMP0': 94, 'RESTORE_AUX_TMP0': 95, 'SAVE_ALLOCATION_TMP0': 96, 'LOAD_COUNTER_TMP1': 97, 'DECREMENT_COUNTER': 98, 'BRANCH_ZERO': 99, 'BRANCH_NONZERO': 100, 'CHECK_PUSH8': 101, 'CHECK_POP8': 102, 'BEGIN_STACK_CURSOR': 103, 'CHECK_STACK_TMP0': 104, 'SET_STACK_ADDRESS_TMP0': 105, 'READ_STACK_ADDRESS_TMP0': 106, 'DECREMENT_STACK_ADDRESS': 107, 'ALLOCATE_STACK': 108, 'CHECK_RM32': 109, 'SET_EA_PLUS2': 110, 'CHECK_BOUNDS': 111, 'READ_STACK_CURSOR_TMP0': 112})
+    if dimension('MC_FORMAT_VERSION') >= 15:
+        expected.update({'MULDIV8': 116, 'MULDIV16': 117, 'IMUL_IMM16': 118, 'WRITE_RESULT_AX16': 119, 'WRITE_RESULT_DX16': 120})
     if {name: values.get(name) for name in expected} != expected:
         raise ValueError("unexpected encoding operation constants")
     words = [0] * depth
@@ -147,7 +161,7 @@ def read_generated_branches(package: str) -> dict[int, int]:
 def canonical_source(words, entries, labels=None, branch_targets=None):
     labels = {} if labels is None else labels
     branch_targets = {} if branch_targets is None else branch_targets
-    if set(branch_targets) != {i for i,w in enumerate(words) if w in (99,100)}:
+    if set(branch_targets) != {i for i,w in enumerate(words) if w in (99,100,121,128)}:
         raise ValueError("missing or extraneous branch target metadata")
     if not words or any(type(w) is not int or w not in (0, *STATEMENTS) for w in words):
         raise ValueError("invalid ROM words")
@@ -177,7 +191,7 @@ def canonical_source(words, entries, labels=None, branch_targets=None):
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
     unary = any(tuple(words[i:i+7]) in ((4,47,61,14,56,18,3), (4,6,61,14,16,18,3)) for i in range(len(words)-6))
-    version = 14 if any(w > 112 for w in words) else 13 if any(w > 77 for w in words) else 12 if any(w > 75 for w in words) else 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
+    version = 17 if any(w > 130 for w in words) else 16 if any(w > 120 for w in words) else 15 if any(w > 115 for w in words) else 14 if any(w > 112 for w in words) else 13 if any(w > 77 for w in words) else 12 if any(w > 75 for w in words) else 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
@@ -187,7 +201,7 @@ def canonical_source(words, entries, labels=None, branch_targets=None):
             raise ValueError(f"missing entry after END at {address-1}")
         lines.extend(f"{label}:" for label in label_addresses.get(address, []))
         statement=STATEMENTS[word]
-        if word in (99,100):
+        if word in (99,100,121,128):
             target=branch_targets[address]
             candidates=[name for name,pc in labels.items() if pc==target and name.startswith(owner_entry + '.')]
             if not candidates:
@@ -251,7 +265,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_phase7_far.json")
+                        default=ROOT / "tests/fixtures/microcode_phase7_io.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

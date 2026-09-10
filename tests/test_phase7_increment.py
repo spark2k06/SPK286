@@ -16,12 +16,13 @@ class Phase7IncrementTests(unittest.TestCase):
         self.assertEqual(len(REQUIRED_PATHS), len(set(REQUIRED_PATHS)))
 
     def test_complete_phase_cannot_pass_as_a_subset(self):
-        with self.assertRaisesRegex(ValueError,'32 required opcode families remain unimplemented'):
-            require_complete()
-        result=subprocess.run(['make','phase7-check'],capture_output=True,text=True)
-        self.assertNotEqual(result.returncode,0)
-        self.assertIn('PHASE7_IMPLEMENTATION_PENDING',result.stdout+result.stderr)
-        self.assertNotIn('PHASE7_DEVELOPMENT_VALIDATION_PASS',result.stdout+result.stderr)
+        from unittest.mock import patch
+        from tools.run_singlestep import SUPPORTED_OPCODES, MULDIV_OPCODES
+        with patch('tools.phase7_scope.SUPPORTED_OPCODES', tuple(op for op in SUPPORTED_OPCODES if op not in MULDIV_OPCODES)):
+            with self.assertRaisesRegex(ValueError,'10 required opcode families remain unimplemented'):
+                require_complete()
+        require_complete()
+
 
     def test_missing_reports_and_malformed_inventory_are_errors(self):
         with tempfile.TemporaryDirectory() as d:

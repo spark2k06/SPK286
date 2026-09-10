@@ -47,9 +47,15 @@ UNARY_OPCODES = ('F6.2','F6.3','F7.2','F7.3','FE.0','FE.1','FF.0','FF.1')
 ADJUST_OPCODES = ('27','2F','37','3F','D4','D5')
 SEGMENT_OPCODES = ('06','07','0E','16','17','1E','1F','8C','8E')
 STACK_FRAME_OPCODES = ('60','61','62','C8','C9')
+MULDIV_OPCODES = ('69','6B') + tuple(f'{op}.{kind}' for op in ('F6','F7') for kind in range(4,8))
+DIVIDE_OPCODES = ('F6.6','F6.7','F7.6','F7.7')
 FAR_OPCODES = ('C4','C5','9A','EA','CA','CB','FF.3','FF.5')
+SCALAR_IO_OPCODES = ('E4','E5','E6','E7','EC','ED','EE','EF')
+STRING_IO_OPCODES = ('6C','6D','6E','6F')
+IO_OPCODES = SCALAR_IO_OPCODES + STRING_IO_OPCODES
+STRING_OPCODES = ('A4','A5','A6','A7','AA','AB','AC','AD','AE','AF')
 CONTROL_OPCODES += ('9A','EA','CA','CB','FF.3','FF.5')
-SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES
+SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES + STRING_OPCODES + IO_OPCODES + MULDIV_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -57,8 +63,7 @@ RESULT_RE = re.compile(
 )
 
 
-class SingleStepRunnerError(RuntimeError):
-    """Raised when a vector cannot be prepared or the runner cannot start."""
+from tools.singlestep import SingleStepRunnerError
 
 
 @dataclass(frozen=True)
@@ -71,8 +76,10 @@ class PreparedCase:
     expected_masks: tuple[int, ...]
     initial_ram: tuple[tuple[int, int], ...]
     expected_ram: tuple[tuple[int, int], ...]
+    expected_ram_masks: tuple[tuple[int, int], ...] = ()
     expected_event: int = 256
     expected_retired: int = 1
+    expected_io: tuple[tuple[int,int,int,int], ...] = ()
 
 
 def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool = False, include_prefixes: bool = False) -> str | None:
@@ -81,7 +88,7 @@ def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES + STRING_OPCODES + IO_OPCODES + MULDIV_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
@@ -157,6 +164,33 @@ def read_masks(final_state: Mapping[str, object]) -> list[int]:
     return masks
 
 
+def captured_io_cycles(case):
+    """Latched Ts address/BHE, completed Tc data; expected records only.
+
+    Physical addresses can advance before Tc. These observations never supply
+    input stimulus: scalar IN's capture responder independently returns FF.
+    """
+    pending=None;cycles=[]
+    for cycle in case.cycles:
+        ts=(cycle['t_state']&7)==1
+        tc=(cycle['t_state']&7)==2
+        if ts and cycle['bus_status'] in (9,10):
+            if pending is not None:raise SingleStepRunnerError('overlapping captured I/O cycles')
+            pending=(int(cycle['bus_status']==10),checked_address(cycle['address'],'I/O address'),(cycle['pin_bitfield0']>>1)&1)
+            if not cycle['pin_bitfield0']&1:raise SingleStepRunnerError('missing captured I/O address latch')
+        if tc and cycle['io_status']:
+            if pending is None:raise SingleStepRunnerError('I/O completion without address latch')
+            write,address,bhe=pending
+            if cycle['io_status']!=(1 if write else 4):raise SingleStepRunnerError('captured I/O direction mismatch')
+            mask=0xff00 if address&1 else (0xff if bhe else 0xffff)
+            if address&1 and bhe:raise SingleStepRunnerError('captured I/O with no selected byte lane')
+            data=checked_word(cycle['data_bus'],'I/O data')&mask
+            if not write and data!=mask:raise SingleStepRunnerError('capture violates documented FF I/O responder')
+            cycles.append((write,address,bhe,data));pending=None
+    if pending is not None:raise SingleStepRunnerError('incomplete captured I/O cycle')
+    return tuple(cycles)
+
+
 def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = False, include_prefixes: bool = False) -> PreparedCase:
     """Convert one sparse MOO state into a full comparison contract."""
 
@@ -180,7 +214,9 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
         expected_event=checked_byte(case.exception['number'],'EXCP vector')
         checked_address(case.exception['flag_address'],'EXCP flag address')
         expected_retired=int(opcode in ('CC','CD','CE'))
-        if not expected_retired and expected_event not in (6,13) and not (opcode == 'D4' and expected_event == 0) and not (opcode == '62' and expected_event == 5):
+        if opcode in STRING_OPCODES + IO_OPCODES and expected_event != 13:
+            raise SingleStepRunnerError(f'case {case.index}: string fault must be #GP')
+        if not expected_retired and expected_event not in (6,13) and not (opcode in ('D4',) + DIVIDE_OPCODES and expected_event == 0) and not (opcode == '62' and expected_event == 5):
             raise SingleStepRunnerError(f'case {case.index}: unsupported architectural fault producer')
     if set(initial) - {"regs", "ram", "queue"}:
         raise SingleStepRunnerError(f"case {case.index}: unsupported initial state fields")
@@ -206,7 +242,7 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
     if opcode in BYTE_SCALAR_OPCODES and (0xB0 <= byte_opcode < 0xB8 or byte_opcode < 0x40 and byte_opcode & 7 == 4):
         if len(instruction_bytes) != 3:
             raise SingleStepRunnerError(f'case {case.index}: byte immediate length mismatch')
-    elif opcode in SCALAR_DIRECT_OPCODES + ('27','2F','37','3F','60','61','C9','D7','06','07','0E','16','17','1E','1F') + tuple(f'{v:02X}' for v in range(0x90,0x98)):
+    elif opcode in SCALAR_DIRECT_OPCODES + STRING_OPCODES + STRING_IO_OPCODES + ('27','2F','37','3F','60','61','C9','D7','06','07','0E','16','17','1E','1F') + tuple(f'{v:02X}' for v in range(0x90,0x98)):
         if len(instruction_bytes) != 2:
             raise SingleStepRunnerError(f'case {case.index}: scalar single-byte instruction length mismatch')
     elif opcode in ('9A','EA','CA','CB'):
@@ -227,6 +263,9 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
     elif opcode in OPCODES:
         if len(instruction_bytes) != 4:
             raise SingleStepRunnerError(f"case {case.index}: supported unprefixed MOV plus HALT requires four bytes")
+    elif opcode in SCALAR_IO_OPCODES:
+        if len(instruction_bytes)!=(3 if byte_opcode<0xE8 else 2):
+            raise SingleStepRunnerError(f'case {case.index}: scalar I/O length mismatch')
     elif opcode in PHASE6_OPCODES:
         if len(instruction_bytes) != (3 if opcode=='CD' else 2):
             raise SingleStepRunnerError(f'case {case.index}: event instruction length mismatch')
@@ -243,14 +282,14 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
                      else len(instruction_bytes) == instruction_length+1)
         if not length_ok:
             raise SingleStepRunnerError(f'case {case.index}: stack/control length mismatch')
-    elif opcode in MODRM_OPCODES + ALU_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SHIFT_OPCODES + UNARY_OPCODES + ('86','87','8D','8C','8E','62','C4','C5','FF.3','FF.5') + ('8F','FF.2','FF.4','FF.6'):
+    elif opcode in MODRM_OPCODES + ALU_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SHIFT_OPCODES + UNARY_OPCODES + MULDIV_OPCODES + ('86','87','8D','8C','8E','62','C4','C5','FF.3','FF.5') + ('8F','FF.2','FF.4','FF.6'):
         if len(instruction_bytes) < 3:
             raise SingleStepRunnerError(f"case {case.index}: missing ModR/M byte")
         if byte_opcode == 0x8F and (instruction_bytes[1] >> 3) & 7 != 0 and not include_exceptions:
             raise SingleStepRunnerError(f'case {case.index}: invalid POP group extension')
         mode, rm = instruction_bytes[1] >> 6, instruction_bytes[1] & 7
         displacement_bytes = 1 if mode == 1 else (2 if mode == 2 or mode == 0 and rm == 6 else 0)
-        immediate_bytes = 0 if opcode in UNARY_OPCODES else 2 if byte_opcode in (0x81,0xC7,0xF7) else (1 if byte_opcode in (0x80,0x83,0xC6,0xF6,0xC0,0xC1) else 0)
+        immediate_bytes = (2 if opcode == '69' else 1 if opcode == '6B' else 0) if opcode in MULDIV_OPCODES else 0 if opcode in UNARY_OPCODES else 2 if byte_opcode in (0x81,0xC7,0xF7) else (1 if byte_opcode in (0x80,0x83,0xC6,0xF6,0xC0,0xC1) else 0)
         if '.' in opcode and (instruction_bytes[1] >> 3) & 7 != int(opcode[-1]):
             raise SingleStepRunnerError(f"case {case.index}: file group extension differs from {opcode}")
         # Invalid POP extensions end decoding at ModR/M. The generator can leave
@@ -308,16 +347,33 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
                 f"case {case.index}: instruction bytes disagree with initial RAM at {address:06X}"
             )
     expected_ram = initial_ram.copy()
-    expected_ram.update(read_ram(final, "final"))
+    final_ram=read_ram(final, "final")
+    expected_ram.update(final_ram)
+    masks=read_masks(final)
+    frame_masks=[]
+    if opcode in DIVIDE_OPCODES and expected_event == 0:
+        # Intel leaves only these six arithmetic bits undefined. The original
+        # corpus RMSK and EXCP locate their comparison mask; no expected byte
+        # or CPU result is changed. Other faults retain exact RAM comparison.
+        flags_mask=masks[REG_ORDER.index("flags")]
+        if flags_mask | 0x08D5 != 0xFFFF:
+            raise SingleStepRunnerError("DIV FLAGS mask excludes a defined bit")
+        flag_address=case.exception['flag_address']
+        frame_address=(initial_regs[REG_ORDER.index("ss")] << 4) + ((initial_regs[REG_ORDER.index("sp")]-2) & 0xFFFF)
+        if flag_address != frame_address or any(flag_address+i not in final_ram for i in (0,1)):
+            raise SingleStepRunnerError("DIV EXCP FLAGS address is not the captured stack word")
+        frame_masks=[(flag_address+i,(flags_mask >> (i*8)) & 255) for i in (0,1) if ((flags_mask >> (i*8)) & 255) != 255]
     return PreparedCase(
         source=case,
         initial_regs=tuple(initial_regs),
         expected_regs=tuple(expected_regs),
-        expected_masks=tuple(read_masks(final)),
+        expected_masks=tuple(masks),
+        expected_ram_masks=tuple(frame_masks),
         initial_ram=tuple(sorted(initial_ram.items())),
         expected_ram=tuple(sorted(expected_ram.items())),
         expected_event=expected_event,
         expected_retired=expected_retired,
+        expected_io=captured_io_cycles(case) if opcode in IO_OPCODES else (),
     )
 
 
@@ -351,7 +407,12 @@ def write_batch(path: Path, cases: list[PreparedCase]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as output:
         output.write(b"SPK286SS")
-        write_u32(output, 2)
+        # Preserve v2, v3 (RAM masks) and v4 (port comparisons). Version 5
+        # carries both extensions for batches that require both capabilities.
+        has_masks=any(p.expected_ram_masks for p in cases)
+        has_io=any(p.expected_io for p in cases)
+        version=5 if has_masks and has_io else 3 if has_masks else 4 if has_io else 2
+        write_u32(output, version)
         write_u32(output, len(cases))
         for prepared in cases:
             case = prepared.source
@@ -368,8 +429,13 @@ def write_batch(path: Path, cases: list[PreparedCase]) -> None:
             for value in prepared.expected_masks:
                 write_u16(output, value)
             write_memory(output, prepared.expected_ram)
+            if version in (3,5):write_memory(output, prepared.expected_ram_masks)
             write_u16(output, prepared.expected_event)
             write_u8(output, prepared.expected_retired)
+            if version in (4,5):
+                write_u32(output,len(prepared.expected_io))
+                for direction,address,bhe,data in prepared.expected_io:
+                    write_u8(output,direction);write_u32(output,address);write_u8(output,bhe);write_u16(output,data)
 
 
 def select_cases(
@@ -435,7 +501,10 @@ def run_opcode(
     selected, selection_skipped = select_cases(
         tuple(eligible), frozenset(), args.sample, args.full, args.index, args.test_hash
     )
-    prepared = [prepare_case(case, opcode, getattr(args, 'include_exceptions', False), getattr(args, 'include_prefixes', False)) for case in selected]
+    from tools.phase7_capture_admission import prepare_population
+    selected, prepared, not_evaluable = prepare_population(
+        selected, opcode, source_path,
+        lambda case: prepare_case(case, opcode, getattr(args, 'include_exceptions', False), getattr(args, 'include_prefixes', False)))
     batch_path = build_dir / "singlestep" / "batches" / f"{opcode}.bin"
     write_batch(batch_path, prepared)
     command = [str(executable), "--singlestep-batch", str(batch_path.resolve())]
@@ -466,13 +535,15 @@ def run_opcode(
     revoked_count = sum(is_revoked(case, revoked) for case in cases)
     reasons = Counter(entry["reason"] for entry in exclusions)
     prefix_skipped, exception_skipped = reasons["unsupported_prefix"], reasons["exception_delivery"]
-    if len(cases) != revoked_count + prefix_skipped + exception_skipped + selection_skipped + executed:
+    if len(cases) != revoked_count + prefix_skipped + exception_skipped + selection_skipped + executed + len(not_evaluable):
         raise SingleStepRunnerError(f"SingleStep discovery accounting mismatch for {opcode}")
     report = {"opcode": opcode, "discovered": len(cases), "revoked": revoked_count,
               "prefix_skipped": prefix_skipped, "exception_skipped": exception_skipped,
               "selection_skipped": selection_skipped, "selected": len(prepared),
               "executed": executed, "passed": passed, "failed": failed, "exclusions": exclusions,
+              "not_evaluable": not_evaluable,
               "inherited_selected":sum(opcode in INHERITED_OPCODES and c.exception is None for c in selected),
+              "undefined_frame_flags_masked":sum(bool(c.expected_ram_masks) for c in prepared),
               "fault_selected":sum(opcode in INHERITED_OPCODES and c.exception is not None for c in selected),
               "phase6_selected":len(selected) if opcode in PHASE6_OPCODES else 0}
     if getattr(args, 'include_prefixes', False):

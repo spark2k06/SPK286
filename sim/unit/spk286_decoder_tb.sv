@@ -10,7 +10,7 @@ module spk286_decoder_tb;
     initial begin
         for (integer i = 0; i < 256; i = i + 1) begin
             opcode = 8'(i); #1;
-            if (supported !== (i == 196 || i == 197 || i == 154 || i == 234 || i == 202 || i == 203 || i == 96 || i == 97 || i == 98 || i == 200 || i == 201 || i == 6 || i == 7 || i == 14 || i == 22 || i == 23 || i == 30 || i == 31 || i == 140 || i == 142 || i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
+            if (supported !== (i == 105 || i == 107 || (i >= 228 && i <= 231) || (i >= 236 && i <= 239) || (i >= 108 && i <= 111) || (i >= 164 && i <= 167) || (i >= 170 && i <= 175) || i == 196 || i == 197 || i == 154 || i == 234 || i == 202 || i == 203 || i == 96 || i == 97 || i == 98 || i == 200 || i == 201 || i == 6 || i == 7 || i == 14 || i == 22 || i == 23 || i == 30 || i == 31 || i == 140 || i == 142 || i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
                               (i >= 80 && i <= 95) || (i >= 112 && i <= 127) || i == 104 || i == 106 || i == 143 || i == 255 ||
                               i == 194 || i == 195 || (i >= 224 && i <= 227) || i == 232 || i == 233 || i == 235 ||
                               (i >= 176 && i <= 191) || i == 136 || i == 138 || i == 198 || i == 199 || i == 128 || i == 137 || i == 139 || i == 129 || i == 131 ||
@@ -62,6 +62,21 @@ module spk286_decoder_tb;
             if(i==234 && entry!=spk286_microcode_pkg::MC_ENTRY_JMP_FAR_IMM) $fatal(1,"far immediate jump entry");
             if(i==202 && entry!=spk286_microcode_pkg::MC_ENTRY_RET_FAR_IMM) $fatal(1,"far adjusted return entry");
             if(i==203 && entry!=spk286_microcode_pkg::MC_ENTRY_RET_FAR) $fatal(1,"far return entry");
+            if ((i==164 || i==165) && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_MOVE) $fatal(1,"MOVS entry");
+            if ((i==166 || i==167) && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_COMPARE) $fatal(1,"CMPS entry");
+            if ((i==170 || i==171) && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_STORE) $fatal(1,"STOS entry");
+            if ((i==172 || i==173) && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_LOAD) $fatal(1,"LODS entry");
+            if ((i==174 || i==175) && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_SCAN) $fatal(1,"SCAS entry");
+            if ((i==228 || i==236) && (destination!=0 || entry!=spk286_microcode_pkg::MC_ENTRY_IN_AL_PORT)) $fatal(1,"IN AL entry");
+            if ((i==229 || i==237) && (destination!=0 || entry!=spk286_microcode_pkg::MC_ENTRY_IN_AX_PORT)) $fatal(1,"IN AX entry");
+            if ((i==230 || i==238) && (destination!=0 || entry!=spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AL)) $fatal(1,"OUT AL entry");
+            if ((i==231 || i==239) && (destination!=0 || entry!=spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AX)) $fatal(1,"OUT AX entry");
+            if (i==108 && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_BYTE) $fatal(1,"INSB entry");
+            if (i==109 && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_WORD) $fatal(1,"INSW entry");
+            if (i==110 && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_BYTE) $fatal(1,"OUTSB entry");
+            if (i==111 && entry!=spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_WORD) $fatal(1,"OUTSW entry");
+            if(i==105 && entry!=spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM16) $fatal(1,"IMUL immediate word entry");
+            if(i==107 && entry!=spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM8S) $fatal(1,"IMUL signed byte entry");
             checks = checks + 1;
         end
         $display("DECODER PASS: %0d opcode checks; MOV and word ALU forms", checks);

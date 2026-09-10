@@ -113,7 +113,10 @@ module spk286 (
     logic [7:0] opcode_q;
     logic unsupported_q;
     logic is_prefix, prefix_accept, context_active, segment_override, lock_prefix, length_fault;
-    logic [1:0] override_segment, unused_repeat_kind;
+    logic [1:0] override_segment, repeat_kind;
+    logic io_transfer;
+    logic [15:0] io_port;
+    logic string_byte, string_compare, string_request, string_destination, repeat_boundary, repeat_stepped;
     logic [3:0] instruction_bytes;
     logic execution_allowed, decode_supported, decode_ready, micro_start;
     logic [2:0] decode_destination, decode_source_index;
@@ -121,6 +124,7 @@ module spk286 (
     logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] micro_word;
     logic dispatch_request, dispatch_valid, reverse_operands, arithmetic_fault;
     logic [2:0] adjust_kind;
+    logic [1:0] muldiv_kind;
     logic counter_branch_request, range_fault, bounds_fault;
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH:0] counter_branch_target;
     assign counter_branch_target = spk286_microcode_pkg::micro_branch_target(micro_pc);
@@ -180,9 +184,9 @@ module spk286 (
     assign stream_restart = restart || internal_redirect || event_cancel;
     assign stream_ip = restart ? ip_write_data : (internal_redirect ? internal_target : debug_ip);
     assign queue_flush = stream_restart;
-    assign service_segment = stack_request ? 2'd2 : (segment_override ? override_segment : operand_segment);
+    assign service_segment = string_request ? (string_destination ? 2'd0 : (segment_override ? override_segment : 2'd3)) : stack_request ? 2'd2 : (segment_override ? override_segment : operand_segment);
     assign implicit_lock = micro_active && !event_active && operand_context_valid && !operand_register_direct && (opcode_q == 8'h86 || opcode_q == 8'h87);
-    assign service_offset = address_override && !stack_request && !vector_request ? address_offset : vector_request ? vector_offset : (stack_request ? stack_offset : operand_offset);
+    assign service_offset = io_transfer ? 16'd0 : address_override && !stack_request && !vector_request ? address_offset : vector_request ? vector_offset : (stack_request ? stack_offset : operand_offset);
     assign execution_allowed = execute_enable && commit_allowed && !reset && !restart && !operand_blocked && !unsupported_q &&
                                !shutdown && (!halted || micro_active);
 
@@ -268,7 +272,7 @@ module spk286 (
         .code_valid(fetch_bus_valid), .code_bhe_n(fetch_bus_bhe_n),
         .code_address(fetch_address), .code_ready(fetch_bus_ready),
         .data_request(memory_request), .data_request_ready(memory_request_ready),
-        .data_write(memory_write), .data_byte(memory_byte), .data_io(1'b0), .data_address(memory_address), .data_write_data(memory_write_data),
+        .data_write(memory_write), .data_byte(memory_byte), .data_io(io_transfer), .data_address(memory_address), .data_write_data(memory_write_data),
         .data_response_valid(memory_response_valid), .data_response_ready(memory_response_ready),
         .data_read_data(memory_read_data), .address(biu_address), .data_out(data_out), .data_oe(data_oe),
         .bus_valid(bus_valid), .bus_write(bus_write), .bus_bhe_n(bus_bhe_n), .bus_status(biu_status)
@@ -296,7 +300,7 @@ module spk286 (
         .consume(queue_consume_valid && queue_consume_ready && !event_active), .prefix_accept(prefix_accept),
         .byte_data(queue_consume_data), .is_prefix(is_prefix), .active(context_active),
         .segment_override(segment_override), .segment_index(override_segment),
-        .lock_prefix(lock_prefix), .repeat_kind(unused_repeat_kind), .byte_count(instruction_bytes)
+        .lock_prefix(lock_prefix), .repeat_kind(repeat_kind), .byte_count(instruction_bytes)
     );
     assign micro_start = opcode_start || event_dispatch;
     // Clear transient services at a candidate dispatch without feeding their
@@ -341,7 +345,10 @@ module spk286 (
         .address_override(address_override), .address_offset(address_offset),
         .direct_flags_data(direct_flags_data), .direct_flags_mask(direct_flags_mask),
         .destination_byte_data(register_state[destination_q[1:0] * 16 + (destination_q[2] ? 8 : 0) +: 8]),
-        .shift_kind(operand_reg), .adjust_kind(adjust_kind), .arithmetic_fault(arithmetic_fault),
+        .shift_kind(operand_reg), .adjust_kind(adjust_kind), .muldiv_kind(muldiv_kind), .arithmetic_fault(arithmetic_fault),
+        .io_transfer(io_transfer), .io_port(io_port), .port_immediate(!opcode_q[3]), .port_register(register_state[32 +: 16]),
+        .string_byte(string_byte), .string_compare(string_compare), .repeat_kind(repeat_kind),
+        .string_request(string_request), .string_destination(string_destination), .repeat_boundary(repeat_boundary), .repeat_stepped(repeat_stepped),
         .register_state(register_state), .counter_branch_request(counter_branch_request), .range_fault(range_fault), .bounds_fault(bounds_fault),
         .segment_read_value(debug_segment_selectors[decoded_segment_index*16 +: 16]),
         .segment_write(internal_segment_write), .segment_write_data(internal_segment_data), .alu_byte(alu_byte), .reverse_operands(reverse_operands), .carry_in(debug_flags[0]), .alu_operation(alu_operation), .result_write_allowed(result_write_allowed),
@@ -369,7 +376,7 @@ module spk286 (
         .opcode(opcode_q), .group_extension(operand_reg), .condition_taken(condition_taken),
         .zero(debug_flags[6]), .count(register_state[16 +: 16]), .push_enabled(push_enabled),
         .push_return_ip(push_return_ip), .branch_taken(branch_taken), .decrement_count(decrement_count),
-        .form_supported(form_supported), .adjust_kind(adjust_kind), .segment_index(decoded_segment_index), .dispatch_entry(dispatch_entry), .dispatch_valid(dispatch_valid)
+        .string_byte(string_byte), .string_compare(string_compare), .form_supported(form_supported), .adjust_kind(adjust_kind), .muldiv_kind(muldiv_kind), .segment_index(decoded_segment_index), .dispatch_entry(dispatch_entry), .dispatch_valid(dispatch_valid)
     );
 
     spk286_alu_decode alu_decode (
@@ -393,8 +400,8 @@ module spk286 (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .read_data(operand_read_data), .register_state(register_state),
-        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !address_override && !stack_request && !vector_request),
-        .physical_address(vector_request ? {8'd0, vector_offset} : segment_address), .offset(service_offset), .segment_limit(vector_request ? 16'hFFFF : segment_limit),
+        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !address_override && !stack_request && !vector_request && !io_transfer),
+        .physical_address(io_transfer ? {8'd0, io_port} : (vector_request ? {8'd0, vector_offset} : segment_address)), .offset(service_offset), .segment_limit(vector_request ? 16'hFFFF : segment_limit),
         .gpr_write_byte(operand_gpr_write_byte), .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
         .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
         .memory_request(memory_request), .memory_request_ready(memory_request_ready),
@@ -465,6 +472,7 @@ module spk286 (
     spk286_events events (
         .clk(clk), .reset(reset), .cancel(restart), .enable(execute_enable && commit_allowed && !reset && !restart),
         .intr(intr), .nmi(nmi), .ss_load(internal_segment_write && decoded_segment_index == 2'd2), .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
+        .repeat_boundary(repeat_boundary), .repeat_stepped(repeat_stepped),
         .retired(raw_retired), .opcode(queue_consume_data), .ip(debug_ip), .cs(debug_cs), .flags(debug_flags),
         .fault_request(fault_request), .fault_vector(fault_vector),
         .software_request(software_taken), .software_vector(selected_software_vector),

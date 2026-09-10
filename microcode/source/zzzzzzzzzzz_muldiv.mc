@@ -1,0 +1,35 @@
+microcode_format 15
+# Acquire immediate bytes before operand data; serialize result, FLAGS and #DE.
+instruction MULDIV_RM8:
+    DECODE_MODRM
+    READ_RM8 -> TMP0
+    MULDIV8 DECODED TMP0
+    RESULT_LOW -> AX
+    COMMIT_FLAGS
+    CHECK_ARITHMETIC
+    END
+instruction MULDIV_RM16:
+    DECODE_MODRM
+    READ_RM16 -> TMP0
+    MULDIV16 DECODED TMP0
+    RESULT_LOW -> AX
+    RESULT_HIGH -> DX
+    COMMIT_FLAGS
+    CHECK_ARITHMETIC
+    END
+instruction IMUL_R16_RM16_IMM16:
+    DECODE_MODRM
+    FETCH_IMM16 -> TMP1
+    READ_RM16 -> TMP0
+    IMUL16 TMP0 TMP1
+    TMP2 -> REG16 IF_WRITE
+    COMMIT_FLAGS
+    END
+instruction IMUL_R16_RM16_IMM8S:
+    DECODE_MODRM
+    FETCH_IMM8S -> TMP1
+    READ_RM16 -> TMP0
+    IMUL16 TMP0 TMP1
+    TMP2 -> REG16 IF_WRITE
+    COMMIT_FLAGS
+    END

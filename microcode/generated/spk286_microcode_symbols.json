@@ -2,7 +2,25 @@
   "branch_targets": {
     "404": 414,
     "406": 412,
-    "411": 407
+    "411": 407,
+    "521": 528,
+    "527": 522,
+    "529": 539,
+    "538": 530,
+    "540": 546,
+    "545": 542,
+    "547": 553,
+    "552": 548,
+    "554": 563,
+    "562": 555,
+    "580": 587,
+    "586": 582,
+    "588": 595,
+    "594": 590,
+    "596": 603,
+    "602": 598,
+    "604": 611,
+    "610": 606
   },
   "entries": {
     "ADJUST_DIRECT": 328,
@@ -34,10 +52,14 @@
     "GROUP5_DISPATCH": 284,
     "GROUP5_NEAR": 61,
     "HALT_CPU": 104,
+    "IMUL_R16_RM16_IMM16": 507,
+    "IMUL_R16_RM16_IMM8S": 514,
     "INC_DEC_R16": 187,
     "INC_DEC_RM16": 321,
     "INC_DEC_RM8": 314,
     "INTERRUPT_RETURN": 111,
+    "IN_AL_PORT": 564,
+    "IN_AX_PORT": 568,
     "JMP_FAR_IMM": 454,
     "JMP_FAR_RM": 472,
     "JMP_REL16": 73,
@@ -59,10 +81,14 @@
     "MOV_RM8_IMM8": 139,
     "MOV_RM8_R8": 131,
     "MOV_SEG_RM16": 346,
+    "MULDIV_RM16": 499,
+    "MULDIV_RM8": 492,
     "NEG_RM16": 307,
     "NEG_RM8": 300,
     "NOT_RM16": 293,
     "NOT_RM8": 286,
+    "OUT_PORT_AL": 572,
+    "OUT_PORT_AX": 576,
     "POP_ALL": 376,
     "POP_FLAGS": 99,
     "POP_R16": 48,
@@ -87,7 +113,16 @@
     "SOFTWARE_EVENT": 106,
     "SOFTWARE_EVENT_IMM8": 108,
     "STORE_DIRECT16": 271,
-    "STORE_DIRECT8": 266
+    "STORE_DIRECT8": 266,
+    "STRING_COMPARE": 529,
+    "STRING_INPUT_BYTE": 580,
+    "STRING_INPUT_WORD": 588,
+    "STRING_LOAD": 547,
+    "STRING_MOVE": 521,
+    "STRING_OUTPUT_BYTE": 596,
+    "STRING_OUTPUT_WORD": 604,
+    "STRING_SCAN": 554,
+    "STRING_STORE": 540
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -100,7 +135,25 @@
     "ENTER_FRAME.push_frame": 412,
     "MOV_R16_IMM16.writeback": 1,
     "MOV_R16_RM16.writeback": 9,
-    "MOV_RM16_R16.writeback": 5
+    "MOV_RM16_R16.writeback": 5,
+    "STRING_COMPARE.done": 539,
+    "STRING_COMPARE.loop": 530,
+    "STRING_INPUT_BYTE.done": 587,
+    "STRING_INPUT_BYTE.loop": 582,
+    "STRING_INPUT_WORD.done": 595,
+    "STRING_INPUT_WORD.loop": 590,
+    "STRING_LOAD.done": 553,
+    "STRING_LOAD.loop": 548,
+    "STRING_MOVE.done": 528,
+    "STRING_MOVE.loop": 522,
+    "STRING_OUTPUT_BYTE.done": 603,
+    "STRING_OUTPUT_BYTE.loop": 598,
+    "STRING_OUTPUT_WORD.done": 611,
+    "STRING_OUTPUT_WORD.loop": 606,
+    "STRING_SCAN.done": 563,
+    "STRING_SCAN.loop": 555,
+    "STRING_STORE.done": 546,
+    "STRING_STORE.loop": 542
   },
   "operations": [
     {
@@ -6625,6 +6678,1564 @@
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
         "line": 75
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 492,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 4
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 493,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 494,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "MULDIV8",
+      "statement": "MULDIV8 DECODED TMP0",
+      "word": 116
+    },
+    {
+      "address": 495,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "WRITE_RESULT_AX16",
+      "statement": "RESULT_LOW -> AX",
+      "word": 119
+    },
+    {
+      "address": 496,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 8
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 497,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "CHECK_ARITHMETIC",
+      "statement": "CHECK_ARITHMETIC",
+      "word": 75
+    },
+    {
+      "address": 498,
+      "location": {
+        "entry": "MULDIV_RM8",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 10
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 499,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 500,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 13
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 501,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 14
+      },
+      "operands": [],
+      "operation": "MULDIV16",
+      "statement": "MULDIV16 DECODED TMP0",
+      "word": 117
+    },
+    {
+      "address": 502,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "WRITE_RESULT_AX16",
+      "statement": "RESULT_LOW -> AX",
+      "word": 119
+    },
+    {
+      "address": 503,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 16
+      },
+      "operands": [],
+      "operation": "WRITE_RESULT_DX16",
+      "statement": "RESULT_HIGH -> DX",
+      "word": 120
+    },
+    {
+      "address": 504,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 505,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 18
+      },
+      "operands": [],
+      "operation": "CHECK_ARITHMETIC",
+      "statement": "CHECK_ARITHMETIC",
+      "word": 75
+    },
+    {
+      "address": 506,
+      "location": {
+        "entry": "MULDIV_RM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 19
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 507,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 21
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 508,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 22
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM16_TMP1",
+      "statement": "FETCH_IMM16 -> TMP1",
+      "word": 11
+    },
+    {
+      "address": 509,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 23
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 510,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 24
+      },
+      "operands": [],
+      "operation": "IMUL_IMM16",
+      "statement": "IMUL16 TMP0 TMP1",
+      "word": 118
+    },
+    {
+      "address": 511,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 25
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_REG16",
+      "statement": "TMP2 -> REG16 IF_WRITE",
+      "word": 15
+    },
+    {
+      "address": 512,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 513,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM16",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 27
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 514,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 29
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 515,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_IMM8S_TMP1",
+      "statement": "FETCH_IMM8S -> TMP1",
+      "word": 12
+    },
+    {
+      "address": 516,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 31
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 517,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "IMUL_IMM16",
+      "statement": "IMUL16 TMP0 TMP1",
+      "word": 118
+    },
+    {
+      "address": 518,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 33
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_REG16",
+      "statement": "TMP2 -> REG16 IF_WRITE",
+      "word": 15
+    },
+    {
+      "address": 519,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 520,
+      "location": {
+        "entry": "IMUL_R16_RM16_IMM8S",
+        "file": "zzzzzzzzzzz_muldiv.mc",
+        "line": 35
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 521,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 6
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 522,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 8
+      },
+      "operands": [],
+      "operation": "STEP_STRING_SOURCE",
+      "statement": "STEP_STRING_SOURCE",
+      "word": 122
+    },
+    {
+      "address": 523,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 524,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 10
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP0",
+      "statement": "READ_STRING_TMP0",
+      "word": 125
+    },
+    {
+      "address": 525,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 11
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 526,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "WRITE_STRING_TMP0",
+      "statement": "WRITE_STRING_TMP0",
+      "word": 127
+    },
+    {
+      "address": 527,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 13
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 528,
+      "location": {
+        "entry": "STRING_MOVE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 529,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 18
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 530,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 20
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 531,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 21
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP1",
+      "statement": "READ_STRING_TMP1",
+      "word": 126
+    },
+    {
+      "address": 532,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 22
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 533,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 23
+      },
+      "operands": [],
+      "operation": "STEP_STRING_SOURCE",
+      "statement": "STEP_STRING_SOURCE",
+      "word": 122
+    },
+    {
+      "address": 534,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 24
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP0",
+      "statement": "READ_STRING_TMP0",
+      "word": 125
+    },
+    {
+      "address": 535,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 25
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 536,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 26
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_DST",
+      "statement": "TMP2 -> DST IF_WRITE",
+      "word": 17
+    },
+    {
+      "address": 537,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 27
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 538,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 28
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 539,
+      "location": {
+        "entry": "STRING_COMPARE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 30
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 540,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 33
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 541,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "READ_STRING_ACCUMULATOR",
+      "statement": "READ_STRING_ACCUMULATOR",
+      "word": 129
+    },
+    {
+      "address": 542,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 36
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 543,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 37
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 544,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 38
+      },
+      "operands": [],
+      "operation": "WRITE_STRING_TMP0",
+      "statement": "WRITE_STRING_TMP0",
+      "word": 127
+    },
+    {
+      "address": 545,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 39
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 546,
+      "location": {
+        "entry": "STRING_STORE",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 547,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 44
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 548,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 46
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 549,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 47
+      },
+      "operands": [],
+      "operation": "STEP_STRING_SOURCE",
+      "statement": "STEP_STRING_SOURCE",
+      "word": 122
+    },
+    {
+      "address": 550,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP0",
+      "statement": "READ_STRING_TMP0",
+      "word": 125
+    },
+    {
+      "address": 551,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 49
+      },
+      "operands": [],
+      "operation": "WRITE_STRING_ACCUMULATOR",
+      "statement": "WRITE_STRING_ACCUMULATOR",
+      "word": 130
+    },
+    {
+      "address": 552,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 50
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 553,
+      "location": {
+        "entry": "STRING_LOAD",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 52
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 554,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 55
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 555,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 556,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 58
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 557,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 59
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP1",
+      "statement": "READ_STRING_TMP1",
+      "word": 126
+    },
+    {
+      "address": 558,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 60
+      },
+      "operands": [],
+      "operation": "READ_STRING_ACCUMULATOR",
+      "statement": "READ_STRING_ACCUMULATOR",
+      "word": 129
+    },
+    {
+      "address": 559,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 61
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 560,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 62
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_DST",
+      "statement": "TMP2 -> DST IF_WRITE",
+      "word": 17
+    },
+    {
+      "address": 561,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 63
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 562,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 64
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 563,
+      "location": {
+        "entry": "STRING_SCAN",
+        "file": "zzzzzzzzzzzz_strings.mc",
+        "line": 66
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 564,
+      "location": {
+        "entry": "IN_AL_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 4
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 565,
+      "location": {
+        "entry": "IN_AL_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 5
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_READ8",
+      "statement": "IO_READ8 TMP1 -> TMP0",
+      "word": 131
+    },
+    {
+      "address": 566,
+      "location": {
+        "entry": "IN_AL_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 6
+      },
+      "operands": [
+        "TMP0",
+        "DST8"
+      ],
+      "operation": "MOVE8",
+      "statement": "TMP0 -> DST8",
+      "word": 54
+    },
+    {
+      "address": 567,
+      "location": {
+        "entry": "IN_AL_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 568,
+      "location": {
+        "entry": "IN_AX_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 9
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 569,
+      "location": {
+        "entry": "IN_AX_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 10
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_READ16",
+      "statement": "IO_READ16 TMP1 -> TMP0",
+      "word": 132
+    },
+    {
+      "address": 570,
+      "location": {
+        "entry": "IN_AX_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 11
+      },
+      "operands": [
+        "TMP0",
+        "DST"
+      ],
+      "operation": "MOVE",
+      "statement": "TMP0 -> DST",
+      "word": 2
+    },
+    {
+      "address": 571,
+      "location": {
+        "entry": "IN_AX_PORT",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 12
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 572,
+      "location": {
+        "entry": "OUT_PORT_AL",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 14
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 573,
+      "location": {
+        "entry": "OUT_PORT_AL",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 15
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST8",
+      "statement": "READ_DST8 -> TMP0",
+      "word": 53
+    },
+    {
+      "address": 574,
+      "location": {
+        "entry": "OUT_PORT_AL",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 16
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_WRITE8",
+      "statement": "IO_WRITE8 TMP1 TMP0",
+      "word": 133
+    },
+    {
+      "address": 575,
+      "location": {
+        "entry": "OUT_PORT_AL",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 576,
+      "location": {
+        "entry": "OUT_PORT_AX",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 19
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 577,
+      "location": {
+        "entry": "OUT_PORT_AX",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 20
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_DST16",
+      "statement": "READ_DST16 -> TMP0",
+      "word": 13
+    },
+    {
+      "address": 578,
+      "location": {
+        "entry": "OUT_PORT_AX",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 21
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_WRITE16",
+      "statement": "IO_WRITE16 TMP1 TMP0",
+      "word": 134
+    },
+    {
+      "address": 579,
+      "location": {
+        "entry": "OUT_PORT_AX",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 22
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 580,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 25
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 581,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 26
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 582,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 28
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 583,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 29
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_READ8",
+      "statement": "IO_READ8 TMP1 -> TMP0",
+      "word": 131
+    },
+    {
+      "address": 584,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 30
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 585,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 31
+      },
+      "operands": [],
+      "operation": "WRITE_STRING_TMP0",
+      "statement": "WRITE_STRING_TMP0",
+      "word": 127
+    },
+    {
+      "address": 586,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 32
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 587,
+      "location": {
+        "entry": "STRING_INPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 588,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 37
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 589,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 590,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 40
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 591,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 41
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_READ16",
+      "statement": "IO_READ16 TMP1 -> TMP0",
+      "word": 132
+    },
+    {
+      "address": 592,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "STEP_STRING_DEST",
+      "statement": "STEP_STRING_DEST",
+      "word": 123
+    },
+    {
+      "address": 593,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 43
+      },
+      "operands": [],
+      "operation": "WRITE_STRING_TMP0",
+      "statement": "WRITE_STRING_TMP0",
+      "word": 127
+    },
+    {
+      "address": 594,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 44
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 595,
+      "location": {
+        "entry": "STRING_INPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 46
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 596,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 49
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 597,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 50
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 598,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 52
+      },
+      "operands": [],
+      "operation": "STEP_STRING_SOURCE",
+      "statement": "STEP_STRING_SOURCE",
+      "word": 122
+    },
+    {
+      "address": 599,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 53
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 600,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 54
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP0",
+      "statement": "READ_STRING_TMP0",
+      "word": 125
+    },
+    {
+      "address": 601,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 55
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_WRITE8",
+      "statement": "IO_WRITE8 TMP1 TMP0",
+      "word": 133
+    },
+    {
+      "address": 602,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 56
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 603,
+      "location": {
+        "entry": "STRING_OUTPUT_BYTE",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 58
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 604,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 61
+      },
+      "operands": [
+        "done"
+      ],
+      "operation": "BRANCH_REPEAT_EMPTY",
+      "statement": "BRANCH_REPEAT_EMPTY done",
+      "word": 121
+    },
+    {
+      "address": 605,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 62
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "FETCH_PORT",
+      "statement": "FETCH_PORT DECODED -> TMP1",
+      "word": 135
+    },
+    {
+      "address": 606,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 64
+      },
+      "operands": [],
+      "operation": "STEP_STRING_SOURCE",
+      "statement": "STEP_STRING_SOURCE",
+      "word": 122
+    },
+    {
+      "address": 607,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 65
+      },
+      "operands": [],
+      "operation": "REPEAT_COUNT",
+      "statement": "REPEAT_COUNT",
+      "word": 124
+    },
+    {
+      "address": 608,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 66
+      },
+      "operands": [],
+      "operation": "READ_STRING_TMP0",
+      "statement": "READ_STRING_TMP0",
+      "word": 125
+    },
+    {
+      "address": 609,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 67
+      },
+      "operands": [
+        "TMP1",
+        "TMP0"
+      ],
+      "operation": "IO_WRITE16",
+      "statement": "IO_WRITE16 TMP1 TMP0",
+      "word": 134
+    },
+    {
+      "address": 610,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 68
+      },
+      "operands": [
+        "loop"
+      ],
+      "operation": "BRANCH_REPEAT_CONTINUE",
+      "statement": "BRANCH_REPEAT_CONTINUE loop",
+      "word": 128
+    },
+    {
+      "address": 611,
+      "location": {
+        "entry": "STRING_OUTPUT_WORD",
+        "file": "zzzzzzzzzzzzz_io.mc",
+        "line": 70
       },
       "operands": [],
       "operation": "END",

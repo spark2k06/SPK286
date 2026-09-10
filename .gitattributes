@@ -1,4 +1,7 @@
 * text=auto
+.gitattributes text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
 *.sh text eol=lf
 *.sv text eol=lf
 *.svh text eol=lf

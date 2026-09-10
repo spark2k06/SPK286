@@ -1,4 +1,4 @@
-SPK286 microcode compiler 14.0; format 14; encoding 14
+SPK286 microcode compiler 17.0; format 17; encoding 17
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -585,3 +585,158 @@ SPK286 microcode compiler 14.0; format 14; encoding 14
 01E9  73  ADD_ALLOCATION_SP  # zzzzzzzzzz_far_pointer.mc:73
 01EA  2A  CONTEXT_COMMIT TMP0 TMP1  # zzzzzzzzzz_far_pointer.mc:74
 01EB  3  END  # zzzzzzzzzz_far_pointer.mc:75
+01EC  MULDIV_RM8:
+01EC  4  DECODE_MODRM  # zzzzzzzzzzz_muldiv.mc:4
+01ED  2F  READ_RM8 -> TMP0  # zzzzzzzzzzz_muldiv.mc:5
+01EE  74  MULDIV8 DECODED TMP0  # zzzzzzzzzzz_muldiv.mc:6
+01EF  77  RESULT_LOW -> AX  # zzzzzzzzzzz_muldiv.mc:7
+01F0  12  COMMIT_FLAGS  # zzzzzzzzzzz_muldiv.mc:8
+01F1  4B  CHECK_ARITHMETIC  # zzzzzzzzzzz_muldiv.mc:9
+01F2  3  END  # zzzzzzzzzzz_muldiv.mc:10
+01F3  MULDIV_RM16:
+01F3  4  DECODE_MODRM  # zzzzzzzzzzz_muldiv.mc:12
+01F4  6  READ_RM16 -> TMP0  # zzzzzzzzzzz_muldiv.mc:13
+01F5  75  MULDIV16 DECODED TMP0  # zzzzzzzzzzz_muldiv.mc:14
+01F6  77  RESULT_LOW -> AX  # zzzzzzzzzzz_muldiv.mc:15
+01F7  78  RESULT_HIGH -> DX  # zzzzzzzzzzz_muldiv.mc:16
+01F8  12  COMMIT_FLAGS  # zzzzzzzzzzz_muldiv.mc:17
+01F9  4B  CHECK_ARITHMETIC  # zzzzzzzzzzz_muldiv.mc:18
+01FA  3  END  # zzzzzzzzzzz_muldiv.mc:19
+01FB  IMUL_R16_RM16_IMM16:
+01FB  4  DECODE_MODRM  # zzzzzzzzzzz_muldiv.mc:21
+01FC  B  FETCH_IMM16 -> TMP1  # zzzzzzzzzzz_muldiv.mc:22
+01FD  6  READ_RM16 -> TMP0  # zzzzzzzzzzz_muldiv.mc:23
+01FE  76  IMUL16 TMP0 TMP1  # zzzzzzzzzzz_muldiv.mc:24
+01FF  F  TMP2 -> REG16 IF_WRITE  # zzzzzzzzzzz_muldiv.mc:25
+0200  12  COMMIT_FLAGS  # zzzzzzzzzzz_muldiv.mc:26
+0201  3  END  # zzzzzzzzzzz_muldiv.mc:27
+0202  IMUL_R16_RM16_IMM8S:
+0202  4  DECODE_MODRM  # zzzzzzzzzzz_muldiv.mc:29
+0203  C  FETCH_IMM8S -> TMP1  # zzzzzzzzzzz_muldiv.mc:30
+0204  6  READ_RM16 -> TMP0  # zzzzzzzzzzz_muldiv.mc:31
+0205  76  IMUL16 TMP0 TMP1  # zzzzzzzzzzz_muldiv.mc:32
+0206  F  TMP2 -> REG16 IF_WRITE  # zzzzzzzzzzz_muldiv.mc:33
+0207  12  COMMIT_FLAGS  # zzzzzzzzzzz_muldiv.mc:34
+0208  3  END  # zzzzzzzzzzz_muldiv.mc:35
+0209  STRING_MOVE:
+0209  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzz_strings.mc:6
+020A  STRING_MOVE.loop:
+020A  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzz_strings.mc:8
+020B  7C  REPEAT_COUNT  # zzzzzzzzzzzz_strings.mc:9
+020C  7D  READ_STRING_TMP0  # zzzzzzzzzzzz_strings.mc:10
+020D  7B  STEP_STRING_DEST  # zzzzzzzzzzzz_strings.mc:11
+020E  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzz_strings.mc:12
+020F  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzz_strings.mc:13
+0210  STRING_MOVE.done:
+0210  3  END  # zzzzzzzzzzzz_strings.mc:15
+0211  STRING_COMPARE:
+0211  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzz_strings.mc:18
+0212  STRING_COMPARE.loop:
+0212  7B  STEP_STRING_DEST  # zzzzzzzzzzzz_strings.mc:20
+0213  7E  READ_STRING_TMP1  # zzzzzzzzzzzz_strings.mc:21
+0214  7C  REPEAT_COUNT  # zzzzzzzzzzzz_strings.mc:22
+0215  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzz_strings.mc:23
+0216  7D  READ_STRING_TMP0  # zzzzzzzzzzzz_strings.mc:24
+0217  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzzzzzzzz_strings.mc:25
+0218  11  TMP2 -> DST IF_WRITE  # zzzzzzzzzzzz_strings.mc:26
+0219  12  COMMIT_FLAGS  # zzzzzzzzzzzz_strings.mc:27
+021A  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzz_strings.mc:28
+021B  STRING_COMPARE.done:
+021B  3  END  # zzzzzzzzzzzz_strings.mc:30
+021C  STRING_STORE:
+021C  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzz_strings.mc:33
+021D  81  READ_STRING_ACCUMULATOR  # zzzzzzzzzzzz_strings.mc:34
+021E  STRING_STORE.loop:
+021E  7C  REPEAT_COUNT  # zzzzzzzzzzzz_strings.mc:36
+021F  7B  STEP_STRING_DEST  # zzzzzzzzzzzz_strings.mc:37
+0220  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzz_strings.mc:38
+0221  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzz_strings.mc:39
+0222  STRING_STORE.done:
+0222  3  END  # zzzzzzzzzzzz_strings.mc:41
+0223  STRING_LOAD:
+0223  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzz_strings.mc:44
+0224  STRING_LOAD.loop:
+0224  7C  REPEAT_COUNT  # zzzzzzzzzzzz_strings.mc:46
+0225  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzz_strings.mc:47
+0226  7D  READ_STRING_TMP0  # zzzzzzzzzzzz_strings.mc:48
+0227  82  WRITE_STRING_ACCUMULATOR  # zzzzzzzzzzzz_strings.mc:49
+0228  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzz_strings.mc:50
+0229  STRING_LOAD.done:
+0229  3  END  # zzzzzzzzzzzz_strings.mc:52
+022A  STRING_SCAN:
+022A  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzz_strings.mc:55
+022B  STRING_SCAN.loop:
+022B  7B  STEP_STRING_DEST  # zzzzzzzzzzzz_strings.mc:57
+022C  7C  REPEAT_COUNT  # zzzzzzzzzzzz_strings.mc:58
+022D  7E  READ_STRING_TMP1  # zzzzzzzzzzzz_strings.mc:59
+022E  81  READ_STRING_ACCUMULATOR  # zzzzzzzzzzzz_strings.mc:60
+022F  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzzzzzzzz_strings.mc:61
+0230  11  TMP2 -> DST IF_WRITE  # zzzzzzzzzzzz_strings.mc:62
+0231  12  COMMIT_FLAGS  # zzzzzzzzzzzz_strings.mc:63
+0232  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzz_strings.mc:64
+0233  STRING_SCAN.done:
+0233  3  END  # zzzzzzzzzzzz_strings.mc:66
+0234  IN_AL_PORT:
+0234  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:4
+0235  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:5
+0236  36  TMP0 -> DST8  # zzzzzzzzzzzzz_io.mc:6
+0237  3  END  # zzzzzzzzzzzzz_io.mc:7
+0238  IN_AX_PORT:
+0238  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:9
+0239  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:10
+023A  2  TMP0 -> DST  # zzzzzzzzzzzzz_io.mc:11
+023B  3  END  # zzzzzzzzzzzzz_io.mc:12
+023C  OUT_PORT_AL:
+023C  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:14
+023D  35  READ_DST8 -> TMP0  # zzzzzzzzzzzzz_io.mc:15
+023E  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:16
+023F  3  END  # zzzzzzzzzzzzz_io.mc:17
+0240  OUT_PORT_AX:
+0240  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:19
+0241  D  READ_DST16 -> TMP0  # zzzzzzzzzzzzz_io.mc:20
+0242  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:21
+0243  3  END  # zzzzzzzzzzzzz_io.mc:22
+0244  STRING_INPUT_BYTE:
+0244  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:25
+0245  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:26
+0246  STRING_INPUT_BYTE.loop:
+0246  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:28
+0247  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:29
+0248  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:30
+0249  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:31
+024A  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:32
+024B  STRING_INPUT_BYTE.done:
+024B  3  END  # zzzzzzzzzzzzz_io.mc:34
+024C  STRING_INPUT_WORD:
+024C  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:37
+024D  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:38
+024E  STRING_INPUT_WORD.loop:
+024E  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:40
+024F  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:41
+0250  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:42
+0251  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:43
+0252  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:44
+0253  STRING_INPUT_WORD.done:
+0253  3  END  # zzzzzzzzzzzzz_io.mc:46
+0254  STRING_OUTPUT_BYTE:
+0254  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:49
+0255  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:50
+0256  STRING_OUTPUT_BYTE.loop:
+0256  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:52
+0257  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:53
+0258  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:54
+0259  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:55
+025A  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:56
+025B  STRING_OUTPUT_BYTE.done:
+025B  3  END  # zzzzzzzzzzzzz_io.mc:58
+025C  STRING_OUTPUT_WORD:
+025C  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:61
+025D  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:62
+025E  STRING_OUTPUT_WORD.loop:
+025E  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:64
+025F  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:65
+0260  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:66
+0261  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:67
+0262  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:68
+0263  STRING_OUTPUT_WORD.done:
+0263  3  END  # zzzzzzzzzzzzz_io.mc:70

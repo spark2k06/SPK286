@@ -1,0 +1,70 @@
+microcode_format 17
+# Port operands are captured before the irreversible bus transaction.
+instruction IN_AL_PORT:
+    FETCH_PORT DECODED -> TMP1
+    IO_READ8 TMP1 -> TMP0
+    TMP0 -> DST8
+    END
+instruction IN_AX_PORT:
+    FETCH_PORT DECODED -> TMP1
+    IO_READ16 TMP1 -> TMP0
+    TMP0 -> DST
+    END
+instruction OUT_PORT_AL:
+    FETCH_PORT DECODED -> TMP1
+    READ_DST8 -> TMP0
+    IO_WRITE8 TMP1 TMP0
+    END
+instruction OUT_PORT_AX:
+    FETCH_PORT DECODED -> TMP1
+    READ_DST16 -> TMP0
+    IO_WRITE16 TMP1 TMP0
+    END
+
+instruction STRING_INPUT_BYTE:
+    BRANCH_REPEAT_EMPTY done
+    FETCH_PORT DECODED -> TMP1
+loop:
+    REPEAT_COUNT
+    IO_READ8 TMP1 -> TMP0
+    STEP_STRING_DEST
+    WRITE_STRING_TMP0
+    BRANCH_REPEAT_CONTINUE loop
+done:
+    END
+
+instruction STRING_INPUT_WORD:
+    BRANCH_REPEAT_EMPTY done
+    FETCH_PORT DECODED -> TMP1
+loop:
+    REPEAT_COUNT
+    IO_READ16 TMP1 -> TMP0
+    STEP_STRING_DEST
+    WRITE_STRING_TMP0
+    BRANCH_REPEAT_CONTINUE loop
+done:
+    END
+
+instruction STRING_OUTPUT_BYTE:
+    BRANCH_REPEAT_EMPTY done
+    FETCH_PORT DECODED -> TMP1
+loop:
+    STEP_STRING_SOURCE
+    REPEAT_COUNT
+    READ_STRING_TMP0
+    IO_WRITE8 TMP1 TMP0
+    BRANCH_REPEAT_CONTINUE loop
+done:
+    END
+
+instruction STRING_OUTPUT_WORD:
+    BRANCH_REPEAT_EMPTY done
+    FETCH_PORT DECODED -> TMP1
+loop:
+    STEP_STRING_SOURCE
+    REPEAT_COUNT
+    READ_STRING_TMP0
+    IO_WRITE16 TMP1 TMP0
+    BRANCH_REPEAT_CONTINUE loop
+done:
+    END

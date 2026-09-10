@@ -138,6 +138,7 @@ def main():
     event_examples = {}
     fault_examples = {}
     excluded_count = 0
+    incomplete = []
     for opcode in SUPPORTED_OPCODES:
         path = args.repo / "v1_real_mode" / f"{opcode}.MOO.gz"
         parsed = load_moo(path)
@@ -180,7 +181,16 @@ def main():
             elif scope_exclusion(ours, opcode, True, args.include_prefixes) is not None:
                 excluded_count += 1
             else:
-                prepared = prepare_case(ours, opcode, True, args.include_prefixes)
+                from tools.phase7_capture_admission import prepare_population
+                _, prepared_items, dispositions = prepare_population(
+                    [ours], opcode, path,
+                    lambda case: prepare_case(case, opcode, True, args.include_prefixes))
+                incomplete.extend(dispositions)
+                if dispositions:
+                    # Raw fields/cycles were compared with the upstream parser
+                    # above; only execution preparation lacks physical payload.
+                    continue
+                prepared = prepared_items[0]
                 if opcode in PHASE5_OPCODES and ours.exception is None:
                     stack_control_examples.setdefault(opcode, prepared)
                 if opcode in PHASE6_OPCODES:
@@ -196,6 +206,9 @@ def main():
     print(f"CORPUS_AUDIT total={total} unique_hashes={len(identities)} cycles={total_cycles} "
           f"revoked={revoked_count} prefixes={prefixes} exceptions={exceptions} "
           f"scope_excluded={excluded_count} masked_cases={masked}")
+    from tools.phase7_capture_admission import CAPTURE
+    require(incomplete == [CAPTURE], 'changed incomplete physical capture inventory')
+    print('CORPUS_AUDIT NOT EVALUABLE: one exact incomplete E7 write capture; raw parser comparison retained')
     require(example is not None, "no supported non-revoked case to probe")
 
     output = args.build_dir / "singlestep-audit"

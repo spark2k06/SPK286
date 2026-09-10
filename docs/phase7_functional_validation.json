@@ -1,0 +1,128 @@
+{
+  "base_commit": "e2bc4a7839cd0aa594b543d8dcaaf253c310a63a",
+  "execution_manifest_sha256": "cbf2f3d7a9cef89ffd268d333d1716d93ae1e4f8d5e77f6308ddd2c057cbc4e5",
+  "fresh_checks": {
+    "accepted_zero_count_event_cases": {
+      "io": 56,
+      "memory": 70,
+      "total": 126
+    },
+    "comparator_result_lines": [
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "SHIFT_AUDIT PASS: 9 rejected RTL mutants; 2 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "DATA_AUDIT PASS: 8 rejected RTL mutants; 2 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "UNARY_AUDIT PASS: 10 rejected RTL mutants; 4 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "ADJUST_AUDIT PASS: 12 rejected RTL mutants; 3 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "SEGMENT_AUDIT PASS: 10 rejected RTL mutants; 2 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "STACK_FRAME_AUDIT PASS: 15 rejected RTL mutants; 2 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "FAR_AUDIT PASS: 12 rejected RTL mutants; 2 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "STRING_AUDIT PASS: 18 rejected RTL mutants; 3 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "IO_AUDIT PASS: 19 rejected RTL mutants; 3 pristine benches; source bytes unchanged",
+      "MICROCODE CHECK PASS: 100 entries, 612 words, 10-bit addresses, 8-bit control",
+      "MULDIV_AUDIT PASS: 17 rejected RTL mutants; 3 pristine benches; source bytes unchanged",
+      "MULDIV_ADAPTER_AUDIT PASS: 4 pristine cases; 24 declared undefined-bit variants; 176 rejected frame/address mutants; source bytes unchanged",
+      "IO_COMPARATOR PASS: pristine plus six intended port comparison failures",
+      "COMBINED_ADAPTER_AUDIT PASS: 6 pristine; 24 undefined-bit variants; 188 rejected frame/address/port mutants; version 5; source unchanged",
+      "SYNTHETIC_OUT PASS: four independent immediate word-output cases; zero physical observations"
+    ],
+    "emulator": {
+      "event_delivery_loop_executed": false,
+      "original_function_cases": 28,
+      "physical_captures": 0,
+      "reference": "86Box",
+      "revision": "3a8953d0fee171a98500ca69d5b4e9905c07272d",
+      "rtl_differential_cases": 16
+    },
+    "mapped_cells": 17300,
+    "ordinary_python_suite_tests": 261,
+    "python": "3.12.3",
+    "python_suite_counts_are_not_disjoint": true,
+    "receipt_artifacts": 7400,
+    "receipt_sha256": "e8096fc6b30284aaa5a0716fe860beb79d0819abc85118e6c32a3977e9841a0f",
+    "recorded_at": "2026-09-10T13:34:02.693877+00:00",
+    "regression_passes": 2,
+    "rtl_benches_per_simulator": 59,
+    "rtl_mutants_detected": 176,
+    "rtl_mutation_counts": {
+      "ADJUST": 12,
+      "ALU": 8,
+      "DATA": 8,
+      "EVENT": 22,
+      "FAR": 12,
+      "IO": 19,
+      "MULDIV": 17,
+      "PHASE3_BOUNDARY": 4,
+      "SEGMENT": 10,
+      "SHIFT": 9,
+      "STACK_CONTROL": 12,
+      "STACK_FRAME": 15,
+      "STRING": 18,
+      "UNARY": 10
+    },
+    "separately_run_compiler_suite_tests": 88,
+    "sequential_cells": 1398,
+    "simulators": [
+      "Verilator 5.020",
+      "Icarus Verilog 12.0"
+    ],
+    "snapshot_to_receipt_seconds": 87876.8,
+    "string_io_lifecycle": {
+      "cases": 400,
+      "checks_per_simulator": 35477
+    },
+    "synthetic_word_out": {
+      "executed": 4,
+      "passed": 4,
+      "physical_captures": 0
+    },
+    "yosys": "0.33"
+  },
+  "physical": {
+    "categories": {
+      "legacy": 474049,
+      "legacy_prefix": 43951,
+      "new_form": 868996
+    },
+    "not_evaluable": [
+      {
+        "corpus_revision": "37c73caf53dcd22d3dd369ff09305d13d117a4fe",
+        "diagnostic": "incomplete captured I/O cycle",
+        "file": "v1_real_mode/E7.MOO.gz",
+        "hash": "c56d37647cc2dbcce82ca640fdd25ddea1f3ee5e",
+        "id": "e7-incomplete-physical-capture",
+        "index": 1100,
+        "source_sha256": "e163ff1271d61ed9e4cbf6a0150ca3e7b1c756ce7cbcd189e4312eb77b70b729",
+        "status": "not_evaluable_incomplete_physical_capture"
+      }
+    ],
+    "opcode_files": 307,
+    "required_population": 1386997,
+    "schema_version": 2,
+    "scope": "complete-required-phase7-evaluable-cohort",
+    "totals": {
+      "discovered": 1387000,
+      "executed": 1386996,
+      "failed": 0,
+      "passed": 1386996,
+      "revoked": 3
+    },
+    "unexpected_omissions": 0,
+    "unique_cases": 1386996,
+    "validation": "PASS"
+  },
+  "policy_manifest_sha256": "7d16bb0a6422bb1d71cf1fe9a665158ca77dc02495e12ae7d1fe7c55974fb9bf",
+  "retained_receipt": {
+    "path": "build/phase7-functional-full-1/execution-receipt.json",
+    "sha256": "e8096fc6b30284aaa5a0716fe860beb79d0819abc85118e6c32a3977e9841a0f"
+  },
+  "simulator_replay_is_new_physical_capture": false,
+  "validation": "PASS"
+}

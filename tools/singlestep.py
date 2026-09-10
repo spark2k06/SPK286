@@ -51,6 +51,10 @@ class SingleStepFormatError(ValueError):
     """Raised when a JSON or MOO input is malformed."""
 
 
+class SingleStepRunnerError(RuntimeError):
+    """Shared runner diagnostic identity for direct and module entry points."""
+
+
 @dataclass(frozen=True)
 class SingleStepCase:
     """Normalized representation of one SingleStep test case."""

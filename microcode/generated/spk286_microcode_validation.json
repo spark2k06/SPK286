@@ -1,10 +1,10 @@
 {
-  "address_width": 9,
-  "compiler_version": "14.0",
-  "encoding_version": 14,
-  "format_version": 14,
-  "instruction_entries": 83,
-  "rom_depth": 492,
+  "address_width": 10,
+  "compiler_version": "17.0",
+  "encoding_version": 17,
+  "format_version": 17,
+  "instruction_entries": 100,
+  "rom_depth": 612,
   "schema_version": 1,
   "source_sha256": {
     "data_move.mc": "0aa4ae7fa92080e5d14b2118327c4f528e31f1e015c3fe0b1f8c5cb31f718823",
@@ -19,12 +19,15 @@
     "zzzzzzz_adjust.mc": "8b71251d5177483e5ec0ccec4db8a2af503dab2171519ffd9bf0d23e9f7f9219",
     "zzzzzzzz_segments.mc": "4eb751b51b6d30bf147d33636f166399eb96091387bf5e18e9935c66a1b24af0",
     "zzzzzzzzz_stack_frame.mc": "507c4d5e503bab8b7f1a0a468efae94885c013da455a379f464159912bc799b6",
-    "zzzzzzzzzz_far_pointer.mc": "125ac3e89b5341ebc0731654f1c046faad0f507c229f4d170a7f9f28c47319ad"
+    "zzzzzzzzzz_far_pointer.mc": "125ac3e89b5341ebc0731654f1c046faad0f507c229f4d170a7f9f28c47319ad",
+    "zzzzzzzzzzz_muldiv.mc": "9f310d9be24327e6c13363c8a3ca2c83400903252369f4a15c6c50970a8d3149",
+    "zzzzzzzzzzzz_strings.mc": "c5a0f116040b03bdd2887cfc108df6ef238f7ce8709be6c7258c4f55e1a989c1",
+    "zzzzzzzzzzzzz_io.mc": "281ba5e750363f87987c83029319f1926c984b6ca72fed24d465e353ff007c98"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 492,
+  "used_words": 612,
   "validation": "PASS",
   "warnings": [],
-  "word_width": 7
+  "word_width": 8
 }

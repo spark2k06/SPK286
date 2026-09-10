@@ -25,6 +25,8 @@ constexpr std::array<const char*, 14> REG_NAMES = {
     "SP", "BP", "SI", "DI", "IP", "FLAGS",
 };
 
+using PortCycle = std::array<std::uint32_t, 4>; // write, physical address, BHE#, selected data
+
 struct BatchCase {
     std::uint32_t index = 0;
     std::string name;
@@ -35,8 +37,10 @@ struct BatchCase {
     std::array<std::uint16_t, 14> expected_masks{};
     std::map<std::uint32_t, std::uint8_t> initial_ram;
     std::map<std::uint32_t, std::uint8_t> expected_ram;
+    std::map<std::uint32_t, std::uint8_t> expected_ram_masks;
     std::uint16_t expected_event = 256;
     std::uint8_t expected_retired = 1;
+    std::vector<PortCycle> expected_io;
 };
 
 class BatchReader {
@@ -51,7 +55,8 @@ public:
             if (read_u8() != static_cast<std::uint8_t>(value))
                 throw std::runtime_error("invalid SingleStep batch magic");
         }
-        if (read_u32() != 2) throw std::runtime_error("unsupported SingleStep batch version");
+        version_ = read_u32();
+        if (version_ < 2 || version_ > 5) throw std::runtime_error("unsupported SingleStep batch version");
         const std::uint32_t count = read_u32();
         if (count > 1000000U) throw std::runtime_error("unreasonable SingleStep batch size");
         std::vector<BatchCase> cases;
@@ -64,6 +69,7 @@ public:
 
 private:
     std::ifstream input_;
+    std::uint32_t version_ = 0;
 
     std::uint8_t read_u8() {
         char value = 0;
@@ -119,10 +125,30 @@ private:
         for (auto& value : result.expected_regs) value = read_u16();
         for (auto& value : result.expected_masks) value = read_u16();
         result.expected_ram = read_memory("expected RAM");
+        if (version_ == 3 || version_ == 5) {
+            result.expected_ram_masks = read_memory("expected RAM masks");
+            for (const auto& [address, mask] : result.expected_ram_masks) {
+                if (result.expected_ram.count(address) == 0 || mask == 255)
+                    throw std::runtime_error("invalid expected RAM mask address/value");
+            }
+        }
         result.expected_event = read_u16();
         result.expected_retired = read_u8();
         if (result.expected_event > 256 || result.expected_retired > 1)
             throw std::runtime_error("invalid completion expectation");
+        if (version_ == 4 || version_ == 5) {
+            const auto count = read_u32();
+            if (count > 131070U) throw std::runtime_error("unreasonable I/O expectation count");
+            for (std::uint32_t i = 0; i < count; ++i) {
+                const auto write = read_u8();
+                const auto address = read_u32();
+                const auto bhe = read_u8();
+                const auto data = read_u16();
+                if (write > 1 || address > 0x10000 || bhe > 1 || ((address & 1U) && bhe))
+                    throw std::runtime_error("invalid I/O expectation");
+                result.expected_io.push_back({write, address, bhe, data});
+            }
+        }
         return result;
     }
 };
@@ -153,7 +179,7 @@ std::uint16_t read_bus_word(const std::map<std::uint32_t, std::uint8_t>& memory,
 }
 
 void apply_bus_write(Vspk286& dut, std::map<std::uint32_t, std::uint8_t>& memory) {
-    if (!dut.bus_valid || !dut.bus_write || !dut.ready) return;
+    if (!dut.bus_valid || dut.bus_status != 6 || !dut.bus_write || !dut.ready) return;
     const std::uint32_t address = dut.address & 0xFFFFFFU;
     if ((address & 1U) != 0U) {
         memory[address] = static_cast<std::uint8_t>((dut.data_out >> 8) & 0xFFU);
@@ -259,6 +285,20 @@ void print_failure(const BatchCase& test, const std::array<std::uint16_t, 14>& a
     std::cout << '\n';
 }
 
+// A scalar retirement budget is insufficient for a counted string. This is
+// a finite execution watchdog, separate from the architectural comparison and
+// from historical timing. READY is asserted by this runner at every bus cycle.
+unsigned execution_budget(const BatchCase& test) {
+    bool repeat = false;
+    for (const auto byte : test.instruction_bytes) {
+        if (byte == 0xF2 || byte == 0xF3) { repeat = true; continue; }
+        if (byte == 0x26 || byte == 0x2E || byte == 0x36 || byte == 0x3E || byte == 0xF0) continue;
+        const bool string = (byte >= 0x6C && byte <= 0x6F) || (byte >= 0xA4 && byte <= 0xA7) || (byte >= 0xAA && byte <= 0xAF);
+        return 512U + (repeat && string ? 64U * test.initial_regs[2] : 0U);
+    }
+    return 512U;
+}
+
 bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ordinal,
               bool report_failure, std::uint64_t& total_cycles) {
     Vspk286 dut;
@@ -274,15 +314,18 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
 
     initialize_case(dut, test);
     std::map<std::uint32_t, std::uint8_t> memory = test.initial_ram;
+    std::vector<PortCycle> observed_io;
     bool retired = false;
     bool failed = false;
     std::string reason;
-    constexpr unsigned max_cycles = 512;
+    const unsigned max_cycles = execution_budget(test);
     unsigned cycles = 0;
     for (; cycles < max_cycles; ++cycles) {
         if (dut.bus_valid) {
             dut.ready = 1;
-            dut.data_in = read_bus_word(memory, dut.address);
+            // Pinned Arduino capture methodology: IN/INS always reads FF.
+            // Expected port records below are comparisons, never stimulus.
+            dut.data_in = dut.bus_status == 9 ? 0xFFFF : read_bus_word(memory, dut.address);
             // Code prefetch may run past the sparse initialized stream. Data
             // reads must have every selected byte supplied by the hardware case.
             if (dut.bus_status == 5 &&
@@ -295,6 +338,11 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
         } else {
             dut.ready = 0;
             dut.data_in = 0;
+        }
+        if (dut.bus_valid && dut.ready && (dut.bus_status == 9 || dut.bus_status == 10)) {
+            const std::uint32_t mask = (dut.address & 1U) ? 0xFF00 : (dut.bus_bhe_n ? 0xFF : 0xFFFF);
+            const std::uint32_t data = (dut.bus_write ? dut.data_out : dut.data_in) & mask;
+            observed_io.push_back({dut.bus_write, dut.address, dut.bus_bhe_n, data});
         }
         apply_bus_write(dut, memory);
         tick(dut, trace, time);
@@ -336,15 +384,25 @@ bool run_case(const BatchCase& test, const std::string& trace_path, unsigned ord
                 break;
             }
         }
-        if (!failed && memory != test.expected_ram) {
+        if (!failed && observed_io != test.expected_io) {
             failed = true;
-            reason = "memory state mismatch";
+            reason = "I/O transaction mismatch";
+        }
+        if (!failed) {
+            if (memory.size() != test.expected_ram.size()) {
+                failed = true;
+                reason = "memory address set mismatch";
+            }
             for (const auto& [address, value] : memory) {
                 const auto expected = test.expected_ram.find(address);
-                if (expected == test.expected_ram.end() || expected->second != value) {
+                const auto masked = test.expected_ram_masks.find(address);
+                const std::uint8_t mask = masked == test.expected_ram_masks.end() ? 255 : masked->second;
+                if (expected == test.expected_ram.end() || ((expected->second ^ value) & mask) != 0) {
+                    failed = true;
                     std::ostringstream detail;
-                    detail << reason << " at 0x" << std::hex << address << " actual=" << unsigned(value);
+                    detail << "memory state mismatch at 0x" << std::hex << address << " actual=" << unsigned(value);
                     if (expected != test.expected_ram.end()) detail << " expected=" << unsigned(expected->second);
+                    detail << " mask=" << unsigned(mask);
                     reason = detail.str();
                     break;
                 }

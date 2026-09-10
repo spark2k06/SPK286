@@ -52,8 +52,8 @@ PROBES = (('exchange-writeback',
  ('address-lifetime',
   'spk286_micro_executor',
   'spk286_data_lifecycle',
-  "address_override <= 1'b0",
-  "if (reset) address_override <= 1'b0",
+  "address_override <= 1'b0; address_offset <= 16'd0;",
+  "if (reset) address_override <= 1'b0; address_offset <= 16'd0;",
   'new operand acquired independently; canceled load cannot write AX'))
 
 

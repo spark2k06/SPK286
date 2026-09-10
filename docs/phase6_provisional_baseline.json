@@ -1,0 +1,24 @@
+{
+  "architectural_evidence": "pending",
+  "cohort_report_sha256": "820e6653ad99c7a0a19f10cb8266ac2905de75e9dfca08ca8c72a3e9dddf8fa3",
+  "combined_recovery_tree": "5938abf0c2f68cb26f71da294bc2c4606c1d26b7",
+  "input_manifest_sha256": "909d5a0169eb8956cd1e48386d9f330ebf8577ec4a4133c2cecf5f1b1f4a667c",
+  "kind": "provisional-development-baseline",
+  "original_head": "03c32df5c2d5edcb4606564d1dba215d26640116",
+  "original_index_tree": "94fcf66a13ca6a1d618feeff37a48c886d37aa86",
+  "pending_ids": [
+    "failed-iret-nmi",
+    "sti-old-if",
+    "fault-tf"
+  ],
+  "schema_version": 1,
+  "validation": {
+    "SPK286_BUILD_DIR": "/mnt/d/GitHub/SPK286/build/phase7-baseline-2",
+    "command": "make phase6-exec-check",
+    "ended_unix": 1788871295.8152184,
+    "linux_make_exit": 0,
+    "log": "/mnt/d/GitHub/SPK286/build/phase7-preparation/phase7-baseline-2.log",
+    "log_sha256": "f36c113625fecfcc00174cc51aaf6f6076a41e6ce20416e754272e158d36598c",
+    "started_unix": 1788869703.2419882
+  }
+}

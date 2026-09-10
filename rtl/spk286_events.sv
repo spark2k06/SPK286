@@ -3,6 +3,7 @@
 module spk286_events (
     input logic clk, reset, cancel, enable,
     input logic intr, nmi, ss_load,
+    input logic repeat_boundary, repeat_stepped,
     input logic instruction_start, opcode_dispatch, instruction_active, retired,
     input logic [7:0] opcode,
     input logic [15:0] ip, cs, flags,
@@ -23,6 +24,7 @@ module spk286_events (
     output logic [15:0] instruction_ip,
     output logic [2:0] event_kind
 );
+    logic repeat_ss_inhibit_q, repeat_sti_inhibit_q;
     logic nmi_previous_q, trap_sample_q, trap_pending_q, dispatch_pending_q;
     logic [15:0] instruction_cs_q;
     logic nmi_edge, boundary, trap_due, accept, entry_failure;
@@ -31,8 +33,8 @@ module spk286_events (
     localparam logic [2:0] KIND_FAULT=3'd1, KIND_TRAP=3'd2,
                            KIND_NMI=3'd3, KIND_INTR=3'd4, KIND_SOFTWARE=3'd5;
     assign nmi_edge = nmi && !nmi_previous_q;
-    assign boundary = !instruction_active && !event_active && !cancel_operation;
-    assign trap_due = trap_pending_q || (retired && trap_sample_q && !event_active);
+    assign boundary = (!instruction_active || repeat_boundary) && !event_active && !cancel_operation;
+    assign trap_due = (repeat_stepped && trap_sample_q) || trap_pending_q || (retired && trap_sample_q && !event_active);
     assign dispatch = dispatch_pending_q && dispatch_ready && enable;
     assign entry_failure = enable && event_active && fault_request && !cancel_operation;
     always_comb begin
@@ -44,9 +46,9 @@ module spk286_events (
             end else if (software_request && !shutdown) begin
                 selected_kind = KIND_SOFTWARE; selected_vector = software_vector;
             end else if (boundary) begin
-                if (trap_due && !ss_shadow && !shutdown) begin selected_kind = KIND_TRAP; selected_vector = 8'd1; end
-                else if ((nmi_pending || nmi_edge) && !nmi_blocked && !ss_shadow) begin selected_kind = KIND_NMI; selected_vector = 8'd2; end
-                else if (intr && flags[9] && !sti_shadow && !ss_shadow && !shutdown) begin selected_kind = KIND_INTR; end
+                if (trap_due && !ss_shadow && !(repeat_boundary && repeat_ss_inhibit_q) && !shutdown) begin selected_kind = KIND_TRAP; selected_vector = 8'd1; end
+                else if ((nmi_pending || nmi_edge) && !nmi_blocked && !ss_shadow && !(repeat_boundary && repeat_ss_inhibit_q)) begin selected_kind = KIND_NMI; selected_vector = 8'd2; end
+                else if (intr && flags[9] && !sti_shadow && !ss_shadow && !(repeat_boundary && (repeat_ss_inhibit_q || repeat_sti_inhibit_q)) && !shutdown) begin selected_kind = KIND_INTR; end
                 // An unavailable next opcode is not a fault of the instruction
                 // that just completed. Its owed trap/external boundary comes first.
                 else if (fault_request && !shutdown) begin selected_kind = KIND_FAULT; selected_vector = fault_vector; end
@@ -57,6 +59,7 @@ module spk286_events (
     assign event_request = accept;
     always_ff @(posedge clk) begin
         if (reset || cancel) begin
+            repeat_ss_inhibit_q <= 1'b0; repeat_sti_inhibit_q <= 1'b0;
             event_active <= 1'b0; cancel_operation <= 1'b0; dispatch_pending_q <= 1'b0;
             event_completed <= 1'b0; event_software <= 1'b0; event_kind <= 3'd0;
             event_vector <= 8'd0; event_ip <= 16'd0; event_cs <= 16'd0; event_flags <= 16'd0;
@@ -77,6 +80,7 @@ module spk286_events (
             // Its prefixes retain the shadow; its opcode starts the protected body.
             if (ss_load) ss_shadow <= 1'b1;
             if (opcode_dispatch) begin
+                repeat_ss_inhibit_q <= ss_shadow; repeat_sti_inhibit_q <= sti_shadow;
                 ss_shadow <= 1'b0;
                 // Candidate policy: release at IRET start. The failed-IRET
                 // distinction still requires 286 evidence; the release gate
@@ -104,8 +108,8 @@ module spk286_events (
                 event_kind <= selected_kind; event_vector <= selected_vector;
                 event_software <= selected_kind == KIND_SOFTWARE;
                 event_needs_ack <= selected_kind == KIND_INTR;
-                event_ip <= selected_kind == KIND_FAULT && instruction_active ? instruction_ip : ip;
-                event_cs <= selected_kind == KIND_FAULT && instruction_active ? instruction_cs_q : cs;
+                event_ip <= (repeat_boundary || (selected_kind == KIND_FAULT && instruction_active)) ? instruction_ip : ip;
+                event_cs <= (repeat_boundary || (selected_kind == KIND_FAULT && instruction_active)) ? instruction_cs_q : cs;
                 event_flags <= flags;
                 trap_pending_q <= 1'b0; trap_sample_q <= 1'b0; sti_shadow <= 1'b0; ss_shadow <= 1'b0;
                 halted <= 1'b0; shutdown <= 1'b0;

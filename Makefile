@@ -190,9 +190,14 @@ phase7-byte-prefix-check:
 
 # Full scope cannot pass by running only the byte/prefix increment.
 phase7-check:
-	python3 -m tools.phase7_scope
-	@echo "PHASE7_DEVELOPMENT_VALIDATION_FAIL: full-scope gate and independent review are pending" >&2
-	@exit 1
+	bash scripts/validate_phase7_complete.sh
+
+.PHONY: phase7-exec-check phase7-evidence-check
+phase7-exec-check:
+	bash scripts/validate_phase7_complete.sh executable
+
+phase7-evidence-check:
+	python3 -m tools.phase7_policy --strict-evidence
 
 .PHONY: phase7-scalar-check
 phase7-scalar-check:
@@ -225,3 +230,15 @@ phase7-stack-frame-check:
 .PHONY: phase7-far-check
 phase7-far-check:
 	./scripts/validate_phase7_far.sh
+
+.PHONY: phase7-string-check
+.PHONY: phase7-arithmetic-check
+phase7-arithmetic-check:
+	bash scripts/validate_phase7_arithmetic.sh
+
+phase7-string-check:
+	bash scripts/validate_phase7_strings.sh
+
+.PHONY: phase7-io-check
+phase7-io-check:
+	bash scripts/validate_phase7_io.sh

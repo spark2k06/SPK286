@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ulimit -c 0
+if (( $# > 2 )); then
+    echo "Expected simulator and one unit name; invoke separate commands for multiple units" >&2
+    exit 2
+fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${SPK286_BUILD_DIR:-$ROOT_DIR/build}"
@@ -16,7 +20,7 @@ tests=(spk286_registers spk286_segments spk286_fetch spk286_core spk286_prefetch
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle
        spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle spk286_stack_control spk286_stack_lifecycle
        spk286_event_instructions spk286_event_lifecycle spk286_event_streams
-       spk286_biu_width_io spk286_operand_byte spk286_alu_byte spk286_byte_scalar spk286_prefix spk286_test_instructions spk286_scalar_direct spk286_shift spk286_shift_instructions spk286_data_instructions spk286_data_lifecycle spk286_unary_instructions spk286_unary_lifecycle spk286_adjust spk286_adjust_instructions spk286_adjust_lifecycle spk286_segment_instructions spk286_segment_lifecycle spk286_stack_range spk286_stack_frame_instructions spk286_stack_frame_lifecycle spk286_far_instructions spk286_far_lifecycle)
+       spk286_biu_width_io spk286_operand_byte spk286_alu_byte spk286_byte_scalar spk286_prefix spk286_test_instructions spk286_scalar_direct spk286_shift spk286_shift_instructions spk286_data_instructions spk286_data_lifecycle spk286_unary_instructions spk286_unary_lifecycle spk286_adjust spk286_adjust_instructions spk286_adjust_lifecycle spk286_segment_instructions spk286_segment_lifecycle spk286_stack_range spk286_stack_frame_instructions spk286_stack_frame_lifecycle spk286_far_instructions spk286_far_lifecycle spk286_string_instructions spk286_string_lifecycle spk286_string_boundaries spk286_scalar_io spk286_string_io spk286_string_io_lifecycle spk286_muldiv spk286_muldiv_instructions spk286_muldiv_lifecycle spk286_string_zero_events spk286_string_io_zero_events)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
@@ -37,6 +41,14 @@ for name in "${tests[@]}"; do
         python3 -m tools.data_instruction_vectors --output "$BUILD_DIR/data-instruction-vectors.txt"
         run_args=("+instruction_vectors=$BUILD_DIR/data-instruction-vectors.txt")
     fi
+    if [[ "$name" == spk286_string_io ]]; then
+        python3 -m tools.string_io_vectors --output "$BUILD_DIR/string-io-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/string-io-vectors.txt")
+    fi
+    if [[ "$name" == spk286_string_instructions ]]; then
+        python3 -m tools.string_instruction_vectors --output "$BUILD_DIR/string-instruction-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/string-instruction-vectors.txt")
+    fi
     if [[ "$name" == spk286_far_instructions ]]; then
         python3 -m tools.far_instruction_vectors --output "$BUILD_DIR/far-instruction-vectors.txt"
         run_args=("+instruction_vectors=$BUILD_DIR/far-instruction-vectors.txt")
@@ -52,6 +64,14 @@ for name in "${tests[@]}"; do
     if [[ "$name" == spk286_adjust_instructions ]]; then
         python3 -m tools.adjust_instruction_vectors --output "$BUILD_DIR/adjust-instruction-vectors.txt"
         run_args=("+instruction_vectors=$BUILD_DIR/adjust-instruction-vectors.txt")
+    fi
+    if [[ "$name" == spk286_muldiv_instructions ]]; then
+        python3 -m tools.muldiv_instruction_vectors --output "$BUILD_DIR/muldiv-instruction-vectors.txt"
+        run_args=("+instruction_vectors=$BUILD_DIR/muldiv-instruction-vectors.txt")
+    fi
+    if [[ "$name" == spk286_muldiv ]]; then
+        python3 -m tools.muldiv_reference --output "$BUILD_DIR/muldiv-vectors.txt"
+        run_args=("+muldiv_vectors=$BUILD_DIR/muldiv-vectors.txt")
     fi
     if [[ "$name" == spk286_adjust ]]; then
         python3 -m tools.adjust_reference --output "$BUILD_DIR/adjust-vectors.txt"
