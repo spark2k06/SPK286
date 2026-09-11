@@ -743,3 +743,59 @@ SPK286 microcode compiler 17.0; format 17; encoding 17
 0264  ESC_NO_COPROCESSOR:
 0264  4  DECODE_MODRM  # zzzzzzzzzzzzzzzz_esc.mc:7
 0265  3  END  # zzzzzzzzzzzzzzzz_esc.mc:8
+0266  SYSTEM_GROUP_0F01:
+0266  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:5
+0267  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:6
+0268  SYSTEM_STORE_GDTR:
+0268  88  SYSTEM_STORE_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:9
+0269  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:10
+026A  SYSTEM_STORE_IDTR:
+026A  89  SYSTEM_STORE_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:13
+026B  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:14
+026C  SYSTEM_LOAD_GDTR:
+026C  8A  SYSTEM_LOAD_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:17
+026D  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:18
+026E  SYSTEM_LOAD_IDTR:
+026E  8B  SYSTEM_LOAD_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:21
+026F  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:22
+0270  SYSTEM_STORE_MSW:
+0270  8C  SYSTEM_STORE_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:25
+0271  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:26
+0272  SYSTEM_LOAD_MSW:
+0272  8D  SYSTEM_LOAD_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:29
+0273  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:30
+0274  SYSTEM_GROUP_0F00:
+0274  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:33
+0275  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:34
+0276  SYSTEM_STORE_LDTR:
+0276  8E  SYSTEM_STORE_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:37
+0277  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:38
+0278  SYSTEM_STORE_TR:
+0278  8F  SYSTEM_STORE_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:41
+0279  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:42
+027A  SYSTEM_LOAD_LDTR:
+027A  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:45
+027B  90  SYSTEM_LOAD_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:46
+027C  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:47
+027D  SYSTEM_LOAD_TR:
+027D  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:50
+027E  91  SYSTEM_LOAD_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:51
+027F  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:52
+0280  SYSTEM_VERIFY_READ:
+0280  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:55
+0281  92  SYSTEM_VERIFY_READ  # zzzzzzzzzzzzzzzzz_system_tables.mc:56
+0282  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:57
+0283  SYSTEM_VERIFY_WRITE:
+0283  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:60
+0284  93  SYSTEM_VERIFY_WRITE  # zzzzzzzzzzzzzzzzz_system_tables.mc:61
+0285  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:62
+0286  SYSTEM_LOAD_ACCESS:
+0286  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:65
+0287  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:66
+0288  94  SYSTEM_LOAD_ACCESS  # zzzzzzzzzzzzzzzzz_system_tables.mc:67
+0289  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:68
+028A  SYSTEM_LOAD_LIMIT:
+028A  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:71
+028B  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:72
+028C  95  SYSTEM_LOAD_LIMIT  # zzzzzzzzzzzzzzzzz_system_tables.mc:73
+028D  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:74

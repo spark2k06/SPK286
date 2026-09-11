@@ -131,7 +131,7 @@ module spk286_microcode_execution_tb;
                     end
                     check(unsupported_opcode && debug_opcode == 8'h0F && retirements == 1,
                           "unsupported byte cannot execute as MOV");
-                    check_architecture(base_ip + 16'd3);
+                    check_architecture(base_ip + 16'd4);
                 end
             end
         end

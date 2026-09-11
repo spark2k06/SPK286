@@ -10,7 +10,7 @@ class IoMicrocodeTests(unittest.TestCase):
         program=compile_sources(sources);artifacts=generate(program)
         fixture=json.loads((ROOT/'tests/fixtures/microcode_phase8.json').read_text())
         words=read_generated_words(artifacts['spk286_microcode_pkg.sv'],artifacts['spk286_microcode_rom.sv']);branches=read_generated_branches(artifacts['spk286_microcode_pkg.sv'])
-        self.assertEqual((program.format_version,program.word_width,program.address_width,len(words)),(17,8,10,614))
+        self.assertEqual((program.format_version,program.word_width,program.address_width,len(words)),(17,8,10,654))
         self.assertEqual(list(words),fixture['words']);self.assertEqual(program.entries,fixture['entries']);self.assertEqual(program.labels,fixture['labels'])
         self.assertEqual(branches,{404: 414, 406: 412, 411: 407, 521: 528, 527: 522, 529: 539, 538: 530, 540: 546, 545: 542, 547: 553, 552: 548, 554: 563, 562: 555, 580: 587, 586: 582, 588: 595, 594: 590, 596: 603, 602: 598, 604: 611, 610: 606})
         rebuilt=compile_sources({'canonical.mc':canonical_source(words,program.entries,program.labels,branches)})

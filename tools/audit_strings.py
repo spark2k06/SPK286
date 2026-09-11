@@ -100,8 +100,8 @@ PROBES = (('word-stride',
  ('real-operand-completion',
   'spk286_micro_executor',
   'spk286_string_instructions',
-  '(operand_request && operand_done);',
-  '(operand_request);',
+  '(operand_request && operand_done) && !system_operand_request',
+  '(operand_request) && !system_operand_request',
   'exact fault producer or single retirement'),
  ('cancel-element-address',
   'spk286_micro_executor',
@@ -124,8 +124,10 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'string-audit'
     output.mkdir(parents=True, exist_ok=True)
+    rtl_sources = sorted((ROOT/'rtl').glob('*.sv'))
+    protected_pkg = ROOT/'rtl/spk286_protected_pkg.sv'
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               protected_pkg, *(p for p in rtl_sources if p != protected_pkg)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

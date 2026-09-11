@@ -28,8 +28,8 @@ PROBES = (('captured-port',
  ('word-port-width',
   'spk286_micro_executor',
   'spk286_scalar_io',
-  'assign operand_byte = io_byte ||',
-  'assign operand_byte = io_transfer ||',
+  'io_byte ||',
+  'io_transfer ||',
   'exact I/O byte lane'),
  ('port-bus-type',
   'spk286',
@@ -40,14 +40,14 @@ PROBES = (('captured-port',
  ('output-direction',
   'spk286_micro_executor',
   'spk286_string_io',
-  'assign operand_write = io_write || string_store',
-  'assign operand_write = string_store',
+  'io_write || string_store',
+  'string_store',
   'exact data transaction order, direction and lanes'),
  ('output-payload',
   'spk286_micro_executor',
   'spk286_string_io',
-  'assign operand_write_data = push_transfer',
-  "assign operand_write_data = io_write ? 16'd0 : push_transfer",
+  ': tmp0_q)));',
+  ": 16'd0)));",
   'low write byte'),
  ('port-completion-dependency',
   'spk286_micro_executor',
@@ -130,8 +130,10 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'io-audit'
     output.mkdir(parents=True, exist_ok=True)
+    rtl_sources = sorted((ROOT/'rtl').glob('*.sv'))
+    protected_pkg = ROOT/'rtl/spk286_protected_pkg.sv'
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               protected_pkg, *(p for p in rtl_sources if p != protected_pkg)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

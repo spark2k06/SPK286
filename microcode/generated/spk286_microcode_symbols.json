@@ -123,7 +123,23 @@
     "STRING_OUTPUT_BYTE": 596,
     "STRING_OUTPUT_WORD": 604,
     "STRING_SCAN": 554,
-    "STRING_STORE": 540
+    "STRING_STORE": 540,
+    "SYSTEM_GROUP_0F00": 628,
+    "SYSTEM_GROUP_0F01": 614,
+    "SYSTEM_LOAD_ACCESS": 646,
+    "SYSTEM_LOAD_GDTR": 620,
+    "SYSTEM_LOAD_IDTR": 622,
+    "SYSTEM_LOAD_LDTR": 634,
+    "SYSTEM_LOAD_LIMIT": 650,
+    "SYSTEM_LOAD_MSW": 626,
+    "SYSTEM_LOAD_TR": 637,
+    "SYSTEM_STORE_GDTR": 616,
+    "SYSTEM_STORE_IDTR": 618,
+    "SYSTEM_STORE_LDTR": 630,
+    "SYSTEM_STORE_MSW": 624,
+    "SYSTEM_STORE_TR": 632,
+    "SYSTEM_VERIFY_READ": 640,
+    "SYSTEM_VERIFY_WRITE": 643
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -8261,6 +8277,498 @@
         "entry": "ESC_NO_COPROCESSOR",
         "file": "zzzzzzzzzzzzzzzz_esc.mc",
         "line": 8
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 614,
+      "location": {
+        "entry": "SYSTEM_GROUP_0F01",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 5
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 615,
+      "location": {
+        "entry": "SYSTEM_GROUP_0F01",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "DISPATCH_DECODED",
+      "statement": "DISPATCH DECODED",
+      "word": 71
+    },
+    {
+      "address": 616,
+      "location": {
+        "entry": "SYSTEM_STORE_GDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 9
+      },
+      "operands": [],
+      "operation": "SYSTEM_STORE_GDTR",
+      "statement": "SYSTEM_STORE_GDTR",
+      "word": 136
+    },
+    {
+      "address": 617,
+      "location": {
+        "entry": "SYSTEM_STORE_GDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 10
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 618,
+      "location": {
+        "entry": "SYSTEM_STORE_IDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 13
+      },
+      "operands": [],
+      "operation": "SYSTEM_STORE_IDTR",
+      "statement": "SYSTEM_STORE_IDTR",
+      "word": 137
+    },
+    {
+      "address": 619,
+      "location": {
+        "entry": "SYSTEM_STORE_IDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 14
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 620,
+      "location": {
+        "entry": "SYSTEM_LOAD_GDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 17
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_GDTR",
+      "statement": "SYSTEM_LOAD_GDTR",
+      "word": 138
+    },
+    {
+      "address": 621,
+      "location": {
+        "entry": "SYSTEM_LOAD_GDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 18
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 622,
+      "location": {
+        "entry": "SYSTEM_LOAD_IDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 21
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_IDTR",
+      "statement": "SYSTEM_LOAD_IDTR",
+      "word": 139
+    },
+    {
+      "address": 623,
+      "location": {
+        "entry": "SYSTEM_LOAD_IDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 22
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 624,
+      "location": {
+        "entry": "SYSTEM_STORE_MSW",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 25
+      },
+      "operands": [],
+      "operation": "SYSTEM_STORE_MSW",
+      "statement": "SYSTEM_STORE_MSW",
+      "word": 140
+    },
+    {
+      "address": 625,
+      "location": {
+        "entry": "SYSTEM_STORE_MSW",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 26
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 626,
+      "location": {
+        "entry": "SYSTEM_LOAD_MSW",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 29
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_MSW",
+      "statement": "SYSTEM_LOAD_MSW",
+      "word": 141
+    },
+    {
+      "address": 627,
+      "location": {
+        "entry": "SYSTEM_LOAD_MSW",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 30
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 628,
+      "location": {
+        "entry": "SYSTEM_GROUP_0F00",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 33
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 629,
+      "location": {
+        "entry": "SYSTEM_GROUP_0F00",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "DISPATCH_DECODED",
+      "statement": "DISPATCH DECODED",
+      "word": 71
+    },
+    {
+      "address": 630,
+      "location": {
+        "entry": "SYSTEM_STORE_LDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 37
+      },
+      "operands": [],
+      "operation": "SYSTEM_STORE_LDTR",
+      "statement": "SYSTEM_STORE_LDTR",
+      "word": 142
+    },
+    {
+      "address": 631,
+      "location": {
+        "entry": "SYSTEM_STORE_LDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 38
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 632,
+      "location": {
+        "entry": "SYSTEM_STORE_TR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 41
+      },
+      "operands": [],
+      "operation": "SYSTEM_STORE_TR",
+      "statement": "SYSTEM_STORE_TR",
+      "word": 143
+    },
+    {
+      "address": 633,
+      "location": {
+        "entry": "SYSTEM_STORE_TR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 634,
+      "location": {
+        "entry": "SYSTEM_LOAD_LDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 45
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 635,
+      "location": {
+        "entry": "SYSTEM_LOAD_LDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 46
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_LDTR",
+      "statement": "SYSTEM_LOAD_LDTR",
+      "word": 144
+    },
+    {
+      "address": 636,
+      "location": {
+        "entry": "SYSTEM_LOAD_LDTR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 47
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 637,
+      "location": {
+        "entry": "SYSTEM_LOAD_TR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 50
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 638,
+      "location": {
+        "entry": "SYSTEM_LOAD_TR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 51
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_TR",
+      "statement": "SYSTEM_LOAD_TR",
+      "word": 145
+    },
+    {
+      "address": 639,
+      "location": {
+        "entry": "SYSTEM_LOAD_TR",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 52
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 640,
+      "location": {
+        "entry": "SYSTEM_VERIFY_READ",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 55
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 641,
+      "location": {
+        "entry": "SYSTEM_VERIFY_READ",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 56
+      },
+      "operands": [],
+      "operation": "SYSTEM_VERIFY_READ",
+      "statement": "SYSTEM_VERIFY_READ",
+      "word": 146
+    },
+    {
+      "address": 642,
+      "location": {
+        "entry": "SYSTEM_VERIFY_READ",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 57
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 643,
+      "location": {
+        "entry": "SYSTEM_VERIFY_WRITE",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 60
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 644,
+      "location": {
+        "entry": "SYSTEM_VERIFY_WRITE",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 61
+      },
+      "operands": [],
+      "operation": "SYSTEM_VERIFY_WRITE",
+      "statement": "SYSTEM_VERIFY_WRITE",
+      "word": 147
+    },
+    {
+      "address": 645,
+      "location": {
+        "entry": "SYSTEM_VERIFY_WRITE",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 62
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 646,
+      "location": {
+        "entry": "SYSTEM_LOAD_ACCESS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 65
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 647,
+      "location": {
+        "entry": "SYSTEM_LOAD_ACCESS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 66
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 648,
+      "location": {
+        "entry": "SYSTEM_LOAD_ACCESS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 67
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_ACCESS",
+      "statement": "SYSTEM_LOAD_ACCESS",
+      "word": 148
+    },
+    {
+      "address": 649,
+      "location": {
+        "entry": "SYSTEM_LOAD_ACCESS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 68
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 650,
+      "location": {
+        "entry": "SYSTEM_LOAD_LIMIT",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 71
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 651,
+      "location": {
+        "entry": "SYSTEM_LOAD_LIMIT",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 72
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 652,
+      "location": {
+        "entry": "SYSTEM_LOAD_LIMIT",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 73
+      },
+      "operands": [],
+      "operation": "SYSTEM_LOAD_LIMIT",
+      "statement": "SYSTEM_LOAD_LIMIT",
+      "word": 149
+    },
+    {
+      "address": 653,
+      "location": {
+        "entry": "SYSTEM_LOAD_LIMIT",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 74
       },
       "operands": [],
       "operation": "END",

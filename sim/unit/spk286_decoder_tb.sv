@@ -2,6 +2,7 @@
 
 module spk286_decoder_tb;
     logic [7:0] opcode;
+    logic extended_opcode = 1'b0;
     wire supported;
     wire [2:0] destination, source_index;
     wire [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry;
@@ -81,6 +82,22 @@ module spk286_decoder_tb;
             if(i==107 && entry!=spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM8S) $fatal(1,"IMUL signed byte entry");
             checks = checks + 1;
         end
+        extended_opcode = 1'b1;
+        opcode = 8'h01; #1;
+        if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F01)
+            $fatal(1, "0F 01 extended decoder entry");
+        opcode = 8'h00; #1;
+        if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00)
+            $fatal(1, "0F 00 extended decoder entry");
+        opcode = 8'h02; #1;
+        if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS)
+            $fatal(1, "0F 02 extended decoder entry");
+        opcode = 8'h03; #1;
+        if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT)
+            $fatal(1, "0F 03 extended decoder entry");
+        opcode = 8'h0F; #1;
+        if (supported !== 1'b0) $fatal(1, "unsupported extended opcode accepted");
+        checks = checks + 3;
         $display("DECODER PASS: %0d opcode checks; MOV and word ALU forms", checks);
         $finish;
     end

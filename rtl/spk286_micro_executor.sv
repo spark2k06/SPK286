@@ -14,6 +14,8 @@ module spk286_micro_executor (
     output logic byte_ready,
     input  logic [2:0] destination, source_index,
     input logic [15:0] target_read_data, effective_offset, address_base,
+    input logic [15:0] segment_limit,
+    input logic operand_register_direct,
     output logic address_override,
     output logic [15:0] address_offset,
     output logic io_transfer,
@@ -67,10 +69,47 @@ module spk286_micro_executor (
     input logic [15:0] segment_read_value,
     output logic segment_write,
     output logic [15:0] segment_write_data,
+    input logic [1:0] segment_index,
+    output logic protected_segment_commit_en,
+    output logic [1:0] protected_segment_commit_index,
+    output logic [15:0] protected_segment_commit_selector,
+    output logic [23:0] protected_segment_commit_base,
+    output logic [15:0] protected_segment_commit_limit,
+    output logic [7:0] protected_segment_commit_access,
+    output logic [3:0] protected_segment_commit_class,
+    output logic protected_segment_commit_present, protected_segment_commit_protected,
+    output logic [1:0] protected_segment_commit_dpl,
+    output logic protected_segment_commit_table_indicator,
+    output logic [1:0] protected_segment_commit_rpl,
     input logic result_write_allowed,
     input logic [15:0] decoded_flags_mask, decoded_undefined_mask,
     output logic flags_write_en,
-    output logic [15:0] flags_write_data, flags_write_mask
+    output logic [15:0] flags_write_data, flags_write_mask,
+    input logic [15:0] protected_msw,
+    input logic [15:0] protected_gdtr_limit, protected_idtr_limit,
+    input logic [23:0] protected_gdtr_base, protected_idtr_base,
+    input logic [15:0] protected_ldtr_selector, protected_tr_selector,
+    input logic [23:0] protected_ldtr_base,
+    input logic [15:0] protected_ldtr_limit,
+    input logic protected_ldtr_valid, protected_ldtr_present,
+    input logic [1:0] protected_cpl,
+    output logic protected_msw_load_en,
+    output logic [15:0] protected_msw_load_data, protected_msw_load_mask,
+    output logic protected_gdtr_load_en, protected_idtr_load_en,
+    output logic [15:0] protected_gdtr_load_limit, protected_idtr_load_limit,
+    output logic [23:0] protected_gdtr_load_base, protected_idtr_load_base,
+    output logic protected_ldtr_commit_en, protected_tr_commit_en,
+    output logic [15:0] protected_ldtr_commit_selector, protected_tr_commit_selector,
+    output logic [23:0] protected_ldtr_commit_base, protected_tr_commit_base,
+    output logic [15:0] protected_ldtr_commit_limit, protected_tr_commit_limit,
+    output logic [7:0] protected_ldtr_commit_access, protected_tr_commit_access,
+    output logic [3:0] protected_ldtr_commit_class, protected_tr_commit_class,
+    output logic protected_ldtr_commit_present, protected_tr_commit_present,
+    output logic protected_ldtr_commit_valid, protected_tr_commit_valid,
+    output logic protected_descriptor_access,
+    output logic [23:0] protected_descriptor_address,
+    output logic system_limit_fault, system_fault,
+    output logic [7:0] system_fault_vector
 );
     logic fetch_port, io_read, io_write, io_byte;
     assign fetch_port = allowed && operation == spk286_microcode_pkg::MC_FETCH_PORT;
@@ -153,6 +192,18 @@ module spk286_micro_executor (
     assign stack_offset = read_frame_address ? frame_address_q : stack_native_offset;
 
     logic [15:0] tmp0_q, tmp1_q, tmp2_q, flags_q, flags_mask_q;
+    logic system_active_q;
+    logic [1:0] system_index_q;
+    logic [15:0] system_limit_q;
+    logic [23:0] system_base_q;
+    logic system_operation, system_table_operation, system_table_store, system_table_load;
+    logic system_msw_store, system_msw_load, system_ldtr_store, system_tr_store;
+    logic system_verify_read, system_verify_write;
+    logic system_selector_store, system_operand_request, system_operand_write;
+    logic system_operand_done, system_done, system_begin, system_is_gdtr;
+    logic [15:0] system_write_data;
+    logic [15:0] system_selected_limit;
+    logic [23:0] system_selected_base;
     logic muldiv_request, muldiv_complete, muldiv_valid, muldiv_write, muldiv_fault;
     logic muldiv_byte, muldiv_immediate, unused_muldiv_ready, result_high_pending_q;
     logic write_result_ax, write_result_dx, fixed_result_write;
@@ -184,8 +235,250 @@ module spk286_micro_executor (
     assign arithmetic_fault = check_arithmetic && arithmetic_fault_q;
     logic read_segment;
     assign read_segment = allowed && operation == spk286_microcode_pkg::MC_READ_SEG16_TMP0;
-    assign segment_write = allowed && operation == spk286_microcode_pkg::MC_WRITE_SEG16_TMP0 && temporary_valid_q[0];
+    assign segment_write = allowed && operation == spk286_microcode_pkg::MC_WRITE_SEG16_TMP0 &&
+                           temporary_valid_q[0] && !protected_msw[0];
     assign segment_write_data = tmp0_q;
+    assign system_table_store = allowed && (operation == spk286_microcode_pkg::MC_SYSTEM_STORE_GDTR || operation == spk286_microcode_pkg::MC_SYSTEM_STORE_IDTR);
+    assign system_table_load = allowed && (operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_GDTR || operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_IDTR);
+    assign system_msw_store = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_STORE_MSW;
+    assign system_msw_load = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_MSW;
+    assign system_ldtr_store = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_STORE_LDTR;
+    assign system_tr_store = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_STORE_TR;
+    assign system_verify_read = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_VERIFY_READ;
+    assign system_verify_write = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_VERIFY_WRITE;
+    assign system_selector_store = system_ldtr_store || system_tr_store;
+    assign system_table_operation = system_table_store || system_table_load;
+    assign system_operation = system_table_operation || system_msw_store || system_msw_load || system_selector_store;
+    assign system_is_gdtr = operation == spk286_microcode_pkg::MC_SYSTEM_STORE_GDTR || operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_GDTR;
+    assign system_selected_limit = system_is_gdtr ? protected_gdtr_limit : protected_idtr_limit;
+    assign system_selected_base = system_is_gdtr ? protected_gdtr_base : protected_idtr_base;
+    assign system_limit_fault = system_table_operation && !operand_register_direct &&
+                                ({1'b0, effective_offset} + 17'd5 > {1'b0, segment_limit});
+    assign system_begin = system_operation && !system_active_q && !system_limit_fault;
+    assign system_operand_request = system_active_q && system_operation && !system_limit_fault;
+    assign system_operand_write = system_operand_request && (system_table_store || system_msw_store || system_selector_store);
+    assign system_operand_done = system_operand_request && operand_done;
+    assign system_done = system_operand_done && (!system_table_operation || system_index_q == 2'd2);
+    assign system_write_data = system_ldtr_store ? protected_ldtr_selector :
+                               system_tr_store ? protected_tr_selector :
+                               system_msw_store ? protected_msw :
+                               system_index_q == 2'd0 ? system_selected_limit :
+                               system_index_q == 2'd1 ? system_selected_base[15:0] :
+                               {8'd0, system_selected_base[23:16]};
+    assign protected_msw_load_en = system_msw_load && system_operand_done;
+    assign protected_msw_load_data = operand_read_data;
+    assign protected_msw_load_mask = 16'h000F;
+    assign protected_gdtr_load_en = system_table_load && system_operand_done && system_index_q == 2'd2 && system_is_gdtr;
+    assign protected_idtr_load_en = system_table_load && system_operand_done && system_index_q == 2'd2 && !system_is_gdtr;
+    assign protected_gdtr_load_limit = system_limit_q;
+    assign protected_idtr_load_limit = system_limit_q;
+    assign protected_gdtr_load_base = {((system_index_q == 2'd2) ? operand_read_data[7:0] : system_base_q[23:16]), system_base_q[15:0]};
+    assign protected_idtr_load_base = protected_gdtr_load_base;
+
+    logic descriptor_active_q;
+    logic [2:0] descriptor_phase_q;
+    logic [15:0] descriptor_word0_q, descriptor_word1_q, descriptor_word2_q, descriptor_word3_q;
+    logic descriptor_load_ldtr, descriptor_load_tr, descriptor_load_operation;
+    logic descriptor_verify_read, descriptor_verify_write, descriptor_verify_operation;
+    logic descriptor_load_access, descriptor_load_limit, descriptor_inspect_operation;
+    logic segment_reload_operation, descriptor_segment_null_commit, descriptor_segment_success_live;
+    logic descriptor_begin, descriptor_operand_done, descriptor_operation_done;
+    logic descriptor_write, descriptor_null_commit, descriptor_success_live, descriptor_success_q;
+    logic descriptor_verify_success_live, descriptor_verify_negative, descriptor_inspect_negative;
+    logic descriptor_inspect_success_live, descriptor_verify_flags_write, descriptor_inspect_flags_write;
+    logic descriptor_result_write;
+    logic [15:0] descriptor_result_data;
+    logic descriptor_read_begin, descriptor_pre_fault, descriptor_post_fault;
+    logic [63:0] descriptor_raw_q, descriptor_raw_candidate;
+    logic [15:0] descriptor_limit;
+    logic [23:0] descriptor_base;
+    logic [7:0] descriptor_access_rights;
+    logic [3:0] descriptor_class;
+    logic descriptor_valid, descriptor_reserved_valid, descriptor_present;
+    /* verilator lint_off UNUSEDSIGNAL */
+    logic [12:0] descriptor_unused_index;
+    logic [1:0] descriptor_unused_rpl;
+    logic [20:0] descriptor_unused_end;
+    logic descriptor_unused_selector_valid;
+    logic descriptor_unused_segment, descriptor_unused_executable, descriptor_unused_conforming;
+    logic descriptor_unused_expand_down, descriptor_unused_readable, descriptor_unused_writable, descriptor_unused_accessed;
+    logic [1:0] descriptor_unused_dpl;
+    logic [15:0] descriptor_unused_gate_selector, descriptor_unused_gate_offset;
+    logic [4:0] descriptor_unused_gate_parameter_count;
+    /* verilator lint_on UNUSEDSIGNAL */
+    logic descriptor_selector_ti, descriptor_selector_null, descriptor_selector_limit_valid;
+    logic [23:0] descriptor_selector_address;
+    logic descriptor_selector_carry;
+    logic [15:0] descriptor_table_limit;
+    logic [23:0] descriptor_table_base;
+    logic [1:0] descriptor_effective_privilege;
+
+    assign descriptor_load_ldtr = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_LDTR;
+    assign descriptor_load_tr = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_TR;
+    assign descriptor_verify_read = system_verify_read;
+    assign descriptor_verify_write = system_verify_write;
+    assign descriptor_verify_operation = descriptor_verify_read || descriptor_verify_write;
+    assign descriptor_load_access = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_ACCESS;
+    assign descriptor_load_limit = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_LIMIT;
+    assign descriptor_inspect_operation = descriptor_load_access || descriptor_load_limit;
+    assign segment_reload_operation = allowed && operation == spk286_microcode_pkg::MC_WRITE_SEG16_TMP0 &&
+                                     temporary_valid_q[0] && protected_msw[0];
+    assign descriptor_load_operation = descriptor_load_ldtr || descriptor_load_tr || descriptor_verify_operation ||
+                                      descriptor_inspect_operation || segment_reload_operation;
+    assign descriptor_begin = descriptor_load_operation && temporary_valid_q[0] && !descriptor_active_q;
+    assign descriptor_table_limit = descriptor_selector_ti ? protected_ldtr_limit : protected_gdtr_limit;
+    assign descriptor_table_base = descriptor_selector_ti ? protected_ldtr_base : protected_gdtr_base;
+    spk286_selector descriptor_selector (
+        .selector(tmp0_q), .table_limit(descriptor_table_limit), .table_base(descriptor_table_base),
+        .index(descriptor_unused_index), .table_indicator(descriptor_selector_ti), .rpl(descriptor_unused_rpl),
+        .null_selector(descriptor_selector_null), .descriptor_end(descriptor_unused_end),
+        .descriptor_limit_valid(descriptor_selector_limit_valid),
+        .descriptor_selector_valid(descriptor_unused_selector_valid),
+        .descriptor_address(descriptor_selector_address), .descriptor_address_carry(descriptor_selector_carry)
+    );
+    assign descriptor_pre_fault = descriptor_begin &&
+                                  (!protected_msw[0] ||
+                                   ((descriptor_load_ldtr || descriptor_load_tr) &&
+                                    (descriptor_selector_ti || descriptor_selector_carry ||
+                                     (!descriptor_selector_null && !descriptor_selector_limit_valid) ||
+                                     (descriptor_load_tr && descriptor_selector_null))) ||
+                                   (segment_reload_operation &&
+                                    (descriptor_selector_carry ||
+                                     (!descriptor_selector_null && !descriptor_selector_limit_valid) ||
+                                     (descriptor_selector_null && segment_index == 2'd2))));
+    assign descriptor_verify_negative = descriptor_begin && descriptor_verify_operation && !descriptor_pre_fault &&
+                                       (descriptor_selector_null || descriptor_selector_carry ||
+                                        !descriptor_selector_limit_valid ||
+                                        (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)));
+    assign descriptor_inspect_negative = descriptor_begin && descriptor_inspect_operation && !descriptor_pre_fault &&
+                                        (descriptor_selector_null || descriptor_selector_carry ||
+                                         !descriptor_selector_limit_valid ||
+                                         (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)));
+    assign descriptor_segment_null_commit = descriptor_begin && segment_reload_operation &&
+                                           descriptor_selector_null && !descriptor_pre_fault && segment_index != 2'd2;
+    assign descriptor_read_begin = descriptor_begin && !descriptor_pre_fault && !descriptor_verify_negative && !descriptor_inspect_negative &&
+                                   !descriptor_segment_null_commit && !descriptor_selector_null;
+    assign descriptor_raw_q = {descriptor_word3_q, descriptor_word2_q, descriptor_word1_q, descriptor_word0_q};
+    assign descriptor_raw_candidate = (descriptor_operand_done && descriptor_phase_q == 3'd3) ?
+                                     {operand_read_data, descriptor_word2_q, descriptor_word1_q, descriptor_word0_q} : descriptor_raw_q;
+    spk286_descriptor descriptor_parser (
+        .raw_descriptor(descriptor_raw_candidate), .limit(descriptor_limit), .base(descriptor_base),
+        .access_rights(descriptor_access_rights), .descriptor_class(descriptor_class),
+        .descriptor_valid(descriptor_valid), .reserved_form_valid(descriptor_reserved_valid),
+        .present(descriptor_present), .segment(descriptor_unused_segment), .executable(descriptor_unused_executable),
+        .conforming(descriptor_unused_conforming), .expand_down(descriptor_unused_expand_down),
+        .readable(descriptor_unused_readable), .writable(descriptor_unused_writable), .accessed(descriptor_unused_accessed),
+        .dpl(descriptor_unused_dpl), .gate_target_selector(descriptor_unused_gate_selector),
+        .gate_offset(descriptor_unused_gate_offset), .gate_parameter_count(descriptor_unused_gate_parameter_count)
+    );
+    assign descriptor_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                     ((descriptor_load_ldtr && descriptor_class == spk286_protected_pkg::DESC_LDT) ||
+                                      (descriptor_load_tr && descriptor_class == spk286_protected_pkg::DESC_TSS_AVAIL));
+    assign descriptor_effective_privilege = descriptor_unused_rpl > protected_cpl ? descriptor_unused_rpl : protected_cpl;
+    assign descriptor_verify_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                            descriptor_unused_segment &&
+                                            ((descriptor_unused_conforming && descriptor_unused_dpl <= protected_cpl) ||
+                                             (!descriptor_unused_conforming && descriptor_unused_dpl >= descriptor_effective_privilege)) &&
+                                            ((descriptor_verify_read &&
+                                              ((descriptor_class == spk286_protected_pkg::DESC_CODE && descriptor_unused_readable) ||
+                                               descriptor_class == spk286_protected_pkg::DESC_DATA ||
+                                               descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN)) ||
+                                             (descriptor_verify_write &&
+                                             (descriptor_class == spk286_protected_pkg::DESC_DATA ||
+                                               descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN) && descriptor_unused_writable));
+    assign descriptor_inspect_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                             descriptor_unused_dpl >= descriptor_effective_privilege &&
+                                             (descriptor_load_access ||
+                                              (descriptor_load_limit &&
+                                               ((descriptor_unused_segment && !descriptor_unused_conforming) ||
+                                                descriptor_class == spk286_protected_pkg::DESC_TSS_AVAIL ||
+                                                descriptor_class == spk286_protected_pkg::DESC_TSS_BUSY ||
+                                                descriptor_class == spk286_protected_pkg::DESC_LDT)));
+    assign descriptor_segment_success_live = descriptor_segment_null_commit ||
+                                             (descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                              (segment_index == 2'd2 ?
+                                               ((descriptor_class == spk286_protected_pkg::DESC_DATA ||
+                                                 descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN) &&
+                                                descriptor_unused_writable && descriptor_unused_dpl == protected_cpl &&
+                                                descriptor_unused_rpl == protected_cpl) :
+                                               (descriptor_unused_segment &&
+                                                ((descriptor_unused_conforming && descriptor_unused_dpl <= protected_cpl) ||
+                                                 (!descriptor_unused_conforming && descriptor_unused_dpl >= descriptor_effective_privilege)) &&
+                                                (descriptor_class != spk286_protected_pkg::DESC_CODE || descriptor_unused_readable))));
+    assign descriptor_result_data = descriptor_load_access ? {descriptor_access_rights, 8'h00} : descriptor_limit;
+    assign descriptor_result_write = descriptor_active_q && descriptor_operand_done && descriptor_phase_q == 3'd3 &&
+                                     descriptor_inspect_operation && descriptor_inspect_success_live;
+    assign descriptor_operand_done = descriptor_active_q && operand_done;
+    assign descriptor_post_fault = descriptor_operand_done && descriptor_phase_q == 3'd3 &&
+                                  (segment_reload_operation ? !descriptor_segment_success_live :
+                                   (!descriptor_verify_operation && !descriptor_inspect_operation && !descriptor_success_live));
+    assign descriptor_verify_flags_write = !descriptor_pre_fault &&
+                                           (descriptor_verify_negative ||
+                                            (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_verify_operation));
+    assign descriptor_inspect_flags_write = !descriptor_pre_fault &&
+                                            (descriptor_inspect_negative ||
+                                             (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_inspect_operation));
+    assign descriptor_write = descriptor_active_q && descriptor_phase_q == 3'd4 &&
+                              (descriptor_load_tr || (segment_reload_operation && descriptor_success_q));
+    assign protected_descriptor_access = descriptor_active_q;
+    always_comb begin
+        protected_descriptor_address = descriptor_selector_address;
+        if (descriptor_phase_q == 3'd1) protected_descriptor_address = descriptor_selector_address + 24'd2;
+        else if (descriptor_phase_q == 3'd2) protected_descriptor_address = descriptor_selector_address + 24'd4;
+        else if (descriptor_phase_q == 3'd3) protected_descriptor_address = descriptor_selector_address + 24'd6;
+        else if (descriptor_phase_q == 3'd4) protected_descriptor_address = descriptor_selector_address + 24'd5;
+    end
+    assign descriptor_operation_done = descriptor_verify_negative || descriptor_inspect_negative || descriptor_null_commit ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_load_ldtr && descriptor_success_live) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_load_tr && descriptor_success_q) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_verify_operation) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_inspect_operation) ||
+                                      descriptor_segment_null_commit ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
+                                       descriptor_segment_success_live && descriptor_unused_accessed) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
+                                       !descriptor_segment_success_live) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q);
+    assign descriptor_null_commit = descriptor_begin && descriptor_selector_null && !descriptor_pre_fault && descriptor_load_ldtr;
+    assign system_fault = descriptor_pre_fault || descriptor_post_fault;
+    assign system_fault_vector = !protected_msw[0] ? 8'd6 :
+                                 segment_reload_operation ?
+                                   (!descriptor_present && descriptor_valid ?
+                                    (segment_index == 2'd2 ? 8'd12 : 8'd11) : 8'd13) :
+                                 (!descriptor_present && descriptor_valid ? 8'd11 : 8'd13);
+    assign protected_ldtr_commit_en = descriptor_null_commit ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_load_ldtr && descriptor_success_live);
+    assign protected_tr_commit_en = descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_load_tr && descriptor_success_q;
+    assign protected_ldtr_commit_selector = descriptor_null_commit ? 16'd0 : tmp0_q;
+    assign protected_tr_commit_selector = tmp0_q;
+    assign protected_ldtr_commit_base = descriptor_base;
+    assign protected_tr_commit_base = descriptor_base;
+    assign protected_ldtr_commit_limit = descriptor_limit;
+    assign protected_tr_commit_limit = descriptor_limit;
+    assign protected_ldtr_commit_access = descriptor_access_rights;
+    assign protected_tr_commit_access = descriptor_access_rights;
+    assign protected_ldtr_commit_class = descriptor_null_commit ? spk286_protected_pkg::DESC_INVALID : descriptor_class;
+    assign protected_tr_commit_class = descriptor_class;
+    assign protected_ldtr_commit_present = descriptor_null_commit ? 1'b0 : descriptor_present;
+    assign protected_tr_commit_present = descriptor_present;
+    assign protected_ldtr_commit_valid = !descriptor_null_commit;
+    assign protected_tr_commit_valid = 1'b1;
+    assign protected_segment_commit_en = descriptor_segment_null_commit ||
+                                         (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
+                                          descriptor_segment_success_live && descriptor_unused_accessed) ||
+                                         (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q);
+    assign protected_segment_commit_index = segment_index;
+    assign protected_segment_commit_selector = tmp0_q;
+    assign protected_segment_commit_base = descriptor_segment_null_commit ? 24'h000000 : descriptor_base;
+    assign protected_segment_commit_limit = descriptor_segment_null_commit ? 16'h0000 : descriptor_limit;
+    assign protected_segment_commit_access = descriptor_segment_null_commit ? 8'h00 :
+                                             descriptor_access_rights | ((descriptor_phase_q == 3'd4) ? 8'h01 : 8'h00);
+    assign protected_segment_commit_class = descriptor_segment_null_commit ? spk286_protected_pkg::DESC_INVALID : descriptor_class;
+    assign protected_segment_commit_present = !descriptor_segment_null_commit && descriptor_present;
+    assign protected_segment_commit_protected = 1'b1;
+    assign protected_segment_commit_dpl = descriptor_segment_null_commit ? 2'd0 : descriptor_unused_dpl;
+    assign protected_segment_commit_table_indicator = descriptor_segment_null_commit ? 1'b0 : descriptor_selector_ti;
+    assign protected_segment_commit_rpl = descriptor_selector_null ? tmp0_q[1:0] : descriptor_unused_rpl;
     logic constant_zero, constant_ones;
     assign constant_zero = allowed && operation == spk286_microcode_pkg::MC_CONST_ZERO_TMP1;
     assign constant_ones = allowed && operation == spk286_microcode_pkg::MC_CONST_ONES_TMP1;
@@ -306,20 +599,22 @@ module spk286_micro_executor (
     assign commit_result = allowed && result_operation && temporary_valid_q[2] && !result_disposed_q;
     assign discard_result = commit_result && !allow_result_write;
     assign result_to_dst = commit_result && allow_result_write && (operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST || operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8);
-    assign operand_request = io_transfer || string_request || vector_request || stack_request || check_operand || (allowed &&
+    assign operand_request = descriptor_active_q || system_operand_request || io_transfer || string_request || vector_request || stack_request || check_operand || (allowed &&
                              (write_reg_tmp1 || operation == spk286_microcode_pkg::MC_READ_REG16 || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_REG8 || operation == spk286_microcode_pkg::MC_READ_RM8 || read_tmp1 ||
                               ((operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8) && temporary_valid_q[0]) ||
                               (commit_result && allow_result_write && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST8)));
-    assign operand_write = io_write || string_store || write_reg_tmp1 || push_transfer || operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || result_operation;
-    assign operand_select_rm = io_transfer || string_request || vector_request || stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
+    assign operand_write = descriptor_write || system_operand_write || io_write || string_store || write_reg_tmp1 || push_transfer || operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || result_operation;
+    assign operand_select_rm = descriptor_active_q || system_operation || io_transfer || string_request || vector_request || stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
                                operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM16 ||
                                operation == spk286_microcode_pkg::MC_READ_RM8 || operation == spk286_microcode_pkg::MC_READ_RM8_TMP1 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM8;
-    assign operand_byte = io_byte || (string_request && string_byte) || operation == spk286_microcode_pkg::MC_WRITE_REG8_TMP1 || operation == spk286_microcode_pkg::MC_READ_REG8 || operation == spk286_microcode_pkg::MC_READ_RM8 ||
+    assign operand_byte = (descriptor_write) || (system_table_operation && system_index_q == 2'd2) || io_byte || (string_request && string_byte) || operation == spk286_microcode_pkg::MC_WRITE_REG8_TMP1 || operation == spk286_microcode_pkg::MC_READ_REG8 || operation == spk286_microcode_pkg::MC_READ_RM8 ||
                           operation == spk286_microcode_pkg::MC_READ_REG8_TMP1 || operation == spk286_microcode_pkg::MC_READ_RM8_TMP1 ||
                           operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 ||
                           operation == spk286_microcode_pkg::MC_WRITE_RESULT_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM8;
-    assign operand_write_data = push_transfer && push_return_ip ? architectural_ip : (write_reg_tmp1 ? tmp1_q : (result_operation ? tmp2_q : tmp0_q));
-    assign read_operand = operand_request && !operand_write && !operand_check;
+    assign operand_write_data = descriptor_write ?
+                                {8'd0, descriptor_access_rights | (descriptor_load_tr ? 8'h02 : 8'h01)} :
+                                system_operand_write ? system_write_data : (push_transfer && push_return_ip ? architectural_ip : (write_reg_tmp1 ? tmp1_q : (result_operation ? tmp2_q : tmp0_q)));
+    assign read_operand = operand_request && !descriptor_active_q && !operand_write && !operand_check;
     assign compute_alu = allowed && operation == spk286_microcode_pkg::MC_ALU && temporary_valid_q[0] && temporary_valid_q[1] && !flags_valid_q;
     assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
     assign byte_ready = fetch_word || fetch_signed_byte || fetch_byte || fetch_byte_tmp1 || (fetch_port && port_immediate) || decode_byte_ready;
@@ -330,15 +625,15 @@ module spk286_micro_executor (
                             read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
                             (push_operation && !push_enabled) || (redirect_operation && (!branch_taken || redirect_ready)) || move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
                             (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
-                            (decode_operand && decode_done) || (operand_request && operand_done);
-    assign gpr_write_en = fixed_result_write || string_index_write || string_count_write || string_write_acc || add_allocation_sp || frame_write_gpr || allocate_stack || move_source || stack_arch_write || (count_operation && decrement_count) || move_word || result_to_dst || operand_gpr_write_en;
-    assign gpr_write_byte = (string_write_acc && string_byte) || (!fixed_result_write && !string_index_write && !string_count_write && !string_write_acc && (!add_allocation_sp && !frame_write_gpr && !allocate_stack && !stack_arch_write && !count_operation && ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
+                            (decode_operand && decode_done) || system_done || descriptor_operation_done || ((operand_request && operand_done) && !system_operand_request && !descriptor_active_q);
+    assign gpr_write_en = descriptor_result_write || fixed_result_write || string_index_write || string_count_write || string_write_acc || add_allocation_sp || frame_write_gpr || allocate_stack || move_source || stack_arch_write || (count_operation && decrement_count) || move_word || result_to_dst || (operand_gpr_write_en && !system_msw_load);
+    assign gpr_write_byte = (string_write_acc && string_byte) || (!descriptor_result_write && !fixed_result_write && !string_index_write && !string_count_write && !string_write_acc && (!add_allocation_sp && !frame_write_gpr && !allocate_stack && !stack_arch_write && !count_operation && ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
                             (result_to_dst && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8) || operand_gpr_write_byte)));
-    assign gpr_write_index = fixed_result_write ? (write_result_dx ? 3'd2 : 3'd0) : string_index_write ? (string_step_source ? 3'd6 : 3'd7) : string_count_write ? 3'd1 : string_write_acc ? 3'd0 : add_allocation_sp ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
-    assign gpr_write_data = fixed_result_write ? (write_result_dx ? auxiliary_q : tmp2_q) : string_index_write ? (architectural_flags[10] ? string_index-string_delta : string_index+string_delta) : string_count_write ? count_value-16'd1 : string_write_acc ? tmp0_q : add_allocation_sp ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
-    assign flags_write_en = direct_flags || commit_flags || restore_flags || set_if || clear_if_tf || iret_commit;
-    assign flags_write_data = direct_flags ? direct_flags_data : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : (clear_if_tf ? 16'd0 : flags_q)));
-    assign flags_write_mask = direct_flags ? direct_flags_mask : restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : flags_mask_q));
+    assign gpr_write_index = descriptor_result_write ? shift_kind : fixed_result_write ? (write_result_dx ? 3'd2 : 3'd0) : string_index_write ? (string_step_source ? 3'd6 : 3'd7) : string_count_write ? 3'd1 : string_write_acc ? 3'd0 : add_allocation_sp ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
+    assign gpr_write_data = descriptor_result_write ? descriptor_result_data : fixed_result_write ? (write_result_dx ? auxiliary_q : tmp2_q) : string_index_write ? (architectural_flags[10] ? string_index-string_delta : string_index+string_delta) : string_count_write ? count_value-16'd1 : string_write_acc ? tmp0_q : add_allocation_sp ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
+    assign flags_write_en = direct_flags || descriptor_verify_flags_write || descriptor_inspect_flags_write || commit_flags || restore_flags || set_if || clear_if_tf || iret_commit;
+    assign flags_write_data = direct_flags ? direct_flags_data : descriptor_verify_flags_write ? (descriptor_verify_success_live ? 16'h0040 : 16'h0000) : descriptor_inspect_flags_write ? (descriptor_inspect_success_live ? 16'h0040 : 16'h0000) : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : (clear_if_tf ? 16'd0 : flags_q)));
+    assign flags_write_mask = direct_flags ? direct_flags_mask : descriptor_verify_flags_write ? 16'h0040 : descriptor_inspect_flags_write ? 16'h0040 : restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : flags_mask_q));
 
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
@@ -351,9 +646,58 @@ module spk286_micro_executor (
             target_q <= 16'h0000; target_valid_q <= 1'b0;
             tmp0_q <= 16'h0000; tmp1_q <= 16'h0000; tmp2_q <= 16'h0000;
             flags_q <= 16'h0000; flags_mask_q <= 16'h0000;
+            system_active_q <= 1'b0; system_index_q <= 2'd0;
+            system_limit_q <= 16'h0000; system_base_q <= 24'h000000;
+            descriptor_active_q <= 1'b0; descriptor_phase_q <= 3'd0;
+            descriptor_word0_q <= 16'h0000; descriptor_word1_q <= 16'h0000;
+            descriptor_word2_q <= 16'h0000; descriptor_word3_q <= 16'h0000;
+            descriptor_success_q <= 1'b0;
             high_byte_q <= 1'b0; temporary_valid_q <= 3'b000;
             flags_valid_q <= 1'b0; result_disposed_q <= 1'b0; result_suppress_q <= 1'b0;
         end else begin
+            if (system_begin) begin
+                system_active_q <= 1'b1;
+                system_index_q <= 2'd0;
+                system_limit_q <= 16'h0000;
+                system_base_q <= 24'h000000;
+                if (system_table_operation) begin
+                    address_override <= 1'b1;
+                    address_offset <= effective_offset;
+                end
+            end
+            if (descriptor_read_begin) begin
+                descriptor_active_q <= 1'b1;
+                descriptor_phase_q <= 3'd0;
+                descriptor_success_q <= 1'b0;
+            end
+            if (descriptor_operand_done) begin
+                case (descriptor_phase_q)
+                    3'd0: begin descriptor_word0_q <= operand_read_data; descriptor_phase_q <= 3'd1; end
+                    3'd1: begin descriptor_word1_q <= operand_read_data; descriptor_phase_q <= 3'd2; end
+                    3'd2: begin descriptor_word2_q <= operand_read_data; descriptor_phase_q <= 3'd3; end
+                    3'd3: begin
+                        descriptor_word3_q <= operand_read_data;
+                        if ((descriptor_load_tr && descriptor_success_live) ||
+                            (segment_reload_operation && descriptor_segment_success_live && !descriptor_unused_accessed)) begin
+                            descriptor_success_q <= 1'b1;
+                            descriptor_phase_q <= 3'd4;
+                        end else descriptor_active_q <= 1'b0;
+                    end
+                    default: descriptor_active_q <= 1'b0;
+                endcase
+            end
+            if (system_operand_done && system_table_operation) begin
+                if (system_table_load) begin
+                    if (system_index_q == 2'd0) system_limit_q <= operand_read_data;
+                    else if (system_index_q == 2'd1) system_base_q[15:0] <= operand_read_data;
+                    else system_base_q[23:16] <= operand_read_data[7:0];
+                end
+                if (system_index_q < 2'd2) begin
+                    system_index_q <= system_index_q + 2'd1;
+                    address_override <= 1'b1;
+                    address_offset <= effective_offset + (system_index_q == 2'd0 ? 16'd2 : 16'd4);
+                end
+            end
             if (fetch_port && operation_done) begin
                 tmp1_q <= port_immediate ? {8'd0, byte_data} : port_register; temporary_valid_q[1] <= 1'b1;
             end

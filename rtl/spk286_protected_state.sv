@@ -1,0 +1,222 @@
+// PM0 architectural state foundation.
+//
+// This block is the single architectural protected-state commit owner.
+// Descriptor and segment services are still added incrementally by phase.
+`timescale 1ns/1ps
+
+module spk286_protected_state (
+    input  logic        clk,
+    input  logic        reset,
+
+    input  logic        msw_load_en,
+    /* verilator lint_off UNUSEDSIGNAL */
+    input  logic [15:0] msw_load_data,
+    input  logic [15:0] msw_load_mask,
+    /* verilator lint_on UNUSEDSIGNAL */
+    output logic [15:0] msw,
+
+    input  logic        gdtr_load_en,
+    input  logic [15:0] gdtr_load_limit,
+    input  logic [23:0] gdtr_load_base,
+    output logic [15:0] gdtr_limit,
+    output logic [23:0] gdtr_base,
+    input  logic        idtr_load_en,
+    input  logic [15:0] idtr_load_limit,
+    input  logic [23:0] idtr_load_base,
+    output logic [15:0] idtr_limit,
+    output logic [23:0] idtr_base,
+
+    input  logic        ldtr_commit_en,
+    input  logic        ldtr_commit_valid,
+    input  logic [15:0] ldtr_commit_selector,
+    input  logic [23:0] ldtr_commit_base,
+    input  logic [15:0] ldtr_commit_limit,
+    input  logic [7:0]  ldtr_commit_access,
+    input  logic [3:0]  ldtr_commit_class,
+    input  logic        ldtr_commit_present,
+    output logic [15:0] ldtr_selector,
+    output logic [23:0] ldtr_base,
+    output logic [15:0] ldtr_limit,
+    output logic [7:0]  ldtr_access,
+    output logic [3:0]  ldtr_class,
+    output logic        ldtr_valid,
+    output logic        ldtr_present,
+
+    input  logic        tr_commit_en,
+    input  logic        tr_commit_valid,
+    input  logic [15:0] tr_commit_selector,
+    input  logic [23:0] tr_commit_base,
+    input  logic [15:0] tr_commit_limit,
+    input  logic [7:0]  tr_commit_access,
+    input  logic [3:0]  tr_commit_class,
+    input  logic        tr_commit_present,
+    output logic [15:0] tr_selector,
+    output logic [23:0] tr_base,
+    output logic [15:0] tr_limit,
+    output logic [7:0]  tr_access,
+    output logic [3:0]  tr_class,
+    output logic        tr_valid,
+    output logic        tr_present,
+
+    input  logic        segment_commit_en,
+    input  logic [1:0]  segment_commit_index,
+    input  logic [15:0] segment_commit_selector,
+    input  logic [23:0] segment_commit_base,
+    input  logic [15:0] segment_commit_limit,
+    input  logic [7:0]  segment_commit_access,
+    input  logic [3:0]  segment_commit_class,
+    input  logic        segment_commit_present,
+    input  logic        segment_commit_protected,
+    input  logic [1:0]  segment_commit_dpl,
+    input  logic        segment_commit_table_indicator,
+    input  logic [1:0]  segment_commit_rpl,
+    output logic [63:0] segment_selector_state,
+    output logic [95:0] segment_base_state,
+    output logic [63:0] segment_limit_state,
+    output logic [31:0] segment_access_state,
+    output logic [15:0] segment_class_state,
+    output logic [3:0]  segment_valid_state,
+    output logic [3:0]  segment_present_state,
+    output logic [3:0]  segment_protected_state,
+    output logic [7:0]  segment_dpl_state,
+    output logic [3:0]  segment_table_state,
+    output logic [7:0]  segment_rpl_state
+);
+    localparam logic [3:0] DESC_INVALID = 4'd0;
+    localparam logic [7:0] REAL_MODE_ACCESS = 8'h93;
+    localparam logic [15:0] MSW_RESET_VALUE = 16'hFFF0;
+
+    logic [15:0] msw_q;
+    logic [15:0] gdtr_limit_q, idtr_limit_q;
+    logic [23:0] gdtr_base_q, idtr_base_q;
+    logic [15:0] ldtr_selector_q, tr_selector_q;
+    logic [23:0] ldtr_base_q, tr_base_q;
+    logic [15:0] ldtr_limit_q, tr_limit_q;
+    logic [7:0] ldtr_access_q, tr_access_q;
+    logic [3:0] ldtr_class_q, tr_class_q;
+    logic ldtr_valid_q, ldtr_present_q, tr_valid_q, tr_present_q;
+
+    logic [63:0] segment_selector_q, segment_limit_q;
+    logic [95:0] segment_base_q;
+    logic [31:0] segment_access_q;
+    logic [15:0] segment_class_q;
+    logic [3:0] segment_valid_q, segment_present_q, segment_protected_q;
+    logic [7:0] segment_dpl_q, segment_rpl_q;
+    logic [3:0] segment_table_q;
+
+    assign msw = msw_q;
+    assign gdtr_limit = gdtr_limit_q;
+    assign gdtr_base = gdtr_base_q;
+    assign idtr_limit = idtr_limit_q;
+    assign idtr_base = idtr_base_q;
+    assign ldtr_selector = ldtr_selector_q;
+    assign ldtr_base = ldtr_base_q;
+    assign ldtr_limit = ldtr_limit_q;
+    assign ldtr_access = ldtr_access_q;
+    assign ldtr_class = ldtr_class_q;
+    assign ldtr_valid = ldtr_valid_q;
+    assign ldtr_present = ldtr_present_q;
+    assign tr_selector = tr_selector_q;
+    assign tr_base = tr_base_q;
+    assign tr_limit = tr_limit_q;
+    assign tr_access = tr_access_q;
+    assign tr_class = tr_class_q;
+    assign tr_valid = tr_valid_q;
+    assign tr_present = tr_present_q;
+    assign segment_selector_state = segment_selector_q;
+    assign segment_base_state = segment_base_q;
+    assign segment_limit_state = segment_limit_q;
+    assign segment_access_state = segment_access_q;
+    assign segment_class_state = segment_class_q;
+    assign segment_valid_state = segment_valid_q;
+    assign segment_present_state = segment_present_q;
+    assign segment_protected_state = segment_protected_q;
+    assign segment_dpl_state = segment_dpl_q;
+    assign segment_table_state = segment_table_q;
+    assign segment_rpl_state = segment_rpl_q;
+
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            msw_q <= MSW_RESET_VALUE;
+            gdtr_limit_q <= 16'h0000;
+            gdtr_base_q <= 24'h000000;
+            idtr_limit_q <= 16'h03FF;
+            idtr_base_q <= 24'h000000;
+
+            ldtr_selector_q <= 16'h0000;
+            ldtr_base_q <= 24'h000000;
+            ldtr_limit_q <= 16'h0000;
+            ldtr_access_q <= 8'h00;
+            ldtr_class_q <= DESC_INVALID;
+            ldtr_valid_q <= 1'b0;
+            ldtr_present_q <= 1'b0;
+            tr_selector_q <= 16'h0000;
+            tr_base_q <= 24'h000000;
+            tr_limit_q <= 16'h0000;
+            tr_access_q <= 8'h00;
+            tr_class_q <= DESC_INVALID;
+            tr_valid_q <= 1'b0;
+            tr_present_q <= 1'b0;
+
+            // Low slices are ES, CS, SS, DS, matching spk286_segments.
+            segment_selector_q <= {16'h0000, 16'h0000, 16'hF000, 16'h0000};
+            segment_base_q <= {24'h000000, 24'h000000, 24'hFF0000, 24'h000000};
+            segment_limit_q <= {4{16'hFFFF}};
+            segment_access_q <= {4{REAL_MODE_ACCESS}};
+            segment_class_q <= 16'h0000;
+            segment_valid_q <= 4'b1111;
+            segment_present_q <= 4'b1111;
+            segment_protected_q <= 4'b0000;
+            segment_dpl_q <= 8'h00;
+            segment_table_q <= 4'b0000;
+            segment_rpl_q <= 8'h00;
+        end else begin
+            // LMSW-compatible state update: only bits 0..3 are writable and
+            // PE is one-way until RESET on the 80286.
+            if (msw_load_en) begin
+                msw_q[3:1] <= (msw_q[3:1] & ~msw_load_mask[3:1]) |
+                              (msw_load_data[3:1] & msw_load_mask[3:1]);
+                if (msw_load_mask[0] && msw_load_data[0]) msw_q[0] <= 1'b1;
+            end
+            if (gdtr_load_en) begin
+                gdtr_limit_q <= gdtr_load_limit;
+                gdtr_base_q <= gdtr_load_base;
+            end
+            if (idtr_load_en) begin
+                idtr_limit_q <= idtr_load_limit;
+                idtr_base_q <= idtr_load_base;
+            end
+            if (ldtr_commit_en) begin
+                ldtr_selector_q <= ldtr_commit_selector;
+                ldtr_base_q <= ldtr_commit_base;
+                ldtr_limit_q <= ldtr_commit_limit;
+                ldtr_access_q <= ldtr_commit_access;
+                ldtr_class_q <= ldtr_commit_class;
+                ldtr_valid_q <= ldtr_commit_valid;
+                ldtr_present_q <= ldtr_commit_valid && ldtr_commit_present;
+            end
+            if (tr_commit_en) begin
+                tr_selector_q <= tr_commit_selector;
+                tr_base_q <= tr_commit_base;
+                tr_limit_q <= tr_commit_limit;
+                tr_access_q <= tr_commit_access;
+                tr_class_q <= tr_commit_class;
+                tr_valid_q <= tr_commit_valid;
+                tr_present_q <= tr_commit_valid && tr_commit_present;
+            end
+            if (segment_commit_en) begin
+                segment_selector_q[segment_commit_index * 16 +: 16] <= segment_commit_selector;
+                segment_base_q[segment_commit_index * 24 +: 24] <= segment_commit_base;
+                segment_limit_q[segment_commit_index * 16 +: 16] <= segment_commit_limit;
+                segment_access_q[segment_commit_index * 8 +: 8] <= segment_commit_access;
+                segment_class_q[segment_commit_index * 4 +: 4] <= segment_commit_class;
+                segment_valid_q[segment_commit_index] <= 1'b1;
+                segment_present_q[segment_commit_index] <= segment_commit_present;
+                segment_protected_q[segment_commit_index] <= segment_commit_protected;
+                segment_dpl_q[segment_commit_index * 2 +: 2] <= segment_commit_dpl;
+                segment_table_q[segment_commit_index] <= segment_commit_table_indicator;
+                segment_rpl_q[segment_commit_index * 2 +: 2] <= segment_commit_rpl;
+            end
+        end
+    end
+endmodule

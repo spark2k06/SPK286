@@ -1,0 +1,74 @@
+microcode_format 17
+
+# PM1 system instructions remain ordinary project-owned microcode entries.
+instruction SYSTEM_GROUP_0F01:
+    DECODE_MODRM
+    DISPATCH DECODED
+
+instruction SYSTEM_STORE_GDTR:
+    SYSTEM_STORE_GDTR
+    END
+
+instruction SYSTEM_STORE_IDTR:
+    SYSTEM_STORE_IDTR
+    END
+
+instruction SYSTEM_LOAD_GDTR:
+    SYSTEM_LOAD_GDTR
+    END
+
+instruction SYSTEM_LOAD_IDTR:
+    SYSTEM_LOAD_IDTR
+    END
+
+instruction SYSTEM_STORE_MSW:
+    SYSTEM_STORE_MSW
+    END
+
+instruction SYSTEM_LOAD_MSW:
+    SYSTEM_LOAD_MSW
+    END
+
+instruction SYSTEM_GROUP_0F00:
+    DECODE_MODRM
+    DISPATCH DECODED
+
+instruction SYSTEM_STORE_LDTR:
+    SYSTEM_STORE_LDTR
+    END
+
+instruction SYSTEM_STORE_TR:
+    SYSTEM_STORE_TR
+    END
+
+instruction SYSTEM_LOAD_LDTR:
+    READ_RM16 -> TMP0
+    SYSTEM_LOAD_LDTR
+    END
+
+instruction SYSTEM_LOAD_TR:
+    READ_RM16 -> TMP0
+    SYSTEM_LOAD_TR
+    END
+
+instruction SYSTEM_VERIFY_READ:
+    READ_RM16 -> TMP0
+    SYSTEM_VERIFY_READ
+    END
+
+instruction SYSTEM_VERIFY_WRITE:
+    READ_RM16 -> TMP0
+    SYSTEM_VERIFY_WRITE
+    END
+
+instruction SYSTEM_LOAD_ACCESS:
+    DECODE_MODRM
+    READ_RM16 -> TMP0
+    SYSTEM_LOAD_ACCESS
+    END
+
+instruction SYSTEM_LOAD_LIMIT:
+    DECODE_MODRM
+    READ_RM16 -> TMP0
+    SYSTEM_LOAD_LIMIT
+    END

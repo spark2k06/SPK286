@@ -41,6 +41,13 @@ OPERATIONS = {"INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3,
               "FLAGS_DECODED": 58, "SIGN_EXTEND8": 59, "SIGN_FILL16": 60, "CONST_ONE_TMP1": 61, "SHIFT": 62, "COUNT_LOW_TMP1": 63, "READ_EA": 64, "WRITE_REG8_TMP1": 65, "WRITE_REG16_TMP1": 66, "READ_TARGET16_TMP1": 67, "MOVE_SOURCE16_TMP1": 68, "SET_ADDRESS_TMP1": 69, "ADD_BASE_TMP0_TMP1": 70, "DISPATCH_DECODED": 71, "CONST_ZERO_TMP1": 72, "CONST_ONES_TMP1": 73, "ADJUST": 74, "CHECK_ARITHMETIC": 75, "READ_SEG16_TMP0": 76, "WRITE_SEG16_TMP0": 77}
 OPERATIONS.update({'READ_AX_TMP0': 78, 'READ_CX_TMP0': 79, 'READ_DX_TMP0': 80, 'READ_BX_TMP0': 81, 'READ_SP_TMP0': 82, 'READ_BP_TMP0': 83, 'READ_SI_TMP0': 84, 'READ_DI_TMP0': 85, 'WRITE_AX_TMP0': 86, 'WRITE_CX_TMP0': 87, 'WRITE_DX_TMP0': 88, 'WRITE_BX_TMP0': 89, 'WRITE_SP_TMP0': 90, 'WRITE_BP_TMP0': 91, 'WRITE_SI_TMP0': 92, 'WRITE_DI_TMP0': 93, 'SAVE_AUX_TMP0': 94, 'RESTORE_AUX_TMP0': 95, 'SAVE_ALLOCATION_TMP0': 96, 'LOAD_COUNTER_TMP1': 97, 'DECREMENT_COUNTER': 98, 'BRANCH_ZERO': 99, 'BRANCH_NONZERO': 100, 'CHECK_PUSH8': 101, 'CHECK_POP8': 102, 'BEGIN_STACK_CURSOR': 103, 'CHECK_STACK_TMP0': 104, 'SET_STACK_ADDRESS_TMP0': 105, 'READ_STACK_ADDRESS_TMP0': 106, 'DECREMENT_STACK_ADDRESS': 107, 'ALLOCATE_STACK': 108, 'CHECK_RM32': 109, 'SET_EA_PLUS2': 110, 'CHECK_BOUNDS': 111, 'READ_STACK_CURSOR_TMP0': 112})
 OPERATIONS.update({'CHECK_PUSH2': 113, 'CHECK_POP2': 114, 'ADD_ALLOCATION_SP': 115})
+OPERATIONS.update({'SYSTEM_STORE_GDTR': 136, 'SYSTEM_STORE_IDTR': 137,
+                   'SYSTEM_LOAD_GDTR': 138, 'SYSTEM_LOAD_IDTR': 139,
+                   'SYSTEM_STORE_MSW': 140, 'SYSTEM_LOAD_MSW': 141,
+                   'SYSTEM_STORE_LDTR': 142, 'SYSTEM_STORE_TR': 143,
+                   'SYSTEM_LOAD_LDTR': 144, 'SYSTEM_LOAD_TR': 145,
+                   'SYSTEM_VERIFY_READ': 146, 'SYSTEM_VERIFY_WRITE': 147,
+                   'SYSTEM_LOAD_ACCESS': 148, 'SYSTEM_LOAD_LIMIT': 149})
 OPERATIONS.update({'BRANCH_REPEAT_EMPTY': 121, 'STEP_STRING_SOURCE': 122, 'STEP_STRING_DEST': 123, 'REPEAT_COUNT': 124, 'READ_STRING_TMP0': 125, 'READ_STRING_TMP1': 126, 'WRITE_STRING_TMP0': 127, 'BRANCH_REPEAT_CONTINUE': 128, 'READ_STRING_ACCUMULATOR': 129, 'WRITE_STRING_ACCUMULATOR': 130})
 OPERATIONS.update({'IO_READ8': 131, 'IO_READ16': 132, 'IO_WRITE8': 133, 'IO_WRITE16': 134, 'FETCH_PORT': 135})
 ROOT = Path(__file__).resolve().parents[2]
@@ -136,6 +143,25 @@ def parse_statement(text: str, location: Location, format_version: int = 1) -> S
     }
     if format_version >= 17 and normalized in io_extensions:
         op, args = io_extensions[normalized]
+        return Statement(location, op, args, text)
+    system_extensions = {
+        'SYSTEM_STORE_GDTR': ('SYSTEM_STORE_GDTR', ()),
+        'SYSTEM_STORE_IDTR': ('SYSTEM_STORE_IDTR', ()),
+        'SYSTEM_LOAD_GDTR': ('SYSTEM_LOAD_GDTR', ()),
+        'SYSTEM_LOAD_IDTR': ('SYSTEM_LOAD_IDTR', ()),
+        'SYSTEM_STORE_MSW': ('SYSTEM_STORE_MSW', ()),
+        'SYSTEM_LOAD_MSW': ('SYSTEM_LOAD_MSW', ()),
+        'SYSTEM_STORE_LDTR': ('SYSTEM_STORE_LDTR', ()),
+        'SYSTEM_STORE_TR': ('SYSTEM_STORE_TR', ()),
+        'SYSTEM_LOAD_LDTR': ('SYSTEM_LOAD_LDTR', ()),
+        'SYSTEM_LOAD_TR': ('SYSTEM_LOAD_TR', ()),
+        'SYSTEM_VERIFY_READ': ('SYSTEM_VERIFY_READ', ()),
+        'SYSTEM_VERIFY_WRITE': ('SYSTEM_VERIFY_WRITE', ()),
+        'SYSTEM_LOAD_ACCESS': ('SYSTEM_LOAD_ACCESS', ()),
+        'SYSTEM_LOAD_LIMIT': ('SYSTEM_LOAD_LIMIT', ()),
+    }
+    if format_version >= 17 and normalized in system_extensions:
+        op, args = system_extensions[normalized]
         return Statement(location, op, args, text)
     segment_extensions = {'READ_SEG16 -> TMP0': ('READ_SEG16_TMP0', ('TMP0',)),
                           'TMP0 -> SEG16': ('WRITE_SEG16_TMP0', ('TMP0',))}
@@ -300,6 +326,28 @@ def validate_io(block: Block) -> None:
                 raise CompileError(block.statements[index].location, 'invalid string I/O iteration target')
 
 
+def validate_system_block(block: Block) -> None:
+    if block.format_version < 17:
+        raise CompileError(block.location, 'system controls require microcode_format 17')
+    actual = tuple(s.operation for s in block.statements)
+    valid = {
+        ('DECODE_MODRM', 'DISPATCH_DECODED'),
+        ('DECODE_MODRM', 'DISPATCH_DECODED', 'END'),
+        ('SYSTEM_STORE_GDTR', 'END'), ('SYSTEM_STORE_IDTR', 'END'),
+        ('SYSTEM_LOAD_GDTR', 'END'), ('SYSTEM_LOAD_IDTR', 'END'),
+        ('SYSTEM_STORE_MSW', 'END'), ('SYSTEM_LOAD_MSW', 'END'),
+        ('SYSTEM_STORE_LDTR', 'END'), ('SYSTEM_STORE_TR', 'END'),
+        ('READ_RM16', 'SYSTEM_LOAD_LDTR', 'END'),
+        ('READ_RM16', 'SYSTEM_LOAD_TR', 'END'),
+        ('READ_RM16', 'SYSTEM_VERIFY_READ', 'END'),
+        ('READ_RM16', 'SYSTEM_VERIFY_WRITE', 'END'),
+        ('DECODE_MODRM', 'READ_RM16', 'SYSTEM_LOAD_ACCESS', 'END'),
+        ('DECODE_MODRM', 'READ_RM16', 'SYSTEM_LOAD_LIMIT', 'END'),
+    }
+    if actual not in valid:
+        raise CompileError(block.location, 'invalid system-instruction acquisition or commit protocol')
+
+
 def validate_string(block: Block) -> None:
     sequences = (('BRANCH_REPEAT_EMPTY', 'STEP_STRING_SOURCE', 'REPEAT_COUNT', 'READ_STRING_TMP0', 'STEP_STRING_DEST', 'WRITE_STRING_TMP0', 'BRANCH_REPEAT_CONTINUE', 'END'), ('BRANCH_REPEAT_EMPTY', 'STEP_STRING_DEST', 'READ_STRING_TMP1', 'REPEAT_COUNT', 'STEP_STRING_SOURCE', 'READ_STRING_TMP0', 'ALU', 'WRITE_RESULT_DST', 'COMMIT_FLAGS', 'BRANCH_REPEAT_CONTINUE', 'END'), ('BRANCH_REPEAT_EMPTY', 'READ_STRING_ACCUMULATOR', 'REPEAT_COUNT', 'STEP_STRING_DEST', 'WRITE_STRING_TMP0', 'BRANCH_REPEAT_CONTINUE', 'END'), ('BRANCH_REPEAT_EMPTY', 'REPEAT_COUNT', 'STEP_STRING_SOURCE', 'READ_STRING_TMP0', 'WRITE_STRING_ACCUMULATOR', 'BRANCH_REPEAT_CONTINUE', 'END'), ('BRANCH_REPEAT_EMPTY', 'STEP_STRING_DEST', 'REPEAT_COUNT', 'READ_STRING_TMP1', 'READ_STRING_ACCUMULATOR', 'ALU', 'WRITE_RESULT_DST', 'COMMIT_FLAGS', 'BRANCH_REPEAT_CONTINUE', 'END'))
     operations = tuple(s.operation for s in block.statements)
@@ -362,6 +410,9 @@ def validate_muldiv(block: Block) -> None:
 
 
 def validate_block(block: Block) -> None:
+    if block.location.entry.startswith('SYSTEM_'):
+        validate_system_block(block)
+        return
     if any(116 <= OPERATIONS.get(statement.operation, 0) <= 120 for statement in block.statements):
         validate_muldiv(block)
         return
@@ -773,7 +824,7 @@ def generate(program: Program) -> dict[str, str]:
     width = program.address_width
     word_width = program.word_width
     operations = {name: value for name, value in OPERATIONS.items()
-                  if value < {1: 4, 2: 9, 3: 19, 4: 29, 5: 46, 6: 58, 7: 62, 8: 64, 9: 71, 10: 74, 11: 76, 12: 78, 13: 113, 14: 116, 15: 121, 16: 131, 17: 136}[program.format_version]}
+                  if value < {1: 4, 2: 9, 3: 19, 4: 29, 5: 46, 6: 58, 7: 62, 8: 64, 9: 71, 10: 74, 11: 76, 12: 78, 13: 113, 14: 116, 15: 121, 16: 131, 17: 150}[program.format_version]}
     package = banner + ("`timescale 1ns/1ps\n"
                         "// Public constants: standalone consumers use only a subset.\n"
                         "/* verilator lint_off UNUSEDPARAM */\n"
