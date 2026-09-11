@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 17 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 18 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -65,7 +65,15 @@ STATEMENTS.update({131: 'IO_READ8 TMP1 -> TMP0', 132: 'IO_READ16 TMP1 -> TMP0', 
                    139: 'SYSTEM_LOAD_IDTR', 140: 'SYSTEM_STORE_MSW', 141: 'SYSTEM_LOAD_MSW',
                    142: 'SYSTEM_STORE_LDTR', 143: 'SYSTEM_STORE_TR', 144: 'SYSTEM_LOAD_LDTR',
                    145: 'SYSTEM_LOAD_TR', 146: 'SYSTEM_VERIFY_READ', 147: 'SYSTEM_VERIFY_WRITE',
-                   148: 'SYSTEM_LOAD_ACCESS', 149: 'SYSTEM_LOAD_LIMIT'})
+                   148: 'SYSTEM_LOAD_ACCESS', 149: 'SYSTEM_LOAD_LIMIT', 150: 'VALIDATE_CS'})
+STATEMENTS.update({151: 'VALIDATE_EVENT_GATE', 152: 'EVENT_GATE_IP -> TMP0',
+                   153: 'EVENT_GATE_CS -> TMP1', 154: 'CLEAR_EVENT_FLAGS',
+                   155: 'PUSH_EVENT_ERROR', 156: 'VALIDATE_IRET_CS',
+                   157: 'IRET_OUTER_FRAME', 158: 'VALIDATE_IRET_SS',
+                   159: 'VALIDATE_CALL_GATE', 160: 'VALIDATE_CALL_CS',
+                   161: 'VALIDATE_CALL_STACK', 162: 'VALIDATE_CALL_SS',
+                   163: 'CALL_GATE_STACK_SWITCH', 164: 'CHECK_CALL_FRAME',
+                   165: 'COPY_CALL_PARAMETERS'})
 
 
 def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
@@ -127,7 +135,17 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
                          'SYSTEM_STORE_LDTR': 142, 'SYSTEM_STORE_TR': 143,
                          'SYSTEM_LOAD_LDTR': 144, 'SYSTEM_LOAD_TR': 145,
                          'SYSTEM_VERIFY_READ': 146, 'SYSTEM_VERIFY_WRITE': 147,
-                         'SYSTEM_LOAD_ACCESS': 148, 'SYSTEM_LOAD_LIMIT': 149})
+                         'SYSTEM_LOAD_ACCESS': 148, 'SYSTEM_LOAD_LIMIT': 149,
+                         'VALIDATE_CS': 150})
+    if dimension('MC_FORMAT_VERSION') >= 18:
+        expected.update({'VALIDATE_EVENT_GATE': 151, 'EVENT_GATE_IP': 152,
+                         'EVENT_GATE_CS': 153, 'CLEAR_EVENT_FLAGS': 154,
+                         'PUSH_EVENT_ERROR': 155, 'VALIDATE_IRET_CS': 156,
+                         'IRET_OUTER_FRAME': 157, 'VALIDATE_IRET_SS': 158,
+                         'VALIDATE_CALL_GATE': 159, 'VALIDATE_CALL_CS': 160,
+                         'VALIDATE_CALL_STACK': 161, 'VALIDATE_CALL_SS': 162,
+                         'CALL_GATE_STACK_SWITCH': 163, 'CHECK_CALL_FRAME': 164,
+                         'COPY_CALL_PARAMETERS': 165})
     if dimension('MC_FORMAT_VERSION') >= 16:
         expected.update({'BRANCH_REPEAT_EMPTY': 121, 'STEP_STRING_SOURCE': 122, 'STEP_STRING_DEST': 123, 'REPEAT_COUNT': 124, 'READ_STRING_TMP0': 125, 'READ_STRING_TMP1': 126, 'WRITE_STRING_TMP0': 127, 'BRANCH_REPEAT_CONTINUE': 128, 'READ_STRING_ACCUMULATOR': 129, 'WRITE_STRING_ACCUMULATOR': 130})
     if dimension('MC_FORMAT_VERSION') >= 14:
@@ -202,7 +220,7 @@ def canonical_source(words, entries, labels=None, branch_targets=None):
             raise ValueError(f"label {symbol} outside its entry")
         label_addresses.setdefault(address, []).append(match[2])
     unary = any(tuple(words[i:i+7]) in ((4,47,61,14,56,18,3), (4,6,61,14,16,18,3)) for i in range(len(words)-6))
-    version = 17 if any(w > 130 for w in words) else 16 if any(w > 120 for w in words) else 15 if any(w > 115 for w in words) else 14 if any(w > 112 for w in words) else 13 if any(w > 77 for w in words) else 12 if any(w > 75 for w in words) else 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
+    version = 20 if any(w > 164 for w in words) else 19 if any(w > 160 for w in words) else 18 if any(w > 150 for w in words) else 17 if any(w > 130 for w in words) else 16 if any(w > 120 for w in words) else 15 if any(w > 115 for w in words) else 14 if any(w > 112 for w in words) else 13 if any(w > 77 for w in words) else 12 if any(w > 75 for w in words) else 11 if any(w > 73 for w in words) else 10 if any(w > 70 for w in words) or unary else 9 if any(w > 63 for w in words) else 8 if any(w > 61 for w in words) else 7 if any(w > 57 for w in words) or any(tuple(words[i:i+2]) == (30, 54) for i in range(len(words)-1)) else 6 if any(w > 45 for w in words) else 5 if any(w > 28 for w in words) else (4 if any(w > 18 for w in words) else (3 if any(w > 8 for w in words) else (2 if any(w > 3 for w in words) else 1)))
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:

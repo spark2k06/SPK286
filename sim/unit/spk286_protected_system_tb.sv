@@ -8,6 +8,7 @@ module spk286_protected_system_tb;
     integer retired_count = 0;
     integer checks = 0;
     integer protected_data_reads = 0;
+    logic [15:0] pm4a_return_sp;
 
     spk286 dut (.*);
 
@@ -17,7 +18,8 @@ module spk286_protected_system_tb;
             ready = bus_valid && ((cycles % 4) != 1);
             data_in = 16'h0000;
             if (bus_valid && !bus_write) begin
-                if (address[0]) data_in = {memory[address[15:0]], 8'h00};
+                if (bus_status == 4'h0) data_in = 16'h0022;
+                else if (address[0]) data_in = {memory[address[15:0]], 8'h00};
                 else if (bus_bhe_n) data_in = {8'h00, memory[address[15:0]]};
                 else data_in = {memory[address[15:0] + 16'd1], memory[address[15:0]]};
             end
@@ -77,6 +79,32 @@ module spk286_protected_system_tb;
             end
             if (!event_completed || debug_event_vector != expected_vector)
                 $fatal(1, "protected fault did not complete; vector=%h expected=%h IP=%h opcode=%h", debug_event_vector, expected_vector, debug_ip, debug_opcode);
+        end
+    endtask
+
+    task automatic wait_event(input logic [7:0] expected_vector);
+        integer deadline;
+        begin
+            deadline = 0;
+            while ((!event_completed || debug_event_vector != expected_vector) && deadline < 500) begin
+                tick();
+                deadline = deadline + 1;
+            end
+            if (!event_completed || debug_event_vector != expected_vector)
+                $fatal(1, "protected event did not complete; vector=%h expected=%h IP=%h opcode=%h", debug_event_vector, expected_vector, debug_ip, debug_opcode);
+        end
+    endtask
+
+    task automatic wait_shutdown;
+        integer deadline;
+        begin
+            deadline = 0;
+            while (!shutdown && deadline < 500) begin
+                tick();
+                deadline = deadline + 1;
+            end
+            if (!shutdown)
+                $fatal(1, "nested protected event did not enter shutdown; vector=%h IP=%h opcode=%h", debug_event_vector, debug_ip, debug_opcode);
         end
     endtask
 
@@ -150,6 +178,19 @@ module spk286_protected_system_tb;
         memory[16'h0091] = 8'h8E; memory[16'h0092] = 8'hD8;
         memory[16'h0093] = 8'hB8; memory[16'h0094] = 8'h03; memory[16'h0095] = 8'h00;
         memory[16'h0096] = 8'hA1; memory[16'h0097] = 8'h03; memory[16'h0098] = 8'h00;
+        // PM2b direct far transfers: valid code selector 0038 and invalid data selector 0018.
+        memory[16'h0099] = 8'hEA; memory[16'h009A] = 8'h00; memory[16'h009B] = 8'h01;
+        memory[16'h009C] = 8'h38; memory[16'h009D] = 8'h00;
+        memory[16'h00A0] = 8'hEA; memory[16'h00A1] = 8'h00; memory[16'h00A2] = 8'h01;
+        memory[16'h00A3] = 8'h18; memory[16'h00A4] = 8'h00;
+        memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'hEF; memory[16'h0102] = 8'hBE;
+        memory[16'h0103] = 8'hF4;
+        memory[16'h0120] = 8'hFB; memory[16'h0121] = 8'hCD; memory[16'h0122] = 8'h20;
+        memory[16'h0140] = 8'hB8; memory[16'h0141] = 8'hDE; memory[16'h0142] = 8'hAD;
+        memory[16'h0143] = 8'hF4;
+        memory[16'h0160] = 8'hFB; memory[16'h0161] = 8'hCD; memory[16'h0162] = 8'h21;
+        memory[16'h0180] = 8'hB8; memory[16'h0181] = 8'hA5; memory[16'h0182] = 8'h5A;
+        memory[16'h0183] = 8'hF4;
 
         memory[16'h0300] = 8'h34; memory[16'h0301] = 8'h12;
         memory[16'h0302] = 8'h78; memory[16'h0303] = 8'h56; memory[16'h0304] = 8'h9A;
@@ -178,6 +219,11 @@ module spk286_protected_system_tb;
         memory[16'h56A2] = 8'h00; memory[16'h56A3] = 8'h00;
         memory[16'h56A4] = 8'h00; memory[16'h56A5] = 8'h91;
         memory[16'h56A6] = 8'h00; memory[16'h56A7] = 8'h00;
+        // GDT index 7: present readable code, base 000000, limit 01FF, accessed clear.
+        memory[16'h56B0] = 8'hFF; memory[16'h56B1] = 8'h01;
+        memory[16'h56B2] = 8'h00; memory[16'h56B3] = 8'h00;
+        memory[16'h56B4] = 8'h00; memory[16'h56B5] = 8'h9A;
+        memory[16'h56B6] = 8'h00; memory[16'h56B7] = 8'h00;
         // GDT index 6: present writable data, limit 0002, accessed initially clear.
         memory[16'h56A8] = 8'h02; memory[16'h56A9] = 8'h00;
         memory[16'h56AA] = 8'h00; memory[16'h56AB] = 8'h00;
@@ -188,6 +234,103 @@ module spk286_protected_system_tb;
         memory[16'h400A] = 8'h00; memory[16'h400B] = 8'h00;
         memory[16'h400C] = 8'h00; memory[16'h400D] = 8'h93;
         memory[16'h400E] = 8'h00; memory[16'h400F] = 8'h00;
+
+        // PM3a: vector 0D in the loaded IDT (base DE9ABC, low 16-bit bus
+        // address 9ABC) points at the existing protected CS handler.
+        memory[16'h9B24] = 8'h00; memory[16'h9B25] = 8'h01;
+        memory[16'h9B26] = 8'h38; memory[16'h9B27] = 8'h00;
+        memory[16'h9B28] = 8'h00; memory[16'h9B29] = 8'h86;
+        memory[16'h9B2A] = 8'h00; memory[16'h9B2B] = 8'h00;
+        // PM3a: software INT 20 uses an interrupt gate; INT 21 uses a trap
+        // gate. Both remain same-level transitions to CS=0038.
+        memory[16'h9BBC] = 8'h40; memory[16'h9BBD] = 8'h01;
+        memory[16'h9BBE] = 8'h38; memory[16'h9BBF] = 8'h00;
+        memory[16'h9BC0] = 8'h00; memory[16'h9BC1] = 8'h86;
+        memory[16'h9BC2] = 8'h00; memory[16'h9BC3] = 8'h00;
+        memory[16'h9BC4] = 8'h80; memory[16'h9BC5] = 8'h01;
+        memory[16'h9BC6] = 8'h38; memory[16'h9BC7] = 8'h00;
+        memory[16'h9BC8] = 8'h00; memory[16'h9BC9] = 8'h87;
+        memory[16'h9BCA] = 8'h00; memory[16'h9BCB] = 8'h00;
+        // PM3b: vector 02 and external vector 22 use same-level interrupt
+        // gates whose handlers execute IRET back into the protected caller.
+        memory[16'h9ACC] = 8'hC0; memory[16'h9ACD] = 8'h01;
+        memory[16'h9ACE] = 8'h38; memory[16'h9ACF] = 8'h00;
+        memory[16'h9AD0] = 8'h00; memory[16'h9AD1] = 8'h86;
+        memory[16'h9AD2] = 8'h00; memory[16'h9AD3] = 8'h00;
+        memory[16'h9BCC] = 8'hC0; memory[16'h9BCD] = 8'h01;
+        memory[16'h9BCE] = 8'h38; memory[16'h9BCF] = 8'h00;
+        memory[16'h9BD0] = 8'h00; memory[16'h9BD1] = 8'h86;
+        memory[16'h9BD2] = 8'h00; memory[16'h9BD3] = 8'h00;
+        memory[16'h9B14] = 8'hE0; memory[16'h9B15] = 8'h01;
+        memory[16'h9B16] = 8'h38; memory[16'h9B17] = 8'h00;
+        memory[16'h9B18] = 8'h00; memory[16'h9B19] = 8'h86;
+        memory[16'h9B1A] = 8'h00; memory[16'h9B1B] = 8'h00;
+        // GDT index 8: structurally valid but not-present writable data.
+        memory[16'h56B8] = 8'hFF; memory[16'h56B9] = 8'hFF;
+        memory[16'h56BA] = 8'h00; memory[16'h56BB] = 8'h00;
+        memory[16'h56BC] = 8'h00; memory[16'h56BD] = 8'h12;
+        memory[16'h56BE] = 8'h00; memory[16'h56BF] = 8'h00;
+        // PM3d: ring-3 code/data descriptors for an outer-level IRET frame.
+        memory[16'h56C0] = 8'hFF; memory[16'h56C1] = 8'h01;
+        memory[16'h56C2] = 8'h00; memory[16'h56C3] = 8'h00;
+        memory[16'h56C4] = 8'h00; memory[16'h56C5] = 8'hFA;
+        memory[16'h56C6] = 8'h00; memory[16'h56C7] = 8'h00;
+        memory[16'h56C8] = 8'hFF; memory[16'h56C9] = 8'hFF;
+        memory[16'h56CA] = 8'h00; memory[16'h56CB] = 8'h00;
+        memory[16'h56CC] = 8'h00; memory[16'h56CD] = 8'hF2;
+        memory[16'h56CE] = 8'h00; memory[16'h56CF] = 8'h00;
+        // PM4a: present DPL-0 call gate at selector 0058 targeting 0038:01C8.
+        memory[16'h56D0] = 8'hD8; memory[16'h56D1] = 8'h01;
+        memory[16'h56D2] = 8'h38; memory[16'h56D3] = 8'h00;
+        memory[16'h56D4] = 8'h00; memory[16'h56D5] = 8'h84;
+        memory[16'h56D6] = 8'h00; memory[16'h56D7] = 8'h00;
+        // PM4b: ring-1 code/data descriptors and DPL-1 call gates back into
+        // the existing ring-0 code segment.  Selector 0071 is the zero-word
+        // PM4b.1 gate; selector 0079 is the PM4b.2 two-word gate.
+        memory[16'h56D8] = 8'hFF; memory[16'h56D9] = 8'h03;
+        memory[16'h56DA] = 8'h00; memory[16'h56DB] = 8'h00;
+        memory[16'h56DC] = 8'h00; memory[16'h56DD] = 8'hBA;
+        memory[16'h56DE] = 8'h00; memory[16'h56DF] = 8'h00;
+        memory[16'h56E0] = 8'hFF; memory[16'h56E1] = 8'hFF;
+        memory[16'h56E2] = 8'h00; memory[16'h56E3] = 8'h00;
+        memory[16'h56E4] = 8'h00; memory[16'h56E5] = 8'hB2;
+        memory[16'h56E6] = 8'h00; memory[16'h56E7] = 8'h00;
+        memory[16'h56E8] = 8'h00; memory[16'h56E9] = 8'h01;
+        memory[16'h56EA] = 8'h38; memory[16'h56EB] = 8'h00;
+        memory[16'h56EC] = 8'h00; memory[16'h56ED] = 8'hA4;
+        memory[16'h56EE] = 8'h00; memory[16'h56EF] = 8'h00;
+        // PM4b.2: a second DPL-1 gate targeting the same entry point with
+        // two 80286 parameter words.
+        memory[16'h56F0] = 8'h00; memory[16'h56F1] = 8'h01;
+        memory[16'h56F2] = 8'h38; memory[16'h56F3] = 8'h00;
+        memory[16'h56F4] = 8'h02; memory[16'h56F5] = 8'hA4;
+        memory[16'h56F6] = 8'h00; memory[16'h56F7] = 8'h00;
+        // TSS SP0/SS0 and SP1/SS1 at the loaded 80286 TSS base 038000.
+        memory[16'h8002] = 8'h00; memory[16'h8003] = 8'hA0;
+        memory[16'h8004] = 8'h18; memory[16'h8005] = 8'h00;
+        memory[16'h8006] = 8'h00; memory[16'h8007] = 8'hFF;
+        memory[16'h8008] = 8'h69; memory[16'h8009] = 8'h00;
+        // Ring-1 entry calls the DPL-1 gate.  The ring-0 target restores the
+        // pre-test SP before continuing with the existing PM3 checks.
+        memory[16'h0240] = 8'h9A; memory[16'h0241] = 8'h00; memory[16'h0242] = 8'h01;
+        memory[16'h0243] = 8'h79; memory[16'h0244] = 8'h00; memory[16'h0245] = 8'hF4;
+        memory[16'h01B8] = 8'hCF;
+        memory[16'h0190] = 8'hCF;
+        memory[16'h0194] = 8'hB8; memory[16'h0195] = 8'h34; memory[16'h0196] = 8'h12;
+        memory[16'h0197] = 8'hF4;
+        memory[16'h01C8] = 8'h9A; memory[16'h01C9] = 8'hD8; memory[16'h01CA] = 8'h01;
+        memory[16'h01CB] = 8'h58; memory[16'h01CC] = 8'h00;
+        memory[16'h01D8] = 8'hB8; memory[16'h01D9] = 8'hFE; memory[16'h01DA] = 8'hCA;
+        memory[16'h01DB] = 8'hCB;
+        memory[16'h01A0] = 8'hFB; memory[16'h01A1] = 8'h40; memory[16'h01A2] = 8'hF4;
+        memory[16'h01B0] = 8'hCD; memory[16'h01B1] = 8'h22; memory[16'h01B2] = 8'h90;
+        memory[16'h01C0] = 8'hCF;
+        // PM3c handler consumes the saved error word, then leaves the event
+        // path so the following directed nested-entry failure can be tested.
+        memory[16'h01D0] = 8'hB8; memory[16'h01D1] = 8'h40; memory[16'h01D2] = 8'h00;
+        memory[16'h01D3] = 8'h8E; memory[16'h01D4] = 8'hD8;
+        memory[16'h01E0] = 8'h58; memory[16'h01E1] = 8'hE9; memory[16'h01E2] = 8'h0C; memory[16'h01E3] = 8'h00;
+        memory[16'h01F0] = 8'hCD; memory[16'h01F1] = 8'h0B;
 
         reset = 1'b1;
         execute_enable = 1'b0;
@@ -318,6 +461,150 @@ module spk286_protected_system_tb;
         protected_data_reads = 0;
         wait_fault(8'd13);
         check(protected_data_reads == 0, "PM2 blocks an out-of-limit word before its first physical data cycle");
+
+        far_restart(16'h0000, 16'h0099);
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_cs_base == 24'h000000 &&
+              debug_segment_limits[31:16] == 16'h01FF && debug_segment_access[15:8] == 8'h9B && memory[16'h56B5] == 8'h9B,
+              "PM2b validates and atomically commits a direct far JMP CS cache with the accessed bit");
+        retire_one();
+        check(debug_gpr[15:0] == 16'hBEEF, "PM2b executes at the validated protected CS target");
+
+        far_restart(16'h0000, 16'h00A0);
+        wait_fault(8'd13);
+        check(debug_cs == 16'h0038 && debug_cs_base == 24'h000000 && debug_segment_limits[31:16] == 16'h01FF,
+              "PM2b rejects a data descriptor as CS without changing the current CS cache");
+
+        far_restart(16'h0038, 16'h0120);
+        wait_event(8'h20);
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0143 && debug_gpr[15:0] == 16'hADDE && !debug_flags[9] && !debug_flags[8],
+              "PM3a interrupt gate validates IDT and clears IF/TF at same privilege");
+
+        far_restart(16'h0038, 16'h0160);
+        wait_event(8'h21);
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0183 && debug_gpr[15:0] == 16'h5AA5 && debug_flags[9] && !debug_flags[8],
+              "PM3a trap gate preserves IF while clearing TF at same privilege");
+
+        flags_write_en = 1'b1;
+        flags_write_mask = 16'hFFFF;
+        flags_write_data = 16'h0202;
+        tick();
+        flags_write_en = 1'b0;
+        far_restart(16'h0038, 16'h01A0);
+        retire_one();
+        nmi = 1'b1;
+        wait_event(8'h02);
+        nmi = 1'b0;
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h01A1 && debug_flags[9] && !debug_flags[8],
+              "PM3b NMI enters through the protected IDT and same-level IRET restores IP/FLAGS");
+        retire_one();
+        intr = 1'b1;
+        wait_event(8'h22);
+        intr = 1'b0;
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h01A2 && debug_flags[9] && !debug_flags[8],
+              "PM3b external INTR consumes INTA vector 22 and returns through protected IRET");
+
+        pm4a_return_sp = debug_gpr[79:64];
+        far_restart(16'h0038, 16'h01C8);
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h01D8 && debug_gpr[79:64] == pm4a_return_sp - 16'd4 &&
+              memory[pm4a_return_sp - 16'd4] == 8'hCD && memory[pm4a_return_sp - 16'd3] == 8'h01 &&
+              memory[pm4a_return_sp - 16'd2] == 8'h38 && memory[pm4a_return_sp - 16'd1] == 8'h00 &&
+              memory[16'h56D5] == 8'h84,
+              "PM4a same-level call gate validates target and pushes return IP/CS before committing");
+        retire_one();
+        check(debug_gpr[15:0] == 16'hCAFE && debug_cs == 16'h0038,
+              "PM4a call-gate target executes at the validated same-level CS");
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h01CD && debug_gpr[79:64] == pm4a_return_sp,
+              "PM4a far return restores the same-level call-gate frame");
+
+        // PM4b.2: use the already validated outer IRET path to enter ring 1,
+        // then call back through a DPL-1 gate into ring 0 with a TSS stack
+        // switch and a copied two-parameter return frame.
+        memory[pm4a_return_sp] = 8'h40; memory[pm4a_return_sp + 16'd1] = 8'h02;
+        memory[pm4a_return_sp + 16'd2] = 8'h61; memory[pm4a_return_sp + 16'd3] = 8'h00;
+        memory[pm4a_return_sp + 16'd4] = 8'h02; memory[pm4a_return_sp + 16'd5] = 8'h02;
+        memory[pm4a_return_sp + 16'd6] = 8'h00; memory[pm4a_return_sp + 16'd7] = 8'hFF;
+        memory[pm4a_return_sp + 16'd8] = 8'h69; memory[pm4a_return_sp + 16'd9] = 8'h00;
+        memory[16'hFF00] = 8'h57; memory[16'hFF01] = 8'h13;
+        memory[16'hFF02] = 8'h68; memory[16'hFF03] = 8'h24;
+        // The target offset is 0100, which was used by PM2b before this
+        // point; rewrite it with a target that restores the saved SP.
+        memory[16'h0100] = 8'hB8; memory[16'h0101] = pm4a_return_sp[7:0]; memory[16'h0102] = pm4a_return_sp[15:8];
+        memory[16'h0103] = 8'h89; memory[16'h0104] = 8'hC4;
+        memory[16'h0105] = 8'hB8; memory[16'h0106] = 8'hDE; memory[16'h0107] = 8'hAD;
+        memory[16'h0108] = 8'hF4;
+        far_restart(16'h0038, 16'h01B8);
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0240 &&
+              debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF00 &&
+              memory[16'h56DD] == 8'hBB && memory[16'h56E5] == 8'hB3,
+              "PM4b.1 outer IRET enters the ring-1 caller and accesses its code/stack descriptors");
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_segment_selectors[47:32] == 16'h0018 &&
+              debug_gpr[79:64] == 16'h9FF4 &&
+              memory[16'h9FF4] == 8'h45 && memory[16'h9FF5] == 8'h02 &&
+              memory[16'h9FF6] == 8'h61 && memory[16'h9FF7] == 8'h00 &&
+              memory[16'h9FF8] == 8'h57 && memory[16'h9FF9] == 8'h13 &&
+              memory[16'h9FFA] == 8'h68 && memory[16'h9FFB] == 8'h24 &&
+              memory[16'h9FFC] == 8'h00 && memory[16'h9FFD] == 8'hFF &&
+              memory[16'h9FFE] == 8'h69 && memory[16'h9FFF] == 8'h00,
+              "PM4b.2 inter-level call gate copies parameters before committing the return frame");
+        retire_one();
+        retire_one();
+        check(debug_gpr[79:64] == pm4a_return_sp, "PM4b.2 target can restore the caller stack after parameter copying");
+        retire_one();
+        check(debug_gpr[15:0] == 16'hADDE && debug_cs == 16'h0038,
+              "PM4b.2 target executes after the copied-parameter frame commits");
+
+        flags_write_en = 1'b1;
+        flags_write_mask = 16'hFFFF;
+        flags_write_data = 16'h0202;
+        tick();
+        flags_write_en = 1'b0;
+        far_restart(16'h0038, 16'h01B0);
+        wait_event(8'h22);
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h01B2 && debug_flags[9] && !debug_flags[8],
+              "PM3b software event returns through validated same-level protected IRET");
+        far_restart(16'h0038, 16'h01D0);
+        wait_fault(8'h0B);
+        retire_one();
+        check(debug_gpr[15:0] == 16'h0040 && debug_gpr[79:64] == 16'hFFDE &&
+              memory[16'hFFDC] == 8'h40 && memory[16'hFFDD] == 8'h00,
+              "PM3c #NP pushes one 16-bit selector error word and the handler consumes it");
+
+        // PM3d uses the current post-error-handler stack position.  The
+        // earlier PM3c event occupied the initially reserved FFE0 area, so
+        // install the outer-return frame at the live SP after that event.
+        memory[16'hFFDE] = 8'h94; memory[16'hFFDF] = 8'h01;
+        memory[16'hFFE0] = 8'h4B; memory[16'hFFE1] = 8'h00;
+        memory[16'hFFE2] = 8'h02; memory[16'hFFE3] = 8'h02;
+        memory[16'hFFE4] = 8'h00; memory[16'hFFE5] = 8'h80;
+        memory[16'hFFE6] = 8'h53; memory[16'hFFE7] = 8'h00;
+        far_restart(16'h0038, 16'h0190);
+        retire_one();
+        check(debug_cs == 16'h004B && debug_ip == 16'h0194 && debug_gpr[79:64] == 16'h8000 &&
+              debug_segment_selectors[47:32] == 16'h0053 && debug_segment_access[23:16] == 8'hF3 &&
+              memory[16'h56C5] == 8'hFB && memory[16'h56CD] == 8'hF3,
+              "PM3d outer IRET validates CS and SS then commits IP/CS/SS/FLAGS/SP coherently");
+        retire_one();
+        check(debug_gpr[15:0] == 16'h1234 && debug_cs == 16'h004B && debug_segment_selectors[47:32] == 16'h0053,
+              "PM3d resumes execution on the less-privileged code and stack caches");
+
+        // The gate descriptor remains valid, but its target is now a data
+        // segment.  INT 0B therefore faults during protected event entry,
+        // while an event is already active, and follows the shutdown policy.
+        memory[16'h9B16] = 8'h18; memory[16'h9B17] = 8'h00;
+        far_restart(16'h0038, 16'h01F0);
+        wait_shutdown();
+        check(shutdown && debug_cs == 16'h004B,
+              "PM3c nested protected event failure enters shutdown without committing a bad CS");
 
         $display("PROTECTED_SYSTEM PASS: %0d checks, READY stalls=%0d", checks, cycles);
         $finish;

@@ -15,6 +15,7 @@ module spk286_micro_executor (
     input  logic [2:0] destination, source_index,
     input logic [15:0] target_read_data, effective_offset, address_base,
     input logic [15:0] segment_limit,
+    input logic [15:0] stack_segment_limit,
     input logic operand_register_direct,
     output logic address_override,
     output logic [15:0] address_offset,
@@ -49,8 +50,10 @@ module spk286_micro_executor (
     input logic [15:0] direct_flags_data, direct_flags_mask,
     input logic if_value,
     input logic [15:0] event_flags, event_cs, event_ip,
+    input logic event_error_valid,
+    input logic [15:0] event_error_code,
     input logic [7:0] event_vector,
-    input logic event_needs_ack, ack_done,
+    input logic event_needs_ack, ack_done, event_active, event_software,
     output logic ack_request, software_event_request, halt_request,
     output logic [7:0] software_vector,
     output logic context_commit, vector_request,
@@ -81,6 +84,17 @@ module spk286_micro_executor (
     output logic [1:0] protected_segment_commit_dpl,
     output logic protected_segment_commit_table_indicator,
     output logic [1:0] protected_segment_commit_rpl,
+    output logic protected_segment_commit_en2,
+    output logic [1:0] protected_segment_commit_index2,
+    output logic [15:0] protected_segment_commit_selector2,
+    output logic [23:0] protected_segment_commit_base2,
+    output logic [15:0] protected_segment_commit_limit2,
+    output logic [7:0] protected_segment_commit_access2,
+    output logic [3:0] protected_segment_commit_class2,
+    output logic protected_segment_commit_present2, protected_segment_commit_protected2,
+    output logic [1:0] protected_segment_commit_dpl2,
+    output logic protected_segment_commit_table_indicator2,
+    output logic [1:0] protected_segment_commit_rpl2,
     input logic result_write_allowed,
     input logic [15:0] decoded_flags_mask, decoded_undefined_mask,
     output logic flags_write_en,
@@ -92,6 +106,10 @@ module spk286_micro_executor (
     input logic [23:0] protected_ldtr_base,
     input logic [15:0] protected_ldtr_limit,
     input logic protected_ldtr_valid, protected_ldtr_present,
+    input logic [23:0] protected_tr_base,
+    input logic [15:0] protected_tr_limit,
+    input logic protected_tr_valid, protected_tr_present,
+    input logic [15:0] protected_ss_selector,
     input logic [1:0] protected_cpl,
     output logic protected_msw_load_en,
     output logic [15:0] protected_msw_load_data, protected_msw_load_mask,
@@ -108,8 +126,16 @@ module spk286_micro_executor (
     output logic protected_ldtr_commit_valid, protected_tr_commit_valid,
     output logic protected_descriptor_access,
     output logic [23:0] protected_descriptor_address,
+    output logic protected_tss_access,
+    output logic [23:0] protected_tss_address,
+    output logic protected_call_stack_access,
+    output logic [23:0] protected_call_stack_address,
+    output logic [15:0] protected_call_stack_limit,
+    output logic protected_event_access,
+    output logic [23:0] protected_event_address,
     output logic system_limit_fault, system_fault,
-    output logic [7:0] system_fault_vector
+    output logic [7:0] system_fault_vector,
+    output logic [15:0] system_fault_error_code
 );
     logic fetch_port, io_read, io_write, io_byte;
     assign fetch_port = allowed && operation == spk286_microcode_pkg::MC_FETCH_PORT;
@@ -144,10 +170,12 @@ module spk286_micro_executor (
     assign string_request = string_read0 || string_read1 || (string_store && !string_range_fault);
     assign string_read_acc = allowed && operation == spk286_microcode_pkg::MC_READ_STRING_ACCUMULATOR;
     assign string_write_acc = allowed && operation == spk286_microcode_pkg::MC_WRITE_STRING_ACCUMULATOR && temporary_valid_q[0];
-    logic check_push2,check_pop2,add_allocation_sp;
+    logic check_push2, check_pop2, check_call_frame, copy_call_parameters, add_allocation_sp;
     assign check_push2=allowed && operation==spk286_microcode_pkg::MC_CHECK_PUSH2;
     assign check_pop2=allowed && operation==spk286_microcode_pkg::MC_CHECK_POP2;
-    assign add_allocation_sp=allowed && operation==spk286_microcode_pkg::MC_ADD_ALLOCATION_SP && allocation_valid_q;
+    assign check_call_frame = allowed && operation == spk286_microcode_pkg::MC_CHECK_CALL_FRAME;
+    assign copy_call_parameters = allowed && operation == spk286_microcode_pkg::MC_COPY_CALL_PARAMETERS;
+    assign add_allocation_sp=allowed && operation==spk286_microcode_pkg::MC_ADD_ALLOCATION_SP && allocation_valid_q && !iret_outer_required;
     logic [15:0] auxiliary_q, allocation_q, frame_address_q;
     logic auxiliary_valid_q, allocation_valid_q, frame_address_valid_q, counter_valid_q;
     logic [4:0] counter_q;
@@ -182,14 +210,18 @@ module spk286_micro_executor (
     assign range_fault = string_range_fault || (check_push2 && stack_pointer[0] && stack_pointer<16'd4) ||
                          (check_pop2 && stack_pointer[0] && stack_pointer>=16'hFFFD) || (check_push8 && push8_invalid) || (check_pop8 && pop8_invalid) ||
                          (check_stack_word && tmp0_q == 16'hFFFF) ||
-                         (check_rm32 && effective_offset[0] && effective_offset > 16'hFFFC);
+                         (check_rm32 && effective_offset[0] && effective_offset > 16'hFFFC) || iret_outer_range_fault ||
+                         iret_outer_restored_range_fault || call_stack_range_fault;
     assign bounds_fault = check_bounds && ($signed(tmp1_q) < $signed(auxiliary_q) || $signed(tmp1_q) > $signed(tmp0_q));
     assign set_frame_address = allowed && operation == spk286_microcode_pkg::MC_SET_STACK_ADDRESS_TMP0 && temporary_valid_q[0];
     assign read_frame_address = allowed && operation == spk286_microcode_pkg::MC_READ_STACK_ADDRESS_TMP0 && frame_address_valid_q;
     assign decrement_frame_address = allowed && operation == spk286_microcode_pkg::MC_DECREMENT_STACK_ADDRESS && frame_address_valid_q;
     assign allocate_stack = allowed && operation == spk286_microcode_pkg::MC_ALLOCATE_STACK && allocation_valid_q && stack_cursor_valid_q;
     assign set_ea_plus2 = allowed && operation == spk286_microcode_pkg::MC_SET_EA_PLUS2;
-    assign stack_offset = read_frame_address ? frame_address_q : stack_native_offset;
+    assign stack_offset = call_parameter_read ? call_parameter_source_sp_q :
+                          call_parameter_write ? (stack_cursor_q - 16'd2) :
+                          iret_outer_pop ? (stack_pointer + (allocation_valid_q ? allocation_q : 16'd0)) :
+                          read_frame_address ? frame_address_q : stack_native_offset;
 
     logic [15:0] tmp0_q, tmp1_q, tmp2_q, flags_q, flags_mask_q;
     logic system_active_q;
@@ -281,7 +313,8 @@ module spk286_micro_executor (
     logic descriptor_load_ldtr, descriptor_load_tr, descriptor_load_operation;
     logic descriptor_verify_read, descriptor_verify_write, descriptor_verify_operation;
     logic descriptor_load_access, descriptor_load_limit, descriptor_inspect_operation;
-    logic segment_reload_operation, descriptor_segment_null_commit, descriptor_segment_success_live;
+    logic segment_reload_operation, cs_validation_operation, call_ss_validation_operation;
+    logic descriptor_segment_null_commit, descriptor_segment_success_live, descriptor_cs_success_live;
     logic descriptor_begin, descriptor_operand_done, descriptor_operation_done;
     logic descriptor_write, descriptor_null_commit, descriptor_success_live, descriptor_success_q;
     logic descriptor_verify_success_live, descriptor_verify_negative, descriptor_inspect_negative;
@@ -307,11 +340,88 @@ module spk286_micro_executor (
     logic [4:0] descriptor_unused_gate_parameter_count;
     /* verilator lint_on UNUSEDSIGNAL */
     logic descriptor_selector_ti, descriptor_selector_null, descriptor_selector_limit_valid;
+    logic [15:0] descriptor_selector_value;
     logic [23:0] descriptor_selector_address;
     logic descriptor_selector_carry;
     logic [15:0] descriptor_table_limit;
     logic [23:0] descriptor_table_base;
     logic [1:0] descriptor_effective_privilege;
+    logic descriptor_cs_offset_fault, cs_validation_success_event;
+    logic call_gate_validation_operation, call_gate_cs_validation_operation;
+    logic call_stack_validation_operation, call_gate_stack_switch_operation;
+    logic call_gate_stack_switch_begin, call_gate_stack_switch_active_q;
+    logic call_gate_stack_write, call_gate_stack_write_done;
+    logic [1:0] call_gate_stack_switch_phase_q;
+    logic [15:0] call_gate_stack_data_q;
+    logic call_parameter_active_q, call_parameter_read, call_parameter_write;
+    logic call_parameter_read_done, call_parameter_write_done, call_parameter_operation_done;
+    logic [1:0] call_parameter_phase_q;
+    logic [4:0] call_parameter_remaining_q;
+    logic [15:0] call_parameter_source_sp_q, call_parameter_data_q;
+    logic call_gate_outer_required, call_tss_active_q, call_tss_active_state_q, call_tss_operand_done;
+    logic call_tss_pre_fault, call_stack_ready_q, call_stack_range_fault;
+    logic [1:0] call_tss_phase_q;
+    logic [15:0] call_stack_sp_q, call_stack_ss_q, call_gate_selector_q, call_tss_phase_offset;
+    logic [1:0] call_gate_target_dpl_q;
+    logic [4:0] call_gate_parameter_count_q;
+    logic call_ss_candidate_valid_q;
+    logic [15:0] call_ss_selector_q, call_ss_limit_q;
+    logic [23:0] call_ss_base_q;
+    logic [7:0] call_ss_access_q;
+    logic [3:0] call_ss_class_q;
+    logic [1:0] call_ss_dpl_q, call_ss_rpl_q;
+    logic call_ss_present_q, call_ss_table_q;
+    logic iret_cs_validation_operation, iret_ss_validation_operation;
+    logic iret_outer_frame_operation, iret_outer_required;
+    logic iret_outer_pop, iret_outer_pop_done, iret_outer_range_fault, iret_outer_restored_range_fault;
+    logic iret_outer_ready_q, iret_ss_candidate_valid_q;
+    logic [1:0] iret_outer_phase_q;
+    logic [15:0] iret_outer_sp_q, iret_outer_ss_q;
+    logic [15:0] iret_ss_selector_q, iret_ss_limit_q;
+    logic [23:0] iret_ss_base_q;
+    logic [7:0] iret_ss_access_q;
+    logic [3:0] iret_ss_class_q;
+    logic [1:0] iret_ss_dpl_q, iret_ss_rpl_q;
+    logic iret_ss_present_q, iret_ss_table_q;
+    logic descriptor_iret_cs_success_live, descriptor_iret_ss_success_live;
+    logic descriptor_call_ss_success_live;
+    logic descriptor_call_gate_success_live, descriptor_call_gate_cs_success_live;
+    logic descriptor_cs_candidate_success_live;
+
+    logic event_gate_active_q;
+    logic [2:0] event_gate_phase_q;
+    logic [15:0] event_gate_word0_q, event_gate_word1_q, event_gate_word2_q, event_gate_word3_q;
+    logic event_gate_operation, event_gate_ip_operation, event_gate_cs_operation;
+    logic event_gate_begin, event_gate_operand_done, event_gate_pre_fault, event_gate_post_fault;
+    logic event_gate_operation_done, event_gate_success_live, event_gate_limit_fault;
+    logic event_gate_candidate_valid_q;
+    logic [15:0] event_gate_target_selector_q, event_gate_target_offset_q;
+    logic [3:0] event_gate_class_q;
+    logic [15:0] event_gate_entry_offset;
+    logic [63:0] event_gate_raw_q, event_gate_raw_candidate;
+    /* verilator lint_off UNUSEDSIGNAL */
+    logic [15:0] event_gate_limit;
+    logic [7:0] event_gate_access_rights;
+    logic [3:0] event_gate_class;
+    logic event_gate_valid, event_gate_reserved_valid, event_gate_present;
+    logic event_gate_unused_segment, event_gate_unused_executable, event_gate_unused_conforming;
+    logic event_gate_unused_expand_down, event_gate_unused_readable, event_gate_unused_writable, event_gate_unused_accessed;
+    logic [1:0] event_gate_dpl;
+    logic [15:0] event_gate_target_selector, event_gate_target_offset;
+    logic [4:0] event_gate_parameter_count;
+    /* verilator lint_on UNUSEDSIGNAL */
+    logic event_gate_vector_ip, event_gate_vector_cs, clear_event_flags;
+    /* verilator lint_off UNUSEDSIGNAL */
+    logic [23:0] event_gate_unused_base;
+    /* verilator lint_on UNUSEDSIGNAL */
+    logic cs_candidate_valid_q;
+    logic [15:0] cs_candidate_selector_q, cs_candidate_limit_q;
+    logic [23:0] cs_candidate_base_q;
+    logic [7:0] cs_candidate_access_q;
+    logic [3:0] cs_candidate_class_q;
+    logic [1:0] cs_candidate_dpl_q, cs_candidate_rpl_q;
+    logic cs_candidate_present_q, cs_candidate_table_q;
+    logic call_gate_candidate_valid_q;
 
     assign descriptor_load_ldtr = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_LDTR;
     assign descriptor_load_tr = allowed && operation == spk286_microcode_pkg::MC_SYSTEM_LOAD_TR;
@@ -323,13 +433,33 @@ module spk286_micro_executor (
     assign descriptor_inspect_operation = descriptor_load_access || descriptor_load_limit;
     assign segment_reload_operation = allowed && operation == spk286_microcode_pkg::MC_WRITE_SEG16_TMP0 &&
                                      temporary_valid_q[0] && protected_msw[0];
+    assign cs_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_CS && protected_msw[0];
+    assign call_gate_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_CALL_GATE && protected_msw[0];
+    assign call_gate_cs_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_CALL_CS && protected_msw[0];
+    assign call_stack_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_CALL_STACK;
+    assign call_ss_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_CALL_SS && protected_msw[0];
+    assign call_gate_stack_switch_operation = allowed && operation == spk286_microcode_pkg::MC_CALL_GATE_STACK_SWITCH;
+    assign iret_cs_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_IRET_CS && protected_msw[0];
+    assign iret_outer_frame_operation = allowed && operation == spk286_microcode_pkg::MC_IRET_OUTER_FRAME;
+    assign iret_ss_validation_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_IRET_SS && protected_msw[0];
     assign descriptor_load_operation = descriptor_load_ldtr || descriptor_load_tr || descriptor_verify_operation ||
-                                      descriptor_inspect_operation || segment_reload_operation;
-    assign descriptor_begin = descriptor_load_operation && temporary_valid_q[0] && !descriptor_active_q;
+                                      descriptor_inspect_operation || segment_reload_operation || cs_validation_operation ||
+                                      call_gate_validation_operation || call_gate_cs_validation_operation || call_ss_validation_operation ||
+                                      iret_cs_validation_operation || iret_ss_validation_operation;
+    assign descriptor_selector_value = (cs_validation_operation || call_gate_validation_operation ||
+                                        call_gate_cs_validation_operation || iret_cs_validation_operation) ? tmp1_q :
+                                       iret_ss_validation_operation ? iret_outer_ss_q :
+                                       call_ss_validation_operation ? call_stack_ss_q : tmp0_q;
+    assign descriptor_begin = descriptor_load_operation &&
+                              ((cs_validation_operation || call_gate_validation_operation || call_gate_cs_validation_operation ||
+                                iret_cs_validation_operation) ? temporary_valid_q[1] :
+                               iret_ss_validation_operation ? iret_outer_ready_q :
+                               call_ss_validation_operation ? call_stack_ready_q : temporary_valid_q[0]) &&
+                              !descriptor_active_q;
     assign descriptor_table_limit = descriptor_selector_ti ? protected_ldtr_limit : protected_gdtr_limit;
     assign descriptor_table_base = descriptor_selector_ti ? protected_ldtr_base : protected_gdtr_base;
     spk286_selector descriptor_selector (
-        .selector(tmp0_q), .table_limit(descriptor_table_limit), .table_base(descriptor_table_base),
+        .selector(descriptor_selector_value), .table_limit(descriptor_table_limit), .table_base(descriptor_table_base),
         .index(descriptor_unused_index), .table_indicator(descriptor_selector_ti), .rpl(descriptor_unused_rpl),
         .null_selector(descriptor_selector_null), .descriptor_end(descriptor_unused_end),
         .descriptor_limit_valid(descriptor_selector_limit_valid),
@@ -345,7 +475,20 @@ module spk286_micro_executor (
                                    (segment_reload_operation &&
                                     (descriptor_selector_carry ||
                                      (!descriptor_selector_null && !descriptor_selector_limit_valid) ||
-                                     (descriptor_selector_null && segment_index == 2'd2))));
+                                     (descriptor_selector_null && segment_index == 2'd2))) ||
+                                   ((cs_validation_operation || call_gate_validation_operation || call_gate_cs_validation_operation ||
+                                      iret_cs_validation_operation) &&
+                                    (descriptor_selector_carry || descriptor_selector_null ||
+                                     (!descriptor_selector_limit_valid) ||
+                                     (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)))) ||
+                                   (call_ss_validation_operation &&
+                                    (descriptor_selector_carry || descriptor_selector_null ||
+                                     (!descriptor_selector_limit_valid) ||
+                                     (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)))) ||
+                                   (iret_ss_validation_operation &&
+                                    (descriptor_selector_carry || descriptor_selector_null ||
+                                     (!descriptor_selector_limit_valid) ||
+                                     (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)))));
     assign descriptor_verify_negative = descriptor_begin && descriptor_verify_operation && !descriptor_pre_fault &&
                                        (descriptor_selector_null || descriptor_selector_carry ||
                                         !descriptor_selector_limit_valid ||
@@ -374,6 +517,28 @@ module spk286_micro_executor (
     assign descriptor_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
                                      ((descriptor_load_ldtr && descriptor_class == spk286_protected_pkg::DESC_LDT) ||
                                       (descriptor_load_tr && descriptor_class == spk286_protected_pkg::DESC_TSS_AVAIL));
+    assign descriptor_cs_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                       descriptor_unused_segment && descriptor_class == spk286_protected_pkg::DESC_CODE &&
+                                       ((descriptor_unused_conforming && descriptor_unused_dpl <= protected_cpl &&
+                                         descriptor_unused_rpl <= protected_cpl) ||
+                                        (!descriptor_unused_conforming && descriptor_unused_dpl == protected_cpl &&
+                                         descriptor_unused_rpl <= protected_cpl));
+    assign descriptor_iret_cs_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                             descriptor_unused_segment && descriptor_class == spk286_protected_pkg::DESC_CODE &&
+                                             !descriptor_unused_conforming &&
+                                             descriptor_unused_dpl == descriptor_unused_rpl &&
+                                             descriptor_unused_rpl >= protected_cpl;
+    assign descriptor_call_gate_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                              descriptor_class == spk286_protected_pkg::DESC_CALL_GATE &&
+                                              descriptor_unused_dpl >= protected_cpl &&
+                                              descriptor_unused_dpl >= descriptor_unused_rpl;
+    assign descriptor_call_gate_cs_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                                 descriptor_unused_segment && descriptor_class == spk286_protected_pkg::DESC_CODE &&
+                                                 !descriptor_unused_conforming &&
+                                                 descriptor_unused_dpl <= protected_cpl &&
+                                                 descriptor_unused_rpl <= protected_cpl;
+    assign descriptor_cs_candidate_success_live = call_gate_cs_validation_operation ? descriptor_call_gate_cs_success_live :
+                                                   iret_cs_validation_operation ? descriptor_iret_cs_success_live : descriptor_cs_success_live;
     assign descriptor_effective_privilege = descriptor_unused_rpl > protected_cpl ? descriptor_unused_rpl : protected_cpl;
     assign descriptor_verify_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
                                             descriptor_unused_segment &&
@@ -394,24 +559,102 @@ module spk286_micro_executor (
                                                 descriptor_class == spk286_protected_pkg::DESC_TSS_AVAIL ||
                                                 descriptor_class == spk286_protected_pkg::DESC_TSS_BUSY ||
                                                 descriptor_class == spk286_protected_pkg::DESC_LDT)));
+    assign descriptor_iret_ss_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                             descriptor_unused_segment &&
+                                             (descriptor_class == spk286_protected_pkg::DESC_DATA ||
+                                              descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN) &&
+                                             descriptor_unused_writable &&
+                                             descriptor_unused_dpl == tmp1_q[1:0] &&
+                                             descriptor_unused_rpl == tmp1_q[1:0];
+    // The bounded PM4 path accepts only ordinary writable data stacks.  The
+    // expand-down stack policy remains a separate protected-mode slice.
+    assign descriptor_call_ss_success_live = descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                             descriptor_unused_segment &&
+                                             descriptor_class == spk286_protected_pkg::DESC_DATA &&
+                                             descriptor_unused_writable &&
+                                             descriptor_unused_dpl == call_gate_target_dpl_q &&
+                                             descriptor_unused_rpl == call_gate_target_dpl_q;
+    assign call_gate_outer_required = protected_msw[0] && call_gate_candidate_valid_q && cs_candidate_valid_q &&
+                                     (call_gate_target_dpl_q < protected_cpl);
+    assign call_tss_phase_offset = 16'd2 + ({14'd0, call_gate_target_dpl_q} << 2);
+    assign call_tss_pre_fault = call_stack_validation_operation && call_gate_outer_required && !call_stack_ready_q &&
+                                (!protected_tr_valid || !protected_tr_present || call_gate_target_dpl_q > 2'd2 ||
+                                 ({1'b0, call_tss_phase_offset} + 17'd3 > {1'b0, protected_tr_limit}));
+    assign call_tss_active_q = call_tss_active_state_q;
+    assign call_tss_operand_done = call_tss_active_q && operand_done;
     assign descriptor_segment_success_live = descriptor_segment_null_commit ||
-                                             (descriptor_valid && descriptor_reserved_valid && descriptor_present &&
-                                              (segment_index == 2'd2 ?
-                                               ((descriptor_class == spk286_protected_pkg::DESC_DATA ||
-                                                 descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN) &&
-                                                descriptor_unused_writable && descriptor_unused_dpl == protected_cpl &&
-                                                descriptor_unused_rpl == protected_cpl) :
-                                               (descriptor_unused_segment &&
-                                                ((descriptor_unused_conforming && descriptor_unused_dpl <= protected_cpl) ||
-                                                 (!descriptor_unused_conforming && descriptor_unused_dpl >= descriptor_effective_privilege)) &&
-                                                (descriptor_class != spk286_protected_pkg::DESC_CODE || descriptor_unused_readable))));
+                                             (iret_cs_validation_operation ? descriptor_iret_cs_success_live :
+                                              (cs_validation_operation ? descriptor_cs_success_live :
+                                              (descriptor_valid && descriptor_reserved_valid && descriptor_present &&
+                                               (segment_index == 2'd2 ?
+                                                ((descriptor_class == spk286_protected_pkg::DESC_DATA ||
+                                                  descriptor_class == spk286_protected_pkg::DESC_EXPAND_DOWN) &&
+                                                 descriptor_unused_writable && descriptor_unused_dpl == protected_cpl &&
+                                                 descriptor_unused_rpl == protected_cpl) :
+                                                (descriptor_unused_segment &&
+                                                 ((descriptor_unused_conforming && descriptor_unused_dpl <= protected_cpl) ||
+                                                  (!descriptor_unused_conforming && descriptor_unused_dpl >= descriptor_effective_privilege)) &&
+                                                 (descriptor_class != spk286_protected_pkg::DESC_CODE || descriptor_unused_readable))))));
     assign descriptor_result_data = descriptor_load_access ? {descriptor_access_rights, 8'h00} : descriptor_limit;
     assign descriptor_result_write = descriptor_active_q && descriptor_operand_done && descriptor_phase_q == 3'd3 &&
                                      descriptor_inspect_operation && descriptor_inspect_success_live;
     assign descriptor_operand_done = descriptor_active_q && operand_done;
+    assign descriptor_cs_offset_fault = (cs_validation_operation || call_gate_cs_validation_operation || iret_cs_validation_operation) && descriptor_operand_done &&
+                                       descriptor_phase_q == 3'd3 && descriptor_cs_candidate_success_live &&
+                                       ({1'b0, tmp0_q} > {1'b0, descriptor_limit});
     assign descriptor_post_fault = descriptor_operand_done && descriptor_phase_q == 3'd3 &&
-                                  (segment_reload_operation ? !descriptor_segment_success_live :
-                                   (!descriptor_verify_operation && !descriptor_inspect_operation && !descriptor_success_live));
+                                  (call_gate_validation_operation ?
+                                   (descriptor_class == spk286_protected_pkg::DESC_CALL_GATE && !descriptor_call_gate_success_live) :
+                                   (call_gate_cs_validation_operation ?
+                                    (descriptor_cs_offset_fault || !descriptor_call_gate_cs_success_live) :
+                                   (call_ss_validation_operation ? !descriptor_call_ss_success_live :
+                                   (iret_cs_validation_operation ?
+                                   ((({1'b0, tmp0_q} > {1'b0, descriptor_limit}) && descriptor_iret_cs_success_live) || !descriptor_iret_cs_success_live) :
+                                   (cs_validation_operation ? (descriptor_cs_offset_fault || !descriptor_cs_success_live) :
+                                   (iret_ss_validation_operation ? !descriptor_iret_ss_success_live :
+                                   (segment_reload_operation ? !descriptor_segment_success_live :
+                                    (!descriptor_verify_operation && !descriptor_inspect_operation && !descriptor_success_live))))))));
+
+    assign event_gate_operation = allowed && operation == spk286_microcode_pkg::MC_VALIDATE_EVENT_GATE;
+    assign event_gate_ip_operation = allowed && operation == spk286_microcode_pkg::MC_EVENT_GATE_IP;
+    assign event_gate_cs_operation = allowed && operation == spk286_microcode_pkg::MC_EVENT_GATE_CS;
+    assign event_gate_begin = event_gate_operation && protected_msw[0] && !event_gate_active_q;
+    assign event_gate_entry_offset = {5'd0, event_vector, 3'b000};
+    assign event_gate_limit_fault = event_gate_begin &&
+                                    ({1'b0, event_gate_entry_offset} + 17'd7 > {1'b0, protected_idtr_limit});
+    assign event_gate_pre_fault = event_gate_limit_fault;
+    assign event_gate_operand_done = event_gate_active_q && operand_done;
+    assign event_gate_raw_q = {event_gate_word3_q, event_gate_word2_q, event_gate_word1_q, event_gate_word0_q};
+    assign event_gate_raw_candidate = (event_gate_operand_done && event_gate_phase_q == 3'd3) ?
+                                      {operand_read_data, event_gate_word2_q, event_gate_word1_q, event_gate_word0_q} : event_gate_raw_q;
+    spk286_descriptor event_gate_parser (
+        .raw_descriptor(event_gate_raw_candidate), .limit(event_gate_limit), .base(event_gate_unused_base),
+        .access_rights(event_gate_access_rights), .descriptor_class(event_gate_class),
+        .descriptor_valid(event_gate_valid), .reserved_form_valid(event_gate_reserved_valid),
+        .present(event_gate_present), .segment(event_gate_unused_segment), .executable(event_gate_unused_executable),
+        .conforming(event_gate_unused_conforming), .expand_down(event_gate_unused_expand_down),
+        .readable(event_gate_unused_readable), .writable(event_gate_unused_writable), .accessed(event_gate_unused_accessed),
+        .dpl(event_gate_dpl), .gate_target_selector(event_gate_target_selector),
+        .gate_offset(event_gate_target_offset), .gate_parameter_count(event_gate_parameter_count)
+    );
+    assign event_gate_success_live = event_gate_valid && event_gate_reserved_valid && event_gate_present &&
+                                     (event_gate_class == spk286_protected_pkg::DESC_INT_GATE ||
+                                      event_gate_class == spk286_protected_pkg::DESC_TRAP_GATE) &&
+                                     (!event_software || event_gate_dpl >= protected_cpl);
+    assign event_gate_post_fault = event_gate_operand_done && event_gate_phase_q == 3'd3 && !event_gate_success_live;
+    assign event_gate_operation_done = (event_gate_operation && !protected_msw[0]) ||
+                                       event_gate_pre_fault || event_gate_post_fault ||
+                                       (event_gate_operand_done && event_gate_phase_q == 3'd3 && event_gate_success_live) ||
+                                       ((event_gate_ip_operation || event_gate_cs_operation) && event_gate_candidate_valid_q);
+    assign event_gate_vector_ip = event_gate_ip_operation && !protected_msw[0] && !event_gate_candidate_valid_q;
+    assign event_gate_vector_cs = event_gate_cs_operation && !protected_msw[0] && !event_gate_candidate_valid_q;
+    assign protected_event_access = event_gate_active_q;
+    always_comb begin
+        protected_event_address = protected_idtr_base + {13'd0, event_vector, 3'b000};
+        if (event_gate_phase_q == 3'd1) protected_event_address = protected_event_address + 24'd2;
+        else if (event_gate_phase_q == 3'd2) protected_event_address = protected_event_address + 24'd4;
+        else if (event_gate_phase_q == 3'd3) protected_event_address = protected_event_address + 24'd6;
+    end
     assign descriptor_verify_flags_write = !descriptor_pre_fault &&
                                            (descriptor_verify_negative ||
                                             (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_verify_operation));
@@ -419,7 +662,9 @@ module spk286_micro_executor (
                                             (descriptor_inspect_negative ||
                                              (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_inspect_operation));
     assign descriptor_write = descriptor_active_q && descriptor_phase_q == 3'd4 &&
-                              (descriptor_load_tr || (segment_reload_operation && descriptor_success_q));
+                               (descriptor_load_tr ||
+                                ((segment_reload_operation || cs_validation_operation || call_gate_cs_validation_operation ||
+                                  call_ss_validation_operation || iret_cs_validation_operation || iret_ss_validation_operation) && descriptor_success_q));
     assign protected_descriptor_access = descriptor_active_q;
     always_comb begin
         protected_descriptor_address = descriptor_selector_address;
@@ -428,7 +673,17 @@ module spk286_micro_executor (
         else if (descriptor_phase_q == 3'd3) protected_descriptor_address = descriptor_selector_address + 24'd6;
         else if (descriptor_phase_q == 3'd4) protected_descriptor_address = descriptor_selector_address + 24'd5;
     end
+    assign protected_tss_access = call_tss_active_q;
+    always_comb begin
+        protected_tss_address = protected_tr_base + {8'd0, call_tss_phase_offset};
+        if (call_tss_phase_q == 2'd1) protected_tss_address = protected_tss_address + 24'd2;
+    end
+    assign protected_call_stack_access = call_gate_stack_switch_active_q && call_gate_outer_required &&
+                                        stack_request && !read_frame_address && !call_parameter_read;
+    assign protected_call_stack_address = call_ss_base_q + {8'd0, stack_offset};
+    assign protected_call_stack_limit = call_ss_limit_q;
     assign descriptor_operation_done = descriptor_verify_negative || descriptor_inspect_negative || descriptor_null_commit ||
+                                      (call_ss_validation_operation && !call_gate_outer_required) ||
                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_load_ldtr && descriptor_success_live) ||
                                       (descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_load_tr && descriptor_success_q) ||
                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_verify_operation) ||
@@ -436,16 +691,59 @@ module spk286_micro_executor (
                                       descriptor_segment_null_commit ||
                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
                                        descriptor_segment_success_live && descriptor_unused_accessed) ||
-                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
-                                       !descriptor_segment_success_live) ||
-                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q);
+                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
+                                        !descriptor_segment_success_live) ||
+                                       (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q) ||
+                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && call_gate_validation_operation &&
+                                        (descriptor_class != spk286_protected_pkg::DESC_CALL_GATE || descriptor_call_gate_success_live)) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && call_ss_validation_operation &&
+                                       (!descriptor_call_ss_success_live || descriptor_unused_accessed)) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && call_ss_validation_operation && descriptor_success_q) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && call_gate_cs_validation_operation &&
+                                       (descriptor_cs_offset_fault || !descriptor_call_gate_cs_success_live || descriptor_unused_accessed)) ||
+                                       (descriptor_operand_done && descriptor_phase_q == 3'd4 && call_gate_cs_validation_operation && descriptor_success_q) ||
+                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && cs_validation_operation &&
+                                        (descriptor_cs_offset_fault || !descriptor_cs_success_live || descriptor_unused_accessed)) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && cs_validation_operation && descriptor_success_q) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && iret_cs_validation_operation &&
+                                       ((({1'b0, tmp0_q} > {1'b0, descriptor_limit}) && descriptor_iret_cs_success_live) ||
+                                        !descriptor_iret_cs_success_live || descriptor_unused_accessed)) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && iret_cs_validation_operation && descriptor_success_q) ||
+                                      (iret_ss_validation_operation && !iret_outer_required) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd3 && iret_ss_validation_operation &&
+                                       (!descriptor_iret_ss_success_live || descriptor_unused_accessed)) ||
+                                      (descriptor_operand_done && descriptor_phase_q == 3'd4 && iret_ss_validation_operation && descriptor_success_q);
+    assign cs_validation_success_event = (cs_validation_operation || call_gate_cs_validation_operation || iret_cs_validation_operation) && !descriptor_pre_fault && !descriptor_post_fault &&
+                                          ((descriptor_operand_done && descriptor_phase_q == 3'd3 &&
+                                            descriptor_cs_candidate_success_live &&
+                                            ({1'b0, tmp0_q} <= {1'b0, descriptor_limit}) &&
+                                            descriptor_unused_accessed) ||
+                                           (descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_success_q));
     assign descriptor_null_commit = descriptor_begin && descriptor_selector_null && !descriptor_pre_fault && descriptor_load_ldtr;
-    assign system_fault = descriptor_pre_fault || descriptor_post_fault;
+    assign system_fault = call_tss_pre_fault || (call_stack_range_fault && protected_msw[0]) ||
+                          iret_outer_restored_range_fault || descriptor_pre_fault || descriptor_post_fault ||
+                          event_gate_pre_fault || event_gate_post_fault;
     assign system_fault_vector = !protected_msw[0] ? 8'd6 :
+                                 call_tss_pre_fault ? 8'd10 :
+                                 call_stack_range_fault ? 8'd12 :
+                                 iret_outer_restored_range_fault ? 8'd12 :
+                                 event_gate_pre_fault ? 8'd13 :
+                                 event_gate_post_fault ? (!event_gate_present && event_gate_valid ? 8'd11 : 8'd13) :
+                                  call_gate_validation_operation || call_gate_cs_validation_operation ?
+                                    (!descriptor_present && descriptor_valid ? 8'd11 : 8'd13) :
+                                  iret_ss_validation_operation ?
+                                    (!descriptor_present && descriptor_valid ? 8'd12 : 8'd13) :
+                                 iret_cs_validation_operation ?
+                                   (!descriptor_present && descriptor_valid ? 8'd11 : 8'd13) :
+                                 cs_validation_operation ?
+                                   (!descriptor_present && descriptor_valid ? 8'd11 : 8'd13) :
                                  segment_reload_operation ?
                                    (!descriptor_present && descriptor_valid ?
                                     (segment_index == 2'd2 ? 8'd12 : 8'd11) : 8'd13) :
                                  (!descriptor_present && descriptor_valid ? 8'd11 : 8'd13);
+    assign system_fault_error_code = (call_tss_pre_fault || (call_stack_range_fault && protected_msw[0])) ? call_gate_selector_q :
+                                     iret_outer_restored_range_fault ? iret_ss_selector_q :
+                                     (descriptor_pre_fault || descriptor_post_fault) ? descriptor_selector_value : 16'd0;
     assign protected_ldtr_commit_en = descriptor_null_commit ||
                                       (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_load_ldtr && descriptor_success_live);
     assign protected_tr_commit_en = descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_load_tr && descriptor_success_q;
@@ -463,22 +761,44 @@ module spk286_micro_executor (
     assign protected_tr_commit_present = descriptor_present;
     assign protected_ldtr_commit_valid = !descriptor_null_commit;
     assign protected_tr_commit_valid = 1'b1;
-    assign protected_segment_commit_en = descriptor_segment_null_commit ||
+    assign protected_segment_commit_en = (context_commit && protected_msw[0] && cs_candidate_valid_q) ||
+                                         descriptor_segment_null_commit ||
                                          (descriptor_operand_done && descriptor_phase_q == 3'd3 && segment_reload_operation &&
                                           descriptor_segment_success_live && descriptor_unused_accessed) ||
                                          (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q);
-    assign protected_segment_commit_index = segment_index;
-    assign protected_segment_commit_selector = tmp0_q;
-    assign protected_segment_commit_base = descriptor_segment_null_commit ? 24'h000000 : descriptor_base;
-    assign protected_segment_commit_limit = descriptor_segment_null_commit ? 16'h0000 : descriptor_limit;
-    assign protected_segment_commit_access = descriptor_segment_null_commit ? 8'h00 :
-                                             descriptor_access_rights | ((descriptor_phase_q == 3'd4) ? 8'h01 : 8'h00);
-    assign protected_segment_commit_class = descriptor_segment_null_commit ? spk286_protected_pkg::DESC_INVALID : descriptor_class;
-    assign protected_segment_commit_present = !descriptor_segment_null_commit && descriptor_present;
+    assign protected_segment_commit_index = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? 2'd1 : segment_index;
+    assign protected_segment_commit_selector = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_selector_q : tmp0_q;
+    assign protected_segment_commit_base = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_base_q :
+                                           (descriptor_segment_null_commit ? 24'h000000 : descriptor_base);
+    assign protected_segment_commit_limit = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_limit_q :
+                                            (descriptor_segment_null_commit ? 16'h0000 : descriptor_limit);
+    assign protected_segment_commit_access = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_access_q :
+                                             (descriptor_segment_null_commit ? 8'h00 :
+                                              descriptor_access_rights | ((descriptor_phase_q == 3'd4) ? 8'h01 : 8'h00));
+    assign protected_segment_commit_class = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_class_q :
+                                            (descriptor_segment_null_commit ? spk286_protected_pkg::DESC_INVALID : descriptor_class);
+    assign protected_segment_commit_present = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_present_q :
+                                              (!descriptor_segment_null_commit && descriptor_present);
     assign protected_segment_commit_protected = 1'b1;
-    assign protected_segment_commit_dpl = descriptor_segment_null_commit ? 2'd0 : descriptor_unused_dpl;
-    assign protected_segment_commit_table_indicator = descriptor_segment_null_commit ? 1'b0 : descriptor_selector_ti;
-    assign protected_segment_commit_rpl = descriptor_selector_null ? tmp0_q[1:0] : descriptor_unused_rpl;
+    assign protected_segment_commit_dpl = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_dpl_q :
+                                          (descriptor_segment_null_commit ? 2'd0 : descriptor_unused_dpl);
+    assign protected_segment_commit_table_indicator = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_table_q :
+                                                      (descriptor_segment_null_commit ? 1'b0 : descriptor_selector_ti);
+    assign protected_segment_commit_rpl = (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_rpl_q :
+                                          (descriptor_selector_null ? tmp0_q[1:0] : descriptor_unused_rpl);
+    assign protected_segment_commit_en2 = context_commit && protected_msw[0] &&
+                                         (iret_ss_candidate_valid_q || call_ss_candidate_valid_q);
+    assign protected_segment_commit_index2 = 2'd2;
+    assign protected_segment_commit_selector2 = call_ss_candidate_valid_q ? call_ss_selector_q : iret_ss_selector_q;
+    assign protected_segment_commit_base2 = call_ss_candidate_valid_q ? call_ss_base_q : iret_ss_base_q;
+    assign protected_segment_commit_limit2 = call_ss_candidate_valid_q ? call_ss_limit_q : iret_ss_limit_q;
+    assign protected_segment_commit_access2 = call_ss_candidate_valid_q ? call_ss_access_q : iret_ss_access_q;
+    assign protected_segment_commit_class2 = call_ss_candidate_valid_q ? call_ss_class_q : iret_ss_class_q;
+    assign protected_segment_commit_present2 = call_ss_candidate_valid_q ? call_ss_present_q : iret_ss_present_q;
+    assign protected_segment_commit_protected2 = 1'b1;
+    assign protected_segment_commit_dpl2 = call_ss_candidate_valid_q ? call_ss_dpl_q : iret_ss_dpl_q;
+    assign protected_segment_commit_table_indicator2 = call_ss_candidate_valid_q ? call_ss_table_q : iret_ss_table_q;
+    assign protected_segment_commit_rpl2 = call_ss_candidate_valid_q ? call_ss_rpl_q : iret_ss_rpl_q;
     logic constant_zero, constant_ones;
     assign constant_zero = allowed && operation == spk286_microcode_pkg::MC_CONST_ZERO_TMP1;
     assign constant_ones = allowed && operation == spk286_microcode_pkg::MC_CONST_ONES_TMP1;
@@ -511,7 +831,7 @@ module spk286_micro_executor (
         .response_ready(shift_request), .result(shift_result), .candidate_flags(shift_flags),
         .flags_mask(shift_mask), .result_write(shift_write)
     );
-    logic push_operation, pop_operation, push_transfer, read_ip, target_relative, target_absolute;
+    logic push_operation, push_event_error, pop_operation, push_transfer, push_event_error_transfer, read_ip, target_relative, target_absolute;
     logic redirect_operation, adjust_stack, count_operation, stack_write_sp, check_operand;
     logic target_valid_q;
     logic [15:0] target_q, stack_next_sp;
@@ -522,17 +842,55 @@ module spk286_micro_executor (
     assign sign_fill_word = allowed && operation == spk286_microcode_pkg::MC_SIGN_FILL16 && temporary_valid_q[0];
     assign constant_one = allowed && operation == spk286_microcode_pkg::MC_CONST_ONE_TMP1;
     logic read_event_flags, read_event_cs, read_event_ip, vector_ip, vector_cs;
-    logic commit_context, ack_operation, request_event, halt_operation, iret_commit;
+    logic commit_context, ack_operation, request_event, halt_operation, iret_commit, iret_outer_sp_commit, retf_outer_sp_commit, call_gate_sp_commit;
     spk286_stack stack_service (
-        .request(push_transfer || pop_operation), .push(push_transfer), .adjust(adjust_stack), .operand_done(operand_done),
+        .request(push_transfer || push_event_error_transfer || pop_operation || call_gate_stack_write),
+        .push(push_transfer || push_event_error_transfer || call_gate_stack_write), .adjust(adjust_stack), .operand_done(operand_done),
         .sp(stack_cursor_valid_q ? stack_cursor_q : stack_pointer), .adjustment(tmp1_q), .offset(stack_native_offset), .next_sp(stack_next_sp), .write_sp(stack_write_sp)
     );
     assign push_operation = allowed && operation == spk286_microcode_pkg::MC_PUSH16 && temporary_valid_q[0];
+    assign push_event_error = allowed && operation == spk286_microcode_pkg::MC_PUSH_EVENT_ERROR;
     assign push_transfer = push_operation && push_enabled;
+    assign push_event_error_transfer = push_event_error && push_enabled && event_error_valid;
+    assign iret_outer_required = protected_msw[0] && temporary_valid_q[1] && (tmp1_q[1:0] > protected_cpl);
+    assign iret_outer_pop = iret_outer_frame_operation && iret_outer_required && iret_outer_phase_q < 2'd2;
+    assign iret_outer_pop_done = iret_outer_pop && operand_done;
+    assign iret_outer_range_fault = iret_outer_frame_operation && iret_outer_required &&
+                                    (stack_pointer[0] ||
+                                     ({1'b0, stack_pointer} + {1'b0, allocation_valid_q ? allocation_q : 16'd0} + 17'd7 >
+                                      {1'b0, stack_segment_limit}));
+    assign iret_outer_restored_range_fault = commit_context && iret_outer_required && iret_ss_candidate_valid_q &&
+                                             ({1'b0, iret_outer_sp_q} +
+                                              {1'b0, allocation_valid_q ? allocation_q : 16'd0} >
+                                              {1'b0, iret_ss_limit_q});
+    assign call_stack_range_fault = check_call_frame &&
+                                   (call_gate_outer_required ?
+                                    (!call_stack_ready_q || call_stack_sp_q[0] ||
+                                     call_stack_sp_q < (16'd8 + {11'd0, call_gate_parameter_count_q, 1'b0}) ||
+                                     ({1'b0, call_stack_sp_q} - 17'd2 > {1'b0, call_ss_limit_q}) ||
+                                     (call_gate_parameter_count_q != 5'd0 &&
+                                      ({1'b0, stack_pointer} + {11'd0, call_gate_parameter_count_q, 1'b0} - 17'd1 > {1'b0, stack_segment_limit})) ) :
+                                    (stack_pointer[0] && stack_pointer < 16'd4));
+    assign call_gate_stack_switch_begin = call_gate_stack_switch_operation && call_gate_outer_required &&
+                                          !call_gate_stack_switch_active_q;
+    assign call_gate_stack_write = call_gate_stack_switch_operation && call_gate_stack_switch_active_q &&
+                                   call_gate_stack_switch_phase_q < 2'd2;
+    assign call_gate_stack_write_done = call_gate_stack_write && operand_done;
+    assign call_parameter_read = copy_call_parameters && call_gate_outer_required &&
+                                 call_parameter_active_q && call_parameter_phase_q == 2'd0;
+    assign call_parameter_write = copy_call_parameters && call_gate_outer_required &&
+                                  call_parameter_active_q && call_parameter_phase_q == 2'd1;
+    assign call_parameter_read_done = call_parameter_read && operand_done;
+    assign call_parameter_write_done = call_parameter_write && operand_done;
+    assign call_parameter_operation_done = copy_call_parameters &&
+                                           (!call_gate_outer_required || call_gate_parameter_count_q == 5'd0 ||
+                                            (call_parameter_write_done && call_parameter_remaining_q == 5'd1));
     assign pop_operation = allowed && (operation == spk286_microcode_pkg::MC_POP16 ||
                                       operation == spk286_microcode_pkg::MC_POP16_TMP1 ||
-                                      operation == spk286_microcode_pkg::MC_POP16_TMP2);
-    assign stack_request = push_transfer || pop_operation || read_frame_address;
+                                      operation == spk286_microcode_pkg::MC_POP16_TMP2 || iret_outer_pop);
+    assign stack_request = !range_fault &&
+                           (push_transfer || push_event_error_transfer || pop_operation || read_frame_address ||
+                            call_gate_stack_write || call_parameter_read || call_parameter_write);
     assign read_ip = allowed && operation == spk286_microcode_pkg::MC_READ_IP16;
     assign target_relative = allowed && operation == spk286_microcode_pkg::MC_TARGET_REL16 && temporary_valid_q[1];
     assign target_absolute = allowed && operation == spk286_microcode_pkg::MC_TARGET_ABS16 && temporary_valid_q[0];
@@ -555,12 +913,21 @@ module spk286_micro_executor (
     assign read_event_ip = allowed && operation == spk286_microcode_pkg::MC_EVENT_IP;
     assign vector_ip = allowed && operation == spk286_microcode_pkg::MC_VECTOR_IP;
     assign vector_cs = allowed && operation == spk286_microcode_pkg::MC_VECTOR_CS;
-    assign vector_request = vector_ip || vector_cs;
-    assign vector_offset = {6'b000000, event_vector, 2'b00} + (vector_cs ? 16'd2 : 16'd0);
+    assign vector_request = vector_ip || vector_cs || event_gate_vector_ip || event_gate_vector_cs;
+    assign vector_offset = {6'b000000, event_vector, 2'b00} + ((vector_cs || event_gate_vector_cs) ? 16'd2 : 16'd0);
+    assign clear_event_flags = allowed && operation == spk286_microcode_pkg::MC_CLEAR_EVENT_FLAGS;
     assign commit_context = allowed && operation == spk286_microcode_pkg::MC_CONTEXT_COMMIT && &temporary_valid_q[1:0];
     assign iret_commit = allowed && operation == spk286_microcode_pkg::MC_IRET_COMMIT && &temporary_valid_q;
-    assign context_commit = (commit_context || iret_commit) && redirect_ready;
+    assign context_commit = ((iret_commit && (!protected_msw[0] || (cs_candidate_valid_q && (!iret_outer_required || iret_ss_candidate_valid_q)))) ||
+                             (commit_context && (!protected_msw[0] || cs_candidate_valid_q || event_active) &&
+                              (!call_gate_outer_required || call_ss_candidate_valid_q) &&
+                              (!iret_outer_required || iret_ss_candidate_valid_q) &&
+                              !iret_outer_restored_range_fault)) &&
+                            redirect_ready;
     assign context_cs = tmp1_q;
+    assign iret_outer_sp_commit = context_commit && iret_commit && iret_outer_required;
+    assign retf_outer_sp_commit = context_commit && commit_context && iret_outer_required;
+    assign call_gate_sp_commit = context_commit && commit_context && call_gate_outer_required;
     assign ack_operation = allowed && operation == spk286_microcode_pkg::MC_EVENT_ACK;
     assign ack_request = ack_operation && event_needs_ack;
     assign request_event = allowed && operation == spk286_microcode_pkg::MC_REQUEST_EVENT;
@@ -599,41 +966,59 @@ module spk286_micro_executor (
     assign commit_result = allowed && result_operation && temporary_valid_q[2] && !result_disposed_q;
     assign discard_result = commit_result && !allow_result_write;
     assign result_to_dst = commit_result && allow_result_write && (operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST || operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8);
-    assign operand_request = descriptor_active_q || system_operand_request || io_transfer || string_request || vector_request || stack_request || check_operand || (allowed &&
+    assign operand_request = descriptor_active_q || event_gate_active_q || call_tss_active_q || system_operand_request || io_transfer || string_request || vector_request || stack_request || check_operand || (allowed &&
                              (write_reg_tmp1 || operation == spk286_microcode_pkg::MC_READ_REG16 || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_REG8 || operation == spk286_microcode_pkg::MC_READ_RM8 || read_tmp1 ||
                               ((operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8) && temporary_valid_q[0]) ||
                               (commit_result && allow_result_write && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST && operation != spk286_microcode_pkg::MC_WRITE_RESULT_DST8)));
-    assign operand_write = descriptor_write || system_operand_write || io_write || string_store || write_reg_tmp1 || push_transfer || operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || result_operation;
-    assign operand_select_rm = descriptor_active_q || system_operation || io_transfer || string_request || vector_request || stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
+    assign operand_write = descriptor_write || system_operand_write || io_write || string_store || write_reg_tmp1 || push_transfer || push_event_error_transfer || call_gate_stack_write || call_parameter_write || operation == spk286_microcode_pkg::MC_WRITE_REG16 || operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || result_operation;
+    assign operand_select_rm = descriptor_active_q || event_gate_active_q || call_tss_active_q || system_operation || io_transfer || string_request || vector_request || stack_request || check_operand || operation == spk286_microcode_pkg::MC_READ_RM16 || operation == spk286_microcode_pkg::MC_READ_RM16_TMP1 ||
                                operation == spk286_microcode_pkg::MC_WRITE_RM16 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM16 ||
                                operation == spk286_microcode_pkg::MC_READ_RM8 || operation == spk286_microcode_pkg::MC_READ_RM8_TMP1 || operation == spk286_microcode_pkg::MC_WRITE_RM8 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM8;
     assign operand_byte = (descriptor_write) || (system_table_operation && system_index_q == 2'd2) || io_byte || (string_request && string_byte) || operation == spk286_microcode_pkg::MC_WRITE_REG8_TMP1 || operation == spk286_microcode_pkg::MC_READ_REG8 || operation == spk286_microcode_pkg::MC_READ_RM8 ||
                           operation == spk286_microcode_pkg::MC_READ_REG8_TMP1 || operation == spk286_microcode_pkg::MC_READ_RM8_TMP1 ||
                           operation == spk286_microcode_pkg::MC_WRITE_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RM8 ||
                           operation == spk286_microcode_pkg::MC_WRITE_RESULT_REG8 || operation == spk286_microcode_pkg::MC_WRITE_RESULT_RM8;
-    assign operand_write_data = descriptor_write ?
+    assign operand_write_data = call_gate_stack_write ? call_gate_stack_data_q : call_parameter_write ? call_parameter_data_q : descriptor_write ?
                                 {8'd0, descriptor_access_rights | (descriptor_load_tr ? 8'h02 : 8'h01)} :
-                                system_operand_write ? system_write_data : (push_transfer && push_return_ip ? architectural_ip : (write_reg_tmp1 ? tmp1_q : (result_operation ? tmp2_q : tmp0_q)));
-    assign read_operand = operand_request && !descriptor_active_q && !operand_write && !operand_check;
+                                system_operand_write ? system_write_data :
+                                push_event_error_transfer ? event_error_code :
+                                (push_transfer && push_return_ip ? architectural_ip :
+                                 (write_reg_tmp1 ? tmp1_q : (result_operation ? tmp2_q : tmp0_q)));
+    assign read_operand = operand_request && !descriptor_active_q && !operand_check && !operand_write;
     assign compute_alu = allowed && operation == spk286_microcode_pkg::MC_ALU && temporary_valid_q[0] && temporary_valid_q[1] && !flags_valid_q;
     assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
     assign byte_ready = fetch_word || fetch_signed_byte || fetch_byte || fetch_byte_tmp1 || (fetch_port && port_immediate) || decode_byte_ready;
     assign operation_done = muldiv_complete || write_result_ax || write_result_dx || (fetch_port && (!port_immediate || byte_valid)) || string_empty || string_continue || string_index_write || string_count || string_read_acc || string_write_acc || add_allocation_sp || ((check_push2 || check_pop2) && !range_fault) || frame_read_gpr || frame_write_gpr || save_auxiliary || restore_auxiliary || save_allocation || load_counter ||
                             decrement_counter || counter_branch || begin_stack_cursor || read_stack_cursor || set_frame_address || decrement_frame_address || allocate_stack || set_ea_plus2 ||
-                            ((check_push8 || check_pop8 || check_stack_word || check_rm32) && !range_fault) || (check_bounds && !bounds_fault) || read_segment || segment_write || adjust_complete || (check_arithmetic && !arithmetic_fault_q) || dispatch_request || constant_zero || constant_ones || read_ea || read_target || move_source || set_address || add_base || shift_complete || count_low || direct_flags || sign_extend_byte || sign_fill_word || constant_one || read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
-                            context_commit || request_event || halt_operation || (ack_operation && (!event_needs_ack || ack_done)) || ((fetch_byte || fetch_byte_tmp1) && byte_valid) ||
+                            ((check_push8 || check_pop8 || check_stack_word || check_rm32 || check_call_frame) && !range_fault) ||
+                            (call_stack_validation_operation && (!call_gate_outer_required || call_stack_ready_q || (call_tss_operand_done && call_tss_phase_q == 2'd1))) ||
+                            (call_gate_stack_switch_operation && (!call_gate_outer_required || (call_gate_stack_write_done && call_gate_stack_switch_phase_q == 2'd1))) ||
+                            call_parameter_operation_done ||
+                            (check_bounds && !bounds_fault) || read_segment || segment_write || adjust_complete || (check_arithmetic && !arithmetic_fault_q) || dispatch_request || constant_zero || constant_ones || read_ea || read_target || move_source || set_address || add_base || shift_complete || count_low || direct_flags || sign_extend_byte || sign_fill_word || constant_one || read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
+                            context_commit || request_event || halt_operation || clear_event_flags || (push_event_error && (!event_error_valid || push_event_error_transfer && operand_done)) || (ack_operation && (!event_needs_ack || ack_done)) || ((fetch_byte || fetch_byte_tmp1) && byte_valid) ||
                             read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
                             (push_operation && !push_enabled) || (redirect_operation && (!branch_taken || redirect_ready)) || move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
                             (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
-                            (decode_operand && decode_done) || system_done || descriptor_operation_done || ((operand_request && operand_done) && !system_operand_request && !descriptor_active_q);
-    assign gpr_write_en = descriptor_result_write || fixed_result_write || string_index_write || string_count_write || string_write_acc || add_allocation_sp || frame_write_gpr || allocate_stack || move_source || stack_arch_write || (count_operation && decrement_count) || move_word || result_to_dst || (operand_gpr_write_en && !system_msw_load);
-    assign gpr_write_byte = (string_write_acc && string_byte) || (!descriptor_result_write && !fixed_result_write && !string_index_write && !string_count_write && !string_write_acc && (!add_allocation_sp && !frame_write_gpr && !allocate_stack && !stack_arch_write && !count_operation && ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
-                            (result_to_dst && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8) || operand_gpr_write_byte)));
-    assign gpr_write_index = descriptor_result_write ? shift_kind : fixed_result_write ? (write_result_dx ? 3'd2 : 3'd0) : string_index_write ? (string_step_source ? 3'd6 : 3'd7) : string_count_write ? 3'd1 : string_write_acc ? 3'd0 : add_allocation_sp ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
-    assign gpr_write_data = descriptor_result_write ? descriptor_result_data : fixed_result_write ? (write_result_dx ? auxiliary_q : tmp2_q) : string_index_write ? (architectural_flags[10] ? string_index-string_delta : string_index+string_delta) : string_count_write ? count_value-16'd1 : string_write_acc ? tmp0_q : add_allocation_sp ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
-    assign flags_write_en = direct_flags || descriptor_verify_flags_write || descriptor_inspect_flags_write || commit_flags || restore_flags || set_if || clear_if_tf || iret_commit;
-    assign flags_write_data = direct_flags ? direct_flags_data : descriptor_verify_flags_write ? (descriptor_verify_success_live ? 16'h0040 : 16'h0000) : descriptor_inspect_flags_write ? (descriptor_inspect_success_live ? 16'h0040 : 16'h0000) : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : (clear_if_tf ? 16'd0 : flags_q)));
-    assign flags_write_mask = direct_flags ? direct_flags_mask : descriptor_verify_flags_write ? 16'h0040 : descriptor_inspect_flags_write ? 16'h0040 : restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : flags_mask_q));
+                            (decode_operand && decode_done) || system_done || descriptor_operation_done || event_gate_operation_done ||
+                            (allowed && (operation == spk286_microcode_pkg::MC_VALIDATE_CS || operation == spk286_microcode_pkg::MC_VALIDATE_CALL_GATE ||
+                                         operation == spk286_microcode_pkg::MC_VALIDATE_CALL_CS || operation == spk286_microcode_pkg::MC_VALIDATE_CALL_SS || operation == spk286_microcode_pkg::MC_VALIDATE_IRET_CS ||
+                                         operation == spk286_microcode_pkg::MC_VALIDATE_IRET_SS) && !protected_msw[0]) ||
+                            (iret_outer_frame_operation && (!iret_outer_required || (iret_outer_phase_q == 2'd1 && operand_done))) ||
+                            (operation == spk286_microcode_pkg::MC_ADD_ALLOCATION_SP && iret_outer_required) ||
+                            ((operand_request && operand_done) && !system_operand_request && !descriptor_active_q && !event_gate_active_q &&
+                             !iret_outer_frame_operation && !call_tss_active_q && !call_gate_stack_write && !copy_call_parameters);
+    assign gpr_write_en = iret_outer_sp_commit || retf_outer_sp_commit || call_gate_sp_commit || descriptor_result_write || fixed_result_write || string_index_write || string_count_write || string_write_acc || add_allocation_sp || frame_write_gpr || allocate_stack || move_source || stack_arch_write || (count_operation && decrement_count) || move_word || result_to_dst || (operand_gpr_write_en && !system_msw_load);
+    assign gpr_write_byte = (iret_outer_sp_commit || retf_outer_sp_commit || call_gate_sp_commit) ? 1'b0 :
+                            ((string_write_acc && string_byte) ||
+                             (!descriptor_result_write && !fixed_result_write && !string_index_write && !string_count_write && !string_write_acc &&
+                              (!add_allocation_sp && !frame_write_gpr && !allocate_stack && !stack_arch_write && !count_operation &&
+                               ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
+                                (result_to_dst && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8) || operand_gpr_write_byte))));
+    assign gpr_write_index = (iret_outer_sp_commit || retf_outer_sp_commit || call_gate_sp_commit) ? 3'd4 : descriptor_result_write ? shift_kind : fixed_result_write ? (write_result_dx ? 3'd2 : 3'd0) : string_index_write ? (string_step_source ? 3'd6 : 3'd7) : string_count_write ? 3'd1 : string_write_acc ? 3'd0 : add_allocation_sp ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
+    assign gpr_write_data = iret_outer_sp_commit ? iret_outer_sp_q : retf_outer_sp_commit ? iret_outer_sp_q + allocation_q : call_gate_sp_commit ? stack_cursor_q : descriptor_result_write ? descriptor_result_data : fixed_result_write ? (write_result_dx ? auxiliary_q : tmp2_q) : string_index_write ? (architectural_flags[10] ? string_index-string_delta : string_index+string_delta) : string_count_write ? count_value-16'd1 : string_write_acc ? tmp0_q : add_allocation_sp ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
+    assign flags_write_en = direct_flags || descriptor_verify_flags_write || descriptor_inspect_flags_write || commit_flags || restore_flags || set_if || clear_if_tf || clear_event_flags || iret_commit;
+    assign flags_write_data = direct_flags ? direct_flags_data : descriptor_verify_flags_write ? (descriptor_verify_success_live ? 16'h0040 : 16'h0000) : descriptor_inspect_flags_write ? (descriptor_inspect_success_live ? 16'h0040 : 16'h0000) : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : ((clear_if_tf || clear_event_flags) ? 16'd0 : flags_q)));
+    assign flags_write_mask = direct_flags ? direct_flags_mask : descriptor_verify_flags_write ? 16'h0040 : descriptor_inspect_flags_write ? 16'h0040 : restore_flags || iret_commit ? 16'h0FD5 : (set_if ? 16'h0200 : (clear_if_tf ? 16'h0300 : (clear_event_flags ? ((!protected_msw[0] || event_gate_class_q == spk286_protected_pkg::DESC_INT_GATE) ? 16'h0300 : 16'h0100) : flags_mask_q)));
 
     always_ff @(posedge clk) begin
         if (reset || cancel || start) begin
@@ -652,6 +1037,43 @@ module spk286_micro_executor (
             descriptor_word0_q <= 16'h0000; descriptor_word1_q <= 16'h0000;
             descriptor_word2_q <= 16'h0000; descriptor_word3_q <= 16'h0000;
             descriptor_success_q <= 1'b0;
+            event_gate_active_q <= 1'b0; event_gate_phase_q <= 3'd0;
+            event_gate_word0_q <= 16'h0000; event_gate_word1_q <= 16'h0000;
+            event_gate_word2_q <= 16'h0000; event_gate_word3_q <= 16'h0000;
+            event_gate_candidate_valid_q <= 1'b0;
+            event_gate_target_selector_q <= 16'h0000; event_gate_target_offset_q <= 16'h0000;
+            event_gate_class_q <= spk286_protected_pkg::DESC_INVALID;
+            cs_candidate_valid_q <= 1'b0;
+            cs_candidate_selector_q <= 16'h0000; cs_candidate_limit_q <= 16'h0000;
+            cs_candidate_base_q <= 24'h000000; cs_candidate_access_q <= 8'h00;
+            cs_candidate_class_q <= spk286_protected_pkg::DESC_INVALID;
+            cs_candidate_dpl_q <= 2'd0; cs_candidate_rpl_q <= 2'd0;
+            cs_candidate_present_q <= 1'b0; cs_candidate_table_q <= 1'b0;
+            call_gate_candidate_valid_q <= 1'b0;
+            call_gate_selector_q <= 16'h0000;
+            call_gate_target_dpl_q <= 2'd0;
+            call_gate_parameter_count_q <= 5'd0;
+            call_tss_active_state_q <= 1'b0; call_tss_phase_q <= 2'd0;
+            call_stack_ready_q <= 1'b0; call_stack_sp_q <= 16'h0000; call_stack_ss_q <= 16'h0000;
+            call_gate_stack_switch_active_q <= 1'b0; call_gate_stack_switch_phase_q <= 2'd0;
+            call_gate_stack_data_q <= 16'h0000;
+            call_parameter_active_q <= 1'b0; call_parameter_phase_q <= 2'd0;
+            call_parameter_remaining_q <= 5'd0; call_parameter_source_sp_q <= 16'h0000;
+            call_parameter_data_q <= 16'h0000;
+            call_ss_candidate_valid_q <= 1'b0;
+            call_ss_selector_q <= 16'h0000; call_ss_limit_q <= 16'h0000; call_ss_base_q <= 24'h000000;
+            call_ss_access_q <= 8'h00; call_ss_class_q <= spk286_protected_pkg::DESC_INVALID;
+            call_ss_dpl_q <= 2'd0; call_ss_rpl_q <= 2'd0; call_ss_present_q <= 1'b0; call_ss_table_q <= 1'b0;
+            iret_outer_phase_q <= 2'd0;
+            iret_outer_ready_q <= 1'b0;
+            iret_outer_sp_q <= 16'h0000;
+            iret_outer_ss_q <= 16'h0000;
+            iret_ss_candidate_valid_q <= 1'b0;
+            iret_ss_selector_q <= 16'h0000; iret_ss_limit_q <= 16'h0000;
+            iret_ss_base_q <= 24'h000000; iret_ss_access_q <= 8'h00;
+            iret_ss_class_q <= spk286_protected_pkg::DESC_INVALID;
+            iret_ss_dpl_q <= 2'd0; iret_ss_rpl_q <= 2'd0;
+            iret_ss_present_q <= 1'b0; iret_ss_table_q <= 1'b0;
             high_byte_q <= 1'b0; temporary_valid_q <= 3'b000;
             flags_valid_q <= 1'b0; result_disposed_q <= 1'b0; result_suppress_q <= 1'b0;
         end else begin
@@ -670,6 +1092,149 @@ module spk286_micro_executor (
                 descriptor_phase_q <= 3'd0;
                 descriptor_success_q <= 1'b0;
             end
+            if (call_stack_validation_operation && call_gate_outer_required && !call_stack_ready_q &&
+                !call_tss_active_state_q && !call_tss_pre_fault) begin
+                call_tss_active_state_q <= 1'b1;
+                call_tss_phase_q <= 2'd0;
+            end
+            if (call_tss_operand_done) begin
+                if (call_tss_phase_q == 2'd0) call_stack_sp_q <= operand_read_data;
+                else begin
+                    call_stack_ss_q <= operand_read_data;
+                    call_stack_ready_q <= 1'b1;
+                    call_tss_active_state_q <= 1'b0;
+                end
+                call_tss_phase_q <= call_tss_phase_q + 2'd1;
+            end
+            if (event_gate_begin) begin
+                event_gate_active_q <= 1'b1;
+                event_gate_phase_q <= 3'd0;
+                event_gate_candidate_valid_q <= 1'b0;
+            end
+            if (iret_outer_frame_operation && !iret_outer_required) begin
+                iret_outer_ready_q <= 1'b0;
+                iret_ss_candidate_valid_q <= 1'b0;
+            end
+            if (iret_outer_pop_done) begin
+                if (iret_outer_phase_q == 2'd0) iret_outer_sp_q <= operand_read_data;
+                else begin
+                    iret_outer_ss_q <= operand_read_data;
+                    iret_outer_ready_q <= 1'b1;
+                end
+                iret_outer_phase_q <= iret_outer_phase_q + 2'd1;
+            end
+            if (cs_validation_success_event) begin
+                cs_candidate_valid_q <= 1'b1;
+                cs_candidate_selector_q <= tmp1_q;
+                cs_candidate_limit_q <= descriptor_limit;
+                cs_candidate_base_q <= descriptor_base;
+                cs_candidate_access_q <= descriptor_access_rights | ((descriptor_phase_q == 3'd4) ? 8'h01 : 8'h00);
+                cs_candidate_class_q <= descriptor_class;
+                cs_candidate_dpl_q <= descriptor_unused_dpl;
+                cs_candidate_rpl_q <= descriptor_unused_rpl;
+                cs_candidate_present_q <= descriptor_present;
+                cs_candidate_table_q <= descriptor_selector_ti;
+                if (call_gate_cs_validation_operation) call_gate_target_dpl_q <= descriptor_unused_dpl;
+            end
+            if (descriptor_operand_done && descriptor_phase_q == 3'd3 && call_gate_validation_operation &&
+                descriptor_call_gate_success_live) begin
+                call_gate_candidate_valid_q <= 1'b1;
+                call_gate_selector_q <= tmp1_q;
+                call_gate_parameter_count_q <= descriptor_unused_gate_parameter_count;
+                tmp0_q <= descriptor_unused_gate_offset;
+                tmp1_q <= descriptor_unused_gate_selector;
+                temporary_valid_q[0] <= 1'b1;
+                temporary_valid_q[1] <= 1'b1;
+            end
+            if (descriptor_operand_done && descriptor_phase_q == 3'd3 && call_ss_validation_operation &&
+                descriptor_call_ss_success_live && descriptor_unused_accessed) begin
+                call_ss_candidate_valid_q <= 1'b1;
+                call_ss_selector_q <= call_stack_ss_q;
+                call_ss_limit_q <= descriptor_limit;
+                call_ss_base_q <= descriptor_base;
+                call_ss_access_q <= descriptor_access_rights;
+                call_ss_class_q <= descriptor_class;
+                call_ss_dpl_q <= descriptor_unused_dpl;
+                call_ss_rpl_q <= descriptor_unused_rpl;
+                call_ss_present_q <= descriptor_present;
+                call_ss_table_q <= descriptor_selector_ti;
+            end
+            if (descriptor_operand_done && descriptor_phase_q == 3'd4 && call_ss_validation_operation && descriptor_success_q) begin
+                call_ss_candidate_valid_q <= 1'b1;
+                call_ss_selector_q <= call_stack_ss_q;
+                call_ss_limit_q <= descriptor_limit;
+                call_ss_base_q <= descriptor_base;
+                call_ss_access_q <= descriptor_access_rights | 8'h01;
+                call_ss_class_q <= descriptor_class;
+                call_ss_dpl_q <= descriptor_unused_dpl;
+                call_ss_rpl_q <= descriptor_unused_rpl;
+                call_ss_present_q <= descriptor_present;
+                call_ss_table_q <= descriptor_selector_ti;
+            end
+            if (call_gate_stack_switch_begin) begin
+                call_gate_stack_switch_active_q <= 1'b1;
+                call_gate_stack_switch_phase_q <= 2'd0;
+                call_gate_stack_data_q <= protected_ss_selector;
+                stack_cursor_q <= call_stack_sp_q;
+                stack_cursor_valid_q <= 1'b1;
+            end
+            if (call_gate_stack_write_done) begin
+                if (call_gate_stack_switch_phase_q == 2'd0) begin
+                    call_gate_stack_data_q <= stack_pointer;
+                    call_gate_stack_switch_phase_q <= 2'd1;
+                end else begin
+                    call_gate_stack_switch_phase_q <= 2'd2;
+                end
+            end
+            if (copy_call_parameters && call_gate_outer_required && !call_parameter_active_q &&
+                call_gate_parameter_count_q != 5'd0) begin
+                call_parameter_active_q <= 1'b1;
+                call_parameter_phase_q <= 2'd0;
+                call_parameter_remaining_q <= call_gate_parameter_count_q;
+                call_parameter_source_sp_q <= stack_pointer +
+                                               {11'd0, call_gate_parameter_count_q, 1'b0} - 16'd2;
+            end
+            if (call_parameter_read_done) begin
+                call_parameter_data_q <= operand_read_data;
+                call_parameter_phase_q <= 2'd1;
+            end
+            if (call_parameter_write_done) begin
+                stack_cursor_q <= stack_cursor_q - 16'd2;
+                if (call_parameter_remaining_q == 5'd1) begin
+                    call_parameter_active_q <= 1'b0;
+                    call_parameter_phase_q <= 2'd0;
+                    call_parameter_remaining_q <= 5'd0;
+                end else begin
+                    call_parameter_phase_q <= 2'd0;
+                    call_parameter_remaining_q <= call_parameter_remaining_q - 5'd1;
+                    call_parameter_source_sp_q <= call_parameter_source_sp_q - 16'd2;
+                end
+            end
+            if (descriptor_operand_done && descriptor_phase_q == 3'd3 && iret_ss_validation_operation &&
+                descriptor_iret_ss_success_live && descriptor_unused_accessed) begin
+                iret_ss_candidate_valid_q <= 1'b1;
+                iret_ss_selector_q <= iret_outer_ss_q;
+                iret_ss_limit_q <= descriptor_limit;
+                iret_ss_base_q <= descriptor_base;
+                iret_ss_access_q <= descriptor_access_rights;
+                iret_ss_class_q <= descriptor_class;
+                iret_ss_dpl_q <= descriptor_unused_dpl;
+                iret_ss_rpl_q <= descriptor_unused_rpl;
+                iret_ss_present_q <= descriptor_present;
+                iret_ss_table_q <= descriptor_selector_ti;
+            end
+            if (descriptor_operand_done && descriptor_phase_q == 3'd4 && iret_ss_validation_operation && descriptor_success_q) begin
+                iret_ss_candidate_valid_q <= 1'b1;
+                iret_ss_selector_q <= iret_outer_ss_q;
+                iret_ss_limit_q <= descriptor_limit;
+                iret_ss_base_q <= descriptor_base;
+                iret_ss_access_q <= descriptor_access_rights | 8'h01;
+                iret_ss_class_q <= descriptor_class;
+                iret_ss_dpl_q <= descriptor_unused_dpl;
+                iret_ss_rpl_q <= descriptor_unused_rpl;
+                iret_ss_present_q <= descriptor_present;
+                iret_ss_table_q <= descriptor_selector_ti;
+            end
             if (descriptor_operand_done) begin
                 case (descriptor_phase_q)
                     3'd0: begin descriptor_word0_q <= operand_read_data; descriptor_phase_q <= 3'd1; end
@@ -678,12 +1243,35 @@ module spk286_micro_executor (
                     3'd3: begin
                         descriptor_word3_q <= operand_read_data;
                         if ((descriptor_load_tr && descriptor_success_live) ||
-                            (segment_reload_operation && descriptor_segment_success_live && !descriptor_unused_accessed)) begin
+                            (segment_reload_operation && descriptor_segment_success_live && !descriptor_unused_accessed) ||
+                            (cs_validation_operation && descriptor_cs_success_live && !descriptor_unused_accessed) ||
+                            (call_ss_validation_operation && descriptor_call_ss_success_live && !descriptor_unused_accessed) ||
+                            (iret_cs_validation_operation && descriptor_iret_cs_success_live &&
+                             ({1'b0, tmp0_q} <= {1'b0, descriptor_limit}) && !descriptor_unused_accessed) ||
+                            (iret_ss_validation_operation && descriptor_iret_ss_success_live && !descriptor_unused_accessed)) begin
                             descriptor_success_q <= 1'b1;
                             descriptor_phase_q <= 3'd4;
                         end else descriptor_active_q <= 1'b0;
                     end
                     default: descriptor_active_q <= 1'b0;
+                endcase
+            end
+            if (event_gate_operand_done) begin
+                case (event_gate_phase_q)
+                    3'd0: begin event_gate_word0_q <= operand_read_data; event_gate_phase_q <= 3'd1; end
+                    3'd1: begin event_gate_word1_q <= operand_read_data; event_gate_phase_q <= 3'd2; end
+                    3'd2: begin event_gate_word2_q <= operand_read_data; event_gate_phase_q <= 3'd3; end
+                    3'd3: begin
+                        event_gate_word3_q <= operand_read_data;
+                        event_gate_active_q <= 1'b0;
+                        if (event_gate_success_live) begin
+                            event_gate_candidate_valid_q <= 1'b1;
+                            event_gate_target_selector_q <= event_gate_target_selector;
+                            event_gate_target_offset_q <= event_gate_target_offset;
+                            event_gate_class_q <= event_gate_class;
+                        end
+                    end
+                    default: event_gate_active_q <= 1'b0;
                 endcase
             end
             if (system_operand_done && system_table_operation) begin
@@ -749,15 +1337,40 @@ module spk286_micro_executor (
                 end
             end
             if (read_operand && operand_done) begin
-                if (operation == spk286_microcode_pkg::MC_POP16_TMP2) begin tmp2_q <= operand_read_data; temporary_valid_q[2] <= 1'b1; end
-                else if (read_tmp1 || vector_cs || operation == spk286_microcode_pkg::MC_POP16_TMP1) begin tmp1_q <= operand_read_data; temporary_valid_q[1] <= 1'b1; end
+                if (call_tss_operand_done) begin
+                    // The TSS service owns SPn/SSn; these reads must not
+                    // overwrite the instruction temporaries.
+                end
+                else if (iret_outer_pop_done) begin
+                    // The outer IRET frame words have dedicated candidates;
+                    // do not overwrite the validated IP/CS/FLAGS temporaries.
+                end
+                else if (call_parameter_read) begin
+                    // Parameter-copy reads have a dedicated data latch; the
+                    // gate target offset must remain in TMP0 for the tail.
+                end
+                else if (operation == spk286_microcode_pkg::MC_POP16_TMP2) begin tmp2_q <= operand_read_data; temporary_valid_q[2] <= 1'b1; end
+                else if (read_tmp1 || vector_cs || event_gate_vector_cs || operation == spk286_microcode_pkg::MC_POP16_TMP1) begin tmp1_q <= operand_read_data; temporary_valid_q[1] <= 1'b1; end
                 else begin tmp0_q <= operand_read_data; temporary_valid_q[0] <= 1'b1; end
+                if (event_gate_vector_ip) event_gate_target_offset_q <= operand_read_data;
+                if (event_gate_vector_cs) begin
+                    event_gate_target_selector_q <= operand_read_data;
+                    event_gate_candidate_valid_q <= 1'b1;
+                end
             end
             if (fetch_byte_tmp1 && byte_valid) begin tmp1_q <= {8'd0, byte_data}; temporary_valid_q[1] <= 1'b1; end
             if (fetch_byte && byte_valid) begin tmp0_q <= {8'd0, byte_data}; temporary_valid_q[0] <= 1'b1; end
             if (read_flags || read_event_flags || read_event_cs || read_event_ip) begin
                 tmp0_q <= read_flags ? architectural_flags : (read_event_flags ? event_flags : (read_event_cs ? event_cs : event_ip));
                 temporary_valid_q[0] <= 1'b1;
+            end
+            if (event_gate_ip_operation && event_gate_candidate_valid_q) begin
+                tmp0_q <= event_gate_target_offset_q;
+                temporary_valid_q[0] <= 1'b1;
+            end
+            if (event_gate_cs_operation && event_gate_candidate_valid_q) begin
+                tmp1_q <= event_gate_target_selector_q;
+                temporary_valid_q[1] <= 1'b1;
             end
             if (read_ip) begin tmp0_q <= architectural_ip; temporary_valid_q[0] <= 1'b1; end
             if (target_relative || target_absolute) begin

@@ -70,6 +70,18 @@ module spk286_protected_state (
     input  logic [1:0]  segment_commit_dpl,
     input  logic        segment_commit_table_indicator,
     input  logic [1:0]  segment_commit_rpl,
+    input  logic        segment_commit_en2,
+    input  logic [1:0]  segment_commit_index2,
+    input  logic [15:0] segment_commit_selector2,
+    input  logic [23:0] segment_commit_base2,
+    input  logic [15:0] segment_commit_limit2,
+    input  logic [7:0]  segment_commit_access2,
+    input  logic [3:0]  segment_commit_class2,
+    input  logic        segment_commit_present2,
+    input  logic        segment_commit_protected2,
+    input  logic [1:0]  segment_commit_dpl2,
+    input  logic        segment_commit_table_indicator2,
+    input  logic [1:0]  segment_commit_rpl2,
     output logic [63:0] segment_selector_state,
     output logic [95:0] segment_base_state,
     output logic [63:0] segment_limit_state,
@@ -216,6 +228,19 @@ module spk286_protected_state (
                 segment_dpl_q[segment_commit_index * 2 +: 2] <= segment_commit_dpl;
                 segment_table_q[segment_commit_index] <= segment_commit_table_indicator;
                 segment_rpl_q[segment_commit_index * 2 +: 2] <= segment_commit_rpl;
+            end
+            if (segment_commit_en2) begin
+                segment_selector_q[segment_commit_index2 * 16 +: 16] <= segment_commit_selector2;
+                segment_base_q[segment_commit_index2 * 24 +: 24] <= segment_commit_base2;
+                segment_limit_q[segment_commit_index2 * 16 +: 16] <= segment_commit_limit2;
+                segment_access_q[segment_commit_index2 * 8 +: 8] <= segment_commit_access2;
+                segment_class_q[segment_commit_index2 * 4 +: 4] <= segment_commit_class2;
+                segment_valid_q[segment_commit_index2] <= 1'b1;
+                segment_present_q[segment_commit_index2] <= segment_commit_present2;
+                segment_protected_q[segment_commit_index2] <= segment_commit_protected2;
+                segment_dpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_dpl2;
+                segment_table_q[segment_commit_index2] <= segment_commit_table_indicator2;
+                segment_rpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_rpl2;
             end
         end
     end

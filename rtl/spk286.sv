@@ -166,6 +166,8 @@ module spk286 (
     logic [15:0] internal_flags_write_data, internal_flags_write_mask;
     logic event_active, event_cancel, event_dispatch, event_request, event_software, event_needs_ack;
     logic [15:0] event_ip, event_cs, event_flags;
+    logic event_error_valid;
+    logic [15:0] event_error_code;
     logic opcode_start, service_start, raw_retired, context_commit, vector_request, halt_request;
     logic software_request, software_taken, fault_request, invalid_form, demanded_code_fault;
     logic [7:0] software_vector, selected_software_vector, fault_vector;
@@ -194,8 +196,18 @@ module spk286 (
     logic protected_ldtr_commit_valid, protected_tr_commit_valid;
     logic protected_descriptor_access;
     logic [23:0] protected_descriptor_address;
+    logic protected_tss_access;
+    logic [23:0] protected_tss_address;
+    logic protected_call_stack_access;
+    logic [23:0] protected_call_stack_address;
+    logic [15:0] protected_call_stack_limit;
+    logic protected_event_access;
+    logic [23:0] protected_event_address;
     logic system_limit_fault, system_fault;
     logic [7:0] system_fault_vector;
+    logic [15:0] system_fault_error_code;
+    logic fault_error_valid;
+    logic [15:0] fault_error_code;
     /* verilator lint_off UNUSEDSIGNAL */
     logic [15:0] protected_ldtr_selector, protected_ldtr_limit, protected_tr_selector, protected_tr_limit;
     logic [23:0] protected_ldtr_base, protected_tr_base;
@@ -217,6 +229,15 @@ module spk286 (
     logic protected_segment_commit_present, protected_segment_commit_protected;
     logic [1:0] protected_segment_commit_dpl, protected_segment_commit_rpl;
     logic protected_segment_commit_table_indicator;
+    logic protected_segment_commit_en2;
+    logic [1:0] protected_segment_commit_index2;
+    logic [15:0] protected_segment_commit_selector2, protected_segment_commit_limit2;
+    logic [23:0] protected_segment_commit_base2;
+    logic [7:0] protected_segment_commit_access2;
+    logic [3:0] protected_segment_commit_class2;
+    logic protected_segment_commit_present2, protected_segment_commit_protected2;
+    logic [1:0] protected_segment_commit_dpl2, protected_segment_commit_rpl2;
+    logic protected_segment_commit_table_indicator2;
     logic segment_state_commit_en;
     logic [1:0] segment_state_commit_index, segment_state_commit_dpl, segment_state_commit_rpl;
     logic [15:0] segment_state_commit_selector, segment_state_commit_limit;
@@ -225,7 +246,7 @@ module spk286 (
     logic [3:0] segment_state_commit_class;
     logic segment_state_commit_present, segment_state_commit_protected, segment_state_commit_table_indicator;
     logic [15:0] real_segment_selector, real_segment_limit;
-    logic [23:0] real_segment_base, real_segment_address;
+    logic [23:0] real_segment_base, real_segment_address, operand_physical_address;
     logic [7:0] real_segment_access;
     logic [63:0] real_segment_selectors, real_segment_limits;
     logic [95:0] real_segment_bases;
@@ -260,7 +281,7 @@ module spk286 (
     // Real Mode the same cache is mirrored from the existing real-mode segment
     // service so PE preserves the currently loaded hidden state until an
     // explicit protected reload commits a descriptor candidate.
-    assign segment_state_commit_en = protected_segment_commit_en ||
+    assign segment_state_commit_en = protected_segment_commit_en || protected_segment_commit_en2 ||
                                      (!protected_msw[0] && commit_allowed &&
                                       (segment_load_en || context_commit || internal_segment_write));
     assign segment_state_commit_index = protected_segment_commit_en ? protected_segment_commit_index :
@@ -292,6 +313,15 @@ module spk286 (
     assign segment_limit = selected_segment_limit;
     assign segment_access = selected_segment_access;
     assign segment_address = selected_segment_base + {8'h00, (execute_enable ? service_offset : segment_offset)};
+    always_comb begin
+        operand_physical_address = segment_address;
+        if (vector_request) operand_physical_address = {8'd0, vector_offset};
+        if (io_transfer) operand_physical_address = {8'd0, io_port};
+        if (protected_call_stack_access) operand_physical_address = protected_call_stack_address;
+        if (protected_tss_access) operand_physical_address = protected_tss_address;
+        if (protected_descriptor_access) operand_physical_address = protected_descriptor_address;
+        if (protected_event_access) operand_physical_address = protected_event_address;
+    end
 
     assign protected_segment_is_loaded = protected_msw[0] && protected_segment_protected[service_segment];
     assign protected_segment_is_valid = protected_segment_valid[service_segment];
@@ -300,16 +330,21 @@ module spk286 (
     assign protected_segment_is_readable = selected_segment_access[1];
     assign protected_segment_is_writable = !protected_segment_is_code && selected_segment_access[1];
     assign protected_segment_is_expand_down = !protected_segment_is_code && selected_segment_access[2];
-    assign protected_access_fault = protected_segment_is_loaded && operand_request && operand_select_rm &&
-                                   !operand_register_direct && !protected_descriptor_access && !io_transfer && !vector_request &&
-                                   (!protected_segment_is_valid || !protected_segment_is_present ||
-                                    (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
-                                     (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
-                                      (operand_write && !protected_segment_is_writable))) ||
-                                    (protected_segment_is_expand_down ?
-                                     ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
-                                      ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
-                                     ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, selected_segment_limit})));
+    assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
+                                   !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
+                                   !io_transfer && !vector_request &&
+                                   (protected_call_stack_access ?
+                                    (service_segment != 2'd2 ||
+                                     ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, protected_call_stack_limit})) :
+                                    (protected_segment_is_loaded &&
+                                     (!protected_segment_is_valid || !protected_segment_is_present ||
+                                      (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
+                                       (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
+                                        (operand_write && !protected_segment_is_writable))) ||
+                                      (protected_segment_is_expand_down ?
+                                       ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
+                                        ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
+                                       ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, selected_segment_limit})))));
     assign protected_access_ss_fault = protected_access_fault && service_segment == 2'd2;
     assign protected_fetch_fault = protected_msw[0] && protected_segment_protected[2'd1] &&
                                    (!protected_segment_valid[2'd1] || !protected_segment_present[2'd1] ||
@@ -374,6 +409,12 @@ module spk286 (
         .segment_commit_class(segment_state_commit_class), .segment_commit_present(segment_state_commit_present),
         .segment_commit_protected(segment_state_commit_protected), .segment_commit_dpl(segment_state_commit_dpl),
         .segment_commit_table_indicator(segment_state_commit_table_indicator), .segment_commit_rpl(segment_state_commit_rpl),
+        .segment_commit_en2(protected_segment_commit_en2), .segment_commit_index2(protected_segment_commit_index2),
+        .segment_commit_selector2(protected_segment_commit_selector2), .segment_commit_base2(protected_segment_commit_base2),
+        .segment_commit_limit2(protected_segment_commit_limit2), .segment_commit_access2(protected_segment_commit_access2),
+        .segment_commit_class2(protected_segment_commit_class2), .segment_commit_present2(protected_segment_commit_present2),
+        .segment_commit_protected2(protected_segment_commit_protected2), .segment_commit_dpl2(protected_segment_commit_dpl2),
+        .segment_commit_table_indicator2(protected_segment_commit_table_indicator2), .segment_commit_rpl2(protected_segment_commit_rpl2),
         .segment_selector_state(protected_segment_selectors), .segment_base_state(protected_segment_bases), .segment_limit_state(protected_segment_limits),
         .segment_access_state(protected_segment_access), .segment_class_state(protected_segment_classes), .segment_valid_state(protected_segment_valid),
         .segment_present_state(protected_segment_present), .segment_protected_state(protected_segment_protected), .segment_dpl_state(protected_segment_dpl),
@@ -497,7 +538,7 @@ module spk286 (
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
         .destination_read_data(register_state[source_index_q * 16 +: 16]),
         .source_index(source_index_q), .target_read_data(register_state[destination_q * 16 +: 16]),
-        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .operand_register_direct(operand_register_direct),
+        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .stack_segment_limit(debug_segment_limits[32 +: 16]), .operand_register_direct(operand_register_direct),
         .address_override(address_override), .address_offset(address_offset),
         .direct_flags_data(direct_flags_data), .direct_flags_mask(direct_flags_mask),
         .destination_byte_data(register_state[destination_q[1:0] * 16 + (destination_q[2] ? 8 : 0) +: 8]),
@@ -514,10 +555,16 @@ module spk286 (
         .protected_segment_commit_class(protected_segment_commit_class), .protected_segment_commit_present(protected_segment_commit_present),
         .protected_segment_commit_protected(protected_segment_commit_protected), .protected_segment_commit_dpl(protected_segment_commit_dpl),
         .protected_segment_commit_table_indicator(protected_segment_commit_table_indicator), .protected_segment_commit_rpl(protected_segment_commit_rpl),
+        .protected_segment_commit_en2(protected_segment_commit_en2), .protected_segment_commit_index2(protected_segment_commit_index2),
+        .protected_segment_commit_selector2(protected_segment_commit_selector2), .protected_segment_commit_base2(protected_segment_commit_base2),
+        .protected_segment_commit_limit2(protected_segment_commit_limit2), .protected_segment_commit_access2(protected_segment_commit_access2),
+        .protected_segment_commit_class2(protected_segment_commit_class2), .protected_segment_commit_present2(protected_segment_commit_present2),
+        .protected_segment_commit_protected2(protected_segment_commit_protected2), .protected_segment_commit_dpl2(protected_segment_commit_dpl2),
+        .protected_segment_commit_table_indicator2(protected_segment_commit_table_indicator2), .protected_segment_commit_rpl2(protected_segment_commit_rpl2),
         .alu_byte(alu_byte), .reverse_operands(reverse_operands), .carry_in(debug_flags[0]), .alu_operation(alu_operation), .result_write_allowed(result_write_allowed),
         .architectural_flags(debug_flags), .if_value(opcode_q == 8'hFB),
-        .event_flags(event_flags), .event_cs(event_cs), .event_ip(event_ip), .event_vector(debug_event_vector),
-        .event_needs_ack(event_needs_ack), .ack_done(ack_done), .ack_request(ack_request),
+        .event_flags(event_flags), .event_cs(event_cs), .event_ip(event_ip), .event_error_valid(event_error_valid), .event_error_code(event_error_code), .event_vector(debug_event_vector),
+        .event_needs_ack(event_needs_ack), .ack_done(ack_done), .event_active(event_active), .event_software(event_software), .ack_request(ack_request),
         .software_event_request(software_request), .software_vector(software_vector),
         .halt_request(halt_request), .context_commit(context_commit),
         .vector_request(vector_request), .context_cs(context_cs), .vector_offset(vector_offset),
@@ -529,6 +576,9 @@ module spk286 (
         .protected_ldtr_selector(protected_ldtr_selector), .protected_tr_selector(protected_tr_selector),
         .protected_ldtr_base(protected_ldtr_base), .protected_ldtr_limit(protected_ldtr_limit),
         .protected_ldtr_valid(protected_ldtr_valid), .protected_ldtr_present(protected_ldtr_present),
+        .protected_tr_base(protected_tr_base), .protected_tr_limit(protected_tr_limit),
+        .protected_tr_valid(protected_tr_valid), .protected_tr_present(protected_tr_present),
+        .protected_ss_selector(protected_segment_selectors[2*16 +: 16]),
         .protected_cpl(debug_cs[1:0]),
         .protected_msw_load_en(protected_msw_load_en), .protected_msw_load_data(protected_msw_load_data), .protected_msw_load_mask(protected_msw_load_mask),
         .protected_gdtr_load_en(protected_gdtr_load_en), .protected_idtr_load_en(protected_idtr_load_en),
@@ -543,7 +593,11 @@ module spk286 (
         .protected_ldtr_commit_present(protected_ldtr_commit_present), .protected_tr_commit_present(protected_tr_commit_present),
         .protected_ldtr_commit_valid(protected_ldtr_commit_valid), .protected_tr_commit_valid(protected_tr_commit_valid),
         .protected_descriptor_access(protected_descriptor_access), .protected_descriptor_address(protected_descriptor_address),
-        .system_fault(system_fault), .system_fault_vector(system_fault_vector),
+        .protected_tss_access(protected_tss_access), .protected_tss_address(protected_tss_address),
+        .protected_call_stack_access(protected_call_stack_access), .protected_call_stack_address(protected_call_stack_address),
+        .protected_call_stack_limit(protected_call_stack_limit),
+        .protected_event_access(protected_event_access), .protected_event_address(protected_event_address),
+        .system_fault(system_fault), .system_fault_vector(system_fault_vector), .system_fault_error_code(system_fault_error_code),
         .system_limit_fault(system_limit_fault)
     );
 
@@ -584,9 +638,9 @@ module spk286 (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .read_data(operand_read_data), .register_state(register_state),
-        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !protected_descriptor_access && !address_override && !stack_request && !vector_request && !io_transfer),
-        .physical_address(protected_descriptor_access ? protected_descriptor_address : (io_transfer ? {8'd0, io_port} : (vector_request ? {8'd0, vector_offset} : segment_address))),
-        .offset(protected_descriptor_access ? 16'd0 : service_offset), .segment_limit(protected_descriptor_access ? 16'hFFFF : (vector_request ? 16'hFFFF : segment_limit)),
+        .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !protected_descriptor_access && !protected_tss_access && !protected_call_stack_access && !protected_event_access && !address_override && !stack_request && !vector_request && !io_transfer),
+        .physical_address(operand_physical_address),
+        .offset((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'd0 : service_offset), .segment_limit((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'hFFFF : (vector_request ? 16'hFFFF : segment_limit)),
         .gpr_write_byte(operand_gpr_write_byte), .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
         .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
         .memory_request(memory_request), .memory_request_ready(memory_request_ready),
@@ -656,6 +710,14 @@ module spk286 (
     assign fault_vector = invalid_form ? 8'd6 : system_fault ? system_fault_vector :
                           protected_access_ss_fault ? 8'd12 : protected_access_fault ? 8'd13 :
                           protected_fetch_fault ? 8'd13 : bounds_fault ? 8'd5 : arithmetic_fault ? 8'd0 : 8'd13;
+    // PM3c frame contract: protected selector faults in the #TS/#NP/#SS/#GP
+    // family carry one 16-bit error word.  Non-selector protected faults use
+    // the architecturally defined zero word until their individual source
+    // classification is extended.
+    assign fault_error_valid = protected_msw[0] &&
+                                (fault_vector == 8'd10 || fault_vector == 8'd11 ||
+                                 fault_vector == 8'd12 || fault_vector == 8'd13);
+    assign fault_error_code = system_fault ? system_fault_error_code : 16'd0;
     assign software_taken = software_request && (opcode_q != 8'hCE || debug_flags[11]);
     assign selected_software_vector = opcode_q == 8'hCD ? software_vector : (opcode_q == 8'hCC ? 8'd3 : 8'd4);
     assign instruction_retired = (raw_retired && !event_active) || (event_completed && event_software);
@@ -672,15 +734,17 @@ module spk286 (
     end
     spk286_events events (
         .clk(clk), .reset(reset), .cancel(restart), .enable(execute_enable && commit_allowed && !reset && !restart),
-        .intr(intr), .nmi(nmi), .ss_load((internal_segment_write || protected_segment_commit_en) && decoded_segment_index == 2'd2), .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
+        .intr(intr), .nmi(nmi), .ss_load(((internal_segment_write || protected_segment_commit_en) && decoded_segment_index == 2'd2) || protected_segment_commit_en2), .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
         .repeat_boundary(repeat_boundary), .repeat_stepped(repeat_stepped),
         .retired(raw_retired), .opcode(queue_consume_data), .ip(debug_ip), .cs(debug_cs), .flags(debug_flags),
         .fault_request(fault_request), .fault_vector(fault_vector),
+        .fault_error_valid(fault_error_valid), .fault_error_code(fault_error_code),
         .software_request(software_taken), .software_vector(selected_software_vector),
         .halt_request(halt_request), .dispatch_ready(decode_ready), .ack_done(ack_done), .ack_vector(ack_vector),
         .event_active(event_active), .cancel_operation(event_cancel), .dispatch(event_dispatch), .event_request(event_request),
         .event_completed(event_completed), .event_software(event_software), .event_vector(debug_event_vector),
-        .event_ip(event_ip), .event_cs(event_cs), .event_flags(event_flags), .event_needs_ack(event_needs_ack),
+        .event_ip(event_ip), .event_cs(event_cs), .event_flags(event_flags),
+        .event_error_valid(event_error_valid), .event_error_code(event_error_code), .event_needs_ack(event_needs_ack),
         .halted(halted), .shutdown(shutdown), .nmi_pending(debug_nmi_pending), .nmi_blocked(debug_nmi_blocked),
         .sti_shadow(debug_sti_shadow), .instruction_ip(debug_instruction_ip), .event_kind(debug_event_kind)
     );

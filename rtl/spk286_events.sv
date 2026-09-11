@@ -9,6 +9,8 @@ module spk286_events (
     input logic [15:0] ip, cs, flags,
     input logic fault_request,
     input logic [7:0] fault_vector,
+    input logic fault_error_valid,
+    input logic [15:0] fault_error_code,
     input logic software_request,
     input logic [7:0] software_vector,
     input logic halt_request, dispatch_ready,
@@ -18,6 +20,8 @@ module spk286_events (
     output logic event_completed, event_software,
     output logic [7:0] event_vector,
     output logic [15:0] event_ip, event_cs, event_flags,
+    output logic event_error_valid,
+    output logic [15:0] event_error_code,
     output logic event_needs_ack,
     output logic halted, shutdown,
     output logic nmi_pending, nmi_blocked, sti_shadow, ss_shadow,
@@ -63,6 +67,7 @@ module spk286_events (
             event_active <= 1'b0; cancel_operation <= 1'b0; dispatch_pending_q <= 1'b0;
             event_completed <= 1'b0; event_software <= 1'b0; event_kind <= 3'd0;
             event_vector <= 8'd0; event_ip <= 16'd0; event_cs <= 16'd0; event_flags <= 16'd0;
+            event_error_valid <= 1'b0; event_error_code <= 16'd0;
             event_needs_ack <= 1'b0;
             nmi_previous_q <= 1'b0; nmi_pending <= 1'b0; nmi_blocked <= 1'b0;
             sti_shadow <= 1'b0; ss_shadow <= 1'b0; halted <= 1'b0; shutdown <= 1'b0;
@@ -111,6 +116,8 @@ module spk286_events (
                 event_ip <= (repeat_boundary || (selected_kind == KIND_FAULT && instruction_active)) ? instruction_ip : ip;
                 event_cs <= (repeat_boundary || (selected_kind == KIND_FAULT && instruction_active)) ? instruction_cs_q : cs;
                 event_flags <= flags;
+                event_error_valid <= selected_kind == KIND_FAULT && fault_error_valid;
+                event_error_code <= (selected_kind == KIND_FAULT && fault_error_valid) ? fault_error_code : 16'd0;
                 trap_pending_q <= 1'b0; trap_sample_q <= 1'b0; sti_shadow <= 1'b0; ss_shadow <= 1'b0;
                 halted <= 1'b0; shutdown <= 1'b0;
                 if (selected_kind == KIND_NMI) begin

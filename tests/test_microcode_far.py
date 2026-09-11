@@ -24,5 +24,5 @@ class FarMicrocodeTests(unittest.TestCase):
             if not line.startswith('    '):continue
             with self.subTest(index=index,line=line),self.assertRaises(CompileError):
                 compile_sources({'missing.mc':'\n'.join(lines[:index]+lines[index+1:])})
-        for changed in (source.replace('microcode_format 14','microcode_format 13'),source.replace('READ_SEG16 -> TMP0','READ_FLAGS -> TMP0'),source.replace('CHECK_POP2','CHECK_PUSH2')):
+        for changed in (source.replace('microcode_format 20','microcode_format 16'),source.replace('READ_SEG16 -> TMP0','READ_FLAGS -> TMP0'),source.replace('CHECK_CALL_FRAME','CHECK_PUSH2'),source.replace('COPY_CALL_PARAMETERS','CHECK_CALL_FRAME')):
             with self.assertRaises(CompileError):compile_sources({'changed.mc':changed})

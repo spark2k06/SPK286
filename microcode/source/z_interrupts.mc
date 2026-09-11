@@ -1,5 +1,5 @@
 # Shared real-mode event services; no instruction-level timing padding.
-microcode_format 5
+microcode_format 18
 
 instruction PUSH_FLAGS:
     READ_FLAGS -> TMP0
@@ -32,19 +32,27 @@ instruction INTERRUPT_RETURN:
     POP16 -> TMP0
     POP16 -> TMP1
     POP16 -> TMP2
+    VALIDATE_IRET_CS
+    IRET_OUTER_FRAME
+    VALIDATE_IRET_SS
     IRET_COMMIT TMP0 TMP1 TMP2
     END
 
 instruction EVENT_ENTRY:
     EVENT_ACK
+    VALIDATE_EVENT_GATE
     EVENT_FLAGS -> TMP0
     PUSH16 DECODED TMP0
     EVENT_CS -> TMP0
     PUSH16 DECODED TMP0
     EVENT_IP -> TMP0
     PUSH16 DECODED TMP0
-    CLEAR_IF_TF
-    VECTOR_IP -> TMP0
-    VECTOR_CS -> TMP1
+    EVENT_GATE_IP -> TMP0
+    EVENT_GATE_CS -> TMP1
+    VALIDATE_CS
+    EVENT_GATE_IP -> TMP0
+    EVENT_GATE_CS -> TMP1
+    CLEAR_EVENT_FLAGS
+    PUSH_EVENT_ERROR
     CONTEXT_COMMIT TMP0 TMP1
     END
