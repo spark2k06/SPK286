@@ -12,6 +12,7 @@ module spk286_operand_service_tb;
     logic register_direct=1;
     logic [23:0] physical_address=24'h102001;
     logic [15:0] offset=16'h2001, segment_limit=16'hFFFF;
+    logic segment_expand_down=1'b0;
     wire blocked, gpr_write_en;
     wire [2:0] gpr_write_index;
     wire [15:0] gpr_write_data;

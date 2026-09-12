@@ -47,7 +47,9 @@ OPERATIONS.update({'SYSTEM_STORE_GDTR': 136, 'SYSTEM_STORE_IDTR': 137,
                    'SYSTEM_STORE_LDTR': 142, 'SYSTEM_STORE_TR': 143,
                    'SYSTEM_LOAD_LDTR': 144, 'SYSTEM_LOAD_TR': 145,
                    'SYSTEM_VERIFY_READ': 146, 'SYSTEM_VERIFY_WRITE': 147,
-                   'SYSTEM_LOAD_ACCESS': 148, 'SYSTEM_LOAD_LIMIT': 149})
+                   'SYSTEM_LOAD_ACCESS': 148, 'SYSTEM_LOAD_LIMIT': 149,
+                   'SYSTEM_ARPL_CHECK': 166, 'SYSTEM_ARPL': 167,
+                   'SYSTEM_CLTS': 168})
 OPERATIONS.update({'VALIDATE_CS': 150,
                    'VALIDATE_EVENT_GATE': 151,
                    'EVENT_GATE_IP': 152,
@@ -175,6 +177,9 @@ def parse_statement(text: str, location: Location, format_version: int = 1) -> S
         'SYSTEM_VERIFY_WRITE': ('SYSTEM_VERIFY_WRITE', ()),
         'SYSTEM_LOAD_ACCESS': ('SYSTEM_LOAD_ACCESS', ()),
         'SYSTEM_LOAD_LIMIT': ('SYSTEM_LOAD_LIMIT', ()),
+        'SYSTEM_ARPL_CHECK': ('SYSTEM_ARPL_CHECK', ()),
+        'SYSTEM_ARPL': ('SYSTEM_ARPL', ()),
+        'SYSTEM_CLTS': ('SYSTEM_CLTS', ()),
     }
     if format_version >= 17 and normalized in system_extensions:
         op, args = system_extensions[normalized]
@@ -385,6 +390,8 @@ def validate_system_block(block: Block) -> None:
         ('READ_RM16', 'SYSTEM_VERIFY_WRITE', 'END'),
         ('DECODE_MODRM', 'READ_RM16', 'SYSTEM_LOAD_ACCESS', 'END'),
         ('DECODE_MODRM', 'READ_RM16', 'SYSTEM_LOAD_LIMIT', 'END'),
+        ('DECODE_MODRM', 'SYSTEM_ARPL_CHECK', 'READ_RM16', 'READ_REG16_TMP1', 'SYSTEM_ARPL', 'END'),
+        ('SYSTEM_CLTS', 'END'),
     }
     if actual not in valid:
         raise CompileError(block.location, 'invalid system-instruction acquisition or commit protocol')
@@ -704,6 +711,11 @@ def validate_event_block(block: Block) -> None:
          'EVENT_IP', 'PUSH16', 'EVENT_GATE_IP', 'EVENT_GATE_CS', 'VALIDATE_CS',
          'EVENT_GATE_IP', 'EVENT_GATE_CS', 'CLEAR_EVENT_FLAGS', 'PUSH_EVENT_ERROR',
          'CONTEXT_COMMIT', 'END'),
+        ('EVENT_ACK', 'VALIDATE_EVENT_GATE', 'EVENT_GATE_IP', 'EVENT_GATE_CS',
+         'VALIDATE_CS', 'VALIDATE_CALL_STACK', 'VALIDATE_CALL_SS', 'CHECK_CALL_FRAME',
+         'CALL_GATE_STACK_SWITCH', 'EVENT_FLAGS', 'PUSH16', 'EVENT_CS', 'PUSH16',
+         'EVENT_IP', 'PUSH16', 'EVENT_GATE_IP', 'EVENT_GATE_CS', 'CLEAR_EVENT_FLAGS',
+         'PUSH_EVENT_ERROR', 'CONTEXT_COMMIT', 'END'),
     )
     ops = tuple(s.operation for s in block.statements)
     if ops not in sequences:
@@ -894,7 +906,7 @@ def generate(program: Program) -> dict[str, str]:
     width = program.address_width
     word_width = program.word_width
     operations = {name: value for name, value in OPERATIONS.items()
-                  if value < {1: 4, 2: 9, 3: 19, 4: 29, 5: 46, 6: 58, 7: 62, 8: 64, 9: 71, 10: 74, 11: 76, 12: 78, 13: 113, 14: 116, 15: 121, 16: 131, 17: 151, 18: 161, 19: 165, 20: 166}[program.format_version]}
+                  if value < {1: 4, 2: 9, 3: 19, 4: 29, 5: 46, 6: 58, 7: 62, 8: 64, 9: 71, 10: 74, 11: 76, 12: 78, 13: 113, 14: 116, 15: 121, 16: 131, 17: 151, 18: 161, 19: 165, 20: 169}[program.format_version]}
     package = banner + ("`timescale 1ns/1ps\n"
                         "// Public constants: standalone consumers use only a subset.\n"
                         "/* verilator lint_off UNUSEDPARAM */\n"

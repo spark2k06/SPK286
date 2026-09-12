@@ -21,7 +21,7 @@ module spk286_control_decode (
     assign adjust_kind = opcode == 8'h2F ? 3'd1 : opcode == 8'h37 ? 3'd2 : opcode == 8'h3F ? 3'd3 : opcode == 8'hD4 ? 3'd4 : opcode == 8'hD5 ? 3'd5 : 3'd0;
     assign form_supported = extended_opcode && opcode == 8'h00 ? (group_extension <= 3'd5) :
                             extended_opcode && opcode == 8'h01 ? (group_extension <= 3 || group_extension == 3'd4 || group_extension == 3'd6) :
-                            extended_opcode && (opcode == 8'h02 || opcode == 8'h03) ? 1'b1 :
+                            extended_opcode && (opcode == 8'h02 || opcode == 8'h03 || opcode == 8'h06) ? 1'b1 :
                             opcode == 8'h8C ? group_extension < 4 :
                             opcode == 8'h8E ? group_extension < 4 && group_extension != 1 : opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 ? group_extension != 3'd6 :
                             opcode == 8'hFE ? group_extension < 2 :

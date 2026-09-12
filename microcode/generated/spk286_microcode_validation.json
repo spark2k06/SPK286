@@ -3,14 +3,14 @@
   "compiler_version": "19.0",
   "encoding_version": 20,
   "format_version": 20,
-  "instruction_entries": 117,
-  "rom_depth": 682,
+  "instruction_entries": 120,
+  "rom_depth": 711,
   "schema_version": 1,
   "source_sha256": {
     "data_move.mc": "0aa4ae7fa92080e5d14b2118327c4f528e31f1e015c3fe0b1f8c5cb31f718823",
     "word_alu.mc": "87c682e9ee39d53434830267be179899a12c68bf39f400bd82e77db266e6b8e4",
     "word_stack_control.mc": "adbc7d859f27d0add9d2e86ece19d8a92a25612f4dda4ec655e64e2363c0c415",
-    "z_interrupts.mc": "8405ccc3f8ee9fa3b4562aa601d30d73cd86ff9004ee6f88ac23cb6d7bcd6448",
+    "z_interrupts.mc": "ef37ca040dbf6d022cf1c056f08a7df45fef37476214c044ab3fb12db888d372",
     "zz_byte_scalar.mc": "0635b236683bba54a31901f4e527f1786a6cf36cab3c2c8115a80ec1415fc755",
     "zzz_scalar.mc": "a3a2f32697d081b9c958a1b5e9a769d62289eab1566ef5df2fe7043634f0086b",
     "zzzz_shift.mc": "d56f94b679e8b5ac7da010c6a269ed81fe431312568ddc9056b350f862527f90",
@@ -24,11 +24,11 @@
     "zzzzzzzzzzzz_strings.mc": "c5a0f116040b03bdd2887cfc108df6ef238f7ce8709be6c7258c4f55e1a989c1",
     "zzzzzzzzzzzzz_io.mc": "281ba5e750363f87987c83029319f1926c984b6ca72fed24d465e353ff007c98",
     "zzzzzzzzzzzzzzzz_esc.mc": "03af6f53d08b46b5068ce1194d8b4b168bf82c5bcbb2947d88e1e71cdba8da82",
-    "zzzzzzzzzzzzzzzzz_system_tables.mc": "e19a6a0837e76eb11f18321d7ac4d710f357d866f6f286fab41f11b2d31bb404"
+    "zzzzzzzzzzzzzzzzz_system_tables.mc": "751f2544998e2d47970bb072aaf2fea940e054077c4d59c718eab97925c73532"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 682,
+  "used_words": 711,
   "validation": "PASS",
   "warnings": [],
   "word_width": 8

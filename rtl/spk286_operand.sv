@@ -13,6 +13,7 @@ module spk286_operand (
     input  logic register_direct,
     input  logic [23:0] physical_address,
     input  logic [15:0] offset, segment_limit,
+    input  logic segment_expand_down,
     output logic blocked,
     output logic gpr_write_en, gpr_write_byte,
     output logic [2:0] gpr_write_index,
@@ -31,7 +32,10 @@ module spk286_operand (
     logic [15:0] register_word;
     assign register_index = select_rm ? rm_index : reg_index;
     assign is_memory = select_rm && !register_direct;
-    assign within_limit = ({1'b0, offset} + (request_byte ? 17'd0 : 17'd1)) <= {1'b0, segment_limit};
+    assign within_limit = segment_expand_down ?
+                          ({1'b0, offset} > {1'b0, segment_limit} &&
+                           ({1'b0, offset} + (request_byte ? 17'd0 : 17'd1) <= 17'h0FFFF)) :
+                          (({1'b0, offset} + (request_byte ? 17'd0 : 17'd1)) <= {1'b0, segment_limit});
     assign allowed = request_valid && !reset && !cancel && !blocked;
     assign memory_request = allowed && is_memory && !pending_q && within_limit && !request_check;
     assign memory_write = request_write;

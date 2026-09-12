@@ -72,3 +72,15 @@ instruction SYSTEM_LOAD_LIMIT:
     READ_RM16 -> TMP0
     SYSTEM_LOAD_LIMIT
     END
+
+instruction SYSTEM_ARPL:
+    DECODE_MODRM
+    SYSTEM_ARPL_CHECK
+    READ_RM16 -> TMP0
+    READ_REG16 -> TMP1
+    SYSTEM_ARPL
+    END
+
+instruction SYSTEM_CLTS:
+    SYSTEM_CLTS
+    END

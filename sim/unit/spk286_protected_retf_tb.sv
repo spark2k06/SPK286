@@ -96,6 +96,7 @@ module spk286_protected_retf_tb;
             memory[16'h1018] = 8'hFF; memory[16'h1019] = 8'hFF;
             memory[16'h1015] = 8'h81;
             memory[16'h1068] = caller_stack_limit[7:0]; memory[16'h1069] = caller_stack_limit[15:8];
+            memory[16'h107C] = 8'h02; memory[16'h107D] = 8'hA4;
             memory[16'h0240] = 8'h9A; memory[16'h0241] = 8'h00; memory[16'h0242] = 8'h01;
             memory[16'h0243] = 8'h79; memory[16'h0244] = 8'h00;
             memory[16'hFF00] = 8'h40; memory[16'hFF01] = 8'h02;
@@ -224,20 +225,31 @@ module spk286_protected_retf_tb;
               "PM4b.3 RETF 4 restores outer CS/SS and discards the copied parameters");
 
         // PM4b.4: re-enter through the same gate with a CPL0 stack limit of
-        // 9FFF.  The four-word RETF 4 outer span then reaches A003 and must
-        // fault before reading the saved outer SP:SS words.
+        // 9FFB.  After the two architectural pops, RETF 4 validates the
+        // saved SP:SS words at 9FFC..9FFF and must fault before reading them.
         memory[16'h0245] = 8'h9A; memory[16'h0246] = 8'h00; memory[16'h0247] = 8'h01;
         memory[16'h0248] = 8'h79; memory[16'h0249] = 8'h00;
         memory[16'hFF04] = 8'h57; memory[16'hFF05] = 8'h13;
         memory[16'hFF06] = 8'h68; memory[16'hFF07] = 8'h24;
-        memory[16'h1018] = 8'hFF; memory[16'h1019] = 8'h9F;
+        // Reload the target SS after the gate has admitted its complete
+        // 9FF4..9FFF frame; only then tighten the descriptor for RETF.
+        memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'h50; memory[16'h0102] = 8'h00;
+        memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD0;
+        memory[16'h0105] = 8'hCA; memory[16'h0106] = 8'h04; memory[16'h0107] = 8'h00;
+        memory[16'h1018] = 8'hFF; memory[16'h1019] = 8'hFF;
+        memory[16'h1050] = 8'hFB; memory[16'h1051] = 8'h9F;
+        memory[16'h1052] = 8'h00; memory[16'h1053] = 8'h00;
+        memory[16'h1054] = 8'h00; memory[16'h1055] = 8'h92;
+        memory[16'h1056] = 8'h00; memory[16'h1057] = 8'h00;
         rejected_outer_frame_reads = 0;
         far_restart(16'h0061, 16'h0245);
         retire_one();
         check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FF4,
               "PM4b.4 call gate reaches the bounded RETF rejection target");
+        retire_one(); // MOV AX,0050
+        retire_one(); // MOV SS,AX installs the tightened target limit
         wait_shutdown();
-        check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
+        check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0050 &&
               debug_gpr[79:64] == 16'h9FF8 && rejected_outer_frame_reads == 0 &&
               memory[16'h9FFC] == 8'h04 && memory[16'h9FFD] == 8'hFF &&
               memory[16'h9FFE] == 8'h69 && memory[16'h9FFF] == 8'h00,
@@ -323,6 +335,120 @@ module spk286_protected_retf_tb;
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 &&
               debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF04,
               "PM4b.8 exact restored-SP limit is accepted");
+
+        // PM4b parameter-count boundaries: the gate field is five bits wide,
+        // so counts one and thirty-one must use the same atomic frame service
+        // as the existing two-parameter case.
+        enter_ring1_caller(16'hFFFF);
+        memory[16'h107C] = 8'h01;
+        memory[16'h0101] = 8'h02; memory[16'h0102] = 8'h00;
+        memory[16'hFF00] = 8'h55; memory[16'hFF01] = 8'hAA;
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FF6 &&
+              {memory[16'h9FFA + 16'd1], memory[16'h9FFA]} == 16'hAA55 &&
+              {memory[16'h9FFC + 16'd1], memory[16'h9FFC]} == 16'hFF00 &&
+              {memory[16'h9FFE + 16'd1], memory[16'h9FFE]} == 16'h0069,
+              "PM4b one-parameter gate copies the frame without an off-by-one");
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF02,
+              "PM4b RETF 2 discards exactly one copied parameter");
+
+        enter_ring1_caller(16'hFFFF);
+        memory[16'h107C] = 8'h1F;
+        memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        for (integer idx = 0; idx < 31; idx = idx + 1) begin
+            memory[16'hFF00 + idx * 2] = idx;
+            memory[16'hFF01 + idx * 2] = 8'h40;
+        end
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
+              {memory[16'h9FFC + 16'd1], memory[16'h9FFC]} == 16'hFF00 &&
+              {memory[16'h9FFE + 16'd1], memory[16'h9FFE]} == 16'h0069,
+              "PM4b thirty-one-parameter gate reserves the complete bounded frame");
+        for (integer idx = 0; idx < 31; idx = idx + 1)
+            check({memory[16'h9FBE + idx * 2 + 16'd1], memory[16'h9FBE + idx * 2]} == (16'h4000 + idx),
+                  "PM4b thirty-one-parameter copy preserves source order");
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF3E,
+              "PM4b RETF 62 discards the complete thirty-one-parameter frame");
+
+        // Restore the ordinary PM4b.2 fixture before the independent
+        // expand-down cases below.
+        memory[16'h107C] = 8'h02;
+        memory[16'h0101] = 8'h04;
+        memory[16'h0102] = 8'h00;
+
+        // PM4b.9: exercise the maximum parameter count against multi-word
+        // source and target stack boundaries.  The source limit is inclusive
+        // for the final parameter byte; the target limit is inclusive for the
+        // complete first pushed word and therefore admits the complete
+        // downward frame.
+        enter_ring1_caller(16'hFF3C);
+        memory[16'h107C] = 8'h1F;
+        memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        wait_shutdown();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF00 &&
+              debug_event_vector == 8'h0C,
+              "PM4b.9 source frame crossing the caller SS limit faults before the gate target");
+
+        enter_ring1_caller(16'hFF3D);
+        memory[16'h107C] = 8'h1F;
+        memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        for (integer idx = 0; idx < 31; idx = idx + 1) begin
+            memory[16'hFF00 + idx * 2] = idx;
+            memory[16'hFF01 + idx * 2] = 8'h40;
+        end
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
+              debug_segment_limits[47:32] == 16'hFFFF &&
+              {memory[16'h9FFC + 16'd1], memory[16'h9FFC]} == 16'hFF00 &&
+              {memory[16'h9FFE + 16'd1], memory[16'h9FFE]} == 16'h0069,
+              "PM4b.9 exact caller-source limit admits the complete maximum frame");
+
+        enter_ring1_caller(16'hFFFF);
+        memory[16'h1018] = 8'hFF; memory[16'h1019] = 8'h9F;
+        memory[16'h107C] = 8'h1F;
+        memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        for (integer idx = 0; idx < 31; idx = idx + 1) begin
+            memory[16'hFF00 + idx * 2] = idx;
+            memory[16'hFF01 + idx * 2] = 8'h40;
+        end
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
+              debug_segment_limits[47:32] == 16'h9FFF &&
+              {memory[16'h9FFC + 16'd1], memory[16'h9FFC]} == 16'hFF00 &&
+              {memory[16'h9FFE + 16'd1], memory[16'h9FFE]} == 16'h0069,
+              "PM4b.9 exact target-stack limit admits the maximum downward frame");
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF3E,
+              "PM4b.9 maximum frame returns through RETF 62 after the target-boundary case");
+
+        enter_ring1_caller(16'hFFFF);
+        memory[16'h1018] = 8'hFE; memory[16'h1019] = 8'h9F;
+        memory[16'h107C] = 8'h1F;
+        memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        wait_shutdown();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF00 &&
+              debug_event_vector == 8'h0C,
+              "PM4b.9 target frame crossing the destination SS limit faults before writes");
+
+        // Expand-down outer return: the caller's saved SS accepts the source
+        // parameter reads above 9000 and the restored SP remains above the
+        // same lower bound through RETF 4.
+        memory[16'h106D] = 8'hB6;
+        enter_ring1_caller(16'h9000);
+        check(debug_segment_access[23:16] == 8'hB7 && debug_segment_limits[47:32] == 16'h9000,
+              "expand-down caller stack commits through the outer IRET setup");
+        memory[16'hFF00] = 8'h57; memory[16'hFF01] = 8'h13;
+        memory[16'hFF02] = 8'h68; memory[16'hFF03] = 8'h24;
+        retire_one();
+        check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_segment_selectors[47:32] == 16'h0018,
+              "expand-down caller stack accepts the inter-level call-gate source frame");
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 &&
+              debug_segment_selectors[47:32] == 16'h0069 && debug_segment_access[23:16] == 8'hB7 &&
+              debug_segment_limits[47:32] == 16'h9000 && debug_gpr[79:64] == 16'hFF04,
+              "expand-down restored SS and SP commit atomically through RETF 4");
 
         $display("PROTECTED_RETF PASS: %0d checks, READY stalls=%0d", checks, cycles);
         $finish;

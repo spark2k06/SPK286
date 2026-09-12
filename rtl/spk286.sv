@@ -201,6 +201,7 @@ module spk286 (
     logic protected_call_stack_access;
     logic [23:0] protected_call_stack_address;
     logic [15:0] protected_call_stack_limit;
+    logic protected_call_stack_expand_down;
     logic protected_event_access;
     logic [23:0] protected_event_address;
     logic system_limit_fault, system_fault;
@@ -333,9 +334,12 @@ module spk286 (
     assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
                                    !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
                                    !io_transfer && !vector_request &&
-                                   (protected_call_stack_access ?
+                                    (protected_call_stack_access ?
                                     (service_segment != 2'd2 ||
-                                     ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, protected_call_stack_limit})) :
+                                     (protected_call_stack_expand_down ?
+                                      ({1'b0, service_offset} <= {1'b0, protected_call_stack_limit} ||
+                                       ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
+                                      ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, protected_call_stack_limit}))) :
                                     (protected_segment_is_loaded &&
                                      (!protected_segment_is_valid || !protected_segment_is_present ||
                                       (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
@@ -510,7 +514,10 @@ module spk286 (
         .ROM_DEPTH(spk286_microcode_pkg::MC_DEPTH)
     ) microsequencer (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .enable(execution_allowed),
-        .start(micro_start), .start_entry(event_dispatch ? spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY : decode_entry), .start_ready(decode_ready),
+        .start(micro_start), .start_entry(event_dispatch ?
+                                          (protected_msw[0] ? spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY_PROTECTED :
+                                                               spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY) :
+                                          decode_entry), .start_ready(decode_ready),
         .rom_valid(micro_valid), .rom_end(micro_end), .operation_done(operation_done),
         .branch_request(dispatch_request || counter_branch_request),
         .branch_target(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] : dispatch_entry),
@@ -537,8 +544,8 @@ module spk286 (
         .gpr_write_byte(internal_gpr_write_byte), .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
         .destination_read_data(register_state[source_index_q * 16 +: 16]),
-        .source_index(source_index_q), .target_read_data(register_state[destination_q * 16 +: 16]),
-        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .stack_segment_limit(debug_segment_limits[32 +: 16]), .operand_register_direct(operand_register_direct),
+        .source_index(source_index_q), .lock_prefix(lock_prefix), .target_read_data(register_state[destination_q * 16 +: 16]),
+        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .stack_segment_limit(debug_segment_limits[32 +: 16]), .stack_segment_access(debug_segment_access[23:16]), .operand_register_direct(operand_register_direct),
         .address_override(address_override), .address_offset(address_offset),
         .direct_flags_data(direct_flags_data), .direct_flags_mask(direct_flags_mask),
         .destination_byte_data(register_state[destination_q[1:0] * 16 + (destination_q[2] ? 8 : 0) +: 8]),
@@ -596,6 +603,7 @@ module spk286 (
         .protected_tss_access(protected_tss_access), .protected_tss_address(protected_tss_address),
         .protected_call_stack_access(protected_call_stack_access), .protected_call_stack_address(protected_call_stack_address),
         .protected_call_stack_limit(protected_call_stack_limit),
+        .protected_call_stack_expand_down(protected_call_stack_expand_down),
         .protected_event_access(protected_event_access), .protected_event_address(protected_event_address),
         .system_fault(system_fault), .system_fault_vector(system_fault_vector), .system_fault_error_code(system_fault_error_code),
         .system_limit_fault(system_limit_fault)
@@ -641,6 +649,7 @@ module spk286 (
         .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !protected_descriptor_access && !protected_tss_access && !protected_call_stack_access && !protected_event_access && !address_override && !stack_request && !vector_request && !io_transfer),
         .physical_address(operand_physical_address),
         .offset((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'd0 : service_offset), .segment_limit((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'hFFFF : (vector_request ? 16'hFFFF : segment_limit)),
+        .segment_expand_down(protected_msw[0] && protected_segment_is_expand_down && !protected_call_stack_access && !protected_event_access && !protected_descriptor_access && !protected_tss_access),
         .gpr_write_byte(operand_gpr_write_byte), .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
         .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
         .memory_request(memory_request), .memory_request_ready(memory_request_ready),
@@ -697,7 +706,8 @@ module spk286 (
     assign debug_micro_active = micro_active;
     assign debug_bus_state = bus_valid ? 4'h1 : 4'h0;
     assign invalid_form = operand_context_valid && micro_active && !event_active &&
-                          ((extended_opcode_active && opcode_q == 8'h00 && operand_reg > 3'd5) ||
+                          ((opcode_q == 8'h63 && lock_prefix) ||
+                           (extended_opcode_active && opcode_q == 8'h00 && operand_reg > 3'd5) ||
                            (extended_opcode_active && opcode_q == 8'h01 && ((operand_reg <= 3 && operand_register_direct) || operand_reg == 3'd5 || operand_reg == 3'd7)) ||
                            ((opcode_q == 8'h8C && operand_reg > 3) || (opcode_q == 8'h8E && (operand_reg > 3 || operand_reg == 1))) || (opcode_q == 8'hFE && operand_reg > 1) || ((opcode_q == 8'h8D || opcode_q == 8'h62 || opcode_q == 8'hC4 || opcode_q == 8'hC5) && operand_register_direct) || ((opcode_q == 8'h8F || opcode_q == 8'hC6 || opcode_q == 8'hC7) && operand_reg != 0) ||
                            (opcode_q == 8'hFF && (operand_reg == 7 ||

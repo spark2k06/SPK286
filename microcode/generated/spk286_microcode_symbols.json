@@ -1,145 +1,148 @@
 {
   "branch_targets": {
-    "412": 422,
-    "414": 420,
-    "419": 415,
-    "549": 556,
-    "555": 550,
-    "557": 567,
-    "566": 558,
-    "568": 574,
-    "573": 570,
-    "575": 581,
-    "580": 576,
-    "582": 591,
-    "590": 583,
-    "608": 615,
-    "614": 610,
-    "616": 623,
-    "622": 618,
-    "624": 631,
-    "630": 626,
-    "632": 639,
-    "638": 634
+    "433": 443,
+    "435": 441,
+    "440": 436,
+    "570": 577,
+    "576": 571,
+    "578": 588,
+    "587": 579,
+    "589": 595,
+    "594": 591,
+    "596": 602,
+    "601": 597,
+    "603": 612,
+    "611": 604,
+    "629": 636,
+    "635": 631,
+    "637": 644,
+    "643": 639,
+    "645": 652,
+    "651": 647,
+    "653": 660,
+    "659": 655
   },
   "entries": {
-    "ADJUST_DIRECT": 336,
-    "ADJUST_RADIX": 343,
-    "ALU_AL_IMM8": 169,
+    "ADJUST_DIRECT": 357,
+    "ADJUST_RADIX": 364,
+    "ALU_AL_IMM8": 190,
     "ALU_AX_IMM16": 25,
     "ALU_R16_RM16": 18,
-    "ALU_R8_RM8": 162,
+    "ALU_R8_RM8": 183,
     "ALU_RM16_IMM16": 31,
     "ALU_RM16_IMM8S": 38,
     "ALU_RM16_R16": 11,
-    "ALU_RM8_IMM8": 175,
-    "ALU_RM8_R8": 155,
+    "ALU_RM8_IMM8": 196,
+    "ALU_RM8_R8": 176,
     "BRANCH_REL8": 77,
-    "CALL_FAR_IMM": 451,
-    "CALL_FAR_RM": 473,
+    "CALL_FAR_IMM": 472,
+    "CALL_FAR_RM": 494,
     "CALL_REL16": 67,
-    "CHECK_BOUNDS": 432,
-    "CONTROL_FLAGS": 182,
+    "CHECK_BOUNDS": 453,
+    "CONTROL_FLAGS": 203,
     "CONTROL_IF": 102,
-    "ENTER_FRAME": 401,
-    "ESC_NO_COPROCESSOR": 640,
+    "ENTER_FRAME": 422,
+    "ESC_NO_COPROCESSOR": 661,
     "EVENT_ENTRY": 119,
-    "EXCHANGE_RM16_R16": 253,
-    "EXCHANGE_RM8_R8": 247,
-    "EXCHANGE_SOURCE_TARGET16": 259,
-    "EXTEND_BYTE": 187,
-    "EXTEND_WORD": 191,
-    "GROUP3_DISPATCH": 290,
-    "GROUP5_DISPATCH": 292,
+    "EVENT_ENTRY_PROTECTED": 136,
+    "EXCHANGE_RM16_R16": 274,
+    "EXCHANGE_RM8_R8": 268,
+    "EXCHANGE_SOURCE_TARGET16": 280,
+    "EXTEND_BYTE": 208,
+    "EXTEND_WORD": 212,
+    "GROUP3_DISPATCH": 311,
+    "GROUP5_DISPATCH": 313,
     "GROUP5_NEAR": 61,
     "HALT_CPU": 104,
-    "IMUL_R16_RM16_IMM16": 535,
-    "IMUL_R16_RM16_IMM8S": 542,
-    "INC_DEC_R16": 195,
-    "INC_DEC_RM16": 329,
-    "INC_DEC_RM8": 322,
+    "IMUL_R16_RM16_IMM16": 556,
+    "IMUL_R16_RM16_IMM8S": 563,
+    "INC_DEC_R16": 216,
+    "INC_DEC_RM16": 350,
+    "INC_DEC_RM8": 343,
     "INTERRUPT_RETURN": 111,
-    "IN_AL_PORT": 592,
-    "IN_AX_PORT": 596,
-    "JMP_FAR_IMM": 468,
-    "JMP_FAR_RM": 493,
+    "IN_AL_PORT": 613,
+    "IN_AX_PORT": 617,
+    "JMP_FAR_IMM": 489,
+    "JMP_FAR_RM": 514,
     "JMP_REL16": 73,
-    "LEAVE_FRAME": 426,
-    "LEA_R16_M": 243,
-    "LOAD_BASE_INDEX8": 284,
-    "LOAD_DIRECT16": 269,
-    "LOAD_DIRECT8": 264,
-    "LOAD_FLAGS_BYTE": 184,
-    "LOAD_POINTER": 441,
+    "LEAVE_FRAME": 447,
+    "LEA_R16_M": 264,
+    "LOAD_BASE_INDEX8": 305,
+    "LOAD_DIRECT16": 290,
+    "LOAD_DIRECT8": 285,
+    "LOAD_FLAGS_BYTE": 205,
+    "LOAD_POINTER": 462,
     "LOOP_REL8": 81,
     "MOV_R16_IMM16": 0,
     "MOV_R16_RM16": 7,
-    "MOV_R8_IMM8": 136,
-    "MOV_R8_RM8": 143,
-    "MOV_RM16_IMM16": 151,
+    "MOV_R8_IMM8": 157,
+    "MOV_R8_RM8": 164,
+    "MOV_RM16_IMM16": 172,
     "MOV_RM16_R16": 3,
-    "MOV_RM16_SEG": 350,
-    "MOV_RM8_IMM8": 147,
-    "MOV_RM8_R8": 139,
-    "MOV_SEG_RM16": 354,
-    "MULDIV_RM16": 527,
-    "MULDIV_RM8": 520,
-    "NEG_RM16": 315,
-    "NEG_RM8": 308,
-    "NOT_RM16": 301,
-    "NOT_RM8": 294,
-    "OUT_PORT_AL": 600,
-    "OUT_PORT_AX": 604,
-    "POP_ALL": 384,
+    "MOV_RM16_SEG": 371,
+    "MOV_RM8_IMM8": 168,
+    "MOV_RM8_R8": 160,
+    "MOV_SEG_RM16": 375,
+    "MULDIV_RM16": 548,
+    "MULDIV_RM8": 541,
+    "NEG_RM16": 336,
+    "NEG_RM8": 329,
+    "NOT_RM16": 322,
+    "NOT_RM8": 315,
+    "OUT_PORT_AL": 621,
+    "OUT_PORT_AX": 625,
+    "POP_ALL": 405,
     "POP_FLAGS": 99,
     "POP_R16": 48,
     "POP_RM16": 57,
-    "POP_SEG": 361,
-    "PUSH_ALL": 364,
+    "POP_SEG": 382,
+    "PUSH_ALL": 385,
     "PUSH_FLAGS": 96,
     "PUSH_IMM16": 51,
     "PUSH_IMM8S": 54,
     "PUSH_R16": 45,
-    "PUSH_SEG": 358,
-    "RET_FAR": 501,
-    "RET_FAR_IMM": 509,
+    "PUSH_SEG": 379,
+    "RET_FAR": 522,
+    "RET_FAR_IMM": 530,
     "RET_IMM16": 90,
     "RET_NEAR": 86,
-    "SHIFT_RM16_CL": 229,
-    "SHIFT_RM16_IMM8": 236,
-    "SHIFT_RM16_ONE": 222,
-    "SHIFT_RM8_CL": 208,
-    "SHIFT_RM8_IMM8": 215,
-    "SHIFT_RM8_ONE": 201,
+    "SHIFT_RM16_CL": 250,
+    "SHIFT_RM16_IMM8": 257,
+    "SHIFT_RM16_ONE": 243,
+    "SHIFT_RM8_CL": 229,
+    "SHIFT_RM8_IMM8": 236,
+    "SHIFT_RM8_ONE": 222,
     "SOFTWARE_EVENT": 106,
     "SOFTWARE_EVENT_IMM8": 108,
-    "STORE_DIRECT16": 279,
-    "STORE_DIRECT8": 274,
-    "STRING_COMPARE": 557,
-    "STRING_INPUT_BYTE": 608,
-    "STRING_INPUT_WORD": 616,
-    "STRING_LOAD": 575,
-    "STRING_MOVE": 549,
-    "STRING_OUTPUT_BYTE": 624,
-    "STRING_OUTPUT_WORD": 632,
-    "STRING_SCAN": 582,
-    "STRING_STORE": 568,
-    "SYSTEM_GROUP_0F00": 656,
-    "SYSTEM_GROUP_0F01": 642,
-    "SYSTEM_LOAD_ACCESS": 674,
-    "SYSTEM_LOAD_GDTR": 648,
-    "SYSTEM_LOAD_IDTR": 650,
-    "SYSTEM_LOAD_LDTR": 662,
-    "SYSTEM_LOAD_LIMIT": 678,
-    "SYSTEM_LOAD_MSW": 654,
-    "SYSTEM_LOAD_TR": 665,
-    "SYSTEM_STORE_GDTR": 644,
-    "SYSTEM_STORE_IDTR": 646,
-    "SYSTEM_STORE_LDTR": 658,
-    "SYSTEM_STORE_MSW": 652,
-    "SYSTEM_STORE_TR": 660,
-    "SYSTEM_VERIFY_READ": 668,
-    "SYSTEM_VERIFY_WRITE": 671
+    "STORE_DIRECT16": 300,
+    "STORE_DIRECT8": 295,
+    "STRING_COMPARE": 578,
+    "STRING_INPUT_BYTE": 629,
+    "STRING_INPUT_WORD": 637,
+    "STRING_LOAD": 596,
+    "STRING_MOVE": 570,
+    "STRING_OUTPUT_BYTE": 645,
+    "STRING_OUTPUT_WORD": 653,
+    "STRING_SCAN": 603,
+    "STRING_STORE": 589,
+    "SYSTEM_ARPL": 703,
+    "SYSTEM_CLTS": 709,
+    "SYSTEM_GROUP_0F00": 677,
+    "SYSTEM_GROUP_0F01": 663,
+    "SYSTEM_LOAD_ACCESS": 695,
+    "SYSTEM_LOAD_GDTR": 669,
+    "SYSTEM_LOAD_IDTR": 671,
+    "SYSTEM_LOAD_LDTR": 683,
+    "SYSTEM_LOAD_LIMIT": 699,
+    "SYSTEM_LOAD_MSW": 675,
+    "SYSTEM_LOAD_TR": 686,
+    "SYSTEM_STORE_GDTR": 665,
+    "SYSTEM_STORE_IDTR": 667,
+    "SYSTEM_STORE_LDTR": 679,
+    "SYSTEM_STORE_MSW": 673,
+    "SYSTEM_STORE_TR": 681,
+    "SYSTEM_VERIFY_READ": 689,
+    "SYSTEM_VERIFY_WRITE": 692
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -147,30 +150,30 @@
     "ALU_RM16_IMM16.writeback": 35,
     "ALU_RM16_IMM8S.writeback": 42,
     "ALU_RM16_R16.writeback": 15,
-    "ENTER_FRAME.copy_parent": 415,
-    "ENTER_FRAME.finish": 422,
-    "ENTER_FRAME.push_frame": 420,
+    "ENTER_FRAME.copy_parent": 436,
+    "ENTER_FRAME.finish": 443,
+    "ENTER_FRAME.push_frame": 441,
     "MOV_R16_IMM16.writeback": 1,
     "MOV_R16_RM16.writeback": 9,
     "MOV_RM16_R16.writeback": 5,
-    "STRING_COMPARE.done": 567,
-    "STRING_COMPARE.loop": 558,
-    "STRING_INPUT_BYTE.done": 615,
-    "STRING_INPUT_BYTE.loop": 610,
-    "STRING_INPUT_WORD.done": 623,
-    "STRING_INPUT_WORD.loop": 618,
-    "STRING_LOAD.done": 581,
-    "STRING_LOAD.loop": 576,
-    "STRING_MOVE.done": 556,
-    "STRING_MOVE.loop": 550,
-    "STRING_OUTPUT_BYTE.done": 631,
-    "STRING_OUTPUT_BYTE.loop": 626,
-    "STRING_OUTPUT_WORD.done": 639,
-    "STRING_OUTPUT_WORD.loop": 634,
-    "STRING_SCAN.done": 591,
-    "STRING_SCAN.loop": 583,
-    "STRING_STORE.done": 574,
-    "STRING_STORE.loop": 570
+    "STRING_COMPARE.done": 588,
+    "STRING_COMPARE.loop": 579,
+    "STRING_INPUT_BYTE.done": 636,
+    "STRING_INPUT_BYTE.loop": 631,
+    "STRING_INPUT_WORD.done": 644,
+    "STRING_INPUT_WORD.loop": 639,
+    "STRING_LOAD.done": 602,
+    "STRING_LOAD.loop": 597,
+    "STRING_MOVE.done": 577,
+    "STRING_MOVE.loop": 571,
+    "STRING_OUTPUT_BYTE.done": 652,
+    "STRING_OUTPUT_BYTE.loop": 647,
+    "STRING_OUTPUT_WORD.done": 660,
+    "STRING_OUTPUT_WORD.loop": 655,
+    "STRING_SCAN.done": 612,
+    "STRING_SCAN.loop": 604,
+    "STRING_STORE.done": 595,
+    "STRING_STORE.loop": 591
   },
   "operations": [
     {
@@ -1985,6 +1988,275 @@
     {
       "address": 136,
       "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 61
+      },
+      "operands": [],
+      "operation": "EVENT_ACK",
+      "statement": "EVENT_ACK",
+      "word": 35
+    },
+    {
+      "address": 137,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 62
+      },
+      "operands": [],
+      "operation": "VALIDATE_EVENT_GATE",
+      "statement": "VALIDATE_EVENT_GATE",
+      "word": 151
+    },
+    {
+      "address": 138,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 63
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "EVENT_GATE_IP",
+      "statement": "EVENT_GATE_IP -> TMP0",
+      "word": 152
+    },
+    {
+      "address": 139,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 64
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "EVENT_GATE_CS",
+      "statement": "EVENT_GATE_CS -> TMP1",
+      "word": 153
+    },
+    {
+      "address": 140,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 65
+      },
+      "operands": [],
+      "operation": "VALIDATE_CS",
+      "statement": "VALIDATE_CS",
+      "word": 150
+    },
+    {
+      "address": 141,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 66
+      },
+      "operands": [],
+      "operation": "VALIDATE_CALL_STACK",
+      "statement": "VALIDATE_CALL_STACK",
+      "word": 161
+    },
+    {
+      "address": 142,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 67
+      },
+      "operands": [],
+      "operation": "VALIDATE_CALL_SS",
+      "statement": "VALIDATE_CALL_SS",
+      "word": 162
+    },
+    {
+      "address": 143,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 68
+      },
+      "operands": [],
+      "operation": "CHECK_CALL_FRAME",
+      "statement": "CHECK_CALL_FRAME",
+      "word": 164
+    },
+    {
+      "address": 144,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 69
+      },
+      "operands": [],
+      "operation": "CALL_GATE_STACK_SWITCH",
+      "statement": "CALL_GATE_STACK_SWITCH",
+      "word": 163
+    },
+    {
+      "address": 145,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 70
+      },
+      "operands": [],
+      "operation": "EVENT_FLAGS",
+      "statement": "EVENT_FLAGS -> TMP0",
+      "word": 36
+    },
+    {
+      "address": 146,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 71
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 147,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 72
+      },
+      "operands": [],
+      "operation": "EVENT_CS",
+      "statement": "EVENT_CS -> TMP0",
+      "word": 37
+    },
+    {
+      "address": 148,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 73
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 149,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 74
+      },
+      "operands": [],
+      "operation": "EVENT_IP",
+      "statement": "EVENT_IP -> TMP0",
+      "word": 38
+    },
+    {
+      "address": 150,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 75
+      },
+      "operands": [
+        "DECODED",
+        "TMP0"
+      ],
+      "operation": "PUSH16",
+      "statement": "PUSH16 DECODED TMP0",
+      "word": 21
+    },
+    {
+      "address": 151,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 76
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "EVENT_GATE_IP",
+      "statement": "EVENT_GATE_IP -> TMP0",
+      "word": 152
+    },
+    {
+      "address": 152,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 77
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "EVENT_GATE_CS",
+      "statement": "EVENT_GATE_CS -> TMP1",
+      "word": 153
+    },
+    {
+      "address": 153,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 78
+      },
+      "operands": [],
+      "operation": "CLEAR_EVENT_FLAGS",
+      "statement": "CLEAR_EVENT_FLAGS",
+      "word": 154
+    },
+    {
+      "address": 154,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 79
+      },
+      "operands": [],
+      "operation": "PUSH_EVENT_ERROR",
+      "statement": "PUSH_EVENT_ERROR",
+      "word": 155
+    },
+    {
+      "address": 155,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 80
+      },
+      "operands": [],
+      "operation": "CONTEXT_COMMIT",
+      "statement": "CONTEXT_COMMIT TMP0 TMP1",
+      "word": 42
+    },
+    {
+      "address": 156,
+      "location": {
+        "entry": "EVENT_ENTRY_PROTECTED",
+        "file": "z_interrupts.mc",
+        "line": 81
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 157,
+      "location": {
         "entry": "MOV_R8_IMM8",
         "file": "zz_byte_scalar.mc",
         "line": 4
@@ -1995,7 +2267,7 @@
       "word": 29
     },
     {
-      "address": 137,
+      "address": 158,
       "location": {
         "entry": "MOV_R8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2010,7 +2282,7 @@
       "word": 54
     },
     {
-      "address": 138,
+      "address": 159,
       "location": {
         "entry": "MOV_R8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2022,7 +2294,7 @@
       "word": 3
     },
     {
-      "address": 139,
+      "address": 160,
       "location": {
         "entry": "MOV_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2034,7 +2306,7 @@
       "word": 4
     },
     {
-      "address": 140,
+      "address": 161,
       "location": {
         "entry": "MOV_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2048,7 +2320,7 @@
       "word": 46
     },
     {
-      "address": 141,
+      "address": 162,
       "location": {
         "entry": "MOV_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2062,7 +2334,7 @@
       "word": 49
     },
     {
-      "address": 142,
+      "address": 163,
       "location": {
         "entry": "MOV_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2074,7 +2346,7 @@
       "word": 3
     },
     {
-      "address": 143,
+      "address": 164,
       "location": {
         "entry": "MOV_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2086,7 +2358,7 @@
       "word": 4
     },
     {
-      "address": 144,
+      "address": 165,
       "location": {
         "entry": "MOV_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2100,7 +2372,7 @@
       "word": 47
     },
     {
-      "address": 145,
+      "address": 166,
       "location": {
         "entry": "MOV_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2114,7 +2386,7 @@
       "word": 48
     },
     {
-      "address": 146,
+      "address": 167,
       "location": {
         "entry": "MOV_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2126,7 +2398,7 @@
       "word": 3
     },
     {
-      "address": 147,
+      "address": 168,
       "location": {
         "entry": "MOV_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2138,7 +2410,7 @@
       "word": 4
     },
     {
-      "address": 148,
+      "address": 169,
       "location": {
         "entry": "MOV_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2150,7 +2422,7 @@
       "word": 29
     },
     {
-      "address": 149,
+      "address": 170,
       "location": {
         "entry": "MOV_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2164,7 +2436,7 @@
       "word": 49
     },
     {
-      "address": 150,
+      "address": 171,
       "location": {
         "entry": "MOV_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2176,7 +2448,7 @@
       "word": 3
     },
     {
-      "address": 151,
+      "address": 172,
       "location": {
         "entry": "MOV_RM16_IMM16",
         "file": "zz_byte_scalar.mc",
@@ -2188,7 +2460,7 @@
       "word": 4
     },
     {
-      "address": 152,
+      "address": 173,
       "location": {
         "entry": "MOV_RM16_IMM16",
         "file": "zz_byte_scalar.mc",
@@ -2202,7 +2474,7 @@
       "word": 1
     },
     {
-      "address": 153,
+      "address": 174,
       "location": {
         "entry": "MOV_RM16_IMM16",
         "file": "zz_byte_scalar.mc",
@@ -2216,7 +2488,7 @@
       "word": 8
     },
     {
-      "address": 154,
+      "address": 175,
       "location": {
         "entry": "MOV_RM16_IMM16",
         "file": "zz_byte_scalar.mc",
@@ -2228,7 +2500,7 @@
       "word": 3
     },
     {
-      "address": 155,
+      "address": 176,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2240,7 +2512,7 @@
       "word": 4
     },
     {
-      "address": 156,
+      "address": 177,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2254,7 +2526,7 @@
       "word": 47
     },
     {
-      "address": 157,
+      "address": 178,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2268,7 +2540,7 @@
       "word": 51
     },
     {
-      "address": 158,
+      "address": 179,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2286,7 +2558,7 @@
       "word": 14
     },
     {
-      "address": 159,
+      "address": 180,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2300,7 +2572,7 @@
       "word": 56
     },
     {
-      "address": 160,
+      "address": 181,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2312,7 +2584,7 @@
       "word": 18
     },
     {
-      "address": 161,
+      "address": 182,
       "location": {
         "entry": "ALU_RM8_R8",
         "file": "zz_byte_scalar.mc",
@@ -2324,7 +2596,7 @@
       "word": 3
     },
     {
-      "address": 162,
+      "address": 183,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2336,7 +2608,7 @@
       "word": 4
     },
     {
-      "address": 163,
+      "address": 184,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2350,7 +2622,7 @@
       "word": 46
     },
     {
-      "address": 164,
+      "address": 185,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2364,7 +2636,7 @@
       "word": 52
     },
     {
-      "address": 165,
+      "address": 186,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2382,7 +2654,7 @@
       "word": 14
     },
     {
-      "address": 166,
+      "address": 187,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2396,7 +2668,7 @@
       "word": 55
     },
     {
-      "address": 167,
+      "address": 188,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2408,7 +2680,7 @@
       "word": 18
     },
     {
-      "address": 168,
+      "address": 189,
       "location": {
         "entry": "ALU_R8_RM8",
         "file": "zz_byte_scalar.mc",
@@ -2420,7 +2692,7 @@
       "word": 3
     },
     {
-      "address": 169,
+      "address": 190,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2434,7 +2706,7 @@
       "word": 53
     },
     {
-      "address": 170,
+      "address": 191,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2448,7 +2720,7 @@
       "word": 50
     },
     {
-      "address": 171,
+      "address": 192,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2466,7 +2738,7 @@
       "word": 14
     },
     {
-      "address": 172,
+      "address": 193,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2480,7 +2752,7 @@
       "word": 57
     },
     {
-      "address": 173,
+      "address": 194,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2492,7 +2764,7 @@
       "word": 18
     },
     {
-      "address": 174,
+      "address": 195,
       "location": {
         "entry": "ALU_AL_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2504,7 +2776,7 @@
       "word": 3
     },
     {
-      "address": 175,
+      "address": 196,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2516,7 +2788,7 @@
       "word": 4
     },
     {
-      "address": 176,
+      "address": 197,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2530,7 +2802,7 @@
       "word": 50
     },
     {
-      "address": 177,
+      "address": 198,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2544,7 +2816,7 @@
       "word": 47
     },
     {
-      "address": 178,
+      "address": 199,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2562,7 +2834,7 @@
       "word": 14
     },
     {
-      "address": 179,
+      "address": 200,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2576,7 +2848,7 @@
       "word": 56
     },
     {
-      "address": 180,
+      "address": 201,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2588,7 +2860,7 @@
       "word": 18
     },
     {
-      "address": 181,
+      "address": 202,
       "location": {
         "entry": "ALU_RM8_IMM8",
         "file": "zz_byte_scalar.mc",
@@ -2600,7 +2872,7 @@
       "word": 3
     },
     {
-      "address": 182,
+      "address": 203,
       "location": {
         "entry": "CONTROL_FLAGS",
         "file": "zzz_scalar.mc",
@@ -2612,7 +2884,7 @@
       "word": 58
     },
     {
-      "address": 183,
+      "address": 204,
       "location": {
         "entry": "CONTROL_FLAGS",
         "file": "zzz_scalar.mc",
@@ -2624,7 +2896,7 @@
       "word": 3
     },
     {
-      "address": 184,
+      "address": 205,
       "location": {
         "entry": "LOAD_FLAGS_BYTE",
         "file": "zzz_scalar.mc",
@@ -2636,7 +2908,7 @@
       "word": 30
     },
     {
-      "address": 185,
+      "address": 206,
       "location": {
         "entry": "LOAD_FLAGS_BYTE",
         "file": "zzz_scalar.mc",
@@ -2651,7 +2923,7 @@
       "word": 54
     },
     {
-      "address": 186,
+      "address": 207,
       "location": {
         "entry": "LOAD_FLAGS_BYTE",
         "file": "zzz_scalar.mc",
@@ -2663,7 +2935,7 @@
       "word": 3
     },
     {
-      "address": 187,
+      "address": 208,
       "location": {
         "entry": "EXTEND_BYTE",
         "file": "zzz_scalar.mc",
@@ -2677,7 +2949,7 @@
       "word": 13
     },
     {
-      "address": 188,
+      "address": 209,
       "location": {
         "entry": "EXTEND_BYTE",
         "file": "zzz_scalar.mc",
@@ -2691,7 +2963,7 @@
       "word": 59
     },
     {
-      "address": 189,
+      "address": 210,
       "location": {
         "entry": "EXTEND_BYTE",
         "file": "zzz_scalar.mc",
@@ -2706,7 +2978,7 @@
       "word": 2
     },
     {
-      "address": 190,
+      "address": 211,
       "location": {
         "entry": "EXTEND_BYTE",
         "file": "zzz_scalar.mc",
@@ -2718,7 +2990,7 @@
       "word": 3
     },
     {
-      "address": 191,
+      "address": 212,
       "location": {
         "entry": "EXTEND_WORD",
         "file": "zzz_scalar.mc",
@@ -2732,7 +3004,7 @@
       "word": 13
     },
     {
-      "address": 192,
+      "address": 213,
       "location": {
         "entry": "EXTEND_WORD",
         "file": "zzz_scalar.mc",
@@ -2746,7 +3018,7 @@
       "word": 60
     },
     {
-      "address": 193,
+      "address": 214,
       "location": {
         "entry": "EXTEND_WORD",
         "file": "zzz_scalar.mc",
@@ -2761,7 +3033,7 @@
       "word": 2
     },
     {
-      "address": 194,
+      "address": 215,
       "location": {
         "entry": "EXTEND_WORD",
         "file": "zzz_scalar.mc",
@@ -2773,7 +3045,7 @@
       "word": 3
     },
     {
-      "address": 195,
+      "address": 216,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2787,7 +3059,7 @@
       "word": 13
     },
     {
-      "address": 196,
+      "address": 217,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2801,7 +3073,7 @@
       "word": 61
     },
     {
-      "address": 197,
+      "address": 218,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2819,7 +3091,7 @@
       "word": 14
     },
     {
-      "address": 198,
+      "address": 219,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2833,7 +3105,7 @@
       "word": 17
     },
     {
-      "address": 199,
+      "address": 220,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2845,7 +3117,7 @@
       "word": 18
     },
     {
-      "address": 200,
+      "address": 221,
       "location": {
         "entry": "INC_DEC_R16",
         "file": "zzz_scalar.mc",
@@ -2857,7 +3129,7 @@
       "word": 3
     },
     {
-      "address": 201,
+      "address": 222,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2869,7 +3141,7 @@
       "word": 4
     },
     {
-      "address": 202,
+      "address": 223,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2883,7 +3155,7 @@
       "word": 61
     },
     {
-      "address": 203,
+      "address": 224,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2897,7 +3169,7 @@
       "word": 47
     },
     {
-      "address": 204,
+      "address": 225,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2913,7 +3185,7 @@
       "word": 62
     },
     {
-      "address": 205,
+      "address": 226,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2927,7 +3199,7 @@
       "word": 56
     },
     {
-      "address": 206,
+      "address": 227,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2939,7 +3211,7 @@
       "word": 18
     },
     {
-      "address": 207,
+      "address": 228,
       "location": {
         "entry": "SHIFT_RM8_ONE",
         "file": "zzzz_shift.mc",
@@ -2951,7 +3223,7 @@
       "word": 3
     },
     {
-      "address": 208,
+      "address": 229,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -2963,7 +3235,7 @@
       "word": 4
     },
     {
-      "address": 209,
+      "address": 230,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -2977,7 +3249,7 @@
       "word": 63
     },
     {
-      "address": 210,
+      "address": 231,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -2991,7 +3263,7 @@
       "word": 47
     },
     {
-      "address": 211,
+      "address": 232,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -3007,7 +3279,7 @@
       "word": 62
     },
     {
-      "address": 212,
+      "address": 233,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -3021,7 +3293,7 @@
       "word": 56
     },
     {
-      "address": 213,
+      "address": 234,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -3033,7 +3305,7 @@
       "word": 18
     },
     {
-      "address": 214,
+      "address": 235,
       "location": {
         "entry": "SHIFT_RM8_CL",
         "file": "zzzz_shift.mc",
@@ -3045,7 +3317,7 @@
       "word": 3
     },
     {
-      "address": 215,
+      "address": 236,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3057,7 +3329,7 @@
       "word": 4
     },
     {
-      "address": 216,
+      "address": 237,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3071,7 +3343,7 @@
       "word": 50
     },
     {
-      "address": 217,
+      "address": 238,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3085,7 +3357,7 @@
       "word": 47
     },
     {
-      "address": 218,
+      "address": 239,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3101,7 +3373,7 @@
       "word": 62
     },
     {
-      "address": 219,
+      "address": 240,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3115,7 +3387,7 @@
       "word": 56
     },
     {
-      "address": 220,
+      "address": 241,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3127,7 +3399,7 @@
       "word": 18
     },
     {
-      "address": 221,
+      "address": 242,
       "location": {
         "entry": "SHIFT_RM8_IMM8",
         "file": "zzzz_shift.mc",
@@ -3139,7 +3411,7 @@
       "word": 3
     },
     {
-      "address": 222,
+      "address": 243,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3151,7 +3423,7 @@
       "word": 4
     },
     {
-      "address": 223,
+      "address": 244,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3165,7 +3437,7 @@
       "word": 61
     },
     {
-      "address": 224,
+      "address": 245,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3179,7 +3451,7 @@
       "word": 6
     },
     {
-      "address": 225,
+      "address": 246,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3195,7 +3467,7 @@
       "word": 62
     },
     {
-      "address": 226,
+      "address": 247,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3209,7 +3481,7 @@
       "word": 16
     },
     {
-      "address": 227,
+      "address": 248,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3221,7 +3493,7 @@
       "word": 18
     },
     {
-      "address": 228,
+      "address": 249,
       "location": {
         "entry": "SHIFT_RM16_ONE",
         "file": "zzzz_shift.mc",
@@ -3233,7 +3505,7 @@
       "word": 3
     },
     {
-      "address": 229,
+      "address": 250,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3245,7 +3517,7 @@
       "word": 4
     },
     {
-      "address": 230,
+      "address": 251,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3259,7 +3531,7 @@
       "word": 63
     },
     {
-      "address": 231,
+      "address": 252,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3273,7 +3545,7 @@
       "word": 6
     },
     {
-      "address": 232,
+      "address": 253,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3289,7 +3561,7 @@
       "word": 62
     },
     {
-      "address": 233,
+      "address": 254,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3303,7 +3575,7 @@
       "word": 16
     },
     {
-      "address": 234,
+      "address": 255,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3315,7 +3587,7 @@
       "word": 18
     },
     {
-      "address": 235,
+      "address": 256,
       "location": {
         "entry": "SHIFT_RM16_CL",
         "file": "zzzz_shift.mc",
@@ -3327,7 +3599,7 @@
       "word": 3
     },
     {
-      "address": 236,
+      "address": 257,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3339,7 +3611,7 @@
       "word": 4
     },
     {
-      "address": 237,
+      "address": 258,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3353,7 +3625,7 @@
       "word": 50
     },
     {
-      "address": 238,
+      "address": 259,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3367,7 +3639,7 @@
       "word": 6
     },
     {
-      "address": 239,
+      "address": 260,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3383,7 +3655,7 @@
       "word": 62
     },
     {
-      "address": 240,
+      "address": 261,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3397,7 +3669,7 @@
       "word": 16
     },
     {
-      "address": 241,
+      "address": 262,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3409,7 +3681,7 @@
       "word": 18
     },
     {
-      "address": 242,
+      "address": 263,
       "location": {
         "entry": "SHIFT_RM16_IMM8",
         "file": "zzzz_shift.mc",
@@ -3421,7 +3693,7 @@
       "word": 3
     },
     {
-      "address": 243,
+      "address": 264,
       "location": {
         "entry": "LEA_R16_M",
         "file": "zzzzz_data.mc",
@@ -3433,7 +3705,7 @@
       "word": 4
     },
     {
-      "address": 244,
+      "address": 265,
       "location": {
         "entry": "LEA_R16_M",
         "file": "zzzzz_data.mc",
@@ -3447,7 +3719,7 @@
       "word": 64
     },
     {
-      "address": 245,
+      "address": 266,
       "location": {
         "entry": "LEA_R16_M",
         "file": "zzzzz_data.mc",
@@ -3461,7 +3733,7 @@
       "word": 7
     },
     {
-      "address": 246,
+      "address": 267,
       "location": {
         "entry": "LEA_R16_M",
         "file": "zzzzz_data.mc",
@@ -3473,7 +3745,7 @@
       "word": 3
     },
     {
-      "address": 247,
+      "address": 268,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3485,7 +3757,7 @@
       "word": 4
     },
     {
-      "address": 248,
+      "address": 269,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3499,7 +3771,7 @@
       "word": 52
     },
     {
-      "address": 249,
+      "address": 270,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3513,7 +3785,7 @@
       "word": 46
     },
     {
-      "address": 250,
+      "address": 271,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3527,7 +3799,7 @@
       "word": 49
     },
     {
-      "address": 251,
+      "address": 272,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3541,7 +3813,7 @@
       "word": 65
     },
     {
-      "address": 252,
+      "address": 273,
       "location": {
         "entry": "EXCHANGE_RM8_R8",
         "file": "zzzzz_data.mc",
@@ -3553,7 +3825,7 @@
       "word": 3
     },
     {
-      "address": 253,
+      "address": 274,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3565,7 +3837,7 @@
       "word": 4
     },
     {
-      "address": 254,
+      "address": 275,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3579,7 +3851,7 @@
       "word": 10
     },
     {
-      "address": 255,
+      "address": 276,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3593,7 +3865,7 @@
       "word": 5
     },
     {
-      "address": 256,
+      "address": 277,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3607,7 +3879,7 @@
       "word": 8
     },
     {
-      "address": 257,
+      "address": 278,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3621,7 +3893,7 @@
       "word": 66
     },
     {
-      "address": 258,
+      "address": 279,
       "location": {
         "entry": "EXCHANGE_RM16_R16",
         "file": "zzzzz_data.mc",
@@ -3633,7 +3905,7 @@
       "word": 3
     },
     {
-      "address": 259,
+      "address": 280,
       "location": {
         "entry": "EXCHANGE_SOURCE_TARGET16",
         "file": "zzzzz_data.mc",
@@ -3647,7 +3919,7 @@
       "word": 13
     },
     {
-      "address": 260,
+      "address": 281,
       "location": {
         "entry": "EXCHANGE_SOURCE_TARGET16",
         "file": "zzzzz_data.mc",
@@ -3661,7 +3933,7 @@
       "word": 67
     },
     {
-      "address": 261,
+      "address": 282,
       "location": {
         "entry": "EXCHANGE_SOURCE_TARGET16",
         "file": "zzzzz_data.mc",
@@ -3675,7 +3947,7 @@
       "word": 68
     },
     {
-      "address": 262,
+      "address": 283,
       "location": {
         "entry": "EXCHANGE_SOURCE_TARGET16",
         "file": "zzzzz_data.mc",
@@ -3690,7 +3962,7 @@
       "word": 2
     },
     {
-      "address": 263,
+      "address": 284,
       "location": {
         "entry": "EXCHANGE_SOURCE_TARGET16",
         "file": "zzzzz_data.mc",
@@ -3702,7 +3974,7 @@
       "word": 3
     },
     {
-      "address": 264,
+      "address": 285,
       "location": {
         "entry": "LOAD_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3716,7 +3988,7 @@
       "word": 11
     },
     {
-      "address": 265,
+      "address": 286,
       "location": {
         "entry": "LOAD_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3730,7 +4002,7 @@
       "word": 69
     },
     {
-      "address": 266,
+      "address": 287,
       "location": {
         "entry": "LOAD_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3744,7 +4016,7 @@
       "word": 47
     },
     {
-      "address": 267,
+      "address": 288,
       "location": {
         "entry": "LOAD_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3759,7 +4031,7 @@
       "word": 54
     },
     {
-      "address": 268,
+      "address": 289,
       "location": {
         "entry": "LOAD_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3771,7 +4043,7 @@
       "word": 3
     },
     {
-      "address": 269,
+      "address": 290,
       "location": {
         "entry": "LOAD_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3785,7 +4057,7 @@
       "word": 11
     },
     {
-      "address": 270,
+      "address": 291,
       "location": {
         "entry": "LOAD_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3799,7 +4071,7 @@
       "word": 69
     },
     {
-      "address": 271,
+      "address": 292,
       "location": {
         "entry": "LOAD_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3813,7 +4085,7 @@
       "word": 6
     },
     {
-      "address": 272,
+      "address": 293,
       "location": {
         "entry": "LOAD_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3828,7 +4100,7 @@
       "word": 2
     },
     {
-      "address": 273,
+      "address": 294,
       "location": {
         "entry": "LOAD_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3840,7 +4112,7 @@
       "word": 3
     },
     {
-      "address": 274,
+      "address": 295,
       "location": {
         "entry": "STORE_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3854,7 +4126,7 @@
       "word": 11
     },
     {
-      "address": 275,
+      "address": 296,
       "location": {
         "entry": "STORE_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3868,7 +4140,7 @@
       "word": 69
     },
     {
-      "address": 276,
+      "address": 297,
       "location": {
         "entry": "STORE_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3882,7 +4154,7 @@
       "word": 53
     },
     {
-      "address": 277,
+      "address": 298,
       "location": {
         "entry": "STORE_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3896,7 +4168,7 @@
       "word": 49
     },
     {
-      "address": 278,
+      "address": 299,
       "location": {
         "entry": "STORE_DIRECT8",
         "file": "zzzzz_data.mc",
@@ -3908,7 +4180,7 @@
       "word": 3
     },
     {
-      "address": 279,
+      "address": 300,
       "location": {
         "entry": "STORE_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3922,7 +4194,7 @@
       "word": 11
     },
     {
-      "address": 280,
+      "address": 301,
       "location": {
         "entry": "STORE_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3936,7 +4208,7 @@
       "word": 69
     },
     {
-      "address": 281,
+      "address": 302,
       "location": {
         "entry": "STORE_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3950,7 +4222,7 @@
       "word": 13
     },
     {
-      "address": 282,
+      "address": 303,
       "location": {
         "entry": "STORE_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3964,7 +4236,7 @@
       "word": 8
     },
     {
-      "address": 283,
+      "address": 304,
       "location": {
         "entry": "STORE_DIRECT16",
         "file": "zzzzz_data.mc",
@@ -3976,7 +4248,7 @@
       "word": 3
     },
     {
-      "address": 284,
+      "address": 305,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -3990,7 +4262,7 @@
       "word": 53
     },
     {
-      "address": 285,
+      "address": 306,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -4005,7 +4277,7 @@
       "word": 70
     },
     {
-      "address": 286,
+      "address": 307,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -4019,7 +4291,7 @@
       "word": 69
     },
     {
-      "address": 287,
+      "address": 308,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -4033,7 +4305,7 @@
       "word": 47
     },
     {
-      "address": 288,
+      "address": 309,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -4048,7 +4320,7 @@
       "word": 54
     },
     {
-      "address": 289,
+      "address": 310,
       "location": {
         "entry": "LOAD_BASE_INDEX8",
         "file": "zzzzz_data.mc",
@@ -4060,7 +4332,7 @@
       "word": 3
     },
     {
-      "address": 290,
+      "address": 311,
       "location": {
         "entry": "GROUP3_DISPATCH",
         "file": "zzzzzz_unary.mc",
@@ -4072,7 +4344,7 @@
       "word": 4
     },
     {
-      "address": 291,
+      "address": 312,
       "location": {
         "entry": "GROUP3_DISPATCH",
         "file": "zzzzzz_unary.mc",
@@ -4084,7 +4356,7 @@
       "word": 71
     },
     {
-      "address": 292,
+      "address": 313,
       "location": {
         "entry": "GROUP5_DISPATCH",
         "file": "zzzzzz_unary.mc",
@@ -4096,7 +4368,7 @@
       "word": 4
     },
     {
-      "address": 293,
+      "address": 314,
       "location": {
         "entry": "GROUP5_DISPATCH",
         "file": "zzzzzz_unary.mc",
@@ -4108,7 +4380,7 @@
       "word": 71
     },
     {
-      "address": 294,
+      "address": 315,
       "location": {
         "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
@@ -4120,7 +4392,7 @@
       "word": 4
     },
     {
-      "address": 295,
+      "address": 316,
       "location": {
         "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
@@ -4134,7 +4406,7 @@
       "word": 47
     },
     {
-      "address": 296,
+      "address": 317,
       "location": {
         "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
@@ -4148,299 +4420,11 @@
       "word": 73
     },
     {
-      "address": 297,
+      "address": 318,
       "location": {
         "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
         "line": 13
-      },
-      "operands": [
-        "DECODED",
-        "TMP0",
-        "TMP1",
-        "TMP2",
-        "FLAGS_DECODED"
-      ],
-      "operation": "ALU",
-      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
-      "word": 14
-    },
-    {
-      "address": 298,
-      "location": {
-        "entry": "NOT_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 14
-      },
-      "operands": [
-        "TMP2"
-      ],
-      "operation": "WRITE_RESULT_RM8",
-      "statement": "TMP2 -> RM8 IF_WRITE",
-      "word": 56
-    },
-    {
-      "address": 299,
-      "location": {
-        "entry": "NOT_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 15
-      },
-      "operands": [],
-      "operation": "COMMIT_FLAGS",
-      "statement": "COMMIT_FLAGS",
-      "word": 18
-    },
-    {
-      "address": 300,
-      "location": {
-        "entry": "NOT_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 16
-      },
-      "operands": [],
-      "operation": "END",
-      "statement": "END",
-      "word": 3
-    },
-    {
-      "address": 301,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 18
-      },
-      "operands": [],
-      "operation": "DECODE_MODRM",
-      "statement": "DECODE_MODRM",
-      "word": 4
-    },
-    {
-      "address": 302,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 19
-      },
-      "operands": [
-        "TMP0"
-      ],
-      "operation": "READ_RM16",
-      "statement": "READ_RM16 -> TMP0",
-      "word": 6
-    },
-    {
-      "address": 303,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 20
-      },
-      "operands": [
-        "TMP1"
-      ],
-      "operation": "CONST_ONES_TMP1",
-      "statement": "CONST_ONES -> TMP1",
-      "word": 73
-    },
-    {
-      "address": 304,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 21
-      },
-      "operands": [
-        "DECODED",
-        "TMP0",
-        "TMP1",
-        "TMP2",
-        "FLAGS_DECODED"
-      ],
-      "operation": "ALU",
-      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
-      "word": 14
-    },
-    {
-      "address": 305,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 22
-      },
-      "operands": [
-        "TMP2"
-      ],
-      "operation": "WRITE_RESULT_RM16",
-      "statement": "TMP2 -> RM16 IF_WRITE",
-      "word": 16
-    },
-    {
-      "address": 306,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 23
-      },
-      "operands": [],
-      "operation": "COMMIT_FLAGS",
-      "statement": "COMMIT_FLAGS",
-      "word": 18
-    },
-    {
-      "address": 307,
-      "location": {
-        "entry": "NOT_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 24
-      },
-      "operands": [],
-      "operation": "END",
-      "statement": "END",
-      "word": 3
-    },
-    {
-      "address": 308,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 26
-      },
-      "operands": [],
-      "operation": "DECODE_MODRM",
-      "statement": "DECODE_MODRM",
-      "word": 4
-    },
-    {
-      "address": 309,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 27
-      },
-      "operands": [
-        "TMP0"
-      ],
-      "operation": "READ_RM8",
-      "statement": "READ_RM8 -> TMP0",
-      "word": 47
-    },
-    {
-      "address": 310,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 28
-      },
-      "operands": [
-        "TMP1"
-      ],
-      "operation": "CONST_ZERO_TMP1",
-      "statement": "CONST_ZERO -> TMP1",
-      "word": 72
-    },
-    {
-      "address": 311,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 29
-      },
-      "operands": [
-        "DECODED",
-        "TMP0",
-        "TMP1",
-        "TMP2",
-        "FLAGS_DECODED"
-      ],
-      "operation": "ALU",
-      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
-      "word": 14
-    },
-    {
-      "address": 312,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 30
-      },
-      "operands": [
-        "TMP2"
-      ],
-      "operation": "WRITE_RESULT_RM8",
-      "statement": "TMP2 -> RM8 IF_WRITE",
-      "word": 56
-    },
-    {
-      "address": 313,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 31
-      },
-      "operands": [],
-      "operation": "COMMIT_FLAGS",
-      "statement": "COMMIT_FLAGS",
-      "word": 18
-    },
-    {
-      "address": 314,
-      "location": {
-        "entry": "NEG_RM8",
-        "file": "zzzzzz_unary.mc",
-        "line": 32
-      },
-      "operands": [],
-      "operation": "END",
-      "statement": "END",
-      "word": 3
-    },
-    {
-      "address": 315,
-      "location": {
-        "entry": "NEG_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 34
-      },
-      "operands": [],
-      "operation": "DECODE_MODRM",
-      "statement": "DECODE_MODRM",
-      "word": 4
-    },
-    {
-      "address": 316,
-      "location": {
-        "entry": "NEG_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 35
-      },
-      "operands": [
-        "TMP0"
-      ],
-      "operation": "READ_RM16",
-      "statement": "READ_RM16 -> TMP0",
-      "word": 6
-    },
-    {
-      "address": 317,
-      "location": {
-        "entry": "NEG_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 36
-      },
-      "operands": [
-        "TMP1"
-      ],
-      "operation": "CONST_ZERO_TMP1",
-      "statement": "CONST_ZERO -> TMP1",
-      "word": 72
-    },
-    {
-      "address": 318,
-      "location": {
-        "entry": "NEG_RM16",
-        "file": "zzzzzz_unary.mc",
-        "line": 37
       },
       "operands": [
         "DECODED",
@@ -4456,23 +4440,23 @@
     {
       "address": 319,
       "location": {
-        "entry": "NEG_RM16",
+        "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 38
+        "line": 14
       },
       "operands": [
         "TMP2"
       ],
-      "operation": "WRITE_RESULT_RM16",
-      "statement": "TMP2 -> RM16 IF_WRITE",
-      "word": 16
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
     },
     {
       "address": 320,
       "location": {
-        "entry": "NEG_RM16",
+        "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 39
+        "line": 15
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -4482,9 +4466,9 @@
     {
       "address": 321,
       "location": {
-        "entry": "NEG_RM16",
+        "entry": "NOT_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 40
+        "line": 16
       },
       "operands": [],
       "operation": "END",
@@ -4494,9 +4478,9 @@
     {
       "address": 322,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 42
+        "line": 18
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -4506,37 +4490,37 @@
     {
       "address": 323,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 43
+        "line": 19
       },
       "operands": [
         "TMP0"
       ],
-      "operation": "READ_RM8",
-      "statement": "READ_RM8 -> TMP0",
-      "word": 47
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
     },
     {
       "address": 324,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 44
+        "line": 20
       },
       "operands": [
         "TMP1"
       ],
-      "operation": "CONST_ONE_TMP1",
-      "statement": "CONST_ONE -> TMP1",
-      "word": 61
+      "operation": "CONST_ONES_TMP1",
+      "statement": "CONST_ONES -> TMP1",
+      "word": 73
     },
     {
       "address": 325,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 45
+        "line": 21
       },
       "operands": [
         "DECODED",
@@ -4552,23 +4536,23 @@
     {
       "address": 326,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 46
+        "line": 22
       },
       "operands": [
         "TMP2"
       ],
-      "operation": "WRITE_RESULT_RM8",
-      "statement": "TMP2 -> RM8 IF_WRITE",
-      "word": 56
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
     },
     {
       "address": 327,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 47
+        "line": 23
       },
       "operands": [],
       "operation": "COMMIT_FLAGS",
@@ -4578,9 +4562,9 @@
     {
       "address": 328,
       "location": {
-        "entry": "INC_DEC_RM8",
+        "entry": "NOT_RM16",
         "file": "zzzzzz_unary.mc",
-        "line": 48
+        "line": 24
       },
       "operands": [],
       "operation": "END",
@@ -4590,9 +4574,9 @@
     {
       "address": 329,
       "location": {
-        "entry": "INC_DEC_RM16",
+        "entry": "NEG_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 50
+        "line": 26
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -4602,37 +4586,37 @@
     {
       "address": 330,
       "location": {
-        "entry": "INC_DEC_RM16",
+        "entry": "NEG_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 51
+        "line": 27
       },
       "operands": [
         "TMP0"
       ],
-      "operation": "READ_RM16",
-      "statement": "READ_RM16 -> TMP0",
-      "word": 6
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
     },
     {
       "address": 331,
       "location": {
-        "entry": "INC_DEC_RM16",
+        "entry": "NEG_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 52
+        "line": 28
       },
       "operands": [
         "TMP1"
       ],
-      "operation": "CONST_ONE_TMP1",
-      "statement": "CONST_ONE -> TMP1",
-      "word": 61
+      "operation": "CONST_ZERO_TMP1",
+      "statement": "CONST_ZERO -> TMP1",
+      "word": 72
     },
     {
       "address": 332,
       "location": {
-        "entry": "INC_DEC_RM16",
+        "entry": "NEG_RM8",
         "file": "zzzzzz_unary.mc",
-        "line": 53
+        "line": 29
       },
       "operands": [
         "DECODED",
@@ -4648,6 +4632,294 @@
     {
       "address": 333,
       "location": {
+        "entry": "NEG_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 30
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 334,
+      "location": {
+        "entry": "NEG_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 31
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 335,
+      "location": {
+        "entry": "NEG_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 32
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 336,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 34
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 337,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 35
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 338,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 36
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ZERO_TMP1",
+      "statement": "CONST_ZERO -> TMP1",
+      "word": 72
+    },
+    {
+      "address": 339,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 37
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 340,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 38
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM16",
+      "statement": "TMP2 -> RM16 IF_WRITE",
+      "word": 16
+    },
+    {
+      "address": 341,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 39
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 342,
+      "location": {
+        "entry": "NEG_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 40
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 343,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 42
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 344,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 43
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM8",
+      "statement": "READ_RM8 -> TMP0",
+      "word": 47
+    },
+    {
+      "address": 345,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 44
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ONE_TMP1",
+      "statement": "CONST_ONE -> TMP1",
+      "word": 61
+    },
+    {
+      "address": 346,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 45
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 347,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 46
+      },
+      "operands": [
+        "TMP2"
+      ],
+      "operation": "WRITE_RESULT_RM8",
+      "statement": "TMP2 -> RM8 IF_WRITE",
+      "word": 56
+    },
+    {
+      "address": 348,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 47
+      },
+      "operands": [],
+      "operation": "COMMIT_FLAGS",
+      "statement": "COMMIT_FLAGS",
+      "word": 18
+    },
+    {
+      "address": 349,
+      "location": {
+        "entry": "INC_DEC_RM8",
+        "file": "zzzzzz_unary.mc",
+        "line": 48
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 350,
+      "location": {
+        "entry": "INC_DEC_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 50
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 351,
+      "location": {
+        "entry": "INC_DEC_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 51
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 352,
+      "location": {
+        "entry": "INC_DEC_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 52
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "CONST_ONE_TMP1",
+      "statement": "CONST_ONE -> TMP1",
+      "word": 61
+    },
+    {
+      "address": 353,
+      "location": {
+        "entry": "INC_DEC_RM16",
+        "file": "zzzzzz_unary.mc",
+        "line": 53
+      },
+      "operands": [
+        "DECODED",
+        "TMP0",
+        "TMP1",
+        "TMP2",
+        "FLAGS_DECODED"
+      ],
+      "operation": "ALU",
+      "statement": "ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED",
+      "word": 14
+    },
+    {
+      "address": 354,
+      "location": {
         "entry": "INC_DEC_RM16",
         "file": "zzzzzz_unary.mc",
         "line": 54
@@ -4660,7 +4932,7 @@
       "word": 16
     },
     {
-      "address": 334,
+      "address": 355,
       "location": {
         "entry": "INC_DEC_RM16",
         "file": "zzzzzz_unary.mc",
@@ -4672,7 +4944,7 @@
       "word": 18
     },
     {
-      "address": 335,
+      "address": 356,
       "location": {
         "entry": "INC_DEC_RM16",
         "file": "zzzzzz_unary.mc",
@@ -4684,7 +4956,7 @@
       "word": 3
     },
     {
-      "address": 336,
+      "address": 357,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4698,7 +4970,7 @@
       "word": 13
     },
     {
-      "address": 337,
+      "address": 358,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4712,7 +4984,7 @@
       "word": 72
     },
     {
-      "address": 338,
+      "address": 359,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4728,7 +5000,7 @@
       "word": 74
     },
     {
-      "address": 339,
+      "address": 360,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4742,7 +5014,7 @@
       "word": 17
     },
     {
-      "address": 340,
+      "address": 361,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4754,7 +5026,7 @@
       "word": 18
     },
     {
-      "address": 341,
+      "address": 362,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4766,7 +5038,7 @@
       "word": 75
     },
     {
-      "address": 342,
+      "address": 363,
       "location": {
         "entry": "ADJUST_DIRECT",
         "file": "zzzzzzz_adjust.mc",
@@ -4778,7 +5050,7 @@
       "word": 3
     },
     {
-      "address": 343,
+      "address": 364,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4792,7 +5064,7 @@
       "word": 50
     },
     {
-      "address": 344,
+      "address": 365,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4806,7 +5078,7 @@
       "word": 13
     },
     {
-      "address": 345,
+      "address": 366,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4822,7 +5094,7 @@
       "word": 74
     },
     {
-      "address": 346,
+      "address": 367,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4836,7 +5108,7 @@
       "word": 17
     },
     {
-      "address": 347,
+      "address": 368,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4848,7 +5120,7 @@
       "word": 18
     },
     {
-      "address": 348,
+      "address": 369,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4860,7 +5132,7 @@
       "word": 75
     },
     {
-      "address": 349,
+      "address": 370,
       "location": {
         "entry": "ADJUST_RADIX",
         "file": "zzzzzzz_adjust.mc",
@@ -4872,7 +5144,7 @@
       "word": 3
     },
     {
-      "address": 350,
+      "address": 371,
       "location": {
         "entry": "MOV_RM16_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -4884,7 +5156,7 @@
       "word": 4
     },
     {
-      "address": 351,
+      "address": 372,
       "location": {
         "entry": "MOV_RM16_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -4898,7 +5170,7 @@
       "word": 76
     },
     {
-      "address": 352,
+      "address": 373,
       "location": {
         "entry": "MOV_RM16_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -4912,7 +5184,7 @@
       "word": 8
     },
     {
-      "address": 353,
+      "address": 374,
       "location": {
         "entry": "MOV_RM16_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -4924,7 +5196,7 @@
       "word": 3
     },
     {
-      "address": 354,
+      "address": 375,
       "location": {
         "entry": "MOV_SEG_RM16",
         "file": "zzzzzzzz_segments.mc",
@@ -4936,7 +5208,7 @@
       "word": 4
     },
     {
-      "address": 355,
+      "address": 376,
       "location": {
         "entry": "MOV_SEG_RM16",
         "file": "zzzzzzzz_segments.mc",
@@ -4950,7 +5222,7 @@
       "word": 6
     },
     {
-      "address": 356,
+      "address": 377,
       "location": {
         "entry": "MOV_SEG_RM16",
         "file": "zzzzzzzz_segments.mc",
@@ -4964,7 +5236,7 @@
       "word": 77
     },
     {
-      "address": 357,
+      "address": 378,
       "location": {
         "entry": "MOV_SEG_RM16",
         "file": "zzzzzzzz_segments.mc",
@@ -4976,7 +5248,7 @@
       "word": 3
     },
     {
-      "address": 358,
+      "address": 379,
       "location": {
         "entry": "PUSH_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -4990,7 +5262,7 @@
       "word": 76
     },
     {
-      "address": 359,
+      "address": 380,
       "location": {
         "entry": "PUSH_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -5005,7 +5277,7 @@
       "word": 21
     },
     {
-      "address": 360,
+      "address": 381,
       "location": {
         "entry": "PUSH_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -5017,7 +5289,7 @@
       "word": 3
     },
     {
-      "address": 361,
+      "address": 382,
       "location": {
         "entry": "POP_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -5031,7 +5303,7 @@
       "word": 22
     },
     {
-      "address": 362,
+      "address": 383,
       "location": {
         "entry": "POP_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -5045,7 +5317,7 @@
       "word": 77
     },
     {
-      "address": 363,
+      "address": 384,
       "location": {
         "entry": "POP_SEG",
         "file": "zzzzzzzz_segments.mc",
@@ -5057,7 +5329,7 @@
       "word": 3
     },
     {
-      "address": 364,
+      "address": 385,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5069,7 +5341,7 @@
       "word": 101
     },
     {
-      "address": 365,
+      "address": 386,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5081,7 +5353,7 @@
       "word": 82
     },
     {
-      "address": 366,
+      "address": 387,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5093,7 +5365,7 @@
       "word": 94
     },
     {
-      "address": 367,
+      "address": 388,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5105,7 +5377,7 @@
       "word": 78
     },
     {
-      "address": 368,
+      "address": 389,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5120,7 +5392,7 @@
       "word": 21
     },
     {
-      "address": 369,
+      "address": 390,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5132,7 +5404,7 @@
       "word": 79
     },
     {
-      "address": 370,
+      "address": 391,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5147,7 +5419,7 @@
       "word": 21
     },
     {
-      "address": 371,
+      "address": 392,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5159,7 +5431,7 @@
       "word": 80
     },
     {
-      "address": 372,
+      "address": 393,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5174,7 +5446,7 @@
       "word": 21
     },
     {
-      "address": 373,
+      "address": 394,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5186,7 +5458,7 @@
       "word": 81
     },
     {
-      "address": 374,
+      "address": 395,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5201,7 +5473,7 @@
       "word": 21
     },
     {
-      "address": 375,
+      "address": 396,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5213,7 +5485,7 @@
       "word": 95
     },
     {
-      "address": 376,
+      "address": 397,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5228,7 +5500,7 @@
       "word": 21
     },
     {
-      "address": 377,
+      "address": 398,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5240,7 +5512,7 @@
       "word": 83
     },
     {
-      "address": 378,
+      "address": 399,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5255,7 +5527,7 @@
       "word": 21
     },
     {
-      "address": 379,
+      "address": 400,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5267,7 +5539,7 @@
       "word": 84
     },
     {
-      "address": 380,
+      "address": 401,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5282,7 +5554,7 @@
       "word": 21
     },
     {
-      "address": 381,
+      "address": 402,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5294,7 +5566,7 @@
       "word": 85
     },
     {
-      "address": 382,
+      "address": 403,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5309,7 +5581,7 @@
       "word": 21
     },
     {
-      "address": 383,
+      "address": 404,
       "location": {
         "entry": "PUSH_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5321,7 +5593,7 @@
       "word": 3
     },
     {
-      "address": 384,
+      "address": 405,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5333,7 +5605,7 @@
       "word": 102
     },
     {
-      "address": 385,
+      "address": 406,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5347,7 +5619,7 @@
       "word": 22
     },
     {
-      "address": 386,
+      "address": 407,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5359,7 +5631,7 @@
       "word": 93
     },
     {
-      "address": 387,
+      "address": 408,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5373,7 +5645,7 @@
       "word": 22
     },
     {
-      "address": 388,
+      "address": 409,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5385,7 +5657,7 @@
       "word": 92
     },
     {
-      "address": 389,
+      "address": 410,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5399,7 +5671,7 @@
       "word": 22
     },
     {
-      "address": 390,
+      "address": 411,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5411,7 +5683,7 @@
       "word": 91
     },
     {
-      "address": 391,
+      "address": 412,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5425,7 +5697,7 @@
       "word": 22
     },
     {
-      "address": 392,
+      "address": 413,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5439,7 +5711,7 @@
       "word": 22
     },
     {
-      "address": 393,
+      "address": 414,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5451,7 +5723,7 @@
       "word": 89
     },
     {
-      "address": 394,
+      "address": 415,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5465,7 +5737,7 @@
       "word": 22
     },
     {
-      "address": 395,
+      "address": 416,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5477,7 +5749,7 @@
       "word": 88
     },
     {
-      "address": 396,
+      "address": 417,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5491,7 +5763,7 @@
       "word": 22
     },
     {
-      "address": 397,
+      "address": 418,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5503,7 +5775,7 @@
       "word": 87
     },
     {
-      "address": 398,
+      "address": 419,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5517,7 +5789,7 @@
       "word": 22
     },
     {
-      "address": 399,
+      "address": 420,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5529,7 +5801,7 @@
       "word": 86
     },
     {
-      "address": 400,
+      "address": 421,
       "location": {
         "entry": "POP_ALL",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5541,7 +5813,7 @@
       "word": 3
     },
     {
-      "address": 401,
+      "address": 422,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5555,7 +5827,7 @@
       "word": 1
     },
     {
-      "address": 402,
+      "address": 423,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5567,7 +5839,7 @@
       "word": 96
     },
     {
-      "address": 403,
+      "address": 424,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5581,7 +5853,7 @@
       "word": 50
     },
     {
-      "address": 404,
+      "address": 425,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5593,7 +5865,7 @@
       "word": 97
     },
     {
-      "address": 405,
+      "address": 426,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5605,7 +5877,7 @@
       "word": 103
     },
     {
-      "address": 406,
+      "address": 427,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5617,7 +5889,7 @@
       "word": 83
     },
     {
-      "address": 407,
+      "address": 428,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5632,7 +5904,7 @@
       "word": 21
     },
     {
-      "address": 408,
+      "address": 429,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5644,7 +5916,7 @@
       "word": 112
     },
     {
-      "address": 409,
+      "address": 430,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5656,7 +5928,7 @@
       "word": 94
     },
     {
-      "address": 410,
+      "address": 431,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5668,7 +5940,7 @@
       "word": 83
     },
     {
-      "address": 411,
+      "address": 432,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5680,7 +5952,7 @@
       "word": 105
     },
     {
-      "address": 412,
+      "address": 433,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5694,7 +5966,7 @@
       "word": 99
     },
     {
-      "address": 413,
+      "address": 434,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5706,7 +5978,7 @@
       "word": 98
     },
     {
-      "address": 414,
+      "address": 435,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5720,7 +5992,7 @@
       "word": 99
     },
     {
-      "address": 415,
+      "address": 436,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5732,7 +6004,7 @@
       "word": 107
     },
     {
-      "address": 416,
+      "address": 437,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5744,7 +6016,7 @@
       "word": 106
     },
     {
-      "address": 417,
+      "address": 438,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5759,7 +6031,7 @@
       "word": 21
     },
     {
-      "address": 418,
+      "address": 439,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5771,7 +6043,7 @@
       "word": 98
     },
     {
-      "address": 419,
+      "address": 440,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5785,7 +6057,7 @@
       "word": 100
     },
     {
-      "address": 420,
+      "address": 441,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5797,7 +6069,7 @@
       "word": 95
     },
     {
-      "address": 421,
+      "address": 442,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5812,7 +6084,7 @@
       "word": 21
     },
     {
-      "address": 422,
+      "address": 443,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5824,7 +6096,7 @@
       "word": 95
     },
     {
-      "address": 423,
+      "address": 444,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5836,7 +6108,7 @@
       "word": 91
     },
     {
-      "address": 424,
+      "address": 445,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5848,7 +6120,7 @@
       "word": 108
     },
     {
-      "address": 425,
+      "address": 446,
       "location": {
         "entry": "ENTER_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5860,7 +6132,7 @@
       "word": 3
     },
     {
-      "address": 426,
+      "address": 447,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5872,7 +6144,7 @@
       "word": 83
     },
     {
-      "address": 427,
+      "address": 448,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5884,7 +6156,7 @@
       "word": 104
     },
     {
-      "address": 428,
+      "address": 449,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5896,7 +6168,7 @@
       "word": 90
     },
     {
-      "address": 429,
+      "address": 450,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5910,7 +6182,7 @@
       "word": 22
     },
     {
-      "address": 430,
+      "address": 451,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5922,7 +6194,7 @@
       "word": 91
     },
     {
-      "address": 431,
+      "address": 452,
       "location": {
         "entry": "LEAVE_FRAME",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5934,7 +6206,7 @@
       "word": 3
     },
     {
-      "address": 432,
+      "address": 453,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5946,7 +6218,7 @@
       "word": 4
     },
     {
-      "address": 433,
+      "address": 454,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5958,7 +6230,7 @@
       "word": 109
     },
     {
-      "address": 434,
+      "address": 455,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5972,7 +6244,7 @@
       "word": 6
     },
     {
-      "address": 435,
+      "address": 456,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5984,7 +6256,7 @@
       "word": 94
     },
     {
-      "address": 436,
+      "address": 457,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -5998,7 +6270,7 @@
       "word": 9
     },
     {
-      "address": 437,
+      "address": 458,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -6010,7 +6282,7 @@
       "word": 110
     },
     {
-      "address": 438,
+      "address": 459,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -6024,7 +6296,7 @@
       "word": 6
     },
     {
-      "address": 439,
+      "address": 460,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -6036,7 +6308,7 @@
       "word": 111
     },
     {
-      "address": 440,
+      "address": 461,
       "location": {
         "entry": "CHECK_BOUNDS",
         "file": "zzzzzzzzz_stack_frame.mc",
@@ -6048,7 +6320,7 @@
       "word": 3
     },
     {
-      "address": 441,
+      "address": 462,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6060,7 +6332,7 @@
       "word": 4
     },
     {
-      "address": 442,
+      "address": 463,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6072,7 +6344,7 @@
       "word": 109
     },
     {
-      "address": 443,
+      "address": 464,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6086,7 +6358,7 @@
       "word": 6
     },
     {
-      "address": 444,
+      "address": 465,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6098,7 +6370,7 @@
       "word": 94
     },
     {
-      "address": 445,
+      "address": 466,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6110,7 +6382,7 @@
       "word": 110
     },
     {
-      "address": 446,
+      "address": 467,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6124,7 +6396,7 @@
       "word": 6
     },
     {
-      "address": 447,
+      "address": 468,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6138,7 +6410,7 @@
       "word": 77
     },
     {
-      "address": 448,
+      "address": 469,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6150,7 +6422,7 @@
       "word": 95
     },
     {
-      "address": 449,
+      "address": 470,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6164,7 +6436,7 @@
       "word": 7
     },
     {
-      "address": 450,
+      "address": 471,
       "location": {
         "entry": "LOAD_POINTER",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6176,7 +6448,7 @@
       "word": 3
     },
     {
-      "address": 451,
+      "address": 472,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6190,7 +6462,7 @@
       "word": 1
     },
     {
-      "address": 452,
+      "address": 473,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6204,7 +6476,7 @@
       "word": 11
     },
     {
-      "address": 453,
+      "address": 474,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6216,7 +6488,7 @@
       "word": 159
     },
     {
-      "address": 454,
+      "address": 475,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6228,7 +6500,7 @@
       "word": 160
     },
     {
-      "address": 455,
+      "address": 476,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6240,7 +6512,7 @@
       "word": 161
     },
     {
-      "address": 456,
+      "address": 477,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6252,7 +6524,7 @@
       "word": 162
     },
     {
-      "address": 457,
+      "address": 478,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6264,7 +6536,7 @@
       "word": 164
     },
     {
-      "address": 458,
+      "address": 479,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6276,7 +6548,7 @@
       "word": 163
     },
     {
-      "address": 459,
+      "address": 480,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6288,7 +6560,7 @@
       "word": 165
     },
     {
-      "address": 460,
+      "address": 481,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6300,7 +6572,7 @@
       "word": 94
     },
     {
-      "address": 461,
+      "address": 482,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6314,7 +6586,7 @@
       "word": 76
     },
     {
-      "address": 462,
+      "address": 483,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6329,7 +6601,7 @@
       "word": 21
     },
     {
-      "address": 463,
+      "address": 484,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6343,7 +6615,7 @@
       "word": 23
     },
     {
-      "address": 464,
+      "address": 485,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6358,7 +6630,7 @@
       "word": 21
     },
     {
-      "address": 465,
+      "address": 486,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6370,7 +6642,7 @@
       "word": 95
     },
     {
-      "address": 466,
+      "address": 487,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6382,7 +6654,7 @@
       "word": 42
     },
     {
-      "address": 467,
+      "address": 488,
       "location": {
         "entry": "CALL_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6394,7 +6666,7 @@
       "word": 3
     },
     {
-      "address": 468,
+      "address": 489,
       "location": {
         "entry": "JMP_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6408,7 +6680,7 @@
       "word": 1
     },
     {
-      "address": 469,
+      "address": 490,
       "location": {
         "entry": "JMP_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6422,7 +6694,7 @@
       "word": 11
     },
     {
-      "address": 470,
+      "address": 491,
       "location": {
         "entry": "JMP_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6434,7 +6706,7 @@
       "word": 150
     },
     {
-      "address": 471,
+      "address": 492,
       "location": {
         "entry": "JMP_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6446,7 +6718,7 @@
       "word": 42
     },
     {
-      "address": 472,
+      "address": 493,
       "location": {
         "entry": "JMP_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6458,7 +6730,7 @@
       "word": 3
     },
     {
-      "address": 473,
+      "address": 494,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6470,7 +6742,7 @@
       "word": 4
     },
     {
-      "address": 474,
+      "address": 495,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6482,7 +6754,7 @@
       "word": 109
     },
     {
-      "address": 475,
+      "address": 496,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6496,7 +6768,7 @@
       "word": 6
     },
     {
-      "address": 476,
+      "address": 497,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6508,7 +6780,7 @@
       "word": 110
     },
     {
-      "address": 477,
+      "address": 498,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6522,7 +6794,7 @@
       "word": 10
     },
     {
-      "address": 478,
+      "address": 499,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6534,7 +6806,7 @@
       "word": 159
     },
     {
-      "address": 479,
+      "address": 500,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6546,7 +6818,7 @@
       "word": 160
     },
     {
-      "address": 480,
+      "address": 501,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6558,7 +6830,7 @@
       "word": 161
     },
     {
-      "address": 481,
+      "address": 502,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6570,7 +6842,7 @@
       "word": 162
     },
     {
-      "address": 482,
+      "address": 503,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6582,7 +6854,7 @@
       "word": 164
     },
     {
-      "address": 483,
+      "address": 504,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6594,7 +6866,7 @@
       "word": 163
     },
     {
-      "address": 484,
+      "address": 505,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6606,7 +6878,7 @@
       "word": 165
     },
     {
-      "address": 485,
+      "address": 506,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6618,7 +6890,7 @@
       "word": 94
     },
     {
-      "address": 486,
+      "address": 507,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6632,7 +6904,7 @@
       "word": 76
     },
     {
-      "address": 487,
+      "address": 508,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6647,7 +6919,7 @@
       "word": 21
     },
     {
-      "address": 488,
+      "address": 509,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6661,7 +6933,7 @@
       "word": 23
     },
     {
-      "address": 489,
+      "address": 510,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6676,7 +6948,7 @@
       "word": 21
     },
     {
-      "address": 490,
+      "address": 511,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6688,7 +6960,7 @@
       "word": 95
     },
     {
-      "address": 491,
+      "address": 512,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6700,7 +6972,7 @@
       "word": 42
     },
     {
-      "address": 492,
+      "address": 513,
       "location": {
         "entry": "CALL_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6712,7 +6984,7 @@
       "word": 3
     },
     {
-      "address": 493,
+      "address": 514,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6724,7 +6996,7 @@
       "word": 4
     },
     {
-      "address": 494,
+      "address": 515,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6736,7 +7008,7 @@
       "word": 109
     },
     {
-      "address": 495,
+      "address": 516,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6750,7 +7022,7 @@
       "word": 6
     },
     {
-      "address": 496,
+      "address": 517,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6762,7 +7034,7 @@
       "word": 110
     },
     {
-      "address": 497,
+      "address": 518,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6776,7 +7048,7 @@
       "word": 10
     },
     {
-      "address": 498,
+      "address": 519,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6788,7 +7060,7 @@
       "word": 150
     },
     {
-      "address": 499,
+      "address": 520,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6800,7 +7072,7 @@
       "word": 42
     },
     {
-      "address": 500,
+      "address": 521,
       "location": {
         "entry": "JMP_FAR_RM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6812,7 +7084,7 @@
       "word": 3
     },
     {
-      "address": 501,
+      "address": 522,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6824,7 +7096,7 @@
       "word": 114
     },
     {
-      "address": 502,
+      "address": 523,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6838,7 +7110,7 @@
       "word": 22
     },
     {
-      "address": 503,
+      "address": 524,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6850,7 +7122,7 @@
       "word": 43
     },
     {
-      "address": 504,
+      "address": 525,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6862,7 +7134,7 @@
       "word": 156
     },
     {
-      "address": 505,
+      "address": 526,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6874,7 +7146,7 @@
       "word": 157
     },
     {
-      "address": 506,
+      "address": 527,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6886,7 +7158,7 @@
       "word": 158
     },
     {
-      "address": 507,
+      "address": 528,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6898,7 +7170,7 @@
       "word": 42
     },
     {
-      "address": 508,
+      "address": 529,
       "location": {
         "entry": "RET_FAR",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6910,7 +7182,7 @@
       "word": 3
     },
     {
-      "address": 509,
+      "address": 530,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6924,7 +7196,7 @@
       "word": 1
     },
     {
-      "address": 510,
+      "address": 531,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6936,7 +7208,7 @@
       "word": 96
     },
     {
-      "address": 511,
+      "address": 532,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6948,7 +7220,7 @@
       "word": 114
     },
     {
-      "address": 512,
+      "address": 533,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6962,7 +7234,7 @@
       "word": 22
     },
     {
-      "address": 513,
+      "address": 534,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6974,7 +7246,7 @@
       "word": 43
     },
     {
-      "address": 514,
+      "address": 535,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6986,7 +7258,7 @@
       "word": 156
     },
     {
-      "address": 515,
+      "address": 536,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -6998,7 +7270,7 @@
       "word": 157
     },
     {
-      "address": 516,
+      "address": 537,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -7010,7 +7282,7 @@
       "word": 158
     },
     {
-      "address": 517,
+      "address": 538,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -7022,7 +7294,7 @@
       "word": 115
     },
     {
-      "address": 518,
+      "address": 539,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -7034,7 +7306,7 @@
       "word": 42
     },
     {
-      "address": 519,
+      "address": 540,
       "location": {
         "entry": "RET_FAR_IMM",
         "file": "zzzzzzzzzz_far_pointer.mc",
@@ -7046,7 +7318,7 @@
       "word": 3
     },
     {
-      "address": 520,
+      "address": 541,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7058,7 +7330,7 @@
       "word": 4
     },
     {
-      "address": 521,
+      "address": 542,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7072,7 +7344,7 @@
       "word": 47
     },
     {
-      "address": 522,
+      "address": 543,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7084,7 +7356,7 @@
       "word": 116
     },
     {
-      "address": 523,
+      "address": 544,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7096,7 +7368,7 @@
       "word": 119
     },
     {
-      "address": 524,
+      "address": 545,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7108,7 +7380,7 @@
       "word": 18
     },
     {
-      "address": 525,
+      "address": 546,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7120,7 +7392,7 @@
       "word": 75
     },
     {
-      "address": 526,
+      "address": 547,
       "location": {
         "entry": "MULDIV_RM8",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7132,7 +7404,7 @@
       "word": 3
     },
     {
-      "address": 527,
+      "address": 548,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7144,7 +7416,7 @@
       "word": 4
     },
     {
-      "address": 528,
+      "address": 549,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7158,7 +7430,7 @@
       "word": 6
     },
     {
-      "address": 529,
+      "address": 550,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7170,7 +7442,7 @@
       "word": 117
     },
     {
-      "address": 530,
+      "address": 551,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7182,7 +7454,7 @@
       "word": 119
     },
     {
-      "address": 531,
+      "address": 552,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7194,7 +7466,7 @@
       "word": 120
     },
     {
-      "address": 532,
+      "address": 553,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7206,7 +7478,7 @@
       "word": 18
     },
     {
-      "address": 533,
+      "address": 554,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7218,7 +7490,7 @@
       "word": 75
     },
     {
-      "address": 534,
+      "address": 555,
       "location": {
         "entry": "MULDIV_RM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7230,7 +7502,7 @@
       "word": 3
     },
     {
-      "address": 535,
+      "address": 556,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7242,7 +7514,7 @@
       "word": 4
     },
     {
-      "address": 536,
+      "address": 557,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7256,7 +7528,7 @@
       "word": 11
     },
     {
-      "address": 537,
+      "address": 558,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7270,7 +7542,7 @@
       "word": 6
     },
     {
-      "address": 538,
+      "address": 559,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7282,7 +7554,7 @@
       "word": 118
     },
     {
-      "address": 539,
+      "address": 560,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7296,7 +7568,7 @@
       "word": 15
     },
     {
-      "address": 540,
+      "address": 561,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7308,7 +7580,7 @@
       "word": 18
     },
     {
-      "address": 541,
+      "address": 562,
       "location": {
         "entry": "IMUL_R16_RM16_IMM16",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7320,7 +7592,7 @@
       "word": 3
     },
     {
-      "address": 542,
+      "address": 563,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7332,7 +7604,7 @@
       "word": 4
     },
     {
-      "address": 543,
+      "address": 564,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7346,7 +7618,7 @@
       "word": 12
     },
     {
-      "address": 544,
+      "address": 565,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7360,7 +7632,7 @@
       "word": 6
     },
     {
-      "address": 545,
+      "address": 566,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7372,7 +7644,7 @@
       "word": 118
     },
     {
-      "address": 546,
+      "address": 567,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7386,7 +7658,7 @@
       "word": 15
     },
     {
-      "address": 547,
+      "address": 568,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7398,7 +7670,7 @@
       "word": 18
     },
     {
-      "address": 548,
+      "address": 569,
       "location": {
         "entry": "IMUL_R16_RM16_IMM8S",
         "file": "zzzzzzzzzzz_muldiv.mc",
@@ -7410,7 +7682,7 @@
       "word": 3
     },
     {
-      "address": 549,
+      "address": 570,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7424,7 +7696,7 @@
       "word": 121
     },
     {
-      "address": 550,
+      "address": 571,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7436,7 +7708,7 @@
       "word": 122
     },
     {
-      "address": 551,
+      "address": 572,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7448,7 +7720,7 @@
       "word": 124
     },
     {
-      "address": 552,
+      "address": 573,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7460,7 +7732,7 @@
       "word": 125
     },
     {
-      "address": 553,
+      "address": 574,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7472,7 +7744,7 @@
       "word": 123
     },
     {
-      "address": 554,
+      "address": 575,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7484,7 +7756,7 @@
       "word": 127
     },
     {
-      "address": 555,
+      "address": 576,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7498,7 +7770,7 @@
       "word": 128
     },
     {
-      "address": 556,
+      "address": 577,
       "location": {
         "entry": "STRING_MOVE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7510,7 +7782,7 @@
       "word": 3
     },
     {
-      "address": 557,
+      "address": 578,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7524,7 +7796,7 @@
       "word": 121
     },
     {
-      "address": 558,
+      "address": 579,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7536,7 +7808,7 @@
       "word": 123
     },
     {
-      "address": 559,
+      "address": 580,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7548,7 +7820,7 @@
       "word": 126
     },
     {
-      "address": 560,
+      "address": 581,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7560,7 +7832,7 @@
       "word": 124
     },
     {
-      "address": 561,
+      "address": 582,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7572,7 +7844,7 @@
       "word": 122
     },
     {
-      "address": 562,
+      "address": 583,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7584,7 +7856,7 @@
       "word": 125
     },
     {
-      "address": 563,
+      "address": 584,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7602,7 +7874,7 @@
       "word": 14
     },
     {
-      "address": 564,
+      "address": 585,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7616,7 +7888,7 @@
       "word": 17
     },
     {
-      "address": 565,
+      "address": 586,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7628,7 +7900,7 @@
       "word": 18
     },
     {
-      "address": 566,
+      "address": 587,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7642,7 +7914,7 @@
       "word": 128
     },
     {
-      "address": 567,
+      "address": 588,
       "location": {
         "entry": "STRING_COMPARE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7654,7 +7926,7 @@
       "word": 3
     },
     {
-      "address": 568,
+      "address": 589,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7668,7 +7940,7 @@
       "word": 121
     },
     {
-      "address": 569,
+      "address": 590,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7680,7 +7952,7 @@
       "word": 129
     },
     {
-      "address": 570,
+      "address": 591,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7692,7 +7964,7 @@
       "word": 124
     },
     {
-      "address": 571,
+      "address": 592,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7704,7 +7976,7 @@
       "word": 123
     },
     {
-      "address": 572,
+      "address": 593,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7716,7 +7988,7 @@
       "word": 127
     },
     {
-      "address": 573,
+      "address": 594,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7730,7 +8002,7 @@
       "word": 128
     },
     {
-      "address": 574,
+      "address": 595,
       "location": {
         "entry": "STRING_STORE",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7742,7 +8014,7 @@
       "word": 3
     },
     {
-      "address": 575,
+      "address": 596,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7756,7 +8028,7 @@
       "word": 121
     },
     {
-      "address": 576,
+      "address": 597,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7768,7 +8040,7 @@
       "word": 124
     },
     {
-      "address": 577,
+      "address": 598,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7780,7 +8052,7 @@
       "word": 122
     },
     {
-      "address": 578,
+      "address": 599,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7792,7 +8064,7 @@
       "word": 125
     },
     {
-      "address": 579,
+      "address": 600,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7804,7 +8076,7 @@
       "word": 130
     },
     {
-      "address": 580,
+      "address": 601,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7818,7 +8090,7 @@
       "word": 128
     },
     {
-      "address": 581,
+      "address": 602,
       "location": {
         "entry": "STRING_LOAD",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7830,7 +8102,7 @@
       "word": 3
     },
     {
-      "address": 582,
+      "address": 603,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7844,7 +8116,7 @@
       "word": 121
     },
     {
-      "address": 583,
+      "address": 604,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7856,7 +8128,7 @@
       "word": 123
     },
     {
-      "address": 584,
+      "address": 605,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7868,7 +8140,7 @@
       "word": 124
     },
     {
-      "address": 585,
+      "address": 606,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7880,7 +8152,7 @@
       "word": 126
     },
     {
-      "address": 586,
+      "address": 607,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7892,7 +8164,7 @@
       "word": 129
     },
     {
-      "address": 587,
+      "address": 608,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7910,7 +8182,7 @@
       "word": 14
     },
     {
-      "address": 588,
+      "address": 609,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7924,7 +8196,7 @@
       "word": 17
     },
     {
-      "address": 589,
+      "address": 610,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7936,7 +8208,7 @@
       "word": 18
     },
     {
-      "address": 590,
+      "address": 611,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7950,7 +8222,7 @@
       "word": 128
     },
     {
-      "address": 591,
+      "address": 612,
       "location": {
         "entry": "STRING_SCAN",
         "file": "zzzzzzzzzzzz_strings.mc",
@@ -7962,7 +8234,7 @@
       "word": 3
     },
     {
-      "address": 592,
+      "address": 613,
       "location": {
         "entry": "IN_AL_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -7976,7 +8248,7 @@
       "word": 135
     },
     {
-      "address": 593,
+      "address": 614,
       "location": {
         "entry": "IN_AL_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -7991,7 +8263,7 @@
       "word": 131
     },
     {
-      "address": 594,
+      "address": 615,
       "location": {
         "entry": "IN_AL_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8006,7 +8278,7 @@
       "word": 54
     },
     {
-      "address": 595,
+      "address": 616,
       "location": {
         "entry": "IN_AL_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8018,7 +8290,7 @@
       "word": 3
     },
     {
-      "address": 596,
+      "address": 617,
       "location": {
         "entry": "IN_AX_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8032,7 +8304,7 @@
       "word": 135
     },
     {
-      "address": 597,
+      "address": 618,
       "location": {
         "entry": "IN_AX_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8047,7 +8319,7 @@
       "word": 132
     },
     {
-      "address": 598,
+      "address": 619,
       "location": {
         "entry": "IN_AX_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8062,7 +8334,7 @@
       "word": 2
     },
     {
-      "address": 599,
+      "address": 620,
       "location": {
         "entry": "IN_AX_PORT",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8074,7 +8346,7 @@
       "word": 3
     },
     {
-      "address": 600,
+      "address": 621,
       "location": {
         "entry": "OUT_PORT_AL",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8088,7 +8360,7 @@
       "word": 135
     },
     {
-      "address": 601,
+      "address": 622,
       "location": {
         "entry": "OUT_PORT_AL",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8102,7 +8374,7 @@
       "word": 53
     },
     {
-      "address": 602,
+      "address": 623,
       "location": {
         "entry": "OUT_PORT_AL",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8117,7 +8389,7 @@
       "word": 133
     },
     {
-      "address": 603,
+      "address": 624,
       "location": {
         "entry": "OUT_PORT_AL",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8129,7 +8401,7 @@
       "word": 3
     },
     {
-      "address": 604,
+      "address": 625,
       "location": {
         "entry": "OUT_PORT_AX",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8143,7 +8415,7 @@
       "word": 135
     },
     {
-      "address": 605,
+      "address": 626,
       "location": {
         "entry": "OUT_PORT_AX",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8157,7 +8429,7 @@
       "word": 13
     },
     {
-      "address": 606,
+      "address": 627,
       "location": {
         "entry": "OUT_PORT_AX",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8172,7 +8444,7 @@
       "word": 134
     },
     {
-      "address": 607,
+      "address": 628,
       "location": {
         "entry": "OUT_PORT_AX",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8184,7 +8456,7 @@
       "word": 3
     },
     {
-      "address": 608,
+      "address": 629,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8198,7 +8470,7 @@
       "word": 121
     },
     {
-      "address": 609,
+      "address": 630,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8212,7 +8484,7 @@
       "word": 135
     },
     {
-      "address": 610,
+      "address": 631,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8224,7 +8496,7 @@
       "word": 124
     },
     {
-      "address": 611,
+      "address": 632,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8239,7 +8511,7 @@
       "word": 131
     },
     {
-      "address": 612,
+      "address": 633,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8251,7 +8523,7 @@
       "word": 123
     },
     {
-      "address": 613,
+      "address": 634,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8263,7 +8535,7 @@
       "word": 127
     },
     {
-      "address": 614,
+      "address": 635,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8277,7 +8549,7 @@
       "word": 128
     },
     {
-      "address": 615,
+      "address": 636,
       "location": {
         "entry": "STRING_INPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8289,7 +8561,7 @@
       "word": 3
     },
     {
-      "address": 616,
+      "address": 637,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8303,7 +8575,7 @@
       "word": 121
     },
     {
-      "address": 617,
+      "address": 638,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8317,7 +8589,7 @@
       "word": 135
     },
     {
-      "address": 618,
+      "address": 639,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8329,7 +8601,7 @@
       "word": 124
     },
     {
-      "address": 619,
+      "address": 640,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8344,7 +8616,7 @@
       "word": 132
     },
     {
-      "address": 620,
+      "address": 641,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8356,7 +8628,7 @@
       "word": 123
     },
     {
-      "address": 621,
+      "address": 642,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8368,7 +8640,7 @@
       "word": 127
     },
     {
-      "address": 622,
+      "address": 643,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8382,7 +8654,7 @@
       "word": 128
     },
     {
-      "address": 623,
+      "address": 644,
       "location": {
         "entry": "STRING_INPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8394,7 +8666,7 @@
       "word": 3
     },
     {
-      "address": 624,
+      "address": 645,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8408,7 +8680,7 @@
       "word": 121
     },
     {
-      "address": 625,
+      "address": 646,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8422,7 +8694,7 @@
       "word": 135
     },
     {
-      "address": 626,
+      "address": 647,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8434,7 +8706,7 @@
       "word": 122
     },
     {
-      "address": 627,
+      "address": 648,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8446,7 +8718,7 @@
       "word": 124
     },
     {
-      "address": 628,
+      "address": 649,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8458,7 +8730,7 @@
       "word": 125
     },
     {
-      "address": 629,
+      "address": 650,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8473,7 +8745,7 @@
       "word": 133
     },
     {
-      "address": 630,
+      "address": 651,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8487,7 +8759,7 @@
       "word": 128
     },
     {
-      "address": 631,
+      "address": 652,
       "location": {
         "entry": "STRING_OUTPUT_BYTE",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8499,7 +8771,7 @@
       "word": 3
     },
     {
-      "address": 632,
+      "address": 653,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8513,7 +8785,7 @@
       "word": 121
     },
     {
-      "address": 633,
+      "address": 654,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8527,7 +8799,7 @@
       "word": 135
     },
     {
-      "address": 634,
+      "address": 655,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8539,7 +8811,7 @@
       "word": 122
     },
     {
-      "address": 635,
+      "address": 656,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8551,7 +8823,7 @@
       "word": 124
     },
     {
-      "address": 636,
+      "address": 657,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8563,7 +8835,7 @@
       "word": 125
     },
     {
-      "address": 637,
+      "address": 658,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8578,7 +8850,7 @@
       "word": 134
     },
     {
-      "address": 638,
+      "address": 659,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8592,7 +8864,7 @@
       "word": 128
     },
     {
-      "address": 639,
+      "address": 660,
       "location": {
         "entry": "STRING_OUTPUT_WORD",
         "file": "zzzzzzzzzzzzz_io.mc",
@@ -8604,7 +8876,7 @@
       "word": 3
     },
     {
-      "address": 640,
+      "address": 661,
       "location": {
         "entry": "ESC_NO_COPROCESSOR",
         "file": "zzzzzzzzzzzzzzzz_esc.mc",
@@ -8616,7 +8888,7 @@
       "word": 4
     },
     {
-      "address": 641,
+      "address": 662,
       "location": {
         "entry": "ESC_NO_COPROCESSOR",
         "file": "zzzzzzzzzzzzzzzz_esc.mc",
@@ -8628,7 +8900,7 @@
       "word": 3
     },
     {
-      "address": 642,
+      "address": 663,
       "location": {
         "entry": "SYSTEM_GROUP_0F01",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8640,7 +8912,7 @@
       "word": 4
     },
     {
-      "address": 643,
+      "address": 664,
       "location": {
         "entry": "SYSTEM_GROUP_0F01",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8652,7 +8924,7 @@
       "word": 71
     },
     {
-      "address": 644,
+      "address": 665,
       "location": {
         "entry": "SYSTEM_STORE_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8664,7 +8936,7 @@
       "word": 136
     },
     {
-      "address": 645,
+      "address": 666,
       "location": {
         "entry": "SYSTEM_STORE_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8676,7 +8948,7 @@
       "word": 3
     },
     {
-      "address": 646,
+      "address": 667,
       "location": {
         "entry": "SYSTEM_STORE_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8688,7 +8960,7 @@
       "word": 137
     },
     {
-      "address": 647,
+      "address": 668,
       "location": {
         "entry": "SYSTEM_STORE_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8700,7 +8972,7 @@
       "word": 3
     },
     {
-      "address": 648,
+      "address": 669,
       "location": {
         "entry": "SYSTEM_LOAD_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8712,7 +8984,7 @@
       "word": 138
     },
     {
-      "address": 649,
+      "address": 670,
       "location": {
         "entry": "SYSTEM_LOAD_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8724,7 +8996,7 @@
       "word": 3
     },
     {
-      "address": 650,
+      "address": 671,
       "location": {
         "entry": "SYSTEM_LOAD_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8736,7 +9008,7 @@
       "word": 139
     },
     {
-      "address": 651,
+      "address": 672,
       "location": {
         "entry": "SYSTEM_LOAD_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8748,7 +9020,7 @@
       "word": 3
     },
     {
-      "address": 652,
+      "address": 673,
       "location": {
         "entry": "SYSTEM_STORE_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8760,7 +9032,7 @@
       "word": 140
     },
     {
-      "address": 653,
+      "address": 674,
       "location": {
         "entry": "SYSTEM_STORE_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8772,7 +9044,7 @@
       "word": 3
     },
     {
-      "address": 654,
+      "address": 675,
       "location": {
         "entry": "SYSTEM_LOAD_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8784,7 +9056,7 @@
       "word": 141
     },
     {
-      "address": 655,
+      "address": 676,
       "location": {
         "entry": "SYSTEM_LOAD_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8796,7 +9068,7 @@
       "word": 3
     },
     {
-      "address": 656,
+      "address": 677,
       "location": {
         "entry": "SYSTEM_GROUP_0F00",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8808,7 +9080,7 @@
       "word": 4
     },
     {
-      "address": 657,
+      "address": 678,
       "location": {
         "entry": "SYSTEM_GROUP_0F00",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8820,7 +9092,7 @@
       "word": 71
     },
     {
-      "address": 658,
+      "address": 679,
       "location": {
         "entry": "SYSTEM_STORE_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8832,7 +9104,7 @@
       "word": 142
     },
     {
-      "address": 659,
+      "address": 680,
       "location": {
         "entry": "SYSTEM_STORE_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8844,7 +9116,7 @@
       "word": 3
     },
     {
-      "address": 660,
+      "address": 681,
       "location": {
         "entry": "SYSTEM_STORE_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8856,7 +9128,7 @@
       "word": 143
     },
     {
-      "address": 661,
+      "address": 682,
       "location": {
         "entry": "SYSTEM_STORE_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8868,7 +9140,7 @@
       "word": 3
     },
     {
-      "address": 662,
+      "address": 683,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8882,7 +9154,7 @@
       "word": 6
     },
     {
-      "address": 663,
+      "address": 684,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8894,7 +9166,7 @@
       "word": 144
     },
     {
-      "address": 664,
+      "address": 685,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8906,7 +9178,7 @@
       "word": 3
     },
     {
-      "address": 665,
+      "address": 686,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8920,7 +9192,7 @@
       "word": 6
     },
     {
-      "address": 666,
+      "address": 687,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8932,7 +9204,7 @@
       "word": 145
     },
     {
-      "address": 667,
+      "address": 688,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8944,7 +9216,7 @@
       "word": 3
     },
     {
-      "address": 668,
+      "address": 689,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8958,7 +9230,7 @@
       "word": 6
     },
     {
-      "address": 669,
+      "address": 690,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8970,7 +9242,7 @@
       "word": 146
     },
     {
-      "address": 670,
+      "address": 691,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8982,7 +9254,7 @@
       "word": 3
     },
     {
-      "address": 671,
+      "address": 692,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -8996,7 +9268,7 @@
       "word": 6
     },
     {
-      "address": 672,
+      "address": 693,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9008,7 +9280,7 @@
       "word": 147
     },
     {
-      "address": 673,
+      "address": 694,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9020,7 +9292,7 @@
       "word": 3
     },
     {
-      "address": 674,
+      "address": 695,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9032,7 +9304,7 @@
       "word": 4
     },
     {
-      "address": 675,
+      "address": 696,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9046,7 +9318,7 @@
       "word": 6
     },
     {
-      "address": 676,
+      "address": 697,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9058,7 +9330,7 @@
       "word": 148
     },
     {
-      "address": 677,
+      "address": 698,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9070,7 +9342,7 @@
       "word": 3
     },
     {
-      "address": 678,
+      "address": 699,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9082,7 +9354,7 @@
       "word": 4
     },
     {
-      "address": 679,
+      "address": 700,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9096,7 +9368,7 @@
       "word": 6
     },
     {
-      "address": 680,
+      "address": 701,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9108,11 +9380,111 @@
       "word": 149
     },
     {
-      "address": 681,
+      "address": 702,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
         "line": 74
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 703,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 77
+      },
+      "operands": [],
+      "operation": "DECODE_MODRM",
+      "statement": "DECODE_MODRM",
+      "word": 4
+    },
+    {
+      "address": 704,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 78
+      },
+      "operands": [],
+      "operation": "SYSTEM_ARPL_CHECK",
+      "statement": "SYSTEM_ARPL_CHECK",
+      "word": 166
+    },
+    {
+      "address": 705,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 79
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "READ_RM16",
+      "statement": "READ_RM16 -> TMP0",
+      "word": 6
+    },
+    {
+      "address": 706,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 80
+      },
+      "operands": [
+        "TMP1"
+      ],
+      "operation": "READ_REG16_TMP1",
+      "statement": "READ_REG16 -> TMP1",
+      "word": 9
+    },
+    {
+      "address": 707,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 81
+      },
+      "operands": [],
+      "operation": "SYSTEM_ARPL",
+      "statement": "SYSTEM_ARPL",
+      "word": 167
+    },
+    {
+      "address": 708,
+      "location": {
+        "entry": "SYSTEM_ARPL",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 82
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 709,
+      "location": {
+        "entry": "SYSTEM_CLTS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 85
+      },
+      "operands": [],
+      "operation": "SYSTEM_CLTS",
+      "statement": "SYSTEM_CLTS",
+      "word": 168
+    },
+    {
+      "address": 710,
+      "location": {
+        "entry": "SYSTEM_CLTS",
+        "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
+        "line": 86
       },
       "operands": [],
       "operation": "END",
