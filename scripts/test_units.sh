@@ -14,7 +14,8 @@ source scripts/rtl_sources.sh
 simulator="${1:-both}"
 unit="${2:-all}"
 case "$simulator" in verilator|iverilog|both) ;; *) echo "Unknown simulator: $simulator" >&2; exit 2;; esac
-tests=(spk286_registers spk286_segments spk286_protected_foundation spk286_protected_system spk286_protected_event_outer spk286_protected_expand_down spk286_arpl spk286_clts spk286_clts_privilege spk286_protected_retf spk286_fetch spk286_core spk286_prefetch_queue
+tests=(spk286_registers spk286_segments spk286_protected_foundation spk286_protected_system spk286_protected_event_outer spk286_protected_expand_down spk286_arpl spk286_clts spk286_clts_privilege spk286_protected_retf spk286_tss_service spk286_tss_descriptor_service spk286_task_segment_service spk286_task_switch_service spk286_protected_task spk286_protected_task_fault spk286_protected_task_state_fault spk286_protected_task_gate spk286_protected_task_gate_far spk286_protected_task_gate_fault spk286_protected_task_gate_error spk286_protected_task_privilege spk286_protected_task_privilege_outer spk286_protected_task_gate_privilege spk286_protected_task_gate_privilege_outer spk286_protected_task_gate_event_privilege_outer spk286_protected_task_iret spk286_protected_task_ldt spk286_fetch spk286_core spk286_prefetch_queue
+       spk286_protected_ltr
        spk286_microsequencer spk286_microcode_rom spk286_decoder
        spk286_execution spk286_microcode_execution spk286_modrm spk286_effective_address
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle

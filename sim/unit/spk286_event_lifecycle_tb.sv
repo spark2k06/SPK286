@@ -125,7 +125,7 @@ module spk286_event_lifecycle_tb;
         else if(stage==5) return_stage=bus_valid && bus_status==5 && address[0];
         else if(stage==6) return_stage=bus_valid && bus_status==5 && !address[0] && bus_bhe_n;
         else return_stage=dut.stack_request && dut.memory_response_valid &&
-                          debug_micro_pc==12'(spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN)+12'(stage-7);
+                          debug_micro_pc==12'(spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN)+12'(stage-6);
     endfunction
     initial begin
 `ifdef __ICARUS__

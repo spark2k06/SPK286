@@ -42,6 +42,7 @@ wire [7:0] debug_modrm;
 wire [15:0] debug_displacement, debug_effective_offset;
 wire [1:0] debug_operand_segment;
 wire [3:0] debug_bus_state;
+wire [3:0] debug_bus_transaction;
 wire [3:0] debug_prefetch_count;
 wire [127:0] debug_gpr;
 wire [63:0] debug_segment_selectors, debug_segment_limits;

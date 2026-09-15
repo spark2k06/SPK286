@@ -92,7 +92,8 @@ module spk286 (
     output logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] debug_micro_instruction,
     output logic         debug_micro_active,
     output logic [3:0]   debug_prefetch_count,
-    output logic [3:0]   debug_bus_state
+    output logic [3:0]   debug_bus_state,
+    output logic [3:0]   debug_bus_transaction
 );
     logic commit_allowed;
     logic restart, stream_restart, internal_redirect;
@@ -160,11 +161,44 @@ module spk286 (
     logic [23:0] memory_address;
     logic [15:0] memory_write_data, memory_read_data;
     logic memory_response_valid, memory_response_ready;
+    logic operand_memory_request, operand_memory_write, operand_memory_byte;
+    logic [23:0] operand_memory_address;
+    logic [15:0] operand_memory_write_data;
+    logic operand_memory_response_ready;
+    logic task_memory_request, task_memory_write, task_memory_byte;
+    logic [23:0] task_memory_address;
+    logic [15:0] task_memory_write_data;
+    logic task_memory_done;
+    logic task_service_busy, task_service_complete, task_service_commit_ready, task_service_fault;
+    logic task_memory_lock;
+    logic [7:0] task_service_fault_vector;
+    logic [15:0] task_service_fault_error_code;
+    logic task_switch_start;
+    logic [15:0] task_switch_target_selector, task_switch_target_limit;
+    logic [23:0] task_switch_target_base, task_switch_target_descriptor_address;
+    logic [7:0] task_switch_target_access;
+    logic [15:0] task_loaded_ip, task_loaded_flags, task_loaded_ldtr, task_loaded_ldtr_limit;
+    logic [23:0] task_loaded_ldtr_base;
+    logic [7:0] task_loaded_ldtr_access;
+    logic [3:0] task_loaded_ldtr_class;
+    logic task_loaded_ldtr_valid, task_loaded_ldtr_present;
+    logic [127:0] task_loaded_gpr;
+    logic [15:0] task_loaded_tr_selector, task_loaded_tr_limit;
+    logic [23:0] task_loaded_tr_base;
+    logic [7:0] task_loaded_tr_access;
+    logic [63:0] task_cache_selectors, task_cache_limits;
+    logic [95:0] task_cache_bases;
+    logic [31:0] task_cache_access;
+    logic [15:0] task_cache_classes;
+    logic [3:0] task_cache_present, task_cache_protected, task_cache_tables;
+    logic [7:0] task_cache_dpl, task_cache_rpl;
     logic [2:0] alu_operation;
     logic result_write_allowed, internal_flags_write_en, alu_byte;
     logic [15:0] decoded_flags_mask, decoded_undefined_mask;
     logic [15:0] internal_flags_write_data, internal_flags_write_mask;
+    logic internal_task_flags_write;
     logic event_active, event_cancel, event_dispatch, event_request, event_software, event_needs_ack;
+    logic [2:0] event_kind;
     logic [15:0] event_ip, event_cs, event_flags;
     logic event_error_valid;
     logic [15:0] event_error_code;
@@ -194,8 +228,11 @@ module spk286 (
     logic [3:0] protected_ldtr_commit_class, protected_tr_commit_class;
     logic protected_ldtr_commit_present, protected_tr_commit_present;
     logic protected_ldtr_commit_valid, protected_tr_commit_valid;
+    logic task_nested_call, task_jump_task, task_return_task;
+    logic task_switch_nested_call, task_switch_return_task;
     logic protected_descriptor_access;
     logic [23:0] protected_descriptor_address;
+    logic protected_gate_access;
     logic protected_tss_access;
     logic [23:0] protected_tss_address;
     logic protected_call_stack_access;
@@ -207,6 +244,7 @@ module spk286 (
     logic system_limit_fault, system_fault;
     logic [7:0] system_fault_vector;
     logic [15:0] system_fault_error_code;
+    logic task_fault_external;
     logic fault_error_valid;
     logic [15:0] fault_error_code;
     /* verilator lint_off UNUSEDSIGNAL */
@@ -269,6 +307,7 @@ module spk286 (
     assign commit_allowed = !control_error;
     assign restart = redirect && commit_allowed;
     assign semantic_cancel = restart || event_cancel;
+    assign task_fault_external = event_active && !event_software;
     assign stream_restart = restart || internal_redirect || event_cancel;
     assign stream_ip = restart ? ip_write_data : (internal_redirect ? internal_target : debug_ip);
     assign queue_flush = stream_restart;
@@ -385,6 +424,7 @@ module spk286 (
         .flags_write_en(effective_flags_write_en && commit_allowed),
         .flags_write_data(execute_enable ? internal_flags_write_data : flags_write_data),
         .flags_write_mask(execute_enable ? internal_flags_write_mask : flags_write_mask),
+        .flags_write_protected_task(execute_enable && internal_task_flags_write),
         .gpr_state(register_state), .ip(debug_ip), .flags(debug_flags)
     );
 
@@ -424,6 +464,49 @@ module spk286 (
         .segment_present_state(protected_segment_present), .segment_protected_state(protected_segment_protected), .segment_dpl_state(protected_segment_dpl),
         .segment_table_state(protected_segment_tables), .segment_rpl_state(protected_segment_rpl)
     );
+
+    assign task_nested_call = task_switch_nested_call || opcode_q == 8'h9A || (opcode_q == 8'hFF && operand_reg == 3'd3);
+    assign task_jump_task = !task_switch_nested_call && (opcode_q == 8'hEA || (opcode_q == 8'hFF && operand_reg == 3'd5));
+    assign task_return_task = task_switch_return_task;
+
+    /* The executor consumes the composite completion/fault and the loaded
+       architectural image; backlink and child commit pulses remain internal
+       service metadata until task-return integration. */
+    /* verilator lint_off PINCONNECTEMPTY */
+    spk286_task_switch_service task_switch_service (
+        .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(task_switch_start),
+        .nested_call(task_nested_call), .jump_task(task_jump_task), .return_task(task_return_task),
+        .target_selector(task_switch_target_selector), .target_base(task_switch_target_base),
+        .target_limit(task_switch_target_limit), .target_access(task_switch_target_access),
+        .target_descriptor_address(task_switch_target_descriptor_address),
+        .current_selector(protected_tr_selector), .current_base(protected_tr_base),
+        .current_limit(protected_tr_limit), .current_access(protected_tr_access),
+        .current_descriptor_address(protected_gdtr_base + {8'd0, protected_tr_selector[15:3], 3'b000}),
+        .current_ip(debug_ip), .current_flags(debug_flags), .current_gpr(register_state),
+        .current_segments(protected_segment_selectors), .current_ldtr(protected_ldtr_selector),
+        .gdtr_limit(protected_gdtr_limit), .gdtr_base(protected_gdtr_base),
+        .memory_done(task_memory_done), .memory_read_data(memory_read_data),
+        .memory_request(task_memory_request), .memory_write(task_memory_write),
+        .memory_byte(task_memory_byte), .memory_address(task_memory_address),
+        .memory_write_data(task_memory_write_data), .busy(task_service_busy),
+        .commit_ready(task_service_commit_ready), .memory_lock(task_memory_lock),
+        .complete(task_service_complete), .fault(task_service_fault),
+        .fault_vector(task_service_fault_vector), .fault_error_code(task_service_fault_error_code),
+        .commit_valid(), .loaded_ip(task_loaded_ip), .loaded_flags(task_loaded_flags),
+        .loaded_gpr(task_loaded_gpr), .loaded_segments(),
+        .loaded_ldtr(task_loaded_ldtr), .loaded_ldtr_base(task_loaded_ldtr_base),
+        .loaded_ldtr_limit(task_loaded_ldtr_limit), .loaded_ldtr_access(task_loaded_ldtr_access),
+        .loaded_ldtr_class(task_loaded_ldtr_class), .loaded_ldtr_valid(task_loaded_ldtr_valid),
+        .loaded_ldtr_present(task_loaded_ldtr_present), .loaded_backlink(),
+        .loaded_tr_selector(task_loaded_tr_selector), .loaded_tr_base(task_loaded_tr_base),
+        .loaded_tr_limit(task_loaded_tr_limit), .loaded_tr_access(task_loaded_tr_access),
+        .cache_selectors(task_cache_selectors), .cache_bases(task_cache_bases),
+        .cache_limits(task_cache_limits), .cache_access(task_cache_access),
+        .cache_classes(task_cache_classes), .cache_present(task_cache_present),
+        .cache_protected(task_cache_protected), .cache_dpl(task_cache_dpl),
+        .cache_tables(task_cache_tables), .cache_rpl(task_cache_rpl)
+    );
+    /* verilator lint_on PINCONNECTEMPTY */
 
     spk286_segments segments (
         .clk(clk), .reset(reset),
@@ -467,7 +550,7 @@ module spk286 (
     assign fetch_count = fetch_response_count;
     spk286_biu biu (
         .clk(clk), .reset(reset), .cancel_data(semantic_cancel), .ready(ready), .data_in(data_in),
-        .hold_request(hold_request), .lock_request(lock_prefix || implicit_lock), .hlda(hlda), .bus_lock(bus_lock),
+        .hold_request(hold_request), .lock_request(lock_prefix || implicit_lock || task_memory_lock), .hlda(hlda), .bus_lock(bus_lock),
         .ack_request(ack_request && !ack_pending_q), .ack_request_ready(ack_request_ready),
         .ack_response_valid(ack_response_valid), .ack_response_ready(ack_response_ready), .ack_vector(ack_vector),
         .code_valid(fetch_bus_valid), .code_bhe_n(fetch_bus_bhe_n),
@@ -600,11 +683,37 @@ module spk286 (
         .protected_ldtr_commit_present(protected_ldtr_commit_present), .protected_tr_commit_present(protected_tr_commit_present),
         .protected_ldtr_commit_valid(protected_ldtr_commit_valid), .protected_tr_commit_valid(protected_tr_commit_valid),
         .protected_descriptor_access(protected_descriptor_access), .protected_descriptor_address(protected_descriptor_address),
+        .protected_gate_access(protected_gate_access),
         .protected_tss_access(protected_tss_access), .protected_tss_address(protected_tss_address),
         .protected_call_stack_access(protected_call_stack_access), .protected_call_stack_address(protected_call_stack_address),
         .protected_call_stack_limit(protected_call_stack_limit),
         .protected_call_stack_expand_down(protected_call_stack_expand_down),
         .protected_event_access(protected_event_access), .protected_event_address(protected_event_address),
+        .task_switch_start(task_switch_start),
+        .task_switch_nested_call(task_switch_nested_call),
+        .task_switch_return_task(task_switch_return_task),
+        .task_switch_target_selector(task_switch_target_selector), .task_switch_target_base(task_switch_target_base),
+        .task_switch_target_limit(task_switch_target_limit), .task_switch_target_access(task_switch_target_access),
+        .task_switch_target_descriptor_address(task_switch_target_descriptor_address),
+        .task_service_busy(task_service_busy), .task_service_complete(task_service_complete),
+        .task_service_commit_ready(task_service_commit_ready),
+        .task_fault_external(task_fault_external),
+        .task_service_fault(task_service_fault), .task_service_fault_vector(task_service_fault_vector),
+        .task_service_fault_error_code(task_service_fault_error_code),
+        .task_loaded_ip(task_loaded_ip), .task_loaded_flags(task_loaded_flags),
+        .task_loaded_gpr(task_loaded_gpr),
+        .task_loaded_ldtr(task_loaded_ldtr), .task_loaded_ldtr_base(task_loaded_ldtr_base),
+        .task_loaded_ldtr_limit(task_loaded_ldtr_limit), .task_loaded_ldtr_access(task_loaded_ldtr_access),
+        .task_loaded_ldtr_class(task_loaded_ldtr_class), .task_loaded_ldtr_valid(task_loaded_ldtr_valid),
+        .task_loaded_ldtr_present(task_loaded_ldtr_present),
+        .task_loaded_tr_selector(task_loaded_tr_selector),
+        .task_loaded_tr_base(task_loaded_tr_base), .task_loaded_tr_limit(task_loaded_tr_limit),
+        .task_loaded_tr_access(task_loaded_tr_access), .task_cache_selectors(task_cache_selectors),
+        .task_cache_bases(task_cache_bases), .task_cache_limits(task_cache_limits),
+        .task_cache_access(task_cache_access), .task_cache_classes(task_cache_classes),
+        .task_cache_present(task_cache_present), .task_cache_protected(task_cache_protected),
+        .task_cache_dpl(task_cache_dpl), .task_cache_tables(task_cache_tables), .task_cache_rpl(task_cache_rpl),
+        .task_flags_write_en(internal_task_flags_write),
         .system_fault(system_fault), .system_fault_vector(system_fault_vector), .system_fault_error_code(system_fault_error_code),
         .system_limit_fault(system_limit_fault)
     );
@@ -642,6 +751,17 @@ module spk286 (
         .register_direct(operand_register_direct), .displacement(operand_displacement),
         .effective_offset(operand_offset), .segment_index(operand_segment)
     );
+    // Task-switch memory is a direct BIU transaction. The ordinary operand
+    // service remains isolated so a TSS word can never be mistaken for an
+    // instruction temporary or an effective-address access.
+    assign memory_request = task_memory_request || operand_memory_request;
+    assign memory_write = task_memory_request ? task_memory_write : operand_memory_write;
+    assign memory_byte = task_memory_request ? task_memory_byte : operand_memory_byte;
+    assign memory_address = task_memory_request ? task_memory_address : operand_memory_address;
+    assign memory_write_data = task_memory_request ? task_memory_write_data : operand_memory_write_data;
+    assign memory_response_ready = task_memory_request ? 1'b1 : operand_memory_response_ready;
+    assign task_memory_done = task_memory_request && memory_response_valid;
+
     spk286_operand operand (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
@@ -652,9 +772,9 @@ module spk286 (
         .segment_expand_down(protected_msw[0] && protected_segment_is_expand_down && !protected_call_stack_access && !protected_event_access && !protected_descriptor_access && !protected_tss_access),
         .gpr_write_byte(operand_gpr_write_byte), .blocked(operand_blocked), .gpr_write_en(operand_gpr_write_en),
         .gpr_write_index(operand_gpr_write_index), .gpr_write_data(operand_gpr_write_data),
-        .memory_request(memory_request), .memory_request_ready(memory_request_ready),
-        .memory_byte(memory_byte), .memory_write(memory_write), .memory_address(memory_address), .memory_write_data(memory_write_data),
-        .memory_response_valid(memory_response_valid), .memory_response_ready(memory_response_ready),
+        .memory_request(operand_memory_request), .memory_request_ready(memory_request_ready),
+        .memory_byte(operand_memory_byte), .memory_write(operand_memory_write), .memory_address(operand_memory_address), .memory_write_data(operand_memory_write_data),
+        .memory_response_valid(memory_response_valid), .memory_response_ready(operand_memory_response_ready),
         .memory_read_data(memory_read_data)
     );
 
@@ -705,6 +825,19 @@ module spk286 (
     assign debug_micro_instruction = micro_word;
     assign debug_micro_active = micro_active;
     assign debug_bus_state = bus_valid ? 4'h1 : 4'h0;
+    // Functional trace metadata is orthogonal to the normalized bus status.
+    // It identifies the protected-mode logical owner while READY holds the
+    // physical request stable; it is not a historical cycle-timing encoding.
+    always_comb begin
+        debug_bus_transaction = 4'h0;
+        if (bus_valid) begin
+            if (protected_tss_access || task_memory_request) debug_bus_transaction = 4'h2;
+            else if (protected_gate_access || protected_event_access) debug_bus_transaction = 4'h3;
+            else if (protected_descriptor_access) debug_bus_transaction = 4'h1;
+            else if (protected_call_stack_access || stack_request) debug_bus_transaction = 4'h4;
+            else if (protected_msw[0] && biu_status == 4'hD) debug_bus_transaction = 4'h5;
+        end
+    end
     assign invalid_form = operand_context_valid && micro_active && !event_active &&
                           ((opcode_q == 8'h63 && lock_prefix) ||
                            (extended_opcode_active && opcode_q == 8'h00 && operand_reg > 3'd5) ||
@@ -756,6 +889,7 @@ module spk286 (
         .event_ip(event_ip), .event_cs(event_cs), .event_flags(event_flags),
         .event_error_valid(event_error_valid), .event_error_code(event_error_code), .event_needs_ack(event_needs_ack),
         .halted(halted), .shutdown(shutdown), .nmi_pending(debug_nmi_pending), .nmi_blocked(debug_nmi_blocked),
-        .sti_shadow(debug_sti_shadow), .instruction_ip(debug_instruction_ip), .event_kind(debug_event_kind)
+        .sti_shadow(debug_sti_shadow), .instruction_ip(debug_instruction_ip), .event_kind(event_kind)
     );
+    assign debug_event_kind = event_kind;
 endmodule

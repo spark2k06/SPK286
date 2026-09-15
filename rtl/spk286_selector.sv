@@ -24,7 +24,8 @@ module spk286_selector (
         index = selector[15:3];
         table_indicator = selector[2];
         rpl = selector[1:0];
-        null_selector = selector[15:3] == 13'd0;
+        // Only GDT entry zero is null; LDT entry zero (TI=1) is usable.
+        null_selector = selector[15:2] == 14'd0;
 
         // 13-bit index * 8 plus the final byte is deliberately carried in
         // 21 bits. A truncated 16-bit expression could wrap an invalid entry

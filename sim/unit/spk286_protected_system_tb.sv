@@ -9,6 +9,7 @@ module spk286_protected_system_tb;
     integer checks = 0;
     integer protected_data_reads = 0;
     integer protected_code_limit_reads = 0;
+    integer protected_frame_trace_count = 0;
     logic [15:0] pm4a_return_sp;
     logic [15:0] gate_fault_sp;
     logic [15:0] conforming_stack_sp;
@@ -42,6 +43,8 @@ module spk286_protected_system_tb;
             if (bus_valid && ready && !bus_write && bus_status == 4'hD && address[15:0] == 16'h0200) begin
                 protected_code_limit_reads = protected_code_limit_reads + 1;
             end
+            if (bus_valid && debug_bus_transaction == 4'h4)
+                protected_frame_trace_count = protected_frame_trace_count + 1;
             #4; clk = 1'b1; #5; clk = 1'b0; #1;
             cycles = cycles + 1;
             if (instruction_retired) retired_count = retired_count + 1;
@@ -874,6 +877,11 @@ module spk286_protected_system_tb;
                                 16'h0010, 24'h038000, 16'h0067, 8'h83,
                                 "PM1 LTR restores the baseline after DPL/RPL matrix");
 
+        /* The matrix intentionally uses integer loop indices to enumerate all
+           selector combinations; these test-only arithmetic widths are not
+           RTL datapath widths. */
+        /* verilator lint_off WIDTHEXPAND */
+        /* verilator lint_off WIDTHTRUNC */
         // PM1 selector-inspection matrix. At CPL0, VERR accepts readable
         // data/readable code, VERW accepts writable data, and LAR/LSL accept
         // every present segment descriptor with max(CPL,RPL) <= DPL. All
@@ -972,6 +980,8 @@ module spk286_protected_system_tb;
                                 "PM1 LAR exact GDT-limit overflow preserves destination");
         run_pm1_inspection_case(2'd3, 16'h1238, 1'b0, 16'h1234,
                                 "PM1 LSL exact GDT-limit overflow preserves destination");
+        /* verilator lint_on WIDTHTRUNC */
+        /* verilator lint_on WIDTHEXPAND */
 
         // Restore the PM2 not-present DS program that reuses this address.
         memory[16'h00B0] = 8'hB8; memory[16'h00B1] = 8'h40; memory[16'h00B2] = 8'h00;
@@ -1411,6 +1421,8 @@ module spk286_protected_system_tb;
         wait_shutdown();
         check(shutdown && debug_cs == 16'h004B,
               "PM3c nested protected event failure enters shutdown without committing a bad CS");
+        check(protected_frame_trace_count != 0,
+              "protected trace metadata identifies frame/stack transactions");
 
         $display("PROTECTED_SYSTEM PASS: %0d checks, READY stalls=%0d", checks, cycles);
         $finish;

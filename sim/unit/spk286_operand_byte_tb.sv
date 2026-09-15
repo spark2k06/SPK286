@@ -34,7 +34,7 @@ module spk286_operand_byte_tb;
         .write_en(setup || gpr_write_en),.write_byte(!setup && gpr_write_byte),
         .write_index(setup ? setup_index : gpr_write_index),.write_data(setup ? setup_data : gpr_write_data),
         .ip_write_en(1'b0),.ip_write_data(16'd0),.flags_write_en(1'b0),.flags_write_data(16'd0),
-        .flags_write_mask(16'd0),.gpr_state(register_state),.ip(ip),.flags(flags));
+        .flags_write_mask(16'd0),.flags_write_protected_task(1'b0),.gpr_state(register_state),.ip(ip),.flags(flags));
     task automatic check(input logic condition,input string message);
         checks++;if(condition!==1'b1)$fatal(1,"%s case=%0d",message,cases);
     endtask

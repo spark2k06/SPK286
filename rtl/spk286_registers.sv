@@ -19,6 +19,7 @@ module spk286_registers (
     input  logic         flags_write_en,
     input  logic [15:0]  flags_write_data,
     input  logic [15:0]  flags_write_mask,
+    input  logic         flags_write_protected_task,
     output logic [127:0] gpr_state,
     output logic [15:0]  ip,
     output logic [15:0]  flags
@@ -37,7 +38,11 @@ module spk286_registers (
             read_register = state[index * 16 +: 16];
     endfunction
 
-    assign effective_flags_mask = flags_write_mask & 16'h7FD5;
+    // Normal instruction writes preserve the architecturally reserved bits
+    // and NT. A hardware task image is the protected-mode path allowed to
+    // restore the complete 80286 FLAGS image.
+    assign effective_flags_mask = flags_write_protected_task ? flags_write_mask :
+                                  (flags_write_mask & 16'h7FD5);
     assign read_a_data = read_register(gpr_q, read_a_index, read_a_byte);
     assign read_b_data = read_register(gpr_q, read_b_index, read_b_byte);
     assign gpr_state = gpr_q;

@@ -3,6 +3,11 @@
 module spk286_protected_expand_down_tb;
     `include "spk286_signals.svh"
 
+    /* Matrix address expressions intentionally use integer loop arithmetic in
+       this verification-only bench; RTL widths remain covered by lint. */
+    /* verilator lint_off WIDTHEXPAND */
+    /* verilator lint_off WIDTHTRUNC */
+
     logic [7:0] memory [0:65535];
     integer cycles = 0;
     integer checks = 0;
@@ -2886,7 +2891,7 @@ module spk286_protected_expand_down_tb;
         // CPL2 enters through a real outer IRET, then exercises the same
         // gate privilege matrix from ring 2.  Keep the loop explicitly
         // three bits wide so the RPL=3 case remains representable in strict
-        // Verilator width checking.
+        // Keep the loop width explicit for strict simulator checking.
         for (logic [2:0] cpl2_rpl = 3'd0; cpl2_rpl < 3'd4;
              cpl2_rpl = cpl2_rpl + 3'd1) begin
             run_cpl2_call_gate_case(16'h0100 + cpl2_rpl, 1'b1, 8'h0D,
@@ -2926,4 +2931,6 @@ module spk286_protected_expand_down_tb;
         $display("PROTECTED_EXPAND_DOWN PASS: %0d checks, READY stalls=%0d", checks, cycles);
         $finish;
     end
+    /* verilator lint_on WIDTHTRUNC */
+    /* verilator lint_on WIDTHEXPAND */
 endmodule

@@ -99,6 +99,17 @@ module spk286_protected_foundation_tb;
     logic [1:0] segment_commit_dpl = 2'd0;
     logic segment_commit_table_indicator = 1'b0;
     logic [1:0] segment_commit_rpl = 2'd0;
+    logic segment_commit_en2 = 1'b0;
+    logic [1:0] segment_commit_index2 = 2'd0;
+    logic [15:0] segment_commit_selector2 = 16'h0000;
+    logic [23:0] segment_commit_base2 = 24'h000000;
+    logic [15:0] segment_commit_limit2 = 16'h0000;
+    logic [7:0] segment_commit_access2 = 8'h00;
+    logic [3:0] segment_commit_class2 = DESC_INVALID;
+    logic segment_commit_present2 = 1'b0, segment_commit_protected2 = 1'b0;
+    logic [1:0] segment_commit_dpl2 = 2'd0;
+    logic segment_commit_table_indicator2 = 1'b0;
+    logic [1:0] segment_commit_rpl2 = 2'd0;
     wire [63:0] segment_selector_state;
     wire [95:0] segment_base_state;
     wire [63:0] segment_limit_state;
@@ -133,6 +144,12 @@ module spk286_protected_foundation_tb;
         .segment_commit_class(segment_commit_class), .segment_commit_present(segment_commit_present),
         .segment_commit_protected(segment_commit_protected), .segment_commit_dpl(segment_commit_dpl),
         .segment_commit_table_indicator(segment_commit_table_indicator), .segment_commit_rpl(segment_commit_rpl),
+        .segment_commit_en2(segment_commit_en2), .segment_commit_index2(segment_commit_index2),
+        .segment_commit_selector2(segment_commit_selector2), .segment_commit_base2(segment_commit_base2),
+        .segment_commit_limit2(segment_commit_limit2), .segment_commit_access2(segment_commit_access2),
+        .segment_commit_class2(segment_commit_class2), .segment_commit_present2(segment_commit_present2),
+        .segment_commit_protected2(segment_commit_protected2), .segment_commit_dpl2(segment_commit_dpl2),
+        .segment_commit_table_indicator2(segment_commit_table_indicator2), .segment_commit_rpl2(segment_commit_rpl2),
         .segment_selector_state(segment_selector_state), .segment_base_state(segment_base_state),
         .segment_limit_state(segment_limit_state), .segment_access_state(segment_access_state),
         .segment_class_state(segment_class_state), .segment_valid_state(segment_valid_state),
@@ -163,8 +180,27 @@ module spk286_protected_foundation_tb;
         selector = 16'hFFF8; table_limit = 16'hFFFF; table_base = 24'h000000; #1;
         check_expect(selector_index == 13'h1FFF && selector_end == 21'h0FFFF && selector_limit_valid,
                "last representable descriptor");
-        selector = 16'h0004; #1;
-        check_expect(selector_null && selector_ti && !selector_valid, "LDT null selector");
+        // Intel 80286 B-2/B-3 Information Sheet (1984-11-21), p. 4:
+        // null means index AND TI are zero; RPL does not affect nullness.
+        // Sweep every selector with a full table, independently of RTL slicing.
+        for (integer value = 0; value < 65536; value = value + 1) begin
+            selector = 16'(value); #1;
+            check_expect(selector_null == (value < 4) && selector_valid == (value >= 4),
+                   $sformatf("null classification for selector %04h", selector));
+        end
+        for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
+            selector = 16'h0004 | 16'(rpl); table_limit = 16'h0007; #1;
+            check_expect(!selector_null && selector_ti && selector_index == 0 &&
+                   selector_rpl == 2'(rpl) && selector_valid && selector_end == 7 &&
+                   selector_address == table_base,
+                   "LDT entry zero is usable at the exact eight-byte boundary");
+            table_limit = 16'h0006; #1;
+            check_expect(!selector_null && !selector_limit_valid && !selector_valid,
+                   "LDT entry zero still requires a complete descriptor");
+            selector = 16'(rpl); table_limit = 16'h0007; #1;
+            check_expect(selector_null && !selector_ti && selector_limit_valid && !selector_valid,
+                   "GDT entry zero remains null for every RPL");
+        end
         selector = 16'h0008; table_limit = 16'h000F; table_base = 24'hFFFFF8; #1;
         check_expect(selector_address == 24'h000000 && selector_carry, "24-bit base carry is visible");
 

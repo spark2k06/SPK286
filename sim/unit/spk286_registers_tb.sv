@@ -12,6 +12,7 @@ module spk286_registers_tb;
     logic ip_write_en = 1'b0, flags_write_en = 1'b0;
     logic [15:0] ip_write_data = 16'h0000;
     logic [15:0] flags_write_data = 16'h0000, flags_write_mask = 16'h0000;
+    logic flags_write_protected_task = 1'b0;
     wire [127:0] gpr_state;
     wire [15:0] ip, flags;
     logic [15:0] expected [0:7];

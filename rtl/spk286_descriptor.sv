@@ -85,7 +85,10 @@ module spk286_descriptor (
         reserved_form_valid = raw_descriptor[63:48] == 16'h0000;
         if (!segment && (system_type == 4'h4))
             reserved_form_valid = reserved_form_valid && (raw_descriptor[39:37] == 3'b000);
-        else if (!segment && (system_type == 4'h5 || system_type == 4'h6 || system_type == 4'h7))
+        else if (!segment && system_type == 4'h5)
+            reserved_form_valid = reserved_form_valid && (raw_descriptor[39:32] == 8'h00) &&
+                                   (raw_descriptor[15:0] == 16'h0000);
+        else if (!segment && (system_type == 4'h6 || system_type == 4'h7))
             reserved_form_valid = reserved_form_valid && (raw_descriptor[39:32] == 8'h00);
 
         descriptor_valid = recognized_class && reserved_form_valid;
