@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov singlestep-audit clean microcode microcode-check microcode-test microcode-audit mcl86-fetch mcl86-check mcl86-test phase2.80-check
+.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform timing-trace timing-calibration data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov singlestep-audit clean microcode microcode-check microcode-test microcode-audit mcl86-fetch mcl86-check mcl86-test phase2.80-check
 
 help:
 	@echo "SPK286 development targets:"
@@ -21,6 +21,8 @@ help:
 	@echo "  make unit         run directed RTL tests in both simulators"
 	@echo "  make regression   run test plus Yosys synthesis sanity check"
 	@echo "  make waveform     run Verilator smoke with a VCD trace"
+	@echo "  make timing-trace capture and validate a versioned Phase 9A timing trace"
+	@echo "  make timing-calibration capture the Phase 9B instruction calibration suite"
 	@echo "  make data-smoke   validate the JSON/MOO data loader"
 	@echo "  make state-smoke  initialize RTL and verify first fetch from JSON state"
 	@echo "  make singlestep-fetch acquire the pinned external 80286 MOO working set"
@@ -98,6 +100,12 @@ regression:
 
 waveform:
 	./scripts/test_verilator.sh --trace
+
+timing-trace:
+	python3 -m tools.capture_timing_trace
+
+timing-calibration:
+	python3 -m tools.capture_timing_calibration --simulator both
 
 data-smoke:
 	python3 tools/run_tests.py --smoke

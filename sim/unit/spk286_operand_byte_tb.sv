@@ -20,6 +20,7 @@ module spk286_operand_byte_tb;
     wire[15:0]memory_write_data;
     logic memory_response_valid=0;
     wire memory_response_ready;
+    wire timing_wait;
     logic[15:0]memory_read_data=0;
     logic setup=0;
     logic[2:0]setup_index=0;
@@ -72,10 +73,10 @@ module spk286_operand_byte_tb;
             request_check=0;memory_request_ready=1;#1;
             check(memory_request && memory_byte && memory_address==24'h10FFFF && memory_write==1'(wr),"byte memory metadata and A20");
             tick();memory_request_ready=0;
-            repeat(4)begin tick();check(!memory_request && !done && !blocked,"pending byte request not resubmitted");end
+            repeat(4)begin tick();check(!memory_request && timing_wait && !done && !blocked,"pending byte request not resubmitted");end
             request_valid=0;memory_response_valid=1;memory_read_data=16'h00A7;
             repeat(3)begin tick();check(!memory_response_ready && !done,"paused consumer holds completion");end
-            request_valid=1;#1;check(done && memory_response_ready && read_data==16'h00A7,"completed byte consumed normally");
+            request_valid=1;#1;check(done && !timing_wait && memory_response_ready && read_data==16'h00A7,"completed byte consumed normally");
             tick();request_valid=0;memory_response_valid=0;
             check(requests==1 && !blocked,"one byte logical acceptance");
             clear();select_rm=1;register_direct=0;request_byte=0;request_write=1'(wr);request_valid=1;memory_request_ready=1;#1;

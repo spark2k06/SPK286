@@ -25,6 +25,7 @@ module spk286_operand (
     output logic [15:0] memory_write_data,
     input  logic memory_response_valid,
     output logic memory_response_ready,
+    output logic timing_wait,
     input  logic [15:0] memory_read_data
 );
     logic pending_q, is_memory, allowed, within_limit;
@@ -43,6 +44,12 @@ module spk286_operand (
     assign memory_address = physical_address;
     assign memory_write_data = write_data;
     assign memory_response_ready = allowed && pending_q;
+    // Observe only genuine memory-service stalls: BIU admission or an
+    // outstanding response. Register accesses, checks, limit faults,
+    // cancellation and the response-acceptance cycle are not waits.
+    assign timing_wait = allowed && is_memory &&
+                         ((!pending_q && !request_check && within_limit && !memory_request_ready) ||
+                          (pending_q && !memory_response_valid));
     assign done = allowed && ((request_check && (!is_memory || within_limit) && !pending_q) || (!is_memory && !pending_q) || (pending_q && memory_response_valid));
     assign word_index = request_byte ? {1'b0, register_index[1:0]} : register_index;
     assign register_word = register_state[word_index * 16 +: 16];

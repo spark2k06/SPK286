@@ -1,0 +1,13 @@
+policy,case,start_ip,end_ip,final_flags,cycles,biu_busy_cycles,accepted_transfers,ready_wait_cycles,prefetch_requests,prefetch_responses,queue_consumes,operand_wait_cycles,saw_lock,final_phase,final_status,final_owner
+0,mov_ax_imm,256,259,2,5,2,2,0,2,2,2,0,0,0,15,0
+0,mov_bx_imm,259,262,2,4,1,1,0,1,2,2,0,0,0,15,0
+0,alu_reg,262,264,6,8,1,1,0,1,2,1,0,0,0,15,0
+0,mov_mem_read,264,268,6,9,3,3,0,2,2,3,1,0,0,15,0
+0,mov_mem_write,268,272,6,9,3,3,0,2,2,3,1,0,0,15,0
+0,branch_short,272,276,6,4,1,1,0,1,0,1,0,0,0,15,0
+0,odd_word_read,256,260,2,11,5,5,0,3,3,3,2,0,1,13,1
+0,near_call,256,262,2,11,5,5,0,3,3,2,2,0,1,13,1
+0,near_ret,265,259,2,7,3,3,0,1,2,0,2,0,1,13,1
+0,rep_movsb,256,258,2,22,6,6,0,2,3,0,4,0,0,15,0
+0,int3,256,512,2,31,6,6,0,1,1,0,5,0,0,15,0
+0,divide_fault,256,512,2,73,8,8,0,3,3,1,5,0,0,15,0

@@ -22,6 +22,7 @@ module spk286_operand_service_tb;
     wire [15:0] memory_write_data;
     logic memory_response_valid=0;
     wire memory_response_ready;
+    wire timing_wait;
     logic [15:0] memory_read_data=0;
     integer checks=0, requests=0, responses=0, commits=0;
     logic [127:0] before_state;
@@ -46,7 +47,7 @@ module spk286_operand_service_tb;
     endtask
     task automatic local_access(input logic rm, input logic wr, input logic [15:0] value);
         select_rm=rm; request_write=wr; write_data=value; request_valid=1; #1;
-        check(done && !memory_request && !memory_response_ready && !blocked,"local access is bus independent");
+        check(done && !memory_request && !memory_response_ready && !timing_wait && !blocked,"local access is bus independent");
         check(read_data==register_state[(rm?int'(rm_index):int'(reg_index))*16 +: 16],"operand identity selects register");
         check(gpr_write_en==wr && gpr_write_index==(rm?rm_index:reg_index),"write direction independent of identity");
         before_state=register_state;
@@ -61,13 +62,13 @@ module spk286_operand_service_tb;
         request_valid=1; memory_request_ready=0;
         repeat(3) begin
             #1;
-            check(memory_request && !done && !gpr_write_en && !memory_response_ready,"unaccepted logical request stalls");
+            check(memory_request && timing_wait && !done && !gpr_write_en && !memory_response_ready,"unaccepted logical request stalls");
             check(memory_address==physical_address && memory_write==wr && memory_write_data==value,"logical metadata has no lane splitting");
             tick();
         end
         memory_request_ready=1; tick();
         repeat(3) begin
-            check(!memory_request && !done && requests==old_requests+1,"pending operation cannot resubmit");
+            check(!memory_request && timing_wait && !done && requests==old_requests+1,"pending operation cannot resubmit");
             tick();
         end
         // Semantic pause while a complete response arrives. The responder holds
@@ -77,7 +78,7 @@ module spk286_operand_service_tb;
             tick(); check(!done && !memory_response_ready && responses==old_responses,"response held across pause");
         end
         request_valid=1; #1;
-        check(done && memory_response_ready && !memory_request && !gpr_write_en,"whole-word completion resumes once");
+        check(done && !timing_wait && memory_response_ready && !memory_request && !gpr_write_en,"whole-word completion resumes once");
         if(!wr) check(read_data==16'hC17E,"read returns responder word");
         tick(); request_valid=0; memory_response_valid=0; #1;
         check(requests==old_requests+1 && responses==old_responses+1,"one request and one completion per memory operation");

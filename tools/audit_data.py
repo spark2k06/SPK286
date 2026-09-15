@@ -22,8 +22,8 @@ PROBES = (('exchange-writeback',
  ('exchange-accumulator',
   'spk286_decoder',
   'spk286_data_instructions',
-  "assign source_index = opcode[7:3] == 5'b10010 ||",
-  'assign source_index =',
+  "assign source_index = opcode == 8'h63 || opcode[7:3] == 5'b10010 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;",
+  "assign source_index = opcode == 8'h63 || opcode[7:3] == 5'b10011 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;",
   'exact GPR result/preservation'),
  ('xlat-unsigned-index',
   'spk286_micro_executor',
@@ -65,8 +65,9 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'data-audit'
     output.mkdir(parents=True, exist_ok=True)
+    packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               *packages, *sorted(p for p in (ROOT/'rtl').glob('*.sv') if p not in packages)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

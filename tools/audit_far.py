@@ -26,9 +26,9 @@ PROBES = (('lds-cache-index',
   "address_offset <= effective_offset + 16'd4",
   'exact data transaction order, direction and lanes'),
  ('call-stack-precheck',
-  'spk286_micro_executor',
-  'spk286_far_instructions',
-  "stack_pointer<16'd4",
+ 'spk286_micro_executor',
+ 'spk286_far_instructions',
+ "stack_pointer<16'd4",
   "stack_pointer<16'd2",
   'no extra data transfer'),
  ('return-stack-precheck',
@@ -76,8 +76,8 @@ PROBES = (('lds-cache-index',
  ('far-context-offset',
   'spk286_micro_executor',
   'spk286_far_instructions',
-  'assign redirect_target = context_commit ? tmp0_q : target_q',
-  'assign redirect_target = context_commit ? tmp1_q : target_q',
+  'assign redirect_target = task_commit_redirect ? task_loaded_ip : (context_commit ? tmp0_q : target_q);',
+  'assign redirect_target = task_commit_redirect ? task_loaded_ip : (context_commit ? tmp1_q : target_q);',
   'exact pointer/return target address'))
 
 
@@ -88,8 +88,9 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'far-audit'
     output.mkdir(parents=True, exist_ok=True)
+    packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               *packages, *sorted(p for p in (ROOT/'rtl').glob('*.sv') if p not in packages)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')
