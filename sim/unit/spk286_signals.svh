@@ -1,5 +1,6 @@
 // Testbench connections to the normal execution/state boundary.
 logic clk = 1'b0, reset = 1'b1, ready = 1'b0, execute_enable = 1'b0;
+logic [1:0] timing_policy_request = 2'd0;
 logic intr = 1'b0, nmi = 1'b0, hold_request = 1'b0;
 wire halted, shutdown, event_completed;
 wire [7:0] debug_event_vector;
@@ -65,6 +66,7 @@ wire [63:0] debug_timing_compatibility_delay_cycles;
 wire [3:0] debug_timing_queue_count;
 wire [7:0] debug_timing_schema_version;
 wire [1:0] debug_timing_policy, debug_timing_trace_owner;
+wire debug_timing_policy_error, debug_timing_policy_locked;
 wire debug_timing_trace_valid, debug_timing_trace_write;
 wire [63:0] debug_timing_trace_cycle;
 wire [23:0] debug_timing_trace_address;

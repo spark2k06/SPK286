@@ -3,6 +3,7 @@
 module spk286_core_tb;
     `include "spk286_signals.svh"
     integer checks = 0;
+    logic max_policy;
     spk286 dut (.*);
 
     task automatic tick;
@@ -34,6 +35,8 @@ module spk286_core_tb;
     endtask
 
     initial begin
+        max_policy = $test$plusargs("max_policy");
+        timing_policy_request = max_policy ? 2'd2 : 2'd0;
         tick();
         if (bus_valid !== 1'b0 || debug_gpr !== 128'h0 || debug_flags !== 16'h0002 ||
             debug_ip !== 16'hFFF0 || debug_cs !== 16'hF000 || debug_cs_base !== 24'hFF0000 ||
@@ -42,6 +45,9 @@ module spk286_core_tb;
             debug_segment_limits !== 64'hFFFFFFFFFFFFFFFF ||
             debug_segment_access !== 32'h93939393)
             $fatal(1, "integrated architectural reset");
+        if (debug_timing_policy !== (max_policy ? 2'd2 : 2'd0) ||
+            debug_timing_policy_error !== 1'b0)
+            $fatal(1, "integrated timing policy selection");
         reset = 1'b0;
         tick();
         check_bus(24'hFFFFF0);

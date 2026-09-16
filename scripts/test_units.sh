@@ -14,9 +14,10 @@ source scripts/rtl_sources.sh
 simulator="${1:-both}"
 unit="${2:-all}"
 case "$simulator" in verilator|iverilog|both) ;; *) echo "Unknown simulator: $simulator" >&2; exit 2;; esac
-tests=(spk286_registers spk286_segments spk286_protected_foundation spk286_protected_system spk286_protected_event_outer spk286_protected_expand_down spk286_arpl spk286_clts spk286_clts_privilege spk286_protected_retf spk286_tss_service spk286_tss_descriptor_service spk286_task_segment_service spk286_task_switch_service spk286_protected_task spk286_protected_task_fault spk286_protected_task_state_fault spk286_protected_task_gate spk286_protected_task_gate_far spk286_protected_task_gate_fault spk286_protected_task_gate_error spk286_protected_task_privilege spk286_protected_task_privilege_outer spk286_protected_task_gate_privilege spk286_protected_task_gate_privilege_outer spk286_protected_task_gate_event_privilege_outer spk286_protected_task_iret spk286_protected_task_ldt spk286_fetch spk286_core spk286_prefetch_queue
+tests=(spk286_registers spk286_segments spk286_protected_foundation spk286_protected_system spk286_protected_event_outer spk286_protected_expand_down spk286_call_stack_precheck spk286_arpl spk286_clts spk286_clts_privilege spk286_protected_retf spk286_tss_service spk286_tss_descriptor_service spk286_task_segment_service spk286_task_switch_service spk286_protected_task spk286_protected_task_fault spk286_protected_task_state_fault spk286_protected_task_gate spk286_protected_task_gate_far spk286_protected_task_gate_fault spk286_protected_task_gate_error spk286_protected_task_privilege spk286_protected_task_privilege_outer spk286_protected_task_gate_privilege spk286_protected_task_gate_privilege_outer spk286_protected_task_gate_event_privilege_outer spk286_protected_task_iret spk286_protected_task_ldt spk286_fetch spk286_core spk286_prefetch_queue
        spk286_protected_ltr
-       spk286_microsequencer spk286_microcode_rom spk286_decoder spk286_timing_trace spk286_timing_capture spk286_timing_calibration spk286_timing_calibration_extra
+       spk286_microsequencer spk286_microcode_rom spk286_decoder spk286_timing_trace spk286_timing_capture spk286_timing_policy spk286_timing_policy_contract spk286_timing_policy_equivalence spk286_timing_calibration spk286_timing_calibration_extra
+       spk286_prefetch_fidelity
        spk286_execution spk286_microcode_execution spk286_modrm spk286_effective_address
        spk286_operand_decode spk286_biu spk286_mov_operands spk286_operand_lifecycle
        spk286_operand_service spk286_alu spk286_alu_instructions spk286_alu_lifecycle spk286_stack_control spk286_stack_lifecycle
@@ -26,6 +27,7 @@ if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
     run_args=()
+    skip_verilator=0
     if [[ "$name" == spk286_test_instructions ]]; then
         python3 -m tools.test_instruction_vectors --output "$BUILD_DIR/test-vectors.txt"
         run_args=("+instruction_vectors=$BUILD_DIR/test-vectors.txt")
@@ -118,6 +120,10 @@ for name in "${tests[@]}"; do
         mkdir -p "$BUILD_DIR/timing"
         run_args=("+trace_out=$BUILD_DIR/timing/spk286_timing_capture.csv")
     fi
+    if [[ "$name" == spk286_prefetch_fidelity ]]; then
+        mkdir -p "$BUILD_DIR/timing"
+        run_args=("+prefetch_trace_out=$BUILD_DIR/timing/spk286_prefetch_fidelity.csv")
+    fi
     if [[ "$name" == spk286_timing_calibration ]]; then
         mkdir -p "$BUILD_DIR/timing"
         run_args=("+calibration_out=$BUILD_DIR/timing/spk286_timing_calibration.csv")
@@ -128,7 +134,11 @@ for name in "${tests[@]}"; do
     fi
     tb="${name}_tb"
     test -f "sim/unit/$tb.sv"
-    if [[ "$simulator" != iverilog ]]; then
+    if [[ "$name" == spk286_protected_expand_down && "$simulator" != iverilog ]]; then
+        echo "VERILATOR SKIP: $name full matrix runs in Icarus; protected-system and event banks provide Verilator cross-checks"
+        skip_verilator=1
+    fi
+    if [[ "$simulator" != iverilog && "$skip_verilator" == 0 ]]; then
         obj="$BUILD_DIR/verilator/$tb"
         mkdir -p "$obj"
         verilator --binary --build-jobs "${SPK286_BUILD_JOBS:-1}" --timing --assert --language 1800-2012 \

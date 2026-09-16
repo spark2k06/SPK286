@@ -1,6 +1,12 @@
 `timescale 1ns/1ps
 
 module spk286_fetch_tb;
+`ifdef SPK286_P02_FETCH_CHAIN
+    localparam logic EXPECT_FETCH_CHAINING = 1'b1;
+`else
+    localparam logic EXPECT_FETCH_CHAINING = 1'b0;
+`endif
+
     logic suspend = 0;
     logic clk = 1'b0, reset = 1'b1, ready = 1'b0;
     logic [15:0] data_in = 16'h0000;
@@ -77,24 +83,68 @@ module spk286_fetch_tb;
         end
         complete_read(16'hBBAA, 16'hBBAA, 2'd2, 16'hFFF0);
         if (cursor !== 17'h0FFF2) $fatal(1, "word cursor advance");
-        // Backpressure preserves the response, even with unsolicited READY/request.
-        request = 1'b1;
-        ready = 1'b1;
-        data_in = 16'hDEAD;
-        repeat (4) begin
+        // P02 can retire a response and launch the next request on the same
+        // edge. The reference profile deliberately preserves the bubble.
+        if (EXPECT_FETCH_CHAINING) begin
+            code_base = 24'hFF0000;
+            request = 1'b1;
+            response_ready = 1'b1;
+            ready = 1'b0;
             tick();
-            if (response_data !== 16'hBBAA || response_valid !== 1'b1 || bus_valid !== 1'b0 || request_ready !== 1'b0)
-                $fatal(1, "response backpressure");
+            if (response_valid !== 1'b0 || bus_valid !== 1'b1 ||
+                address !== 24'hFFFFF2)
+                $fatal(1, "P02 did not chain response into next fetch");
+            response_ready = 1'b0;
+            request = 1'b0;
+            data_in = 16'h2211;
+            ready = 1'b1;
+            tick();
+            ready = 1'b0;
+            if (response_valid !== 1'b1 || response_data !== 16'h2211 ||
+                response_ip !== 16'hFFF2 || response_count !== 2'd2)
+                $fatal(1, "P02 chained fetch did not complete");
+            consume();
         end
-        ready = 1'b0;
-        request = 1'b0;
-        consume();
+        // Backpressure preserves the response, even with unsolicited READY/request.
+        if (EXPECT_FETCH_CHAINING) begin
+            request = 1'b1;
+            ready = 1'b1;
+            data_in = 16'hDEAD;
+            tick();
+            if (bus_valid !== 1'b1 || response_valid !== 1'b0)
+                $fatal(1, "P02 did not launch the post-consume fetch");
+            tick();
+            request = 1'b0;
+            ready = 1'b0;
+            if (response_data !== 16'hDEAD || response_valid !== 1'b1 || bus_valid !== 1'b0)
+                $fatal(1, "P02 response setup");
+            repeat (4) begin
+                tick();
+                if (response_data !== 16'hDEAD || response_valid !== 1'b1 ||
+                    bus_valid !== 1'b0 || request_ready !== 1'b0)
+                    $fatal(1, "P02 response backpressure");
+            end
+            consume();
+        end else begin
+            request = 1'b1;
+            ready = 1'b1;
+            data_in = 16'hDEAD;
+            repeat (4) begin
+                tick();
+                if (response_data !== 16'hBBAA || response_valid !== 1'b1 || bus_valid !== 1'b0 || request_ready !== 1'b0)
+                    $fatal(1, "response backpressure");
+            end
+            ready = 1'b0;
+            request = 1'b0;
+            consume();
+        end
         code_base = 24'hFF0000;
         request = 1'b1;
         tick();
         request = 1'b0;
-        expect_bus(24'hFFFFF2);
-        complete_read(16'h2211, 16'h2211, 2'd2, 16'hFFF2);
+        expect_bus(EXPECT_FETCH_CHAINING ? 24'hFFFFF6 : 24'hFFFFF2);
+        complete_read(16'h2211, 16'h2211, 2'd2,
+                     EXPECT_FETCH_CHAINING ? 16'hFFF6 : 16'hFFF2);
 
         // A restart invalidates buffered bytes and starts the new stream.
         redirect(24'h0FFFF0, 16'h0011);

@@ -26,6 +26,7 @@ module spk286_timing_trace (
     input  logic        operand_wait,
     input  logic        event_request,
     input  logic        event_complete,
+    input  logic [1:0]  timing_policy,
     output logic [63:0] cycle_count,
     output logic [63:0] biu_busy_cycles,
     output logic [63:0] accepted_transfers,
@@ -70,9 +71,7 @@ module spk286_timing_trace (
     wire event_complete_edge = event_complete && !event_complete_q;
 
     assign trace_schema_version = 8'd1;
-    // 0 is the current normalized functional baseline. Accurate/Fast/Max
-    // policy selection is deliberately introduced by a later Phase 9E change.
-    assign trace_policy = 2'd0;
+    assign trace_policy = timing_policy;
     assign trace_valid = !reset;
     assign trace_cycle = cycle_count;
     assign trace_queue_count = queue_count;

@@ -5,6 +5,8 @@
 
 // Drive the normal execution interface inactive before resetting the datapath.
 inline void clear_execution_inputs(Vspk286& dut) {
+    // Establish the supported baseline policy before the reset-boundary sample.
+    dut.timing_policy_request = 0;
     dut.data_in = 0;
     dut.execute_enable = 0;
     dut.intr = 0;

@@ -33,13 +33,21 @@ module spk286_fetch (
     logic bhe_n_q;
     logic [23:0] next_address;
     logic single_byte;
+`ifdef SPK286_P02_FETCH_CHAIN
+    localparam logic FETCH_CHAINING = 1'b1;
+`else
+    localparam logic FETCH_CHAINING = 1'b0;
+`endif
+    wire response_fire = response_valid && response_ready;
+    wire response_slot_available = !response_valid ||
+                                   (FETCH_CHAINING && response_fire);
 
     assign cursor = cursor_q;
     assign blocked = cursor_q[16] || (cursor_q[15:0] > code_limit);
     assign next_address = code_base + {8'h00, cursor_q[15:0]};
     assign single_byte = next_address[0] || (cursor_q[15:0] == code_limit);
     assign request_ready = !reset && !restart && !restart_pending_q &&
-                           !active_q && !response_valid && !blocked;
+                           !active_q && response_slot_available && !blocked;
     assign bus_valid = active_q && !reset;
     assign address = bus_valid ? address_q : 24'h000000;
     assign bus_bhe_n = bus_valid ? bhe_n_q : 1'b1;
@@ -69,7 +77,7 @@ module spk286_fetch (
                 canceled_q <= 1'b0;
             end
         end else begin
-            if (response_valid && response_ready) response_valid <= 1'b0;
+            if (response_fire) response_valid <= 1'b0;
             if (active_q) begin
                 if (ready) begin
                     active_q <= 1'b0;
@@ -85,7 +93,10 @@ module spk286_fetch (
                         cursor_q <= {1'b0, request_ip_q} + {15'h0000, request_count_q};
                     end
                 end
-            end else if (!suspend && !response_valid && !blocked && (restart_pending_q || request)) begin
+            end else if (!suspend && response_slot_available && !blocked &&
+                         (restart_pending_q || request)) begin
+                // P02 may retire the response and capture the next fetch on
+                // the same edge; the base profile keeps the old bubble.
                 active_q <= 1'b1;
                 canceled_q <= 1'b0;
                 restart_pending_q <= 1'b0;

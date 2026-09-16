@@ -27,10 +27,10 @@ PROBES = (('lds-cache-index',
   'exact data transaction order, direction and lanes'),
  ('call-stack-precheck',
  'spk286_micro_executor',
- 'spk286_far_instructions',
- "stack_pointer<16'd4",
-  "stack_pointer<16'd2",
-  'no extra data transfer'),
+ 'spk286_call_stack_precheck',
+ "stack_pointer[0] && stack_pointer < 16'd4",
+ "stack_pointer[0] && stack_pointer < 16'd2",
+ 'call-frame precheck prevents every stack write'),
  ('return-stack-precheck',
   'spk286_micro_executor',
   'spk286_far_instructions',
@@ -123,13 +123,13 @@ def main():
         elif run.returncode or 'PASS:' not in run.stdout:
             raise RuntimeError(f'{name}: pristine bench failed')
         print(f'FAR_MUTATION {name}: {"rejected" if reason else "passed"} status={run.returncode}')
-    for bench in ('spk286_far_instructions','spk286_far_lifecycle'):
+    for bench in ('spk286_far_instructions','spk286_far_lifecycle','spk286_call_stack_precheck'):
         execute('pristine-'+bench,bench)
     for name,module,bench,old,new,reason in PROBES:
         execute(name,bench,(module,old,new),reason)
     if any(p.read_bytes()!=data for p,data in originals.items()):
         raise RuntimeError('production source changed during mutation audit')
-    print('FAR_AUDIT PASS: 12 rejected RTL mutants; 2 pristine benches; source bytes unchanged')
+    print('FAR_AUDIT PASS: 12 rejected RTL mutants; 3 pristine benches; source bytes unchanged')
 
 
 if __name__ == '__main__':

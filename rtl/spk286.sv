@@ -8,6 +8,7 @@ module spk286 (
     input  logic         ready,
     input  logic [15:0]  data_in,
     input  logic         execute_enable,
+    input  logic [1:0]   timing_policy_request,
     input  logic         intr, nmi, hold_request,
     output logic         halted, shutdown, event_completed,
     output logic [7:0]   debug_event_vector,
@@ -111,6 +112,8 @@ module spk286 (
     output logic [3:0]   debug_timing_queue_count,
     output logic [7:0]   debug_timing_schema_version,
     output logic [1:0]   debug_timing_policy,
+    output logic         debug_timing_policy_error,
+    output logic         debug_timing_policy_locked,
     output logic         debug_timing_trace_valid,
     output logic [63:0]  debug_timing_trace_cycle,
     output logic [23:0]  debug_timing_trace_address,
@@ -139,6 +142,7 @@ module spk286 (
     logic fetch_response_valid;
     logic [15:0] fetch_response_data, fetch_response_ip;
     logic [1:0] fetch_response_count;
+    logic [1:0] timing_policy_active;
 
     logic queue_flush, queue_fill_ready;
     logic queue_consume_valid, queue_consume_ready;
@@ -402,6 +406,30 @@ module spk286 (
     assign protected_segment_is_readable = selected_segment_access[1];
     assign protected_segment_is_writable = !protected_segment_is_code && selected_segment_access[1];
     assign protected_segment_is_expand_down = !protected_segment_is_code && selected_segment_access[2];
+`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+    // P05: compare the starting offset in parallel with the late width bit.
+    // offset + !byte > limit iff offset > limit || (!byte && offset == limit).
+    assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
+                                   !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
+                                   !io_transfer && !vector_request &&
+                                    (protected_call_stack_access ?
+                                    (service_segment != 2'd2 ||
+                                     (protected_call_stack_expand_down ?
+                                      ({1'b0, service_offset} <= {1'b0, protected_call_stack_limit} ||
+                                       (!operand_byte && service_offset == 16'hFFFF)) :
+                                      (service_offset > protected_call_stack_limit ||
+                                       (!operand_byte && service_offset == protected_call_stack_limit)))) :
+                                    (protected_segment_is_loaded &&
+                                     (!protected_segment_is_valid || !protected_segment_is_present ||
+                                      (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
+                                       (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
+                                        (operand_write && !protected_segment_is_writable))) ||
+                                      (protected_segment_is_expand_down ?
+                                       ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
+                                        (!operand_byte && service_offset == 16'hFFFF)) :
+                                       (service_offset > selected_segment_limit ||
+                                        (!operand_byte && service_offset == selected_segment_limit))))));
+`else
     assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
                                    !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
                                    !io_transfer && !vector_request &&
@@ -420,6 +448,7 @@ module spk286 (
                                        ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
                                         ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
                                        ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, selected_segment_limit})))));
+`endif
     assign protected_access_ss_fault = protected_access_fault && service_segment == 2'd2;
     assign protected_fetch_fault = protected_msw[0] && protected_segment_protected[2'd1] &&
                                    (!protected_segment_valid[2'd1] || !protected_segment_present[2'd1] ||
@@ -597,6 +626,12 @@ module spk286 (
     assign timing_prefetch_response_accept = fetch_response_valid && fetch_response_ready;
     assign timing_queue_consume = queue_consume_valid && queue_consume_ready;
 
+    spk286_timing_policy timing_policy (
+        .clk(clk), .reset(reset), .requested_policy(timing_policy_request),
+        .active_policy(timing_policy_active), .selection_error(debug_timing_policy_error),
+        .selection_locked(debug_timing_policy_locked)
+    );
+
     spk286_timing_trace timing_trace (
         .clk(clk), .reset(reset), .ready(ready),
         .bus_valid(bus_valid), .bus_write(bus_write), .bus_bhe_n(bus_bhe_n),
@@ -609,6 +644,7 @@ module spk286 (
         .cancel_event(semantic_cancel),
         .operand_wait(operand_service_wait),
         .event_request(event_request), .event_complete(event_completed),
+        .timing_policy(timing_policy_active),
         .cycle_count(debug_timing_cycle_count),
         .biu_busy_cycles(debug_timing_biu_busy_cycles),
         .accepted_transfers(debug_timing_accepted_transfers),

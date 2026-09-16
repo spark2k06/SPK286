@@ -19,6 +19,7 @@ module spk286_timing_trace_tb;
     logic [63:0] queue_empty_cycles, redirect_count, cancel_count, operand_wait_cycles;
     logic [63:0] event_request_count, event_complete_count, compatibility_delay_cycles;
     logic [3:0] trace_queue_count;
+    logic [1:0] timing_policy = 2'd0;
     logic [7:0] trace_schema_version;
     logic [1:0] trace_policy;
     logic trace_valid, trace_write, trace_lock, trace_hold, trace_hlda, trace_ready;

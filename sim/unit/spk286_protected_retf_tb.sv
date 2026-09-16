@@ -357,16 +357,17 @@ module spk286_protected_retf_tb;
         memory[16'h107C] = 8'h1F;
         memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
         for (integer idx = 0; idx < 31; idx = idx + 1) begin
-            memory[16'hFF00 + idx * 2] = idx;
-            memory[16'hFF01 + idx * 2] = 8'h40;
+            memory[32'h0000FF00 + idx * 32'd2] = idx[7:0];
+            memory[32'h0000FF01 + idx * 32'd2] = 8'h40;
         end
         retire_one();
         check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
-              {memory[16'h9FFC + 16'd1], memory[16'h9FFC]} == 16'hFF00 &&
-              {memory[16'h9FFE + 16'd1], memory[16'h9FFE]} == 16'h0069,
+              {memory[32'h00009FFC + 32'd1], memory[32'h00009FFC]} == 16'hFF00 &&
+              {memory[32'h00009FFE + 32'd1], memory[32'h00009FFE]} == 16'h0069,
               "PM4b thirty-one-parameter gate reserves the complete bounded frame");
         for (integer idx = 0; idx < 31; idx = idx + 1)
-            check({memory[16'h9FBE + idx * 2 + 16'd1], memory[16'h9FBE + idx * 2]} == (16'h4000 + idx),
+            check({memory[32'h00009FBE + idx * 32'd2 + 32'd1],
+                   memory[32'h00009FBE + idx * 32'd2]} == (16'h4000 + idx[15:0]),
                   "PM4b thirty-one-parameter copy preserves source order");
         retire_one();
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF3E,
@@ -395,8 +396,8 @@ module spk286_protected_retf_tb;
         memory[16'h107C] = 8'h1F;
         memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
         for (integer idx = 0; idx < 31; idx = idx + 1) begin
-            memory[16'hFF00 + idx * 2] = idx;
-            memory[16'hFF01 + idx * 2] = 8'h40;
+            memory[32'h0000FF00 + idx * 32'd2] = idx[7:0];
+            memory[32'h0000FF01 + idx * 32'd2] = 8'h40;
         end
         retire_one();
         check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
@@ -410,8 +411,8 @@ module spk286_protected_retf_tb;
         memory[16'h107C] = 8'h1F;
         memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
         for (integer idx = 0; idx < 31; idx = idx + 1) begin
-            memory[16'hFF00 + idx * 2] = idx;
-            memory[16'hFF01 + idx * 2] = 8'h40;
+            memory[32'h0000FF00 + idx * 32'd2] = idx[7:0];
+            memory[32'h0000FF01 + idx * 32'd2] = 8'h40;
         end
         retire_one();
         check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FBA &&
