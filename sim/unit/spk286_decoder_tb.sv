@@ -4,6 +4,7 @@ module spk286_decoder_tb;
     logic [7:0] opcode;
     logic extended_opcode = 1'b0;
     wire supported;
+    wire invalid_opcode;
     wire [2:0] destination, source_index;
     wire [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry;
     integer checks = 0;
@@ -15,7 +16,13 @@ module spk286_decoder_tb;
                               (i >= 80 && i <= 95) || (i >= 112 && i <= 127) || i == 104 || i == 106 || i == 143 || i == 255 ||
                               i == 194 || i == 195 || (i >= 224 && i <= 227) || i == 232 || i == 233 || i == 235 ||
                               (i >= 176 && i <= 191) || i == 136 || i == 138 || i == 198 || i == 199 || i == 128 || i == 137 || i == 139 || i == 129 || i == 131 ||
+                              i == 214 ||
                               (i < 64 && (i % 8 <= 5)))) $fatal(1, "opcode support %h", opcode);
+            if (i == 214 && (destination != 0 || source_index != 0 ||
+                entry != spk286_microcode_pkg::MC_ENTRY_LOAD_CARRY_BYTE))
+                $fatal(1, "SALC destination/entry metadata");
+            if (invalid_opcode !== (i >= 100 && i <= 103))
+                $fatal(1, "primary opcode classification %h", opcode);
             if (i >= 184 && i <= 191 && (destination !== 3'(i - 184) ||
                 entry !== spk286_microcode_pkg::MC_ENTRY_MOV_R16_IMM16))
                 $fatal(1, "MOV decoder metadata %h", opcode);
@@ -99,9 +106,14 @@ module spk286_decoder_tb;
         opcode = 8'h06; #1;
         if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_CLTS)
             $fatal(1, "0F 06 extended decoder entry");
+        opcode = 8'h05; #1;
+        if (supported !== 1'b1 || invalid_opcode !== 1'b0 || entry !== spk286_microcode_pkg::MC_ENTRY_LOADALL)
+            $fatal(1, "0F 05 LOADALL classification/entry");
         opcode = 8'h0F; #1;
-        if (supported !== 1'b0) $fatal(1, "unsupported extended opcode accepted");
-        checks = checks + 4;
+        if (supported !== 1'b0 || invalid_opcode !== 1'b1) $fatal(1, "unsupported extended opcode classification");
+        opcode = 8'h04; #1;
+        if (invalid_opcode !== 1'b1) $fatal(1, "0F 04 invalid classification");
+        checks = checks + 7;
         $display("DECODER PASS: %0d opcode checks; MOV and word ALU forms", checks);
         $finish;
     end

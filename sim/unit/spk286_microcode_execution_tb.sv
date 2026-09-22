@@ -42,7 +42,9 @@ module spk286_microcode_execution_tb;
         memory[ip[11:0]] = 8'hB8 + {5'd0, dst};
         memory[ip[11:0] + 12'd1] = value[7:0];
         memory[ip[11:0] + 12'd2] = value[15:8];
-        memory[ip[11:0] + 12'd3] = 8'h0F;
+        // F1 is retained as a legal-but-unimplemented diagnostic sentinel;
+        // invalid 0F escape holes now enter the architectural #UD path.
+        memory[ip[11:0] + 12'd3] = 8'hF1;
     endtask
     task automatic redirect_to(input logic [15:0] ip);
         ip_write_en = 1; ip_write_data = ip; redirect = 1;
@@ -106,7 +108,7 @@ module spk286_microcode_execution_tb;
     endtask
 
     initial begin
-        for (integer i = 0; i < 4096; i = i + 1) memory[i] = 8'h0F;
+        for (integer i = 0; i < 4096; i = i + 1) memory[i] = 8'hF1;
         // All register encodings, little-endian/extreme immediates and both alignments.
         for (integer alignment = 0; alignment < 2; alignment = alignment + 1) begin
             for (integer r = 0; r < 8; r = r + 1) begin
@@ -129,9 +131,9 @@ module spk286_microcode_execution_tb;
                     while (!unsupported_opcode && phase_cycles < 150) begin
                         service(); phase_cycles = phase_cycles + 1;
                     end
-                    check(unsupported_opcode && debug_opcode == 8'h0F && retirements == 1,
+                    check(unsupported_opcode && debug_opcode == 8'hF1 && retirements == 1,
                           "unsupported byte cannot execute as MOV");
-                    check_architecture(base_ip + 16'd4);
+                    check_architecture(base_ip + 16'd3);
                 end
             end
         end

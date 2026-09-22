@@ -110,6 +110,23 @@ module spk286_protected_foundation_tb;
     logic [1:0] segment_commit_dpl2 = 2'd0;
     logic segment_commit_table_indicator2 = 1'b0;
     logic [1:0] segment_commit_rpl2 = 2'd0;
+    logic loadall_commit_en = 1'b0;
+    logic [15:0] loadall_msw = 16'h0, loadall_gdtr_limit = 16'h0, loadall_idtr_limit = 16'h0;
+    logic [23:0] loadall_gdtr_base = 24'h0, loadall_idtr_base = 24'h0;
+    logic [15:0] loadall_ldtr_selector = 16'h0, loadall_tr_selector = 16'h0;
+    logic [23:0] loadall_ldtr_base = 24'h0, loadall_tr_base = 24'h0;
+    logic [15:0] loadall_ldtr_limit = 16'h0, loadall_tr_limit = 16'h0;
+    logic [7:0] loadall_ldtr_access = 8'h0, loadall_tr_access = 8'h0;
+    logic [3:0] loadall_ldtr_class = DESC_INVALID, loadall_tr_class = DESC_INVALID;
+    logic loadall_ldtr_valid = 1'b0, loadall_ldtr_present = 1'b0;
+    logic loadall_tr_valid = 1'b0, loadall_tr_present = 1'b0;
+    logic [63:0] loadall_segment_selectors = 64'h0, loadall_segment_limits = 64'h0;
+    logic [95:0] loadall_segment_bases = 96'h0;
+    logic [31:0] loadall_segment_access = 32'h0;
+    logic [15:0] loadall_segment_classes = 16'h0;
+    logic [3:0] loadall_segment_valid = 4'h0, loadall_segment_present = 4'h0;
+    logic [3:0] loadall_segment_protected = 4'h0, loadall_segment_tables = 4'h0;
+    logic [7:0] loadall_segment_dpl = 8'h0, loadall_segment_rpl = 8'h0;
     wire [63:0] segment_selector_state;
     wire [95:0] segment_base_state;
     wire [63:0] segment_limit_state;
@@ -150,6 +167,22 @@ module spk286_protected_foundation_tb;
         .segment_commit_class2(segment_commit_class2), .segment_commit_present2(segment_commit_present2),
         .segment_commit_protected2(segment_commit_protected2), .segment_commit_dpl2(segment_commit_dpl2),
         .segment_commit_table_indicator2(segment_commit_table_indicator2), .segment_commit_rpl2(segment_commit_rpl2),
+        .loadall_commit_en(loadall_commit_en), .loadall_msw(loadall_msw),
+        .loadall_gdtr_limit(loadall_gdtr_limit), .loadall_gdtr_base(loadall_gdtr_base),
+        .loadall_idtr_limit(loadall_idtr_limit), .loadall_idtr_base(loadall_idtr_base),
+        .loadall_ldtr_selector(loadall_ldtr_selector), .loadall_ldtr_base(loadall_ldtr_base),
+        .loadall_ldtr_limit(loadall_ldtr_limit), .loadall_ldtr_access(loadall_ldtr_access),
+        .loadall_ldtr_class(loadall_ldtr_class), .loadall_ldtr_valid(loadall_ldtr_valid),
+        .loadall_ldtr_present(loadall_ldtr_present), .loadall_tr_selector(loadall_tr_selector),
+        .loadall_tr_base(loadall_tr_base), .loadall_tr_limit(loadall_tr_limit),
+        .loadall_tr_access(loadall_tr_access), .loadall_tr_class(loadall_tr_class),
+        .loadall_tr_valid(loadall_tr_valid), .loadall_tr_present(loadall_tr_present),
+        .loadall_segment_selectors(loadall_segment_selectors), .loadall_segment_bases(loadall_segment_bases),
+        .loadall_segment_limits(loadall_segment_limits), .loadall_segment_access(loadall_segment_access),
+        .loadall_segment_classes(loadall_segment_classes), .loadall_segment_valid(loadall_segment_valid),
+        .loadall_segment_present(loadall_segment_present), .loadall_segment_protected(loadall_segment_protected),
+        .loadall_segment_tables(loadall_segment_tables), .loadall_segment_dpl(loadall_segment_dpl),
+        .loadall_segment_rpl(loadall_segment_rpl),
         .segment_selector_state(segment_selector_state), .segment_base_state(segment_base_state),
         .segment_limit_state(segment_limit_state), .segment_access_state(segment_access_state),
         .segment_class_state(segment_class_state), .segment_valid_state(segment_valid_state),

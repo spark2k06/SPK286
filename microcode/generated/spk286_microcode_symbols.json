@@ -67,7 +67,9 @@
     "JMP_REL16": 73,
     "LEAVE_FRAME": 449,
     "LEA_R16_M": 266,
+    "LOADALL": 717,
     "LOAD_BASE_INDEX8": 307,
+    "LOAD_CARRY_BYTE": 719,
     "LOAD_DIRECT16": 292,
     "LOAD_DIRECT8": 287,
     "LOAD_FLAGS_BYTE": 207,
@@ -9557,6 +9559,83 @@
         "entry": "SYSTEM_CLTS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
         "line": 86
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 717,
+      "location": {
+        "entry": "LOADALL",
+        "file": "zzzzzzzzzzzzzzzzzzzz_loadall.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "LOADALL",
+      "statement": "LOADALL",
+      "word": 171
+    },
+    {
+      "address": 718,
+      "location": {
+        "entry": "LOADALL",
+        "file": "zzzzzzzzzzzzzzzzzzzz_loadall.mc",
+        "line": 7
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 719,
+      "location": {
+        "entry": "LOAD_CARRY_BYTE",
+        "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
+        "line": 6
+      },
+      "operands": [],
+      "operation": "READ_FLAGS",
+      "statement": "READ_FLAGS -> TMP0",
+      "word": 30
+    },
+    {
+      "address": 720,
+      "location": {
+        "entry": "LOAD_CARRY_BYTE",
+        "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
+        "line": 7
+      },
+      "operands": [
+        "TMP0"
+      ],
+      "operation": "CARRY_FILL8",
+      "statement": "CARRY_FILL8 TMP0",
+      "word": 172
+    },
+    {
+      "address": 721,
+      "location": {
+        "entry": "LOAD_CARRY_BYTE",
+        "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
+        "line": 8
+      },
+      "operands": [
+        "TMP0",
+        "DST8"
+      ],
+      "operation": "MOVE8",
+      "statement": "TMP0 -> DST8",
+      "word": 54
+    },
+    {
+      "address": 722,
+      "location": {
+        "entry": "LOAD_CARRY_BYTE",
+        "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
+        "line": 9
       },
       "operands": [],
       "operation": "END",

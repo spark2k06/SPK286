@@ -1013,6 +1013,8 @@ module spk286_micro_executor (
     logic [15:0] target_q, stack_next_sp;
     logic fetch_byte, fetch_byte_tmp1, read_flags, restore_flags, set_if, clear_if_tf;
     logic direct_flags, sign_extend_byte, sign_fill_word, constant_one;
+    logic carry_fill_byte;
+    assign carry_fill_byte = allowed && operation == spk286_microcode_pkg::MC_CARRY_FILL8 && temporary_valid_q[0];
     assign direct_flags = allowed && operation == spk286_microcode_pkg::MC_FLAGS_DECODED;
     assign sign_extend_byte = allowed && operation == spk286_microcode_pkg::MC_SIGN_EXTEND8 && temporary_valid_q[0];
     assign sign_fill_word = allowed && operation == spk286_microcode_pkg::MC_SIGN_FILL16 && temporary_valid_q[0];
@@ -1250,7 +1252,7 @@ module spk286_micro_executor (
     assign commit_flags = allowed && operation == spk286_microcode_pkg::MC_COMMIT_FLAGS && flags_valid_q && result_disposed_q;
     assign byte_ready = fetch_word || fetch_signed_byte || fetch_byte || fetch_byte_tmp1 || (fetch_port && port_immediate) || decode_byte_ready;
     assign operation_done = muldiv_complete || write_result_ax || write_result_dx || (fetch_port && (!port_immediate || byte_valid)) || string_empty || string_continue || string_index_write || string_count || string_read_acc || string_write_acc || add_allocation_sp || ((check_push2 || check_pop2) && !range_fault) || frame_read_gpr || frame_write_gpr || save_auxiliary || restore_auxiliary || save_allocation || load_counter ||
-                            decrement_counter || counter_branch || begin_stack_cursor || read_stack_cursor || set_frame_address || decrement_frame_address || allocate_stack || set_ea_plus2 ||
+                            carry_fill_byte || decrement_counter || counter_branch || begin_stack_cursor || read_stack_cursor || set_frame_address || decrement_frame_address || allocate_stack || set_ea_plus2 ||
                             ((check_push8 || check_pop8 || check_stack_word || check_rm32 || check_call_frame) && !range_fault) ||
                             (call_stack_validation_operation && (!call_gate_outer_required || call_stack_ready_q || (call_tss_operand_done && call_tss_phase_q == 2'd1))) ||
                             (call_gate_stack_switch_operation && (!call_gate_outer_required || (call_gate_stack_write_done && call_gate_stack_switch_phase_q == 2'd1))) ||
@@ -1643,6 +1645,7 @@ module spk286_micro_executor (
             if (add_base) begin tmp1_q <= address_base + tmp0_q; temporary_valid_q[1] <= 1'b1; end
             if (set_address) begin address_override <= 1'b1; address_offset <= tmp1_q; end
             if (sign_extend_byte) tmp0_q <= {{8{tmp0_q[7]}}, tmp0_q[7:0]};
+            if (carry_fill_byte) tmp0_q <= {8'h00, {8{tmp0_q[0]}}};
             if (sign_fill_word) tmp0_q <= {16{tmp0_q[15]}};
             if (constant_one || constant_zero || constant_ones) begin tmp1_q <= constant_zero ? 16'd0 : constant_ones ? 16'hFFFF : 16'd1; temporary_valid_q[1] <= 1'b1; end
             if (count_low) begin tmp1_q <= {8'd0, count_value[7:0]}; temporary_valid_q[1] <= 1'b1; end

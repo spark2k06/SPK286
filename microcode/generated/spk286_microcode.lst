@@ -1,4 +1,4 @@
-SPK286 microcode compiler 19.0; format 20; encoding 20
+SPK286 microcode compiler 20.1; format 21; encoding 21
 0000  MOV_R16_IMM16:
 0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -865,3 +865,11 @@ SPK286 microcode compiler 19.0; format 20; encoding 20
 02CB  SYSTEM_CLTS:
 02CB  A8  SYSTEM_CLTS  # zzzzzzzzzzzzzzzzz_system_tables.mc:85
 02CC  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:86
+02CD  LOADALL:
+02CD  AB  LOADALL  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:6
+02CE  3  END  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:7
+02CF  LOAD_CARRY_BYTE:
+02CF  1E  READ_FLAGS -> TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:6
+02D0  AC  CARRY_FILL8 TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:7
+02D1  36  TMP0 -> DST8  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:8
+02D2  3  END  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:9

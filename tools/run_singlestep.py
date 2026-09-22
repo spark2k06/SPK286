@@ -41,6 +41,8 @@ INHERITED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES
 BYTE_SCALAR_OPCODES = tuple(f'{v:02X}' for v in range(0xB0,0xB8)) + ('88','8A','C6','C7') + tuple(f'{g*8+f:02X}' for g in range(8) for f in (0,2,4)) + tuple(f'80.{g}' for g in range(8))
 TEST_OPCODES = ('84','85','A8','A9','F6.0','F7.0')
 SCALAR_DIRECT_OPCODES = tuple(f'{v:02X}' for v in range(0x40,0x50)) + ('98','99','9E','9F','F5','F8','F9','FC','FD')
+# Downstream compatibility extension; do not silently expand the frozen Phase 7 cohorts.
+COMPATIBILITY_OPCODES = ('D6',)
 SHIFT_OPCODES = tuple(f'{op}.{g}' for op in ('C0','C1','D0','D1','D2','D3') for g in (0,1,2,3,4,5,7))
 DATA_OPCODES = ('86','87','8D','D7','A0','A1','A2','A3') + tuple(f'{v:02X}' for v in range(0x90,0x98))
 UNARY_OPCODES = ('F6.2','F6.3','F7.2','F7.3','FE.0','FE.1','FF.0','FF.1')
@@ -56,6 +58,7 @@ IO_OPCODES = SCALAR_IO_OPCODES + STRING_IO_OPCODES
 STRING_OPCODES = ('A4','A5','A6','A7','AA','AB','AC','AD','AE','AF')
 CONTROL_OPCODES += ('9A','EA','CA','CB','FF.3','FF.5')
 SUPPORTED_OPCODES = INHERITED_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES + STRING_OPCODES + IO_OPCODES + MULDIV_OPCODES
+SUPPORTED_OPCODES += COMPATIBILITY_OPCODES
 PREFIXES = frozenset((0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3))
 RESULT_RE = re.compile(
     r"^SINGLESTEP_RESULT executed=(\d+) passed=(\d+) failed=(\d+)(?: cycles=\d+)?$",
@@ -88,7 +91,7 @@ def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
     """
-    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES + STRING_OPCODES + IO_OPCODES + MULDIV_OPCODES:
+    if opcode not in MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES + PHASE6_OPCODES + BYTE_SCALAR_OPCODES + TEST_OPCODES + SCALAR_DIRECT_OPCODES + SHIFT_OPCODES + DATA_OPCODES + UNARY_OPCODES + ADJUST_OPCODES + SEGMENT_OPCODES + STACK_FRAME_OPCODES + FAR_OPCODES + STRING_OPCODES + IO_OPCODES + MULDIV_OPCODES + COMPATIBILITY_OPCODES:
         return None
     data = case.instruction_bytes
     prefix_count = 0
@@ -242,7 +245,7 @@ def prepare_case(case: SingleStepCase, opcode: str, include_exceptions: bool = F
     if opcode in BYTE_SCALAR_OPCODES and (0xB0 <= byte_opcode < 0xB8 or byte_opcode < 0x40 and byte_opcode & 7 == 4):
         if len(instruction_bytes) != 3:
             raise SingleStepRunnerError(f'case {case.index}: byte immediate length mismatch')
-    elif opcode in SCALAR_DIRECT_OPCODES + STRING_OPCODES + STRING_IO_OPCODES + ('27','2F','37','3F','60','61','C9','D7','06','07','0E','16','17','1E','1F') + tuple(f'{v:02X}' for v in range(0x90,0x98)):
+    elif opcode in SCALAR_DIRECT_OPCODES + COMPATIBILITY_OPCODES + STRING_OPCODES + STRING_IO_OPCODES + ('27','2F','37','3F','60','61','C9','D7','06','07','0E','16','17','1E','1F') + tuple(f'{v:02X}' for v in range(0x90,0x98)):
         if len(instruction_bytes) != 2:
             raise SingleStepRunnerError(f'case {case.index}: scalar single-byte instruction length mismatch')
     elif opcode in ('9A','EA','CA','CB'):

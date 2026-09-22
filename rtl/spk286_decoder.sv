@@ -5,6 +5,7 @@ module spk286_decoder (
     input  logic [7:0] opcode,
     input logic        extended_opcode,
     output logic supported,
+    output logic invalid_opcode,
     output logic [2:0] destination, source_index,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry
 );
@@ -29,12 +30,21 @@ module spk286_decoder (
     assign binary_byte = opcode[7:6] == 2'b00 && (opcode[2:0] == 3'd0 || opcode[2:0] == 3'd2 || opcode[2:0] == 3'd4);
     assign binary_word = opcode[7:6] == 2'b00 &&
                          (opcode[2:0] == 3'd1 || opcode[2:0] == 3'd3 || opcode[2:0] == 3'd5);
-    assign supported = extended_opcode ? (opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 || opcode == 8'h03 || opcode == 8'h06) : opcode == 8'h63 || opcode == 8'h69 || opcode == 8'h6B || scalar_io || string_io || string_instruction || opcode == 8'hC4 || opcode == 8'hC5 || opcode == 8'h9A || opcode == 8'hEA || opcode == 8'hCA || opcode == 8'hCB || opcode == 8'h60 || opcode == 8'h61 || opcode == 8'h62 || opcode == 8'hC8 || opcode == 8'hC9 || segment_instruction || adjust_instruction || esc_instruction || opcode == 8'hFE || opcode == 8'h86 || opcode == 8'h87 || opcode == 8'h8D || opcode[7:3] == 5'b10010 || opcode[7:2] == 6'b101000 || opcode == 8'hD7 || opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
-                       binary_word || opcode == 8'h81 || opcode == 8'h83;
+    // The 80286 has no 386 operand/address-size prefixes: 64h..67h are
+    // invalid first bytes.  0F05 is the undocumented 286 LOADALL opcode;
+    // it is implemented by the dedicated fixed-image LOADALL service.
+    // The remaining 0Fxx values outside the 286 system set are invalid.
+    assign invalid_opcode = extended_opcode ?
+                            !(opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 ||
+                              opcode == 8'h03 || opcode == 8'h05 || opcode == 8'h06) :
+                            (opcode >= 8'h64 && opcode <= 8'h67);
+    assign supported = extended_opcode ? (opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 || opcode == 8'h03 || opcode == 8'h05 || opcode == 8'h06) : opcode == 8'h63 || opcode == 8'h69 || opcode == 8'h6B || scalar_io || string_io || string_instruction || opcode == 8'hC4 || opcode == 8'hC5 || opcode == 8'h9A || opcode == 8'hEA || opcode == 8'hCA || opcode == 8'hCB || opcode == 8'h60 || opcode == 8'h61 || opcode == 8'h62 || opcode == 8'hC8 || opcode == 8'hC9 || segment_instruction || adjust_instruction || esc_instruction || opcode == 8'hFE || opcode == 8'h86 || opcode == 8'h87 || opcode == 8'h8D || opcode[7:3] == 5'b10010 || opcode[7:2] == 6'b101000 || opcode == 8'hD7 || opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
+                       binary_word || opcode == 8'h81 || opcode == 8'h83 || opcode == 8'hD6;
     assign source_index = opcode == 8'h63 || opcode[7:3] == 5'b10010 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
-    assign destination = opcode == 8'h63 ? 3'd0 : scalar_io ? 3'd0 : adjust_instruction ? 3'd0 : esc_instruction ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
+    assign destination = opcode == 8'h63 ? 3'd0 : scalar_io ? 3'd0 : adjust_instruction ? 3'd0 : esc_instruction ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD6 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
-    assign entry = extended_opcode && opcode == 8'h00 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00 :
+    assign entry = extended_opcode && opcode == 8'h05 ? spk286_microcode_pkg::MC_ENTRY_LOADALL :
+                   extended_opcode && opcode == 8'h00 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00 :
                    extended_opcode && opcode == 8'h01 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F01 :
                    extended_opcode && opcode == 8'h02 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS :
                    extended_opcode && opcode == 8'h03 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT :
@@ -70,6 +80,7 @@ module spk286_decoder (
                    opcode == 8'hA1 ? spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT16 :
                    opcode == 8'hA2 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT8 :
                    opcode == 8'hA3 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT16 :
+                   opcode == 8'hD6 ? spk286_microcode_pkg::MC_ENTRY_LOAD_CARRY_BYTE :
                    opcode == 8'hD7 ? spk286_microcode_pkg::MC_ENTRY_LOAD_BASE_INDEX8 :
                    esc_instruction ? spk286_microcode_pkg::MC_ENTRY_ESC_NO_COPROCESSOR :
                    opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :

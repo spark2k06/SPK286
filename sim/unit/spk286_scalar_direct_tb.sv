@@ -138,7 +138,8 @@ module spk286_scalar_direct_tb;
             cases = cases + 1;
         end
         $fclose(file_handle);
-        check(cases == 1968, "complete direct scalar instruction vector set");
+        // 26 opcodes * 12 values * 4 flag/stall seeds, plus 4 * 256 aliases.
+        check(cases == 2272, "complete direct scalar instruction vector set");
         $display("SCALAR_DIRECT PASS: %0d directed CPU cases; %0d checks; %0d immediate stalls", cases, checks, immediate_stalls);
         $finish;
     end

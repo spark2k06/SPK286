@@ -20,6 +20,10 @@ module spk286_registers (
     input  logic [15:0]  flags_write_data,
     input  logic [15:0]  flags_write_mask,
     input  logic         flags_write_protected_task,
+    input  logic         loadall_commit_en,
+    input  logic [127:0] loadall_gpr,
+    input  logic [15:0]  loadall_ip,
+    input  logic [15:0]  loadall_flags,
     output logic [127:0] gpr_state,
     output logic [15:0]  ip,
     output logic [15:0]  flags
@@ -55,6 +59,13 @@ module spk286_registers (
             gpr_q <= 128'h0;
             ip_q <= 16'hFFF0;
             flags_q <= 16'h0002;
+        end else if (loadall_commit_en) begin
+            // LOADALL publishes the complete architectural register image
+            // on one edge; this is deliberately separate from instruction
+            // writeback and its FLAGS filtering rules.
+            gpr_q <= loadall_gpr;
+            ip_q <= loadall_ip;
+            flags_q <= loadall_flags;
         end else begin
             if (write_en) begin
                 if (write_byte)

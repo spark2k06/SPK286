@@ -82,6 +82,24 @@ module spk286_protected_state (
     input  logic [1:0]  segment_commit_dpl2,
     input  logic        segment_commit_table_indicator2,
     input  logic [1:0]  segment_commit_rpl2,
+    input  logic        loadall_commit_en,
+    input  logic [15:0] loadall_msw,
+    input  logic [15:0] loadall_gdtr_limit, loadall_idtr_limit,
+    input  logic [23:0] loadall_gdtr_base, loadall_idtr_base,
+    input  logic [15:0] loadall_ldtr_selector, loadall_tr_selector,
+    input  logic [23:0] loadall_ldtr_base, loadall_tr_base,
+    input  logic [15:0] loadall_ldtr_limit, loadall_tr_limit,
+    input  logic [7:0]  loadall_ldtr_access, loadall_tr_access,
+    input  logic [3:0]  loadall_ldtr_class, loadall_tr_class,
+    input  logic        loadall_ldtr_valid, loadall_ldtr_present,
+    input  logic        loadall_tr_valid, loadall_tr_present,
+    input  logic [63:0] loadall_segment_selectors, loadall_segment_limits,
+    input  logic [95:0] loadall_segment_bases,
+    input  logic [31:0] loadall_segment_access,
+    input  logic [15:0] loadall_segment_classes,
+    input  logic [3:0]  loadall_segment_valid, loadall_segment_present,
+    input  logic [3:0]  loadall_segment_protected, loadall_segment_tables,
+    input  logic [7:0]  loadall_segment_dpl, loadall_segment_rpl,
     output logic [63:0] segment_selector_state,
     output logic [95:0] segment_base_state,
     output logic [63:0] segment_limit_state,
@@ -182,6 +200,39 @@ module spk286_protected_state (
             segment_dpl_q <= 8'h00;
             segment_table_q <= 4'b0000;
             segment_rpl_q <= 8'h00;
+        end else if (loadall_commit_en) begin
+            msw_q <= loadall_msw;
+            gdtr_limit_q <= loadall_gdtr_limit;
+            gdtr_base_q <= loadall_gdtr_base;
+            idtr_limit_q <= loadall_idtr_limit;
+            idtr_base_q <= loadall_idtr_base;
+
+            ldtr_selector_q <= loadall_ldtr_selector;
+            ldtr_base_q <= loadall_ldtr_base;
+            ldtr_limit_q <= loadall_ldtr_limit;
+            ldtr_access_q <= loadall_ldtr_access;
+            ldtr_class_q <= loadall_ldtr_class;
+            ldtr_valid_q <= loadall_ldtr_valid;
+            ldtr_present_q <= loadall_ldtr_valid && loadall_ldtr_present;
+            tr_selector_q <= loadall_tr_selector;
+            tr_base_q <= loadall_tr_base;
+            tr_limit_q <= loadall_tr_limit;
+            tr_access_q <= loadall_tr_access;
+            tr_class_q <= loadall_tr_class;
+            tr_valid_q <= loadall_tr_valid;
+            tr_present_q <= loadall_tr_valid && loadall_tr_present;
+
+            segment_selector_q <= loadall_segment_selectors;
+            segment_base_q <= loadall_segment_bases;
+            segment_limit_q <= loadall_segment_limits;
+            segment_access_q <= loadall_segment_access;
+            segment_class_q <= loadall_segment_classes;
+            segment_valid_q <= loadall_segment_valid;
+            segment_present_q <= loadall_segment_present;
+            segment_protected_q <= loadall_segment_protected;
+            segment_dpl_q <= loadall_segment_dpl;
+            segment_table_q <= loadall_segment_tables;
+            segment_rpl_q <= loadall_segment_rpl;
         end else begin
             // LMSW-compatible state update: only bits 0..3 are writable and
             // PE is one-way until RESET on the 80286.

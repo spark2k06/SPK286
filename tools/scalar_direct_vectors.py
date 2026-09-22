@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-OPCODES = tuple(range(0x40, 0x50)) + (0x98, 0x99, 0x9e, 0x9f, 0xf5, 0xf8, 0xf9, 0xfc, 0xfd)
+OPCODES = tuple(range(0x40, 0x50)) + (0x98, 0x99, 0x9e, 0x9f, 0xd6, 0xf5, 0xf8, 0xf9, 0xfc, 0xfd)
 VALUES = (0, 1, 0xf, 0x10, 0x7f, 0x80, 0xff, 0x100, 0x7fff, 0x8000, 0xfffe, 0xffff)
 
 
@@ -29,6 +29,8 @@ def record(opcode, value, seed):
         result_flags = (flags & ~0x00d5) | ((value // 256) & 0xd5)
     elif opcode == 0x9f:
         expected[0] = value % 256 + (flags % 256) * 256
+    elif opcode == 0xd6:
+        expected[0] = (value & 0xff00) | (255 if flags & 1 else 0)
     elif opcode == 0xf5:
         result_flags = flags - 1 if flags % 2 else flags + 1
     elif opcode == 0xf8:
@@ -54,7 +56,7 @@ def vectors():
             for seed in range(4):
                 yield record(opcode, value, seed)
     # Every AL/AH bit combination with varied preserved high FLAGS and READY.
-    for opcode in (0x98, 0x9e, 0x9f):
+    for opcode in (0x98, 0x9e, 0x9f, 0xd6):
         for value in range(256):
             yield record(opcode, value + (255-value)*256, value % 4)
 

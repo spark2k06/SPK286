@@ -1,5 +1,5 @@
-// 80286 segment state. This port performs ordinary real-mode segment reloads.
-// Descriptor lookup, protection checks and LOADALL are not implemented here.
+// 80286 segment state. This port performs ordinary real-mode segment reloads;
+// the protected-state owner supplies LOADALL cache commits.
 `timescale 1ns/1ps
 
 module spk286_segments (
@@ -8,6 +8,11 @@ module spk286_segments (
     input  logic        load_en,
     input  logic [1:0]  load_index,
     input  logic [15:0] load_selector,
+    input  logic        loadall_commit_en,
+    input  logic [63:0] loadall_selectors,
+    input  logic [95:0] loadall_bases,
+    input  logic [63:0] loadall_limits,
+    input  logic [31:0] loadall_access,
     input  logic [1:0]  read_index,
     input  logic [15:0] offset,
     output logic [15:0] selector,
@@ -44,6 +49,11 @@ module spk286_segments (
             base_q <= {24'h000000, 24'h000000, 24'hFF0000, 24'h000000};
             limit_q <= {4{16'hFFFF}};
             access_q <= {4{REAL_MODE_ACCESS}};
+        end else if (loadall_commit_en) begin
+            selector_q <= loadall_selectors;
+            base_q <= loadall_bases;
+            limit_q <= loadall_limits;
+            access_q <= loadall_access;
         end else if (load_en) begin
             selector_q[load_index * 16 +: 16] <= load_selector;
             base_q[load_index * 24 +: 24] <= {4'h0, load_selector, 4'h0};

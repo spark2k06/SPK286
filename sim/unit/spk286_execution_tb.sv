@@ -175,19 +175,20 @@ module spk286_execution_tb;
         if (debug_prefetch_count > 4'd6)
             $fatal(1, "prefetch queue count overflow: %d", debug_prefetch_count);
 
-        // Unsupported escaped opcodes are reported without consuming or writing them.
+        // A legal-but-unimplemented undocumented primary opcode is reported
+        // without consuming or writing it.  Invalid 0F escape holes are
+        // covered by the event/exception suites instead.
         ip_write_en = 1'b1;
         ip_write_data = 16'h0200;
         redirect = 1'b1;
-        load_byte(16'h0200, 8'h0F);
-        load_byte(16'h0201, 8'h0F);
+        load_byte(16'h0200, 8'hF1);
         #1;
         tick();
         ip_write_en = 1'b0;
         redirect = 1'b0;
         for (cycles = 0; cycles < 600 && !unsupported_opcode; cycles = cycles + 1)
             service_cycle();
-        if (!unsupported_opcode || debug_opcode !== 8'h0F || debug_ip !== 16'h0201 ||
+        if (!unsupported_opcode || debug_opcode !== 8'hF1 || debug_ip !== 16'h0200 ||
             debug_gpr[15:0] !== 16'h1234 || debug_flags !== 16'h0043)
             $fatal(1, "unsupported opcode trap did not preserve state: unsupported=%b opcode=%h IP=%h AX=%h FLAGS=%h", unsupported_opcode, debug_opcode, debug_ip, debug_gpr[15:0], debug_flags);
 
