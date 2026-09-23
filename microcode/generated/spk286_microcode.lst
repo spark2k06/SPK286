@@ -1,23 +1,23 @@
-SPK286 microcode compiler 20.1; format 21; encoding 21
+SPK286 microcode compiler 23.0; format 23; encoding 23
 0000  MOV_R16_IMM16:
-0000  1  FETCH_IMM16 -> TMP0  # data_move.mc:5
+0000  BA  FETCH_MOV_DST16_IMM16  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
 0001  2  TMP0 -> DST  # data_move.mc:7
 0002  3  END  # data_move.mc:8
 0003  MOV_RM16_R16:
-0003  4  DECODE_MODRM  # data_move.mc:11
+0003  B1  DECODE_MOV_RM16_REG16  # data_move.mc:11
 0004  5  READ_REG16 -> TMP0  # data_move.mc:12
 0005  MOV_RM16_R16.writeback:
 0005  8  TMP0 -> RM16  # data_move.mc:14
 0006  3  END  # data_move.mc:15
 0007  MOV_R16_RM16:
-0007  4  DECODE_MODRM  # data_move.mc:18
+0007  B2  DECODE_MOV_REG16_RM16  # data_move.mc:18
 0008  6  READ_RM16 -> TMP0  # data_move.mc:19
 0009  MOV_R16_RM16.writeback:
 0009  7  TMP0 -> REG16  # data_move.mc:21
 000A  3  END  # data_move.mc:22
 000B  ALU_RM16_R16:
-000B  4  DECODE_MODRM  # word_alu.mc:7
+000B  AD  DECODE_ALU_RM16_REG16  # word_alu.mc:7
 000C  6  READ_RM16 -> TMP0  # word_alu.mc:8
 000D  9  READ_REG16 -> TMP1  # word_alu.mc:9
 000E  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:10
@@ -26,7 +26,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0010  12  COMMIT_FLAGS  # word_alu.mc:13
 0011  3  END  # word_alu.mc:14
 0012  ALU_R16_RM16:
-0012  4  DECODE_MODRM  # word_alu.mc:17
+0012  AE  DECODE_ALU_REG16_RM16  # word_alu.mc:17
 0013  5  READ_REG16 -> TMP0  # word_alu.mc:18
 0014  A  READ_RM16 -> TMP1  # word_alu.mc:19
 0015  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:20
@@ -35,7 +35,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0017  12  COMMIT_FLAGS  # word_alu.mc:23
 0018  3  END  # word_alu.mc:24
 0019  ALU_AX_IMM16:
-0019  D  READ_DST16 -> TMP0  # word_alu.mc:27
+0019  B5  FETCH_ALU_DST16_IMM16  # word_alu.mc:27
 001A  B  FETCH_IMM16 -> TMP1  # word_alu.mc:28
 001B  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:29
 001C  ALU_AX_IMM16.writeback:
@@ -44,7 +44,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 001E  3  END  # word_alu.mc:33
 001F  ALU_RM16_IMM16:
 001F  4  DECODE_MODRM  # word_alu.mc:36
-0020  B  FETCH_IMM16 -> TMP1  # word_alu.mc:37
+0020  B7  FETCH_ALU_RM16_IMM16  # word_alu.mc:37
 0021  6  READ_RM16 -> TMP0  # word_alu.mc:38
 0022  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:39
 0023  ALU_RM16_IMM16.writeback:
@@ -53,7 +53,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0025  3  END  # word_alu.mc:43
 0026  ALU_RM16_IMM8S:
 0026  4  DECODE_MODRM  # word_alu.mc:46
-0027  C  FETCH_IMM8S -> TMP1  # word_alu.mc:47
+0027  B8  FETCH_ALU_RM16_IMM8S  # word_alu.mc:47
 0028  6  READ_RM16 -> TMP0  # word_alu.mc:48
 0029  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # word_alu.mc:49
 002A  ALU_RM16_IMM8S.writeback:
@@ -196,31 +196,31 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 009D  2A  CONTEXT_COMMIT TMP0 TMP1  # z_interrupts.mc:82
 009E  3  END  # z_interrupts.mc:83
 009F  MOV_R8_IMM8:
-009F  1D  FETCH_IMM8 -> TMP0  # zz_byte_scalar.mc:4
+009F  BB  FETCH_MOV_DST8_IMM8  # zz_byte_scalar.mc:4
 00A0  36  TMP0 -> DST8  # zz_byte_scalar.mc:5
 00A1  3  END  # zz_byte_scalar.mc:6
 00A2  MOV_RM8_R8:
-00A2  4  DECODE_MODRM  # zz_byte_scalar.mc:8
+00A2  B3  DECODE_MOV_RM8_REG8  # zz_byte_scalar.mc:8
 00A3  2E  READ_REG8 -> TMP0  # zz_byte_scalar.mc:9
 00A4  31  TMP0 -> RM8  # zz_byte_scalar.mc:10
 00A5  3  END  # zz_byte_scalar.mc:11
 00A6  MOV_R8_RM8:
-00A6  4  DECODE_MODRM  # zz_byte_scalar.mc:13
+00A6  B4  DECODE_MOV_REG8_RM8  # zz_byte_scalar.mc:13
 00A7  2F  READ_RM8 -> TMP0  # zz_byte_scalar.mc:14
 00A8  30  TMP0 -> REG8  # zz_byte_scalar.mc:15
 00A9  3  END  # zz_byte_scalar.mc:16
 00AA  MOV_RM8_IMM8:
 00AA  4  DECODE_MODRM  # zz_byte_scalar.mc:18
-00AB  1D  FETCH_IMM8 -> TMP0  # zz_byte_scalar.mc:19
+00AB  BD  FETCH_MOV_RM8_IMM8  # zz_byte_scalar.mc:19
 00AC  31  TMP0 -> RM8  # zz_byte_scalar.mc:20
 00AD  3  END  # zz_byte_scalar.mc:21
 00AE  MOV_RM16_IMM16:
 00AE  4  DECODE_MODRM  # zz_byte_scalar.mc:23
-00AF  1  FETCH_IMM16 -> TMP0  # zz_byte_scalar.mc:24
+00AF  BC  FETCH_MOV_RM16_IMM16  # zz_byte_scalar.mc:24
 00B0  8  TMP0 -> RM16  # zz_byte_scalar.mc:25
 00B1  3  END  # zz_byte_scalar.mc:26
 00B2  ALU_RM8_R8:
-00B2  4  DECODE_MODRM  # zz_byte_scalar.mc:28
+00B2  AF  DECODE_ALU_RM8_REG8  # zz_byte_scalar.mc:28
 00B3  2F  READ_RM8 -> TMP0  # zz_byte_scalar.mc:29
 00B4  33  READ_REG8 -> TMP1  # zz_byte_scalar.mc:30
 00B5  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zz_byte_scalar.mc:31
@@ -228,7 +228,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 00B7  12  COMMIT_FLAGS  # zz_byte_scalar.mc:33
 00B8  3  END  # zz_byte_scalar.mc:34
 00B9  ALU_R8_RM8:
-00B9  4  DECODE_MODRM  # zz_byte_scalar.mc:36
+00B9  B0  DECODE_ALU_REG8_RM8  # zz_byte_scalar.mc:36
 00BA  2E  READ_REG8 -> TMP0  # zz_byte_scalar.mc:37
 00BB  34  READ_RM8 -> TMP1  # zz_byte_scalar.mc:38
 00BC  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zz_byte_scalar.mc:39
@@ -236,7 +236,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 00BE  12  COMMIT_FLAGS  # zz_byte_scalar.mc:41
 00BF  3  END  # zz_byte_scalar.mc:42
 00C0  ALU_AL_IMM8:
-00C0  35  READ_DST8 -> TMP0  # zz_byte_scalar.mc:44
+00C0  B6  FETCH_ALU_DST8_IMM8  # zz_byte_scalar.mc:44
 00C1  32  FETCH_IMM8 -> TMP1  # zz_byte_scalar.mc:45
 00C2  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zz_byte_scalar.mc:46
 00C3  39  TMP2 -> DST8 IF_WRITE  # zz_byte_scalar.mc:47
@@ -244,7 +244,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 00C5  3  END  # zz_byte_scalar.mc:49
 00C6  ALU_RM8_IMM8:
 00C6  4  DECODE_MODRM  # zz_byte_scalar.mc:51
-00C7  32  FETCH_IMM8 -> TMP1  # zz_byte_scalar.mc:52
+00C7  B9  FETCH_ALU_RM8_IMM8  # zz_byte_scalar.mc:52
 00C8  2F  READ_RM8 -> TMP0  # zz_byte_scalar.mc:53
 00C9  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zz_byte_scalar.mc:54
 00CA  38  TMP2 -> RM8 IF_WRITE  # zz_byte_scalar.mc:55
@@ -268,7 +268,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 00D8  2  TMP0 -> DST  # zzz_scalar.mc:18
 00D9  3  END  # zzz_scalar.mc:19
 00DA  INC_DEC_R16:
-00DA  D  READ_DST16 -> TMP0  # zzz_scalar.mc:21
+00DA  C0  EXEC_INC_DEC_DST16  # zzz_scalar.mc:21
 00DB  3D  CONST_ONE -> TMP1  # zzz_scalar.mc:22
 00DC  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzz_scalar.mc:23
 00DD  11  TMP2 -> DST IF_WRITE  # zzz_scalar.mc:24
@@ -385,7 +385,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 013B  4  DECODE_MODRM  # zzzzzz_unary.mc:7
 013C  47  DISPATCH DECODED  # zzzzzz_unary.mc:8
 013D  NOT_RM8:
-013D  4  DECODE_MODRM  # zzzzzz_unary.mc:10
+013D  BF  DECODE_UNARY_RM8  # zzzzzz_unary.mc:10
 013E  2F  READ_RM8 -> TMP0  # zzzzzz_unary.mc:11
 013F  49  CONST_ONES -> TMP1  # zzzzzz_unary.mc:12
 0140  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:13
@@ -393,7 +393,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0142  12  COMMIT_FLAGS  # zzzzzz_unary.mc:15
 0143  3  END  # zzzzzz_unary.mc:16
 0144  NOT_RM16:
-0144  4  DECODE_MODRM  # zzzzzz_unary.mc:18
+0144  BE  DECODE_UNARY_RM16  # zzzzzz_unary.mc:18
 0145  6  READ_RM16 -> TMP0  # zzzzzz_unary.mc:19
 0146  49  CONST_ONES -> TMP1  # zzzzzz_unary.mc:20
 0147  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:21
@@ -401,7 +401,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0149  12  COMMIT_FLAGS  # zzzzzz_unary.mc:23
 014A  3  END  # zzzzzz_unary.mc:24
 014B  NEG_RM8:
-014B  4  DECODE_MODRM  # zzzzzz_unary.mc:26
+014B  BF  DECODE_UNARY_RM8  # zzzzzz_unary.mc:26
 014C  2F  READ_RM8 -> TMP0  # zzzzzz_unary.mc:27
 014D  48  CONST_ZERO -> TMP1  # zzzzzz_unary.mc:28
 014E  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:29
@@ -409,7 +409,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0150  12  COMMIT_FLAGS  # zzzzzz_unary.mc:31
 0151  3  END  # zzzzzz_unary.mc:32
 0152  NEG_RM16:
-0152  4  DECODE_MODRM  # zzzzzz_unary.mc:34
+0152  BE  DECODE_UNARY_RM16  # zzzzzz_unary.mc:34
 0153  6  READ_RM16 -> TMP0  # zzzzzz_unary.mc:35
 0154  48  CONST_ZERO -> TMP1  # zzzzzz_unary.mc:36
 0155  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:37
@@ -417,7 +417,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 0157  12  COMMIT_FLAGS  # zzzzzz_unary.mc:39
 0158  3  END  # zzzzzz_unary.mc:40
 0159  INC_DEC_RM8:
-0159  4  DECODE_MODRM  # zzzzzz_unary.mc:42
+0159  BF  DECODE_UNARY_RM8  # zzzzzz_unary.mc:42
 015A  2F  READ_RM8 -> TMP0  # zzzzzz_unary.mc:43
 015B  3D  CONST_ONE -> TMP1  # zzzzzz_unary.mc:44
 015C  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:45
@@ -425,7 +425,7 @@ SPK286 microcode compiler 20.1; format 21; encoding 21
 015E  12  COMMIT_FLAGS  # zzzzzz_unary.mc:47
 015F  3  END  # zzzzzz_unary.mc:48
 0160  INC_DEC_RM16:
-0160  4  DECODE_MODRM  # zzzzzz_unary.mc:50
+0160  BE  DECODE_UNARY_RM16  # zzzzzz_unary.mc:50
 0161  6  READ_RM16 -> TMP0  # zzzzzz_unary.mc:51
 0162  3D  CONST_ONE -> TMP1  # zzzzzz_unary.mc:52
 0163  E  ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED  # zzzzzz_unary.mc:53

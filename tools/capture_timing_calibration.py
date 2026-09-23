@@ -144,7 +144,12 @@ def validate_calibration(
                 raise ValueError(f"calibration row {index} counter {name} is negative")
             if value > UINT64_MAX:
                 raise ValueError(f"calibration row {index} counter {name} exceeds 64 bits")
-            if name in NONZERO_COUNTER_COLUMNS and value == 0:
+            # A prefetched register ALU can now finish without a bus acceptance
+            # inside its two-cycle interval. Keep every other class's original
+            # traffic requirement and the BIU partition/bounds checks below.
+            requires_nonzero = name in NONZERO_COUNTER_COLUMNS and (
+                row['case'] != 'alu_reg' or name == 'cycles')
+            if requires_nonzero and value == 0:
                 raise ValueError(f"calibration row {index} counter {name} is unexpectedly zero")
         for name in COUNTER_COLUMNS:
             if row[name] > row["cycles"]:
@@ -157,7 +162,13 @@ def validate_calibration(
             raise ValueError(f"calibration row {index} BIU busy counter is inconsistent")
         if row["saw_lock"] != 0:
             raise ValueError(f"calibration row {index} LOCK marker is not boolean")
-        if (row["final_phase"], row["final_status"], row["final_owner"]) != EXPECTED_FINAL_BUS[row["case"]]:
+        final_bus = (row["final_phase"], row["final_status"], row["final_owner"])
+        allowed_final_bus = {EXPECTED_FINAL_BUS[row["case"]]}
+        if row['case'] in {'alu_reg', 'mov_bx_imm'}:
+            # Preserve admission of historical captures. The shortened ALU
+            # or immediate MOV may end while the next code request is active.
+            allowed_final_bus.add((1, 13, 1))
+        if final_bus not in allowed_final_bus:
             raise ValueError(f"calibration row {index} final bus fields do not match {row['case']}")
         if row["final_flags"] != EXPECTED_FINAL_FLAGS[row["case"]]:
             raise ValueError(f"calibration row {index} FLAGS do not match {row['case']}")

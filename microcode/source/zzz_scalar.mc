@@ -1,4 +1,4 @@
-microcode_format 7
+microcode_format 22
 # Decode supplies flag masks and register selectors; no instruction timing padding.
 instruction CONTROL_FLAGS:
     FLAGS DECODED
@@ -18,7 +18,7 @@ instruction EXTEND_WORD:
     TMP0 -> DST
     END
 instruction INC_DEC_R16:
-    READ_DST16 -> TMP0
+    EXEC_INC_DEC_DST16
     CONST_ONE -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
     TMP2 -> DST IF_WRITE

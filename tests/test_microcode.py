@@ -150,7 +150,7 @@ class MicrocodeTests(unittest.TestCase):
         self.reject(SOURCE.replace("    FETCH_IMM16 -> TMP0\n", ""), "TMP0 read before")
 
     def test_format_version(self):
-        for version in ("0", "22", "x", "1 extra"):
+        for version in ("0", "24", "x", "1 extra"):
             with self.subTest(version=version):
                 self.reject(SOURCE.replace("microcode_format 1", f"microcode_format {version}"), "expected microcode_format 1")
 

@@ -121,24 +121,27 @@ module spk286_operand_lifecycle_tb;
                 // A new architectural setup then executes a different word load.
                 setup(0); redirect_to(16'h0200); finish(0,1); cases=cases+1;
             end
-        // Register-only forms cancel at writeback and END. At END an earlier
-        // register commit remains visible, but the canceled instruction cannot retire.
+        // Register forms now commit and retire together. Cancel before capture,
+        // after capture, and after retirement; only the last retains a commit.
         for(integer direction=0;direction<2;direction=direction+1)
-            for(integer at_end=0;at_end<2;at_end=at_end+1) begin
+            for(integer boundary=0;boundary<3;boundary=boundary+1) begin
                 setup(0);
                 memory[256]=direction==0?8'h89:8'h8B;
                 memory[257]=direction==0?8'hC1:8'hC8; memory[258]=8'h0F;
                 timeout_count=0;
-                while(!(debug_micro_active && debug_micro_pc==12'((direction==0?5:9)+at_end)) && timeout_count<150) begin
+                while(!((boundary==0 && debug_micro_active && debug_ip==16'h0101) ||
+                        (boundary==1 && debug_micro_active && dut.micro_executor.register_pending_q) ||
+                        (boundary==2 && instruction_retired)) && timeout_count<150) begin
                     service(); timeout_count=timeout_count+1;
                 end
-                check(timeout_count<150 && retired_count==0 && data_count==0,"reach register writeback/END without a data cycle");
-                check(debug_gpr[31:16]==(at_end!=0?16'hBEEF:16'h0000),"register commit precedes END only");
+                check(timeout_count<150 && retired_count==(boundary==2?1:0) && data_count==0,
+                      "reach register capture/commit/retirement without a data cycle");
+                check(debug_gpr[31:16]==(boundary==2?16'hBEEF:16'h0000),"register commit is atomic with retirement");
                 ready=1; redirect_to(16'h0200); permit_data=1;
                 timeout_count=0;
                 while(!instruction_retired && timeout_count<150) begin service(); timeout_count=timeout_count+1; end
-                check(retired_count==1 && debug_ip==16'h0204 && debug_gpr[127:112]==16'h1234 &&
-                      debug_gpr[31:16]==(at_end!=0?16'hBEEF:16'h0000) && data_count==2,
+                check(retired_count==(boundary==2?2:1) && debug_ip==16'h0204 && debug_gpr[127:112]==16'h1234 &&
+                      debug_gpr[31:16]==(boundary==2?16'hBEEF:16'h0000) && data_count==2,
                       "register cancellation suppresses simultaneous effects without rolling back prior commits");
                 cases=cases+1;
             end

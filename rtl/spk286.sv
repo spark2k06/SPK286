@@ -170,7 +170,7 @@ module spk286 (
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH:0] counter_branch_target;
     assign counter_branch_target = spk286_microcode_pkg::micro_branch_target(micro_pc);
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] dispatch_entry;
-    logic micro_active, micro_valid, micro_end, operation_valid, operation_done;
+    logic micro_active, micro_valid, micro_end, operation_valid, operation_done, operation_retire;
     logic executor_done, executor_byte_ready;
     logic internal_gpr_write_en, internal_gpr_write_byte, internal_ip_write_en;
     logic [2:0] internal_gpr_write_index;
@@ -800,7 +800,7 @@ module spk286 (
                                           (protected_msw[0] ? spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY_PROTECTED :
                                                                spk286_microcode_pkg::MC_ENTRY_EVENT_ENTRY) :
                                           decode_entry), .start_ready(decode_ready),
-        .rom_valid(micro_valid), .rom_end(micro_end), .operation_done(operation_done),
+        .rom_valid(micro_valid), .rom_end(micro_end), .operation_done(operation_done), .operation_retire(operation_retire),
         .branch_request(dispatch_request || counter_branch_request),
         .branch_target(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] : dispatch_entry),
         .branch_target_valid(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH] : dispatch_valid),
@@ -811,9 +811,9 @@ module spk286 (
 
     spk286_micro_executor micro_executor (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start),
-        .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .dispatch_request(dispatch_request),
+        .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .operation_retire(operation_retire), .dispatch_request(dispatch_request),
         .byte_valid(queue_consume_valid && !length_fault), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
-        .decode_operand(operand_decode_enable), .decode_done(operand_decode_done),
+        .decode_operand(operand_decode_enable), .decode_done(operand_decode_done), .decode_modrm_valid(operand_context_valid),
         .decode_byte_ready(operand_byte_ready), .operand_request(operand_request),
         .operand_write(operand_write), .operand_byte(operand_byte), .operand_select_rm(operand_select_rm), .operand_check(operand_check),
         .stack_request(stack_request), .stack_offset(stack_offset),
@@ -827,7 +827,7 @@ module spk286 (
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
         .destination_read_data(register_state[source_index_q * 16 +: 16]),
         .source_index(source_index_q), .lock_prefix(lock_prefix), .target_read_data(register_state[destination_q * 16 +: 16]),
-        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .stack_segment_limit(debug_segment_limits[32 +: 16]), .stack_segment_access(debug_segment_access[23:16]), .operand_register_direct(operand_register_direct),
+        .effective_offset(operand_offset), .address_base(register_state[48 +: 16]), .segment_limit(segment_limit), .stack_segment_limit(debug_segment_limits[32 +: 16]), .stack_segment_access(debug_segment_access[23:16]), .operand_register_direct(operand_register_direct), .operand_rm_index(operand_rm),
         .address_override(address_override), .address_offset(address_offset),
         .direct_flags_data(direct_flags_data), .direct_flags_mask(direct_flags_mask),
         .destination_byte_data(register_state[destination_q[1:0] * 16 + (destination_q[2] ? 8 : 0) +: 8]),

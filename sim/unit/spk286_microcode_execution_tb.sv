@@ -34,7 +34,7 @@ module spk286_microcode_execution_tb;
     task automatic service;
         ready = (cycles % 7 == 0); // Real READY dependency, including underfilled immediates.
         if (execute_enable && debug_micro_active &&
-            debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM16 && debug_prefetch_count == 0)
+            debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_MOV_DST16_IMM16 && debug_prefetch_count == 0)
             underfill_cycles = underfill_cycles + 1;
         tick();
     endtask
@@ -85,8 +85,9 @@ module spk286_microcode_execution_tb;
             service(); phase_cycles = phase_cycles + 1;
             check(!unsupported_opcode, "supported program reached retirement");
         end
-        check(instruction_retired && !debug_micro_active, "END retirement boundary");
-        check(debug_micro_instruction == spk286_microcode_pkg::MC_END, "retirement came from generated END");
+        check(instruction_retired && !debug_micro_active, "atomic MOV retirement boundary");
+        check(debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_MOV_DST16_IMM16,
+              "retirement came from generated immediate control");
         check(debug_micro_entry == 12'(spk286_microcode_pkg::MC_ENTRY_MOV_R16_IMM16), "shared micro-entry");
     endtask
     task automatic check_architecture(input logic [15:0] expected_ip);
@@ -100,8 +101,7 @@ module spk286_microcode_execution_tb;
         while (!(debug_micro_active &&
                  ((stage == 0 && debug_ip == 16'h0301) ||
                   (stage == 1 && debug_ip == 16'h0302) ||
-                  (stage == 2 && debug_micro_instruction == spk286_microcode_pkg::MC_MOVE) ||
-                  (stage == 3 && debug_micro_instruction == spk286_microcode_pkg::MC_END))) && phase_cycles < 300) begin
+                  (stage == 2 && dut.micro_executor.register_pending_q))) && phase_cycles < 300) begin
             service(); phase_cycles = phase_cycles + 1;
         end
         check(phase_cycles < 300 && retirements == 0, "reach cancellation/pause stage");
@@ -150,7 +150,9 @@ module spk286_microcode_execution_tb;
         end
 
         // Pause, malformed control, reset and redirect at every functional boundary.
-        for (integer stage = 0; stage < 4; stage = stage + 1) begin
+        // Capture and write/retirement are now atomic: before low byte, before
+        // high byte and before commit are the three cancellable boundaries.
+        for (integer stage = 0; stage < 3; stage = stage + 1) begin
             program_mov(16'h0300, 3'd0, 16'h1234);
             program_mov(16'h0381, 3'd7, 16'hBEEF);
             setup(16'h0300); reach_stage(stage);
@@ -169,7 +171,6 @@ module spk286_microcode_execution_tb;
                               "malformed redirect cannot consume or commit");
             end
             redirect = 0;
-            if (stage == 3) expected_gpr[15:0] = 16'h1234; // Earlier completed write is not rolled back.
             redirect_to(16'h0381);
             run_to_retire(); expected_gpr[127:112] = 16'hBEEF;
             check_architecture(16'h0384);
@@ -189,7 +190,7 @@ module spk286_microcode_execution_tb;
             check_architecture(16'h0303);
             check(retirements == 1, "resume retires the original instruction exactly once");
         end
-        $display("MICROCODE_EXECUTION PASS: 48 MOV vectors, 8-MOV stream, 4 cancellation/reset/resume boundaries; %0d checks; %0d underfill cycles",
+        $display("MICROCODE_EXECUTION PASS: 48 MOV vectors, 8-MOV stream, 3 cancellation/reset/resume boundaries; %0d checks; %0d underfill cycles",
                  checks, underfill_cycles);
         $finish;
     end

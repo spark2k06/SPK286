@@ -11,7 +11,10 @@ PROBES = (
     ('test-write-suppression','spk286_alu_decode','spk286_test_instructions',
      "kind != 3'd7 && !test_instruction", "kind != 3'd7", 'TEST never writes data'),
     ('test-undefined-af','spk286_micro_executor','spk286_test_instructions',
-     'decoded_flags_mask & ~decoded_undefined_mask', 'decoded_flags_mask | decoded_undefined_mask', 'exact FLAGS and preserved bits'),
+     '(decoded_flags_mask & ~decoded_undefined_mask)', '(decoded_flags_mask | decoded_undefined_mask)', 'exact FLAGS and preserved bits'),
+    ('test-register-undefined-af','spk286_micro_executor','spk286_test_instructions',
+     'decoded_flags_mask & ~decoded_undefined_mask : sequential_flags_write_mask',
+     'decoded_flags_mask | decoded_undefined_mask : sequential_flags_write_mask', 'exact FLAGS and preserved bits'),
     ('inc-preserves-carry','spk286_alu_decode','spk286_scalar_direct',
      "inc_dec ? 16'h08D4", "inc_dec ? 16'h08D5", 'exact FLAGS and preserved bits'),
     ('sahf-preserves-controls','spk286_flags_decode','spk286_scalar_direct',
@@ -33,8 +36,10 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'scalar-audit'
     output.mkdir(parents=True, exist_ok=True)
+    # Match scripts/rtl_sources.sh: packages must precede their users in Icarus.
+    packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               *packages, *(p for p in sorted((ROOT/'rtl').glob('*.sv')) if p not in packages)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')
@@ -77,7 +82,7 @@ def main():
         execute(name,bench,(module,old,new),reason)
     if any(p.read_bytes()!=data for p,data in originals.items()):
         raise RuntimeError('production source changed during mutation audit')
-    print('SCALAR_AUDIT PASS: 7 rejected RTL mutants; 2 pristine benches; source bytes unchanged')
+    print(f'SCALAR_AUDIT PASS: {len(PROBES)} rejected RTL mutants; 2 pristine benches; source bytes unchanged')
 
 
 if __name__ == '__main__':

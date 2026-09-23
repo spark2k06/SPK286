@@ -31,6 +31,7 @@ module spk286_operand_byte_tb;
     spk286_operand dut(.*);
     spk286_registers storage(
         .clk(clk),.reset(reset),.read_a_index(3'd0),.read_b_index(3'd0),
+        .loadall_commit_en(1'b0),.loadall_gpr(128'd0),.loadall_ip(16'd0),.loadall_flags(16'd0),
         .read_a_byte(1'b0),.read_b_byte(1'b0),.read_a_data(read_a),.read_b_data(read_b),
         .write_en(setup || gpr_write_en),.write_byte(!setup && gpr_write_byte),
         .write_index(setup ? setup_index : gpr_write_index),.write_data(setup ? setup_data : gpr_write_data),

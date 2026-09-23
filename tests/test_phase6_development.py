@@ -159,9 +159,15 @@ if name=='python3' and len(args)>1 and args[1] in ('tools.phase6_development','t
 
     @unittest.skipUnless(shutil.which('bash'), 'CI shell requires bash')
     def test_ci_status_capture_does_not_mask_validator_failure(self):
-        workflow = (ROOT / '.github/workflows/ci.yml').read_text()
-        step = workflow.split('      - name: Classify strict Phase 6 architectural evidence', 1)[1]
-        body = textwrap.dedent(step.split('        run: |\n', 1)[1])
+        # CI was intentionally removed in 9c269a6. Continue executing the
+        # preserved shell contract; also validate a live workflow if restored.
+        bodies = [(ROOT / 'tests/fixtures/phase6_ci_status_capture.sh').read_text()]
+        workflow_path = ROOT / '.github/workflows/ci.yml'
+        if workflow_path.is_file():
+            step = workflow_path.read_text().split(
+                '      - name: Classify strict Phase 6 architectural evidence', 1)[1]
+            step = step.split('\n      - name:', 1)[0]
+            bodies.append(textwrap.dedent(step.split('        run: |\n', 1)[1]))
         binary = self.root / 'bin'
         binary.mkdir()
         python = binary / 'python3'
@@ -169,6 +175,8 @@ if name=='python3' and len(args)>1 and args[1] in ('tools.phase6_development','t
         python.chmod(0o755)
         env = {**os.environ, 'PATH': str(binary) + os.pathsep + os.environ['PATH'],
                'GITHUB_STEP_SUMMARY': str(self.root / 'summary')}
-        result = subprocess.run(['bash', '-e', '-c', body], cwd=self.root, env=env,
-                                capture_output=True, text=True)
-        self.assertEqual(result.returncode, 23, result.stdout + result.stderr)
+        for body in bodies:
+            with self.subTest(body=body):
+                result = subprocess.run(['bash', '-e', '-c', body], cwd=self.root, env=env,
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 23, result.stdout + result.stderr)

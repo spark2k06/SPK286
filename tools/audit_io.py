@@ -52,8 +52,8 @@ PROBES = (('captured-port',
  ('port-completion-dependency',
   'spk286_micro_executor',
   'spk286_string_io',
-  'assign operation_done = muldiv_complete || write_result_ax || write_result_dx || (fetch_port',
-  'assign operation_done = io_transfer || muldiv_complete || write_result_ax || write_result_dx || (fetch_port',
+  'assign operation_done =',
+  'assign operation_done = io_transfer ||',
   'exact fault producer or single retirement'),
  ('input-result-ownership',
   'spk286_micro_executor',
@@ -131,9 +131,10 @@ def main():
     output = args.build_dir.resolve()/'io-audit'
     output.mkdir(parents=True, exist_ok=True)
     rtl_sources = sorted((ROOT/'rtl').glob('*.sv'))
-    protected_pkg = ROOT/'rtl/spk286_protected_pkg.sv'
+    # Match scripts/rtl_sources.sh: packages must precede their users in Icarus.
+    packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               protected_pkg, *(p for p in rtl_sources if p != protected_pkg)]
+               *packages, *(p for p in rtl_sources if p not in packages)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

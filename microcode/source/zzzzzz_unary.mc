@@ -1,4 +1,4 @@
-microcode_format 10
+microcode_format 22
 # Group dispatch is terminal; targets reuse the cached operand context.
 instruction GROUP3_DISPATCH:
     DECODE_MODRM
@@ -7,7 +7,7 @@ instruction GROUP5_DISPATCH:
     DECODE_MODRM
     DISPATCH DECODED
 instruction NOT_RM8:
-    DECODE_MODRM
+    DECODE_UNARY_RM8
     READ_RM8 -> TMP0
     CONST_ONES -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
@@ -15,7 +15,7 @@ instruction NOT_RM8:
     COMMIT_FLAGS
     END
 instruction NOT_RM16:
-    DECODE_MODRM
+    DECODE_UNARY_RM16
     READ_RM16 -> TMP0
     CONST_ONES -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
@@ -23,7 +23,7 @@ instruction NOT_RM16:
     COMMIT_FLAGS
     END
 instruction NEG_RM8:
-    DECODE_MODRM
+    DECODE_UNARY_RM8
     READ_RM8 -> TMP0
     CONST_ZERO -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
@@ -31,7 +31,7 @@ instruction NEG_RM8:
     COMMIT_FLAGS
     END
 instruction NEG_RM16:
-    DECODE_MODRM
+    DECODE_UNARY_RM16
     READ_RM16 -> TMP0
     CONST_ZERO -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
@@ -39,7 +39,7 @@ instruction NEG_RM16:
     COMMIT_FLAGS
     END
 instruction INC_DEC_RM8:
-    DECODE_MODRM
+    DECODE_UNARY_RM8
     READ_RM8 -> TMP0
     CONST_ONE -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED
@@ -47,7 +47,7 @@ instruction INC_DEC_RM8:
     COMMIT_FLAGS
     END
 instruction INC_DEC_RM16:
-    DECODE_MODRM
+    DECODE_UNARY_RM16
     READ_RM16 -> TMP0
     CONST_ONE -> TMP1
     ALU DECODED TMP0, TMP1 -> TMP2 FLAGS_DECODED

@@ -72,8 +72,11 @@ module spk286_unary_lifecycle_tb;
             wait_operation(spk286_microcode_pkg::MC_DISPATCH_DECODED);
             check(debug_ip==16'h0104 && debug_effective_offset==16'h1001,"dispatch follows complete ModRM/displacement acquisition");
             if(stage>=4) begin
-                tick(); check(debug_micro_instruction==spk286_microcode_pkg::MC_DECODE_MODRM &&
-                              debug_micro_pc!=debug_micro_entry && dut.operand_decode.reuse_q,"generic branch rearms cached context");
+                tick(); check((debug_micro_instruction==spk286_microcode_pkg::MC_DECODE_MODRM ||
+                               debug_micro_instruction==spk286_microcode_pkg::MC_DECODE_UNARY_RM8 ||
+                               debug_micro_instruction==spk286_microcode_pkg::MC_DECODE_UNARY_RM16) &&
+                              debug_micro_pc!=debug_micro_entry && dut.operand_decode.modrm_valid &&
+                              debug_effective_offset==16'h1001,"generic branch retains cached context");
             end
             if(stage>=5) wait_data(0);
             if(stage==6 || stage==7) begin ready=1; tick(); ready=0; check(address==24'h001002,"second odd unary read held"); end

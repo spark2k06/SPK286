@@ -38,7 +38,8 @@ module spk286_adjust_instructions_tb;
         if (execute_enable && debug_micro_active && !dut.queue_consume_valid &&
             (debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM8_TMP1 || debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM8 ||
              debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM16_TMP1 ||
-             debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM8S_TMP1))
+             debug_micro_instruction == spk286_microcode_pkg::MC_FETCH_IMM8S_TMP1 ||
+             dut.micro_executor.immediate_fetch))
             immediate_stalls=immediate_stalls+1;
         if (bus_valid && ready && !reset && (bus_status == 5 || bus_status == 6)) begin
             check(blocked == 0 && (expected_reads != 0 || expected_writes != 0), "unexpected data transaction");

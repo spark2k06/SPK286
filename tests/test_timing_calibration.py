@@ -46,6 +46,31 @@ def calibration_rows():
 
 
 class TimingCalibrationTests(unittest.TestCase):
+    def test_immediate_mov_can_end_with_next_code_request(self):
+        rows = calibration_rows()
+        rows[1].update(cycles=3, prefetch_responses=1, queue_consumes=2,
+                       final_phase=1, final_status=13, final_owner=1)
+        validate_calibration(rows)
+        for field, value in (('final_owner', 2), ('final_status', 5),
+                             ('accepted_transfers', 0), ('operand_wait_cycles', 1)):
+            invalid = [dict(row) for row in rows]
+            invalid[1][field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                validate_calibration(invalid)
+
+    def test_prefetched_register_alu_needs_no_bus_transfer(self):
+        rows = calibration_rows()
+        rows[2].update(cycles=2, biu_busy_cycles=0, accepted_transfers=0,
+                       prefetch_requests=0, prefetch_responses=1,
+                       final_phase=1, final_status=13, final_owner=1)
+        validate_calibration(rows)
+        for field, value in (('cycles', 0), ('final_owner', 2), ('final_status', 5),
+                             ('biu_busy_cycles', 1), ('operand_wait_cycles', 1)):
+            invalid = [dict(row) for row in rows]
+            invalid[2][field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                validate_calibration(invalid)
+
     def test_accepts_complete_normalized_baseline(self):
         rows = calibration_rows()
         for row in rows:

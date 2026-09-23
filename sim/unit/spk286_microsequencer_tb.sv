@@ -3,7 +3,7 @@
 module spk286_microsequencer_tb;
     logic clk = 0, reset = 1, cancel = 0, enable = 1, start = 0;
     logic [3:0] start_entry = 0;
-    logic rom_valid = 1, rom_end = 0, operation_done = 0;
+    logic rom_valid = 1, rom_end = 0, operation_done = 0, operation_retire = 0;
     wire start_ready, operation_valid, active, retired, fault;
     wire [3:0] micro_pc, micro_entry;
     logic branch_request=0, branch_target_valid=0;
@@ -26,7 +26,7 @@ module spk286_microsequencer_tb;
     endtask
     task automatic clear_context;
         cancel = 1; tick(); cancel = 0;
-        rom_valid = 1; rom_end = 0; operation_done = 0; branch_request = 0; branch_target_valid = 0;
+        rom_valid = 1; rom_end = 0; operation_done = 0; operation_retire = 0; branch_request = 0; branch_target_valid = 0;
         #1; check(!active && !retired && !fault && micro_pc == 0 && micro_entry == 0,
                   "cancel clears context");
     endtask
@@ -103,6 +103,17 @@ module spk286_microsequencer_tb;
         branch_request=0; operation_done=0; launch(4'd1); branch_request=1; operation_done=1;
         reset=1; tick(); reset=0;
         check(!active && !retired && !fault && micro_pc==0,"reset suppresses branch");
+        clear_context(); launch(4'd4); operation_retire=1;
+        repeat(3) tick();
+        check(active && !retired && micro_pc==4, "terminal operation waits for completion");
+        operation_done=1; enable=0; tick();
+        check(active && !retired && micro_pc==4, "terminal operation respects pause");
+        enable=1; tick();
+        check(retired && !active && !fault && micro_pc==4, "terminal functional operation retires without END bubble");
+        enable=0; tick(); check(!retired, "terminal retirement pulse clears while paused");
+        enable=1; clear_context(); launch(4'd4); operation_done=1; operation_retire=1;
+        cancel=1; tick(); cancel=0;
+        check(!retired && !active && !fault, "cancel suppresses terminal functional operation");
         $display("MICROSEQUENCER PASS: %0d entry/stall/resume/END/reset/cancel/fault checks", checks);
         $finish;
     end

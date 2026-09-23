@@ -16,14 +16,14 @@ module spk286_microcode_rom_tb;
     endtask
     initial begin
         if (int'(MOV_ENTRY) + 2 >= spk286_microcode_pkg::MC_DEPTH) $fatal(1, "MOV entry out of range");
-        check_word(MOV_ENTRY, spk286_microcode_pkg::MC_FETCH_IMM16);
+        check_word(MOV_ENTRY, spk286_microcode_pkg::MC_FETCH_MOV_DST16_IMM16);
         check_word(MOV_ENTRY + W'(1), spk286_microcode_pkg::MC_MOVE);
         check_word(MOV_ENTRY + W'(2), spk286_microcode_pkg::MC_END);
-        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16, spk286_microcode_pkg::MC_DECODE_MODRM);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16, spk286_microcode_pkg::MC_DECODE_MOV_RM16_REG16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(1), spk286_microcode_pkg::MC_READ_REG16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(2), spk286_microcode_pkg::MC_WRITE_RM16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 + W'(3), spk286_microcode_pkg::MC_END);
-        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16, spk286_microcode_pkg::MC_DECODE_MODRM);
+        check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16, spk286_microcode_pkg::MC_DECODE_MOV_REG16_RM16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(1), spk286_microcode_pkg::MC_READ_RM16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(2), spk286_microcode_pkg::MC_WRITE_REG16);
         check_word(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 + W'(3), spk286_microcode_pkg::MC_END);

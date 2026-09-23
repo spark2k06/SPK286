@@ -3,7 +3,11 @@
 The authoritative source is `source/*.mc`, compiled by
 `tools/microcode/compile_microcode.py` using Python's standard library.
 `SPK286_MICROCODE_FORMAT.md` defines the architecture; this file documents the
-preserved Phase 2.75/3/4 formats and the incremental extensions below; format 14 is current.
+preserved formats and incremental extensions. Format 22 adds register-direct
+ALU/MOV execution; format 23 extends the atomic register commit to immediate
+operands while retaining the validated memory sequence. See
+[`REGISTER_EXECUTION_OPTIMIZATION.md`](../docs/REGISTER_EXECUTION_OPTIMIZATION.md)
+and [`IMMEDIATE_EXECUTION_OPTIMIZATION.md`](../docs/IMMEDIATE_EXECUTION_OPTIMIZATION.md).
 
 ```text
 make microcode        # regenerate all five committed artifacts

@@ -16,6 +16,7 @@ module spk286_microsequencer #(
     input  logic                     rom_valid,
     input  logic                     rom_end,
     input  logic                     operation_done,
+    input  logic                     operation_retire,
     input  logic                     branch_request, branch_target_valid,
     input  logic [ADDRESS_WIDTH-1:0] branch_target,
     output logic                     operation_valid,
@@ -46,7 +47,7 @@ module spk286_microsequencer #(
                         active <= 1'b0;
                         fault <= 1'b1;
                     end else if (operation_done) begin
-                        if (rom_end) begin
+                        if (rom_end || operation_retire) begin
                             active <= 1'b0;
                             retired <= 1'b1;
                         end else if (branch_request) begin

@@ -125,17 +125,16 @@ module spk286_alu_lifecycle_tb;
                 cases=cases+1;
               end
         // TMP1 immediate acquisition must cancel/hold just like operand reads.
-        for(integer stage=0;stage<6;stage=stage+1)
+        // Immediate register execution now has three cancellable boundaries:
+        // before either byte and after capture, before atomic GPR/FLAGS retirement.
+        for(integer stage=0;stage<3;stage=stage+1)
           for(integer action=0;action<3;action=action+1) begin
             setup(0);
             memory[256]=8'h15; memory[257]=8'hFF; memory[258]=8'h7F; memory[259]=8'hF4;
             timeout_count=0;
             while(!(debug_micro_active &&
                    ((stage<2 && debug_ip==16'h0101+16'(stage)) ||
-                    (stage==2 && debug_micro_instruction==spk286_microcode_pkg::MC_ALU) ||
-                    (stage==3 && debug_micro_instruction==spk286_microcode_pkg::MC_WRITE_RESULT_DST) ||
-                    (stage==4 && debug_micro_instruction==spk286_microcode_pkg::MC_COMMIT_FLAGS) ||
-                    (stage==5 && debug_micro_instruction==spk286_microcode_pkg::MC_END))) && timeout_count<200) begin
+                    (stage==2 && dut.micro_executor.register_pending_q))) && timeout_count<200) begin
                 service(); timeout_count=timeout_count+1;
             end
             check(timeout_count<200,"reach immediate partial/result/FLAGS boundary");
