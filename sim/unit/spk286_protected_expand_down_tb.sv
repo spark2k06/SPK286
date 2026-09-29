@@ -118,10 +118,10 @@ module spk286_protected_expand_down_tb;
         begin
             checks = checks + 1;
             if (condition !== 1'b1)
-                $fatal(1, "%s: CS:IP=%h:%h AX=%h DS=%h SS:SP=%h:%h event=%h shutdown=%b", message,
+                $fatal(1, "%s: CS:IP=%h:%h AX=%h DS=%h SS:SP=%h:%h event=%h first=%h shutdown=%b", message,
                        debug_cs, debug_ip, debug_gpr[15:0], debug_segment_selectors[63:48],
-                       debug_segment_selectors[47:32], debug_gpr[79:64],
-                       debug_event_vector, shutdown);
+                       debug_segment_selectors[47:32], debug_gpr[79:64], debug_event_vector,
+                       first_fault_vector, shutdown);
         end
     endtask
 
@@ -1011,6 +1011,7 @@ module spk286_protected_expand_down_tb;
         input string message
     );
         logic valid;
+        logic inspect_valid;
         logic verr_valid;
         logic verw_valid;
         logic [15:0] observed_lar_value;
@@ -1023,6 +1024,7 @@ module spk286_protected_expand_down_tb;
             for (rpl = 0; rpl < 4; rpl = rpl + 1) begin
                 rpl_value = rpl[1:0];
                 valid = descriptor_present && descriptor_dpl >= caller_cpl && descriptor_dpl >= rpl_value;
+                inspect_valid = descriptor_dpl >= caller_cpl && descriptor_dpl >= rpl_value;
                 verr_valid = valid && (descriptor_kind == 3'd0 || descriptor_kind == 3'd1 || descriptor_kind == 3'd2);
                 verw_valid = valid && descriptor_kind == 3'd0;
                 run_pm1_level_case(base_selector + {14'h0000, rpl_value}, 2'd0,
@@ -1030,9 +1032,9 @@ module spk286_protected_expand_down_tb;
                 run_pm1_level_case(base_selector + {14'h0000, rpl_value}, 2'd1,
                                    verw_valid, 16'h1234, message);
                 run_pm1_level_case(base_selector + {14'h0000, rpl_value}, 2'd2,
-                                   valid, valid ? observed_lar_value : 16'h1234, message);
+                                   inspect_valid, inspect_valid ? observed_lar_value : 16'h1234, message);
                 run_pm1_level_case(base_selector + {14'h0000, rpl_value}, 2'd3,
-                                   valid, valid ? 16'hFFFF : 16'h1234, message);
+                                   inspect_valid, inspect_valid ? 16'hFFFF : 16'h1234, message);
             end
         end
     endtask
@@ -1128,6 +1130,7 @@ module spk286_protected_expand_down_tb;
         input string message
     );
         logic valid;
+        logic inspect_valid;
         logic verr_valid;
         logic verw_valid;
         logic [15:0] observed_lar_value;
@@ -1140,6 +1143,7 @@ module spk286_protected_expand_down_tb;
             for (rpl = 0; rpl < 4; rpl = rpl + 1) begin
                 rpl_value = rpl[1:0];
                 valid = descriptor_present && descriptor_dpl >= 2'd3 && descriptor_dpl >= rpl_value;
+                inspect_valid = descriptor_dpl >= 2'd3 && descriptor_dpl >= rpl_value;
                 verr_valid = valid && (descriptor_kind == 3'd0 || descriptor_kind == 3'd1 || descriptor_kind == 3'd2);
                 verw_valid = valid && descriptor_kind == 3'd0;
                 run_pm1_cpl3_case(base_selector + {14'h0000, rpl_value}, 2'd0,
@@ -1147,9 +1151,9 @@ module spk286_protected_expand_down_tb;
                 run_pm1_cpl3_case(base_selector + {14'h0000, rpl_value}, 2'd1,
                                   verw_valid, 16'h1234, message);
                 run_pm1_cpl3_case(base_selector + {14'h0000, rpl_value}, 2'd2,
-                                  valid, valid ? observed_lar_value : 16'h1234, message);
+                                  inspect_valid, inspect_valid ? observed_lar_value : 16'h1234, message);
                 run_pm1_cpl3_case(base_selector + {14'h0000, rpl_value}, 2'd3,
-                                  valid, valid ? 16'hFFFF : 16'h1234, message);
+                                  inspect_valid, inspect_valid ? 16'hFFFF : 16'h1234, message);
             end
         end
     endtask
@@ -1386,6 +1390,7 @@ module spk286_protected_expand_down_tb;
         input string message
     );
         logic valid;
+        logic inspect_valid;
         logic verr_valid;
         logic verw_valid;
         logic [15:0] observed_lar_value;
@@ -1400,6 +1405,7 @@ module spk286_protected_expand_down_tb;
             for (rpl = 0; rpl < 4; rpl = rpl + 1) begin
                 rpl_value = rpl[1:0];
                 valid = descriptor_present && descriptor_dpl >= 2'd2 && descriptor_dpl >= rpl_value;
+                inspect_valid = descriptor_dpl >= 2'd2 && descriptor_dpl >= rpl_value;
                 verr_valid = valid && (descriptor_kind == 3'd0 || descriptor_kind == 3'd1 || descriptor_kind == 3'd2);
                 verw_valid = valid && descriptor_kind == 3'd0;
                 run_pm1_cpl2_case(base_selector + {14'h0000, rpl_value}, 2'd0,
@@ -1407,9 +1413,9 @@ module spk286_protected_expand_down_tb;
                 run_pm1_cpl2_case(base_selector + {14'h0000, rpl_value}, 2'd1,
                                   verw_valid, 16'h1234, message);
                 run_pm1_cpl2_case(base_selector + {14'h0000, rpl_value}, 2'd2,
-                                  valid, valid ? observed_lar_value : 16'h1234, message);
+                                  inspect_valid, inspect_valid ? observed_lar_value : 16'h1234, message);
                 run_pm1_cpl2_case(base_selector + {14'h0000, rpl_value}, 2'd3,
-                                  valid, valid ? observed_limit : 16'h1234, message);
+                                  inspect_valid, inspect_valid ? observed_limit : 16'h1234, message);
             end
         end
     endtask
@@ -2358,11 +2364,12 @@ module spk286_protected_expand_down_tb;
                                   "CPL1 DPL0 conforming code RPL matrix");
             run_cpl1_far_cs_case(16'h00D0 + rpl, 1'b1, 8'h0D, 16'h0009,
                                   "CPL1 DPL3 conforming code rejection");
-            run_cpl1_far_cs_case(16'h00E8 + rpl, 1'b1, 8'h0B, 16'h0009,
-                                  "CPL1 DPL1 not-present code matrix");
-            run_cpl1_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0B, 16'h0009,
+            run_cpl1_far_cs_case(16'h00E8 + rpl, 1'b1,
+                                  rpl > 3'd1 ? 8'h0D : 8'h0B, 16'h0009,
+                                  "CPL1 DPL1 not-present code privilege/RPL matrix");
+            run_cpl1_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0D, 16'h0009,
                                   "CPL1 DPL2 not-present code matrix");
-            run_cpl1_far_cs_case(16'h00F0 + rpl, 1'b1, 8'h0B, 16'h0009,
+            run_cpl1_far_cs_case(16'h00F0 + rpl, 1'b1, 8'h0D, 16'h0009,
                                   "CPL1 DPL3 not-present code matrix");
 
             run_cpl0_far_cs_case(16'h0018 + rpl, rpl != 0, 8'h0D, 16'h0018,
@@ -2379,11 +2386,11 @@ module spk286_protected_expand_down_tb;
                                   "CPL0 DPL0 conforming code RPL matrix");
             run_cpl0_far_cs_case(16'h00D0 + rpl, 1'b1, 8'h0D, 16'h0018,
                                   "CPL0 DPL3 conforming code rejection");
-            run_cpl0_far_cs_case(16'h00E8 + rpl, 1'b1, 8'h0B, 16'h0018,
+            run_cpl0_far_cs_case(16'h00E8 + rpl, 1'b1, 8'h0D, 16'h0018,
                                   "CPL0 DPL1 not-present code matrix");
-            run_cpl0_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0B, 16'h0018,
+            run_cpl0_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0D, 16'h0018,
                                   "CPL0 DPL2 not-present code matrix");
-            run_cpl0_far_cs_case(16'h00F0 + rpl, 1'b1, 8'h0B, 16'h0018,
+            run_cpl0_far_cs_case(16'h00F0 + rpl, 1'b1, 8'h0D, 16'h0018,
                                   "CPL0 DPL3 not-present code matrix");
 
             run_cpl3_far_cs_case(16'h00A8 + rpl, 1'b0, 8'h00, 16'h00AB,
@@ -2402,9 +2409,9 @@ module spk286_protected_expand_down_tb;
                                   "CPL3 DPL0 conforming code RPL matrix");
             run_cpl3_far_cs_case(16'h00D0 + rpl, 1'b0, 8'h00, 16'h00D3,
                                   "CPL3 DPL3 conforming code RPL matrix");
-            run_cpl3_far_cs_case(16'h00E8 + rpl, 1'b1, 8'h0B, 16'h00AB,
+            run_cpl3_far_cs_case(16'h00E8 + rpl, 1'b1, 8'h0D, 16'h00AB,
                                   "CPL3 DPL1 not-present code matrix");
-            run_cpl3_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0B, 16'h00AB,
+            run_cpl3_far_cs_case(16'h00F8 + rpl, 1'b1, 8'h0D, 16'h00AB,
                                   "CPL3 DPL2 not-present code matrix");
             run_cpl3_far_cs_case(16'h00F0 + rpl, 1'b1, 8'h0B, 16'h00AB,
                                   "CPL3 DPL3 not-present code matrix");
@@ -2436,11 +2443,11 @@ module spk286_protected_expand_down_tb;
                                  "CPL2 DPL0 conforming code RPL matrix");
             run_cpl2_far_cs_case(16'h00D0 + cpl2_rpl, 1'b1, 8'h0D, 16'h00DA,
                                  "CPL2 DPL3 conforming code rejection");
-            run_cpl2_far_cs_case(16'h00E8 + cpl2_rpl, 1'b1, 8'h0B, 16'h00DA,
+            run_cpl2_far_cs_case(16'h00E8 + cpl2_rpl, 1'b1, 8'h0D, 16'h00DA,
                                  "CPL2 DPL1 not-present code matrix");
-            run_cpl2_far_cs_case(16'h00F8 + cpl2_rpl, 1'b1, 8'h0B, 16'h00DA,
+            run_cpl2_far_cs_case(16'h00F8 + cpl2_rpl, 1'b1, cpl2_rpl == 3'd3 ? 8'h0D : 8'h0B, 16'h00DA,
                                  "CPL2 DPL2 not-present code matrix");
-            run_cpl2_far_cs_case(16'h00F0 + cpl2_rpl, 1'b1, 8'h0B, 16'h00DA,
+            run_cpl2_far_cs_case(16'h00F0 + cpl2_rpl, 1'b1, 8'h0D, 16'h00DA,
                                  "CPL2 DPL3 not-present code matrix");
             run_cpl2_far_cs_case(16'h0148 + cpl2_rpl, 1'b1, 8'h0D, 16'h00DA,
                                  "CPL2 direct far-CS GDT-limit matrix");

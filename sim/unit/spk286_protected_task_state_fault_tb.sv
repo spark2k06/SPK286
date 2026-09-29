@@ -365,8 +365,9 @@ module spk286_protected_task_state_fault_tb;
         reset_case();
         case_es_selector = 16'h0030;
         case_aux_reserved_word = 16'h0001;
-        run_fault_pair(16'h0200, 16'hFFFF, 8'h9A, 8'h93, 8'h0A,
-                       "incoming task reserved descriptor form raises #TS");
+        // Intel 386 PRM 13.3.2 documents that 286 programs may use the
+        // final descriptor word; it is not a 286 segment-validation fault.
+        run_valid_pair(8'h9A, "incoming task accepts data descriptor with nonzero upper word");
         reset_case();
         case_es_selector = 16'h000C;
         run_fault_pair(16'h0200, 16'hFFFF, 8'h9A, 8'h93, 8'h0A,

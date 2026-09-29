@@ -152,6 +152,51 @@ module spk286_task_segment_service_tb;
         reset = 1'b1; tick(1'b0); reset = 1'b0; start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0); run_to_end();
         check(fault && fault_vector == 8'd12 && fault_error_code == 16'h0038,
               "not-present SS raises #SS with the SS selector");
+
+        // Intel 286 B-13: task-loaded ES/DS may reference readable conforming
+        // code at any DPL or selector RPL. CS and SS still use task CPL rules.
+        for (integer cpl = 0; cpl < 4; cpl = cpl + 1)
+            for (integer dpl = 0; dpl < 4; dpl = dpl + 1)
+                for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
+                    write_descriptor(32'h00000118, 24'h110000, 16'hFFFF,
+                                     8'h9E | (8'(dpl) << 5));
+                    write_descriptor(32'h00000128, 24'h220000, 16'h7FFF,
+                                     8'h9A | (8'(cpl) << 5));
+                    write_descriptor(32'h00000138, 24'h330000, 16'hFFFF,
+                                     8'h92 | (8'(cpl) << 5));
+                    write_descriptor(32'h00000148, 24'h440000, 16'hFFFF,
+                                     8'h9E | (8'(dpl) << 5));
+                    task_segments = {(16'h0048 | 16'(rpl)), (16'h0038 | 16'(cpl)),
+                                     (16'h0028 | 16'(cpl)), (16'h0018 | 16'(rpl))};
+                    reset = 1'b1; tick(1'b0); reset = 1'b0;
+                    start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0);
+                    run_to_end();
+                    check(complete && commit_valid && !fault && cache_selectors == task_segments &&
+                          cache_access[7:0] == (8'h9F | (8'(dpl) << 5)) &&
+                          cache_access[31:24] == (8'h9F | (8'(dpl) << 5)) &&
+                          cache_dpl[1:0] == 2'(dpl) && cache_dpl[7:6] == 2'(dpl) &&
+                          memory[10'h11D] == (8'h9F | (8'(dpl) << 5)) &&
+                          memory[10'h14D] == (8'h9F | (8'(dpl) << 5)),
+                          $sformatf("task conforming ES/DS CPL=%0d DPL=%0d RPL=%0d", cpl, dpl, rpl));
+                    tick(1'b0);
+                end
+
+        // Execute-only code is not a readable data register target. Presence
+        // faults must remain distinct from type/privilege faults.
+        task_segments = 64'h0048003800280018;
+        write_descriptor(32'h00000128, 24'h220000, 16'h7FFF, 8'h9A);
+        write_descriptor(32'h00000138, 24'h330000, 16'hFFFF, 8'h92);
+        write_descriptor(32'h00000148, 24'h440000, 16'hFFFF, 8'h93);
+        write_descriptor(32'h00000118, 24'h110000, 16'hFFFF, 8'h9C);
+        reset = 1'b1; tick(1'b0); reset = 1'b0;
+        start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0); run_to_end();
+        check(fault && fault_vector == 8'd10 && fault_error_code == 16'h0018 && !commit_valid,
+              "task execute-only ES raises #TS without publishing caches");
+        write_descriptor(32'h00000118, 24'h110000, 16'hFFFF, 8'h1E);
+        reset = 1'b1; tick(1'b0); reset = 1'b0;
+        start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0); run_to_end();
+        check(fault && fault_vector == 8'd11 && fault_error_code == 16'h0018 && !commit_valid,
+              "task absent readable conforming ES raises #NP");
         $display("TASK_SEGMENT_SERVICE PASS: %0d checks", checks);
         $finish;
     end

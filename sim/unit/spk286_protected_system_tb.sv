@@ -634,13 +634,13 @@ module spk286_protected_system_tb;
         retire_one();
         check(debug_gdtr_limit == 16'h1234 && debug_gdtr_base == 24'h9A5678, "LGDT commits only after complete table read");
         retire_one();
-        check({memory[16'h0205], memory[16'h0204], memory[16'h0203], memory[16'h0202], memory[16'h0201], memory[16'h0200]} == 48'h009A56781234,
-              "SGDT stores limit and 24-bit base in Intel byte order");
+        check({memory[16'h0205], memory[16'h0204], memory[16'h0203], memory[16'h0202], memory[16'h0201], memory[16'h0200]} == 48'hFF9A56781234,
+              "SGDT stores limit and 24-bit base with 286 compatibility byte FF");
         retire_one();
         check(debug_idtr_limit == 16'h5678 && debug_idtr_base == 24'hDE9ABC, "LIDT commits only after complete table read");
         retire_one();
-        check({memory[16'h0215], memory[16'h0214], memory[16'h0213], memory[16'h0212], memory[16'h0211], memory[16'h0210]} == 48'h00DE9ABC5678,
-              "SIDT stores limit and 24-bit base in Intel byte order");
+        check({memory[16'h0215], memory[16'h0214], memory[16'h0213], memory[16'h0212], memory[16'h0211], memory[16'h0210]} == 48'hFFDE9ABC5678,
+              "SIDT stores limit and 24-bit base with 286 compatibility byte FF");
         retire_one();
         check(debug_protected_msw == 16'hFFF1 && debug_gpr[15:0] == 16'h0001, "LMSW sets PE without writing its source GPR");
         retire_one();
@@ -884,9 +884,9 @@ module spk286_protected_system_tb;
         /* verilator lint_off WIDTHTRUNC */
         // PM1 selector-inspection matrix. At CPL0, VERR accepts readable
         // data/readable code, VERW accepts writable data, and LAR/LSL accept
-        // every present segment descriptor with max(CPL,RPL) <= DPL. All
-        // operation families reject absent descriptors and preserve their
-        // destination state on a negative result.
+        // visible segment descriptor with max(CPL,RPL) <= DPL regardless of
+        // presence (Intel 286 PRM, LAR/LSL). Negative inspection results
+        // preserve the destination. VERR/VERW retain their existing coverage.
         for (integer dpl = 0; dpl < 4; dpl = dpl + 1) begin
             for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
                 run_pm1_inspection_case(2'd0, 16'h0140 + dpl * 8 + rpl,
@@ -952,10 +952,11 @@ module spk286_protected_system_tb;
                                          1'b0, 16'h1234,
                                          "PM1 VERW not-present-data matrix");
                 run_pm1_inspection_case(2'd2, 16'h01C0 + dpl * 8 + rpl,
-                                         1'b0, 16'h1234,
+                                         rpl <= dpl,
+                                         (rpl <= dpl) ? (16'h1200 + dpl * 16'h2000) : 16'h1234,
                                          "PM1 LAR not-present-data matrix");
                 run_pm1_inspection_case(2'd3, 16'h01C0 + dpl * 8 + rpl,
-                                         1'b0, 16'h1234,
+                                         rpl <= dpl, (rpl <= dpl) ? 16'hFFFF : 16'h1234,
                                          "PM1 LSL not-present-data matrix");
 
                 run_pm1_inspection_case(2'd0, 16'h01E0 + dpl * 8 + rpl,
@@ -965,10 +966,11 @@ module spk286_protected_system_tb;
                                          1'b0, 16'h1234,
                                          "PM1 VERW not-present-code matrix");
                 run_pm1_inspection_case(2'd2, 16'h01E0 + dpl * 8 + rpl,
-                                         1'b0, 16'h1234,
+                                         rpl <= dpl,
+                                         (rpl <= dpl) ? (16'h1A00 + dpl * 16'h2000) : 16'h1234,
                                          "PM1 LAR not-present-code matrix");
                 run_pm1_inspection_case(2'd3, 16'h01E0 + dpl * 8 + rpl,
-                                         1'b0, 16'h1234,
+                                         rpl <= dpl, (rpl <= dpl) ? 16'hFFFF : 16'h1234,
                                          "PM1 LSL not-present-code matrix");
             end
         end

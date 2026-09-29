@@ -225,7 +225,7 @@ module spk286_protected_retf_tb;
               "PM4b.3 RETF 4 restores outer CS/SS and discards the copied parameters");
 
         // PM4b.4: re-enter through the same gate with a CPL0 stack limit of
-        // 9FFB.  After the two architectural pops, RETF 4 validates the
+        // 9FFB.  After reading IP and CS tentatively, RETF 4 validates the
         // saved SP:SS words at 9FFC..9FFF and must fault before reading them.
         memory[16'h0245] = 8'h9A; memory[16'h0246] = 8'h00; memory[16'h0247] = 8'h01;
         memory[16'h0248] = 8'h79; memory[16'h0249] = 8'h00;
@@ -250,7 +250,7 @@ module spk286_protected_retf_tb;
         retire_one(); // MOV SS,AX installs the tightened target limit
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0050 &&
-              debug_gpr[79:64] == 16'h9FF8 && rejected_outer_frame_reads == 0 &&
+              debug_gpr[79:64] == 16'h9FF4 && rejected_outer_frame_reads == 0 &&
               memory[16'h9FFC] == 8'h04 && memory[16'h9FFD] == 8'hFF &&
               memory[16'h9FFE] == 8'h69 && memory[16'h9FFF] == 8'h00,
               "PM4b.4 RETF frame-range fault precedes outer SP:SS reads and CS/SS commit");
@@ -264,7 +264,7 @@ module spk286_protected_retf_tb;
         memory[16'h9FFE] = 8'h00; memory[16'h9FFF] = 8'h00;
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
+              debug_gpr[79:64] == 16'h9FF4,
               "PM4b.5 null outer SS faults without restored CS/SS/SP commit");
 
         // PM4b.5: a present writable SS with the wrong DPL/RPL is also
@@ -276,7 +276,7 @@ module spk286_protected_retf_tb;
         memory[16'h9FFE] = 8'h18; memory[16'h9FFF] = 8'h00;
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
+              debug_gpr[79:64] == 16'h9FF4,
               "PM4b.5 mismatched outer SS privilege faults atomically");
 
         // PM4b.6: the remaining immediate SS descriptor classes are rejected
@@ -288,7 +288,7 @@ module spk286_protected_retf_tb;
         memory[16'h9FFE] = 8'h20; memory[16'h9FFF] = 8'h00;
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
+              debug_gpr[79:64] == 16'h9FF4,
               "PM4b.6 non-present outer SS faults atomically");
 
         enter_ring1_caller(16'hFFFF);
@@ -298,7 +298,7 @@ module spk286_protected_retf_tb;
         memory[16'h9FFE] = 8'h28; memory[16'h9FFF] = 8'h00;
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
+              debug_gpr[79:64] == 16'h9FF4,
               "PM4b.6 code-descriptor outer SS faults atomically");
 
         enter_ring1_caller(16'hFFFF);
@@ -308,22 +308,20 @@ module spk286_protected_retf_tb;
         memory[16'h9FFE] = 8'h0D; memory[16'h9FFF] = 8'h00;
         wait_shutdown();
         check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
+              debug_gpr[79:64] == 16'h9FF4,
               "PM4b.6 LDT-indicator outer SS faults atomically");
 
-        // PM4b.7: the caller stack limit admits the copied source parameters
-        // through FF03, but RETF 8 would restore FF08 and must fault against
-        // the validated outer SS before context commit.
+        // PM4b.7: the caller stack admits the copied parameters through FF03.
+        // RETF 4 restores FF04, one byte past the limit: a valid empty stack.
+        // Intel's RET outer-return checks do not dereference the restored SP.
         enter_ring1_caller(16'hFF03);
-        memory[16'h0101] = 8'h08;
-        memory[16'h0102] = 8'h00;
         retire_one();
         check(debug_cs == 16'h0038 && debug_ip == 16'h0100 && debug_gpr[79:64] == 16'h9FF4,
               "PM4b.7 restored-SP limit case reaches the protected RETF target");
-        wait_shutdown();
-        check(debug_cs == 16'h0038 && debug_segment_selectors[47:32] == 16'h0018 &&
-              debug_gpr[79:64] == 16'h9FFC,
-              "PM4b.7 restored outer SP limit faults before CS/SS/SP commit");
+        retire_one();
+        check(debug_cs == 16'h0061 && debug_ip == 16'h0245 &&
+              debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF04,
+              "PM4b.7 restored outer SP may point one byte past the stack limit");
 
         // PM4b.8: the restored SP may equal the outer SS limit.  The inclusive
         // upper boundary is valid because RETF does not dereference it.

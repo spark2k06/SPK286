@@ -79,10 +79,11 @@ module spk286_descriptor (
             endcase
         end
 
-        // Bytes 6-7 are reserved on the 80286. Gate byte 4 is reserved except
-        // for the five-bit call-gate parameter count. Base byte 4 remains
-        // meaningful for segment, TSS and LDT descriptors.
-        reserved_form_valid = raw_descriptor[63:48] == 16'h0000;
+        // The 286 ignores bytes 6-7 in code/data descriptors. Zeroing them
+        // is a 386 compatibility rule, not a 286 validity check (Intel 386
+        // PRM 13.3.2). Windows uses this word even for absent segments.
+        // Retain the separate system/gate reserved-form checks below.
+        reserved_form_valid = segment || raw_descriptor[63:48] == 16'h0000;
         if (!segment && (system_type == 4'h4))
             reserved_form_valid = reserved_form_valid && (raw_descriptor[39:37] == 3'b000);
         else if (!segment && system_type == 4'h5)

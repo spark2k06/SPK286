@@ -168,9 +168,10 @@ module spk286_task_segment_service (
             if (j != 1 && j != 2) begin
                 segment_type_valid[j] = descriptor_segment[j] &&
                                          ((!descriptor_executable[j]) || descriptor_readable[j]);
-                segment_privilege_valid[j] = descriptor_executable[j] && descriptor_conforming[j] ?
-                    descriptor_dpl[j] <= target_cpl_q :
-                    descriptor_dpl[j] >= target_cpl_q && descriptor_dpl[j] >= task_segments_q[j * 16 +: 2];
+                // A readable conforming code segment can be task-loaded into
+                // ES/DS regardless of the incoming CPL or selector RPL.
+                segment_privilege_valid[j] = descriptor_conforming[j] ||
+                    (descriptor_dpl[j] >= target_cpl_q && descriptor_dpl[j] >= task_segments_q[j * 16 +: 2]);
             end
         end
     end

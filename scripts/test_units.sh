@@ -24,6 +24,15 @@ tests=(spk286_registers spk286_segments spk286_loadall_service spk286_loadall_pr
        spk286_event_instructions spk286_event_lifecycle spk286_event_streams
        spk286_biu_width_io spk286_operand_byte spk286_alu_byte spk286_byte_scalar spk286_prefix spk286_test_instructions spk286_scalar_direct spk286_shift spk286_shift_instructions spk286_data_instructions spk286_data_lifecycle spk286_unary_instructions spk286_unary_lifecycle spk286_adjust spk286_adjust_instructions spk286_adjust_lifecycle spk286_segment_instructions spk286_segment_lifecycle spk286_stack_range spk286_stack_frame_instructions spk286_stack_frame_lifecycle spk286_far_instructions spk286_far_lifecycle spk286_string_instructions spk286_string_lifecycle spk286_string_boundaries spk286_scalar_io spk286_string_io spk286_string_io_lifecycle spk286_muldiv spk286_muldiv_instructions spk286_muldiv_lifecycle spk286_string_zero_events spk286_string_io_zero_events spk286_biu_hold_lock spk286_xchg_hold_lock spk286_esc_instructions)
 tests+=(spk286_loadall_integration)
+tests+=(spk286_protected_entry)
+tests+=(spk286_protected_direct_call)
+tests+=(spk286_conforming_data_load)
+tests+=(spk286_call_gate_accessed)
+tests+=(spk286_protected_return_restart)
+tests+=(spk286_protected_pop_segment_restart)
+tests+=(spk286_descriptor_inspection)
+tests+=(spk286_system_table_range)
+tests+=(spk286_outer_return_sp)
 tests+=(spk286_register_execution)
 tests+=(spk286_immediate_execution spk286_immediate_throughput)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi

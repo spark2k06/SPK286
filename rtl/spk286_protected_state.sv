@@ -82,6 +82,8 @@ module spk286_protected_state (
     input  logic [1:0]  segment_commit_dpl2,
     input  logic        segment_commit_table_indicator2,
     input  logic [1:0]  segment_commit_rpl2,
+    input  logic        outer_return_commit,
+    input  logic [1:0]  outer_return_cpl,
     input  logic        loadall_commit_en,
     input  logic [15:0] loadall_msw,
     input  logic [15:0] loadall_gdtr_limit, loadall_idtr_limit,
@@ -133,6 +135,34 @@ module spk286_protected_state (
     logic [3:0] segment_valid_q, segment_present_q, segment_protected_q;
     logic [7:0] segment_dpl_q, segment_rpl_q;
     logic [3:0] segment_table_q;
+    logic [3:0] outer_return_clear;
+
+    // The new privilege level is effective at the same edge as CS/SS commit.
+    // Inspect the cached DS/ES attributes; do not replace the descriptor cache
+    // with a later memory image just because the GDT/LDT entry was edited.
+    always_comb begin
+        outer_return_clear = 4'b0000;
+        for (integer i = 0; i < 4; i = i + 1) begin : check_outer_data
+            logic [15:0] selector;
+            logic [4:1] access;
+            logic [1:0] dpl;
+            logic table_ok, type_ok, privilege_ok;
+            selector = segment_selector_q[i * 16 +: 16];
+            access = segment_access_q[i * 8 + 1 +: 4];
+            dpl = segment_dpl_q[i * 2 +: 2];
+            table_ok = selector[2] ?
+                (ldtr_valid_q && ldtr_present_q &&
+                 ({1'b0, selector[15:3], 3'b000} + 17'd7 <= {1'b0, ldtr_limit_q})) :
+                ({1'b0, selector[15:3], 3'b000} + 17'd7 <= {1'b0, gdtr_limit_q});
+            type_ok = access[4] && (!access[3] || access[1]);
+            privilege_ok = (access[3] && access[2]) ||
+                           (dpl >= outer_return_cpl && dpl >= selector[1:0]);
+            if (i == 0 || i == 3)
+                outer_return_clear[i] = selector[15:2] != 14'd0 &&
+                                        (!segment_valid_q[i] || !segment_present_q[i] ||
+                                         !table_ok || !type_ok || !privilege_ok);
+        end
+    end
 
     assign msw = msw_q;
     assign gdtr_limit = gdtr_limit_q;
@@ -292,6 +322,23 @@ module spk286_protected_state (
                 segment_dpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_dpl2;
                 segment_table_q[segment_commit_index2] <= segment_commit_table_indicator2;
                 segment_rpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_rpl2;
+            end
+            if (outer_return_commit) begin
+                for (integer i = 0; i < 4; i = i + 1) begin
+                    if (outer_return_clear[i]) begin
+                        segment_selector_q[i * 16 +: 16] <= 16'd0;
+                        segment_base_q[i * 24 +: 24] <= 24'd0;
+                        segment_limit_q[i * 16 +: 16] <= 16'd0;
+                        segment_access_q[i * 8 +: 8] <= 8'd0;
+                        segment_class_q[i * 4 +: 4] <= DESC_INVALID;
+                        segment_valid_q[i] <= 1'b0;
+                        segment_present_q[i] <= 1'b0;
+                        segment_protected_q[i] <= 1'b1;
+                        segment_dpl_q[i * 2 +: 2] <= 2'd0;
+                        segment_table_q[i] <= 1'b0;
+                        segment_rpl_q[i * 2 +: 2] <= 2'd0;
+                    end
+                end
             end
         end
     end
