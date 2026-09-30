@@ -13,8 +13,16 @@ module spk286_protected_expand_down_tb;
     integer checks = 0;
     logic fault_request_reported = 1'b0;
     logic [7:0] first_fault_vector = 8'h00;
+    logic terminal_reached = 1'b0;
 
     spk286 dut (.*);
+
+    // A legal JMP $ terminates fixtures at every CPL. HLT is reserved for
+    // the dedicated privilege bank and must not hide a protection failure.
+    task automatic put_terminal(input integer physical_address);
+        memory[physical_address] = 8'hEB;
+        memory[physical_address + 1] = 8'hFE;
+    endtask
 
     task automatic tick;
         begin
@@ -43,6 +51,10 @@ module spk286_protected_expand_down_tb;
             end
             #4; clk = 1'b1; #5; clk = 1'b0; #1;
             cycles = cycles + 1;
+            if (!reset && instruction_retired && debug_opcode == 8'hEB &&
+                memory[(debug_cs_base + {8'd0,debug_instruction_ip}) & 24'h00FFFF] == 8'hEB &&
+                memory[(debug_cs_base + {8'd0,debug_instruction_ip} + 24'd1) & 24'h00FFFF] == 8'hFE)
+                terminal_reached = 1'b1;
         end
     endtask
 
@@ -64,6 +76,7 @@ module spk286_protected_expand_down_tb;
 
     task automatic reset_cpu;
         begin
+            terminal_reached = 1'b0;
             reset = 1'b1;
             execute_enable = 1'b0;
             ready = 1'b0;
@@ -143,7 +156,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = selector[15:8];
             memory[16'h0103] = 8'h8E;
             memory[16'h0104] = modrm;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -167,7 +180,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && observed_selector == expected_cache_selector,
                       message);
             end else begin
-                check(halted && observed_selector == selector, message);
+                check((terminal_reached && !halted) && observed_selector == selector, message);
             end
         end
     endtask
@@ -192,7 +205,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0105] = 8'hA1;
             memory[16'h0106] = offset[7:0];
             memory[16'h0107] = offset[15:8];
-            memory[16'h0108] = 8'hF4;
+            put_terminal(16'h0108);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -205,7 +218,7 @@ module spk286_protected_expand_down_tb;
                       message);
             end else begin
                 repeat (128) tick();
-                check(halted && debug_segment_selectors[63:48] == selector && debug_gpr[15:0] == expected_ax,
+                check((terminal_reached && !halted) && debug_segment_selectors[63:48] == selector && debug_gpr[15:0] == expected_ax,
                       message);
             end
         end
@@ -233,7 +246,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0108] = 8'hA3;
             memory[16'h0109] = offset[7:0];
             memory[16'h010A] = offset[15:8];
-            memory[16'h010B] = 8'hF4;
+            put_terminal(16'h010B);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -247,7 +260,7 @@ module spk286_protected_expand_down_tb;
                       message);
             end else begin
                 repeat (128) tick();
-                check(halted && debug_segment_selectors[63:48] == selector &&
+                check((terminal_reached && !halted) && debug_segment_selectors[63:48] == selector &&
                       memory[physical_address] == 8'h34 && memory[physical_address + 16'd1] == 8'h12,
                       message);
             end
@@ -271,13 +284,13 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = selector[7:0];
             memory[16'h0202] = selector[15:8];
             memory[16'h0203] = 8'h8E;
             memory[16'h0204] = modrm;
-            memory[16'h0205] = 8'hF4;
+            put_terminal(16'h0205);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -301,7 +314,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && observed_selector == expected_cache_selector,
                       message);
             end else begin
-                check(halted && debug_cs == 16'h0018 && observed_selector == selector,
+                check((terminal_reached && !halted) && debug_cs == 16'h0018 && observed_selector == selector,
                       message);
             end
         end
@@ -325,7 +338,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -352,7 +365,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = selector[15:8];
             memory[16'h0603] = 8'h8E;
             memory[16'h0604] = modrm;
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -376,7 +389,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && observed_selector == expected_cache_selector,
                       message);
             end else begin
-                check(halted && debug_cs == 16'h00AB && observed_selector == selector,
+                check((terminal_reached && !halted) && debug_cs == 16'h00AB && observed_selector == selector,
                       message);
             end
         end
@@ -400,7 +413,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -427,7 +440,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = selector[15:8];
             memory[16'h0603] = 8'h8E;
             memory[16'h0604] = modrm;
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -451,7 +464,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && observed_selector == expected_cache_selector,
                       message);
             end else begin
-                check(halted && debug_cs == 16'h00DA && observed_selector == selector,
+                check((terminal_reached && !halted) && debug_cs == 16'h00DA && observed_selector == selector,
                       message);
             end
         end
@@ -470,11 +483,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h07;
             memory[16'h0103] = selector[7:0];
             memory[16'h0104] = selector[15:8];
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0700] = 8'hB8;
             memory[16'h0701] = 8'h34;
             memory[16'h0702] = 8'h12;
-            memory[16'h0703] = 8'hF4;
+            put_terminal(16'h0703);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -486,7 +499,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && debug_cs == 16'h0009, message);
             end else begin
                 repeat (256) tick();
-                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && debug_ip == 16'h0704,
+                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && terminal_reached && debug_instruction_ip == 16'h0703,
                       message);
             end
         end
@@ -505,17 +518,17 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hEA;
             memory[16'h0201] = 8'h00;
             memory[16'h0202] = 8'h07;
             memory[16'h0203] = selector[7:0];
             memory[16'h0204] = selector[15:8];
-            memory[16'h0205] = 8'hF4;
+            put_terminal(16'h0205);
             memory[16'h0700] = 8'hB8;
             memory[16'h0701] = 8'h34;
             memory[16'h0702] = 8'h12;
-            memory[16'h0703] = 8'hF4;
+            put_terminal(16'h0703);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -527,7 +540,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && debug_cs == 16'h0018, message);
             end else begin
                 repeat (256) tick();
-                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && debug_ip == 16'h0704,
+                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && terminal_reached && debug_instruction_ip == 16'h0703,
                       message);
             end
         end
@@ -546,7 +559,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -573,11 +586,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = 8'h07;
             memory[16'h0603] = selector[7:0];
             memory[16'h0604] = selector[15:8];
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h0700] = 8'hB8;
             memory[16'h0701] = 8'h34;
             memory[16'h0702] = 8'h12;
-            memory[16'h0703] = 8'hF4;
+            put_terminal(16'h0703);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -589,7 +602,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && debug_cs == 16'h00AB, message);
             end else begin
                 repeat (256) tick();
-                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && debug_ip == 16'h0704,
+                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && terminal_reached && debug_instruction_ip == 16'h0703,
                       message);
             end
         end
@@ -608,7 +621,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -635,11 +648,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = 8'h07;
             memory[16'h0603] = selector[7:0];
             memory[16'h0604] = selector[15:8];
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h0700] = 8'hB8;
             memory[16'h0701] = 8'h34;
             memory[16'h0702] = 8'h12;
-            memory[16'h0703] = 8'hF4;
+            put_terminal(16'h0703);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -651,7 +664,7 @@ module spk286_protected_expand_down_tb;
                 check(first_fault_vector == expected_vector && debug_cs == 16'h00DA, message);
             end else begin
                 repeat (256) tick();
-                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && debug_ip == 16'h0704,
+                check(debug_gpr[15:0] == 16'h1234 && debug_cs == expected_cs && terminal_reached && debug_instruction_ip == 16'h0703,
                       message);
             end
         end
@@ -670,10 +683,10 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hCD;
             memory[16'h0201] = vector;
-            memory[16'h0202] = 8'hF4;
+            put_terminal(16'h0202);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -703,7 +716,7 @@ module spk286_protected_expand_down_tb;
         begin
             memory[16'h0100] = 8'hCD;
             memory[16'h0101] = vector;
-            memory[16'h0102] = 8'hF4;
+            put_terminal(16'h0102);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -736,7 +749,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -760,7 +773,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0214] = 8'hCF;
             memory[16'h0600] = 8'hCD;
             memory[16'h0601] = vector;
-            memory[16'h0602] = 8'hF4;
+            put_terminal(16'h0602);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -808,7 +821,7 @@ module spk286_protected_expand_down_tb;
             memory[target_ip] = 8'hB8;
             memory[target_ip + 1] = marker[7:0];
             memory[target_ip + 2] = marker[15:8];
-            memory[target_ip + 3] = 8'hF4;
+            put_terminal(target_ip + 3);
         end
     endtask
 
@@ -830,10 +843,10 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hCD;
             memory[16'h0201] = 8'h28;
-            memory[16'h0202] = 8'hF4;
+            put_terminal(16'h0202);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -868,7 +881,7 @@ module spk286_protected_expand_down_tb;
             configure_event_target(target_ip, marker);
             memory[16'h0100] = 8'hCD;
             memory[16'h0101] = 8'h28;
-            memory[16'h0102] = 8'hF4;
+            put_terminal(16'h0102);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -906,7 +919,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -930,7 +943,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0214] = 8'hCF;
             memory[16'h0600] = 8'hCD;
             memory[16'h0601] = 8'h28;
-            memory[16'h0602] = 8'hF4;
+            put_terminal(16'h0602);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -984,7 +997,7 @@ module spk286_protected_expand_down_tb;
                 memory[16'h010A] = 8'h03;
                 memory[16'h010B] = 8'hC8;
             end
-            memory[16'h010C] = 8'hF4;
+            put_terminal(16'h010C);
             memory[16'h042D] = 8'h81;
 
             fault_request_reported = 1'b0;
@@ -1054,7 +1067,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -1102,7 +1115,7 @@ module spk286_protected_expand_down_tb;
                 memory[16'h060A] = 8'h03;
                 memory[16'h060B] = 8'hC8;
             end
-            memory[16'h060C] = 8'hF4;
+            put_terminal(16'h060C);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1111,13 +1124,13 @@ module spk286_protected_expand_down_tb;
             wait_state(16'h0009, 16'h0100);
             repeat (2048) tick();
             if (operation_kind == 2'd2)
-                check(halted && debug_cs == 16'h00AB && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00AB && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[63:48] == expected_value, message);
             else if (operation_kind == 2'd3)
-                check(halted && debug_cs == 16'h00AB && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00AB && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[31:16] == expected_value, message);
             else
-                check(halted && debug_cs == 16'h00AB && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00AB && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[15:0] == selector, message);
         end
     endtask
@@ -1170,11 +1183,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h07;
             memory[16'h0103] = gate_selector[7:0];
             memory[16'h0104] = gate_selector[15:8];
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0780] = 8'hB8;
             memory[16'h0781] = 8'h5A;
             memory[16'h0782] = 8'hA5;
-            memory[16'h0783] = 8'hF4;
+            put_terminal(16'h0783);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1204,17 +1217,17 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'h9A;
             memory[16'h0201] = 8'h80;
             memory[16'h0202] = 8'h07;
             memory[16'h0203] = gate_selector[7:0];
             memory[16'h0204] = gate_selector[15:8];
-            memory[16'h0205] = 8'hF4;
+            put_terminal(16'h0205);
             memory[16'h0780] = 8'hB8;
             memory[16'h0781] = 8'h5A;
             memory[16'h0782] = 8'hA5;
-            memory[16'h0783] = 8'hF4;
+            put_terminal(16'h0783);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1244,7 +1257,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h53;
             memory[16'h0202] = 8'h00;
@@ -1271,11 +1284,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = 8'h07;
             memory[16'h0603] = gate_selector[7:0];
             memory[16'h0604] = gate_selector[15:8];
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h0780] = 8'hB8;
             memory[16'h0781] = 8'h5A;
             memory[16'h0782] = 8'hA5;
-            memory[16'h0783] = 8'hF4;
+            put_terminal(16'h0783);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1308,7 +1321,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -1356,7 +1369,7 @@ module spk286_protected_expand_down_tb;
                 memory[16'h060A] = 8'h03;
                 memory[16'h060B] = 8'hC8;
             end
-            memory[16'h060C] = 8'hF4;
+            put_terminal(16'h060C);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1365,17 +1378,17 @@ module spk286_protected_expand_down_tb;
             wait_state(16'h0009, 16'h0100);
             repeat (2048) tick();
             if (operation_kind == 2'd2)
-                check(halted && debug_cs == 16'h00DA && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00DA && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[63:48] == expected_value,
                       $sformatf("%s op=%0d selector=%h expected_zf=%b value=%h", message,
                                 operation_kind, selector, expected_zf, expected_value));
             else if (operation_kind == 2'd3)
-                check(halted && debug_cs == 16'h00DA && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00DA && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[31:16] == expected_value,
                       $sformatf("%s op=%0d selector=%h expected_zf=%b value=%h", message,
                                 operation_kind, selector, expected_zf, expected_value));
             else
-                check(halted && debug_cs == 16'h00DA && debug_ip == 16'h060D &&
+                check((terminal_reached && !halted) && debug_cs == 16'h00DA && debug_instruction_ip == 16'h060C &&
                       debug_flags[6] == expected_zf && debug_gpr[15:0] == selector,
                       $sformatf("%s op=%0d selector=%h expected_zf=%b", message,
                                 operation_kind, selector, expected_zf));
@@ -1432,7 +1445,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -1459,11 +1472,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = 8'h07;
             memory[16'h0603] = gate_selector[7:0];
             memory[16'h0604] = gate_selector[15:8];
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h0780] = 8'hB8;
             memory[16'h0781] = 8'h5A;
             memory[16'h0782] = 8'hA5;
-            memory[16'h0783] = 8'hF4;
+            put_terminal(16'h0783);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1520,7 +1533,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -1547,11 +1560,11 @@ module spk286_protected_expand_down_tb;
             memory[16'h0602] = 8'h07;
             memory[16'h0603] = gate_selector[7:0];
             memory[16'h0604] = gate_selector[15:8];
-            memory[16'h0605] = 8'hF4;
+            put_terminal(16'h0605);
             memory[16'h0780] = 8'hB8;
             memory[16'h0781] = 8'h5A;
             memory[16'h0782] = 8'hA5;
-            memory[16'h0783] = 8'hF4;
+            put_terminal(16'h0783);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1588,7 +1601,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0102] = 8'h02;
             memory[16'h0103] = 8'h81;
             memory[16'h0104] = 8'h00;
-            memory[16'h0105] = 8'hF4;
+            put_terminal(16'h0105);
             memory[16'h0200] = 8'hB8;
             memory[16'h0201] = 8'h4A;
             memory[16'h0202] = 8'h00;
@@ -1612,7 +1625,7 @@ module spk286_protected_expand_down_tb;
             memory[16'h0214] = 8'hCF;
             memory[16'h0600] = 8'hCD;
             memory[16'h0601] = 8'h28;
-            memory[16'h0602] = 8'hF4;
+            put_terminal(16'h0602);
             memory[16'h042D] = 8'h81;
             fault_request_reported = 1'b0;
             first_fault_vector = 8'h00;
@@ -1664,9 +1677,9 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
         memory[16'hE002] = 8'hFE; memory[16'hE003] = 8'hCA;
-        memory[16'h0200] = 8'hF4;
+        put_terminal(16'h0200);
 
         // GDT limit 0147h: matrix descriptors through index 40 are inside
         // the table; selector 0148h is the shared limit-overflow probe.
@@ -1820,9 +1833,9 @@ module spk286_protected_expand_down_tb;
         memory[16'h0932] = 8'hF3; memory[16'h0933] = 8'h00;
         memory[16'h0934] = 8'h00; memory[16'h0935] = 8'hE6;
         memory[16'h0936] = 8'h00; memory[16'h0937] = 8'h00;
-        memory[16'h0720] = 8'hB8; memory[16'h0721] = 8'h22; memory[16'h0722] = 8'h22; memory[16'h0723] = 8'hF4;
-        memory[16'h0730] = 8'hB8; memory[16'h0731] = 8'h23; memory[16'h0732] = 8'h23; memory[16'h0733] = 8'hF4;
-        memory[16'h0740] = 8'hB8; memory[16'h0741] = 8'h24; memory[16'h0742] = 8'h24; memory[16'h0743] = 8'hF4;
+        memory[16'h0720] = 8'hB8; memory[16'h0721] = 8'h22; memory[16'h0722] = 8'h22; put_terminal(16'h0723);
+        memory[16'h0730] = 8'hB8; memory[16'h0731] = 8'h23; memory[16'h0732] = 8'h23; put_terminal(16'h0733);
+        memory[16'h0740] = 8'hB8; memory[16'h0741] = 8'h24; memory[16'h0742] = 8'h24; put_terminal(16'h0743);
 
         reset_cpu();
         far_restart(16'h0000, 16'h0000);
@@ -1835,7 +1848,7 @@ module spk286_protected_expand_down_tb;
         check(memory[16'hEFF6] == 8'h0A && memory[16'hEFF7] == 8'h01 && memory[16'hEFFF] == 8'h00,
               "expand-down event writes its lowest and highest frame bytes");
         repeat (64) tick();
-        check(debug_gpr[15:0] == 16'hCAFE && halted,
+        check(debug_gpr[15:0] == 16'hCAFE && (terminal_reached && !halted),
               "valid expand-down event reaches the target handler");
 
         // DS and ES accept a null selector as an unloaded cache, while SS
@@ -1846,7 +1859,7 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'h8E; memory[16'h0106] = 8'hC0;
         memory[16'h0107] = 8'h8E; memory[16'h0108] = 8'hD0;
-        memory[16'h0109] = 8'hF4;
+        put_terminal(16'h0109);
         memory[16'h042D] = 8'h81;
         for (integer i = 16'hEFF6; i <= 16'hEFFF; i = i + 1) memory[i] = 8'h00;
         fault_request_reported = 1'b0;
@@ -1865,14 +1878,14 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
 
         // A CPL1 data reload may not select the present DPL0 data descriptor.
         // The privilege check must reject the selector before changing DS or
         // reaching the later software event in the test program.
         memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'h20; memory[16'h0102] = 8'h00;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
-        memory[16'h0105] = 8'hF4;
+        put_terminal(16'h0105);
         memory[16'h042D] = 8'h81;
         for (integer i = 16'hEFF6; i <= 16'hEFFF; i = i + 1) memory[i] = 8'h00;
         fault_request_reported = 1'b0;
@@ -1890,13 +1903,13 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
 
         // SS has the stricter privilege rule: CPL1 cannot load the present
         // DPL0 stack descriptor even though it is writable.
         memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'h20; memory[16'h0102] = 8'h00;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD0;
-        memory[16'h0105] = 8'hF4;
+        put_terminal(16'h0105);
         memory[16'h042D] = 8'h81;
         for (integer i = 16'hEFF6; i <= 16'hEFFF; i = i + 1) memory[i] = 8'h00;
         fault_request_reported = 1'b0;
@@ -1914,13 +1927,13 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
 
         // ES uses the same data-segment privilege rule as DS. Keep the
         // descriptor present and writable so this isolates the DPL mismatch.
         memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'h20; memory[16'h0102] = 8'h00;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hC0;
-        memory[16'h0105] = 8'hF4;
+        put_terminal(16'h0105);
         memory[16'h042D] = 8'h81;
         for (integer i = 16'hEFF6; i <= 16'hEFFF; i = i + 1) memory[i] = 8'h00;
         fault_request_reported = 1'b0;
@@ -1938,13 +1951,13 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
 
         // The effective privilege also includes the selector RPL. RPL3 must
         // reject the same present DPL0 descriptor even from the CPL1 caller.
         memory[16'h0100] = 8'hB8; memory[16'h0101] = 8'h23; memory[16'h0102] = 8'h00;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
-        memory[16'h0105] = 8'hF4;
+        put_terminal(16'h0105);
         memory[16'h042D] = 8'h81;
         for (integer i = 16'hEFF6; i <= 16'hEFFF; i = i + 1) memory[i] = 8'h00;
         fault_request_reported = 1'b0;
@@ -1962,7 +1975,7 @@ module spk286_protected_expand_down_tb;
         memory[16'h0103] = 8'h8E; memory[16'h0104] = 8'hD8;
         memory[16'h0105] = 8'hA1; memory[16'h0106] = 8'h02; memory[16'h0107] = 8'hE0;
         memory[16'h0108] = 8'hCD; memory[16'h0109] = 8'h20;
-        memory[16'h010A] = 8'hF4;
+        put_terminal(16'h010A);
 
         // A software INT from CPL1 must not enter a present DPL0 gate. The
         // gate check must fault before the privilege transition can write any
@@ -2005,6 +2018,28 @@ module spk286_protected_expand_down_tb;
         memory[16'h0420] = 8'h00;
         memory[16'h0421] = 8'hE0;
         memory[16'h042D] = 8'h81;
+        // A bounded check for the fixture termination repair. Default runs
+        // retain the complete matrix below; no architectural result is waived.
+        if ($test$plusargs("termination_smoke")) begin
+            run_segment_load_case(8'hD8, 16'h0041, 1'b0, 8'h00, 16'h0000,
+                                  "termination smoke: CPL1 DS reload");
+            run_cpl0_segment_case(8'hD8, 16'h0020, 1'b0, 8'h00, 16'h0000,
+                                  "termination smoke: CPL0 DS reload");
+            run_cpl2_segment_case(8'hD8, 16'h004A, 1'b0, 8'h00, 16'h0000,
+                                  "termination smoke: CPL2 DS reload");
+            run_cpl3_segment_case(8'hD8, 16'h0053, 1'b0, 8'h00, 16'h0000,
+                                  "termination smoke: CPL3 DS reload");
+            run_pm1_cpl3_case(16'h0053, 2'd0, 1'b1, 16'h1234,
+                             "termination smoke: CPL3 VERR");
+            run_pm1_cpl2_case(16'h004A, 2'd1, 1'b1, 16'h1234,
+                             "termination smoke: CPL2 VERW");
+            run_word_read_case(16'h0069, 16'h0200, 16'h0200, 16'h5678, 1'b0, 8'h00,
+                               "termination smoke: read-only DS read");
+            run_word_write_case(16'h0041, 16'h0200, 16'h0200, 1'b0, 8'h00,
+                                "termination smoke: writable DS write");
+            $display("PROTECTED_EXPAND_DOWN TERMINATION_SMOKE PASS: %0d checks", checks);
+            $finish;
+        end
         // Exhaustive CPL1 data/stack selector matrix.  For DS and ES the
         // effective privilege is max(CPL,RPL) <= DPL; SS additionally
         // requires DPL == CPL and RPL == CPL.  Present/type faults are kept

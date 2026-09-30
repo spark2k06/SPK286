@@ -28,6 +28,10 @@ tests+=(spk286_protected_entry)
 tests+=(spk286_protected_direct_call)
 tests+=(spk286_conforming_data_load)
 tests+=(spk286_call_gate_accessed)
+tests+=(spk286_jmp_call_gate)
+tests+=(spk286_hlt_privilege)
+tests+=(spk286_event_nt)
+tests+=(spk286_odd_protected_stack)
 tests+=(spk286_protected_return_restart)
 tests+=(spk286_protected_pop_segment_restart)
 tests+=(spk286_descriptor_inspection)
@@ -146,7 +150,10 @@ for name in "${tests[@]}"; do
     fi
     tb="${name}_tb"
     test -f "sim/unit/$tb.sv"
-    if [[ "$name" == spk286_protected_expand_down && "$simulator" != iverilog ]]; then
+    if [[ "$name" == spk286_protected_expand_down && "${SPK286_EXPAND_DOWN_TERMINATION_SMOKE:-0}" == 1 ]]; then
+        run_args=("+termination_smoke")
+    fi
+    if [[ "$name" == spk286_protected_expand_down && "$simulator" != iverilog && "${SPK286_EXPAND_DOWN_TERMINATION_SMOKE:-0}" != 1 ]]; then
         echo "VERILATOR SKIP: $name full matrix runs in Icarus; protected-system and event banks provide Verilator cross-checks"
         skip_verilator=1
     fi
