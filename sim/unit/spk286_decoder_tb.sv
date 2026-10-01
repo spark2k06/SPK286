@@ -12,7 +12,7 @@ module spk286_decoder_tb;
     initial begin
         for (integer i = 0; i < 256; i = i + 1) begin
             opcode = 8'(i); #1;
-            if (supported !== (i == 99 || i == 105 || i == 107 || (i >= 216 && i <= 223) || (i >= 228 && i <= 231) || (i >= 236 && i <= 239) || (i >= 108 && i <= 111) || (i >= 164 && i <= 167) || (i >= 170 && i <= 175) || i == 196 || i == 197 || i == 154 || i == 234 || i == 202 || i == 203 || i == 96 || i == 97 || i == 98 || i == 200 || i == 201 || i == 6 || i == 7 || i == 14 || i == 22 || i == 23 || i == 30 || i == 31 || i == 140 || i == 142 || i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
+            if (supported !== (i == 155 || i == 99 || i == 105 || i == 107 || (i >= 216 && i <= 223) || (i >= 228 && i <= 231) || (i >= 236 && i <= 239) || (i >= 108 && i <= 111) || (i >= 164 && i <= 167) || (i >= 170 && i <= 175) || i == 196 || i == 197 || i == 154 || i == 234 || i == 202 || i == 203 || i == 96 || i == 97 || i == 98 || i == 200 || i == 201 || i == 6 || i == 7 || i == 14 || i == 22 || i == 23 || i == 30 || i == 31 || i == 140 || i == 142 || i == 39 || i == 47 || i == 55 || i == 63 || i == 212 || i == 213 || i == 254 || i == 134 || i == 135 || i == 141 || (i >= 144 && i <= 151) || (i >= 160 && i <= 163) || i == 215 || i == 192 || i == 193 || (i >= 208 && i <= 211) || (i >= 64 && i < 80) || i == 152 || i == 153 || i == 158 || i == 159 || i == 245 || i == 248 || i == 249 || i == 252 || i == 253 || i == 132 || i == 133 || i == 168 || i == 169 || i == 246 || i == 247 || i == 156 || i == 157 || (i >= 204 && i <= 207) || i == 244 || i == 250 || i == 251 ||
                               (i >= 80 && i <= 95) || (i >= 112 && i <= 127) || i == 104 || i == 106 || i == 143 || i == 255 ||
                               i == 194 || i == 195 || (i >= 224 && i <= 227) || i == 232 || i == 233 || i == 235 ||
                               (i >= 176 && i <= 191) || i == 136 || i == 138 || i == 198 || i == 199 || i == 128 || i == 137 || i == 139 || i == 129 || i == 131 ||
@@ -54,6 +54,8 @@ module spk286_decoder_tb;
             if (i == 255 && entry !== spk286_microcode_pkg::MC_ENTRY_GROUP5_DISPATCH) $fatal(1,"group5 dispatch entry");
             if (i >= 216 && i <= 223 && entry !== spk286_microcode_pkg::MC_ENTRY_ESC_NO_COPROCESSOR)
                 $fatal(1, "ESC no-coprocessor entry");
+            if (i == 155 && (entry !== spk286_microcode_pkg::MC_ENTRY_WAIT_NO_COPROCESSOR || destination != 0 || source_index != 0))
+                $fatal(1, "WAIT no-coprocessor metadata");
             if (i == 254 && entry !== spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM8) $fatal(1,"byte unary entry");
             if ((i==39 || i==47 || i==55 || i==63 || i==212 || i==213) && (destination!=0 || source_index!=0 ||
                 entry!=(i>=212?spk286_microcode_pkg::MC_ENTRY_ADJUST_RADIX:spk286_microcode_pkg::MC_ENTRY_ADJUST_DIRECT)))
@@ -91,6 +93,15 @@ module spk286_decoder_tb;
             checks = checks + 1;
         end
         extended_opcode = 1'b1;
+        // Retain the downstream exhaustive 0F classification matrix as well
+        // as the standalone per-entry metadata checks below.
+        for (integer i = 0; i < 256; i = i + 1) begin
+            opcode = 8'(i); #1;
+            if (invalid_opcode !== !(i == 0 || i == 1 || i == 2 || i == 3 || i == 5 || i == 6) ||
+                supported !== (i == 0 || i == 1 || i == 2 || i == 3 || i == 5 || i == 6))
+                $fatal(1, "extended opcode classification %h", opcode);
+            checks++;
+        end
         opcode = 8'h01; #1;
         if (supported !== 1'b1 || entry !== spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F01)
             $fatal(1, "0F 01 extended decoder entry");

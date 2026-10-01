@@ -12,6 +12,7 @@ module spk286_task_switch_service (
     input  logic        reset,
     input  logic        cancel,
     input  logic        start,
+    input  logic        state_loaded,
     input  logic        nested_call,
     input  logic        jump_task,
     input  logic        return_task,
@@ -42,6 +43,8 @@ module spk286_task_switch_service (
     output logic        busy,
     output logic        complete,
     output logic        commit_ready,
+    output logic        cache_commit,
+    output logic [1:0]  cache_commit_index,
     output logic        fault,
     output logic [7:0]  fault_vector,
     output logic [15:0] fault_error_code,
@@ -91,7 +94,8 @@ module spk286_task_switch_service (
         ST_RETURN_DESC0,
         ST_RETURN_DESC1,
         ST_RETURN_DESC2,
-        ST_RETURN_DESC3
+        ST_RETURN_DESC3,
+        ST_LOAD_WAIT, ST_LDTR_CHECK
     } state_t;
 
     state_t state_q;
@@ -157,7 +161,7 @@ module spk286_task_switch_service (
     /* The composite intentionally exposes cache candidates, not the child
        service's intermediate write metadata. */
     /* verilator lint_off UNUSEDSIGNAL */
-    logic segment_commit_valid_unused;
+    logic segment_commit_valid;
     logic task_descriptor_update_unused;
     logic [23:0] task_descriptor_update_address_unused;
     logic [7:0] task_descriptor_update_data_unused;
@@ -219,7 +223,8 @@ module spk286_task_switch_service (
         .memory_byte(segment_memory_byte), .memory_address(segment_memory_address),
         .memory_write_data(segment_memory_write_data), .busy(),
         .complete(segment_complete), .fault(segment_fault), .fault_vector(segment_fault_vector),
-        .fault_error_code(segment_fault_error_code), .commit_valid(segment_commit_valid_unused),
+        .fault_error_code(segment_fault_error_code), .commit_valid(segment_commit_valid),
+        .commit_index(cache_commit_index),
         .cache_selectors(segment_cache_selectors), .cache_bases(segment_cache_bases),
         .cache_limits(segment_cache_limits), .cache_access(segment_cache_access),
         .cache_classes(segment_cache_classes), .cache_present(segment_cache_present),
@@ -270,6 +275,7 @@ module spk286_task_switch_service (
     assign busy = state_q != ST_IDLE && state_q != ST_COMPLETE && state_q != ST_FAULT;
     assign complete = state_q == ST_COMPLETE;
     assign commit_ready = state_q == ST_TASK_ACTIVE && task_complete;
+    assign cache_commit = state_q == ST_SEG_ACTIVE && segment_commit_valid;
     assign fault = state_q == ST_FAULT;
     // The child service's one-cycle commit state is consumed when the
     // composite advances to ST_COMPLETE; expose the composite commit there.
@@ -410,10 +416,15 @@ module spk286_task_switch_service (
                     fault_error_code_q <= task_fault_error_code;
                     state_q <= ST_FAULT;
                 end else if (task_complete) begin
-                    // The child service has now performed BUSY/save/load.
-                    // Continue with the incoming task's late validation.
+                    state_q <= ST_LOAD_WAIT;
+                end
+            end else if (state_q == ST_LOAD_WAIT) begin
+                // No incoming validation fault can escape while the CPU is
+                // still publishing the loaded GPRs, selectors and TR.
+                if (state_loaded) state_q <= ST_LDTR_CHECK;
+            end else if (state_q == ST_LDTR_CHECK) begin
                     incoming_ldtr_selector_q <= task_loaded_ldtr;
-                    if (task_loaded_ldtr == 16'h0000) begin
+                    if (task_loaded_ldtr[15:2] == 14'd0) begin
                         incoming_ldtr_limit_q <= 16'h0000;
                         incoming_ldtr_base_q <= 24'h000000;
                         incoming_ldtr_access_q <= 8'h00;
@@ -424,14 +435,13 @@ module spk286_task_switch_service (
                     end else if (task_loaded_ldtr[2] || task_loaded_ldtr[15:3] == 13'd0 ||
                                  ({1'b0, task_loaded_ldtr[15:3], 3'b000} + 17'd7 > {1'b0, gdtr_limit})) begin
                         fault_vector_q <= 8'd10;
-                        fault_error_code_q <= task_loaded_ldtr;
+                        fault_error_code_q <= task_loaded_ldtr & 16'hFFFC;
                         state_q <= ST_FAULT;
                     end else begin
                         incoming_ldtr_descriptor_address_q <= gdtr_base +
                                                             {8'd0, task_loaded_ldtr[15:3], 3'b000};
                         state_q <= ST_LDTR_DESC0;
                     end
-                end
             end else if (state_q == ST_LDTR_DESC0 && memory_done) begin
                 incoming_ldtr_word0_q <= memory_read_data;
                 state_q <= ST_LDTR_DESC1;
@@ -445,11 +455,11 @@ module spk286_task_switch_service (
                 if (!incoming_ldtr_valid || !incoming_ldtr_reserved_valid ||
                     incoming_ldtr_class != spk286_protected_pkg::DESC_LDT) begin
                     fault_vector_q <= 8'd10;
-                    fault_error_code_q <= incoming_ldtr_selector_q;
+                    fault_error_code_q <= incoming_ldtr_selector_q & 16'hFFFC;
                     state_q <= ST_FAULT;
                 end else if (!incoming_ldtr_present) begin
                     fault_vector_q <= 8'd10;
-                    fault_error_code_q <= incoming_ldtr_selector_q;
+                    fault_error_code_q <= incoming_ldtr_selector_q & 16'hFFFC;
                     state_q <= ST_FAULT;
                 end else begin
                     incoming_ldtr_limit_q <= incoming_ldtr_limit;

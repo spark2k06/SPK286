@@ -247,6 +247,7 @@ module spk286 (
     logic [3:0] task_loaded_ldtr_class;
     logic task_loaded_ldtr_valid, task_loaded_ldtr_present;
     logic [127:0] task_loaded_gpr;
+    logic [63:0] task_loaded_segments;
     logic [15:0] task_loaded_tr_selector, task_loaded_tr_limit;
     logic [23:0] task_loaded_tr_base;
     logic [7:0] task_loaded_tr_access;
@@ -261,7 +262,7 @@ module spk286 (
     logic [15:0] decoded_flags_mask, decoded_undefined_mask;
     logic [15:0] internal_flags_write_data, internal_flags_write_mask;
     logic internal_task_flags_write;
-    logic event_active, event_cancel, event_dispatch, event_request, event_software, event_needs_ack;
+    logic event_active, event_cancel, event_dispatch, event_request, event_software, event_needs_ack, event_external;
     logic [2:0] event_kind;
     logic [15:0] event_ip, event_cs, event_flags;
     logic event_error_valid;
@@ -358,7 +359,9 @@ module spk286 (
     logic [63:0] real_segment_selectors, real_segment_limits;
     logic [95:0] real_segment_bases;
     logic [31:0] real_segment_access_state;
-    logic protected_access_fault, protected_access_ss_fault, protected_fetch_fault;
+    logic protected_access_fault, protected_access_ss_fault, protected_fetch_fault, protected_fetch_invalid;
+    logic protected_task_load, task_state_loaded, task_cache_commit, protected_segment_commit_valid;
+    logic [1:0] task_cache_commit_index;
     logic protected_segment_is_expand_down, protected_segment_is_code, protected_segment_is_readable, protected_segment_is_writable;
     logic protected_segment_is_present, protected_segment_is_valid, protected_segment_is_loaded;
     logic [1:0] selected_segment_index;
@@ -378,9 +381,9 @@ module spk286 (
     // EXT identifies an event external to the program, not every exception.
     // Intel 286 PRM B-1 includes INTR/NMI, single step and NPX #NM/#9;
     // software INT and instruction-generated protection faults keep EXT=0.
-    assign task_fault_external = event_active &&
-                                 (event_kind == 3'd2 || event_kind == 3'd3 || event_kind == 3'd4 ||
-                                  (event_kind == 3'd1 && (debug_event_vector == 8'd7 || debug_event_vector == 8'd9)));
+    // The event controller retains the original provenance across H11
+    // replacement exceptions, whose current kind/vector can be #GP/#DF.
+    assign task_fault_external = event_active && event_external;
     assign stream_restart = restart || internal_redirect || event_cancel || loadall_commit_valid;
     assign stream_ip = restart ? ip_write_data :
                        (internal_redirect ? internal_target :
@@ -499,9 +502,12 @@ module spk286 (
                                        ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, selected_segment_limit})))));
 `endif
     assign protected_access_ss_fault = protected_access_fault && service_segment == 2'd2;
-    assign protected_fetch_fault = protected_msw[0] && protected_segment_protected[2'd1] &&
+    assign protected_fetch_invalid = protected_msw[0] && protected_segment_protected[2'd1] &&
                                    (!protected_segment_valid[2'd1] || !protected_segment_present[2'd1] ||
                                     !protected_segment_access[1*8 + 3]);
+    // An invalid incoming CS cache is expected while SWITCH_TASKS or event
+    // delivery validates it. Only demand a fetch exception at dispatch.
+    assign protected_fetch_fault = protected_fetch_invalid && execution_allowed && !event_active && !micro_active;
 
     // The Phase 1 state ports remain the setup/debug path. Once execution is
     // enabled, the microcode path owns GPR/IP writeback, while an explicit redirect
@@ -519,7 +525,7 @@ module spk286 (
     // service preserve both bytes of every word response without a second
     // response staging slot in the instruction queue.
     assign fetch_request_internal = execute_enable && !event_active && !halted && !shutdown && !unsupported_q && !microcode_fault && !operand_blocked &&
-                                    !protected_fetch_fault && (queue_count <= 4'd4);
+                                    !protected_fetch_invalid && (queue_count <= 4'd4);
     assign fetch_response_ready = execute_enable ? queue_fill_ready : fetch_ready;
 
     spk286_registers registers (
@@ -559,13 +565,13 @@ module spk286 (
         .tr_commit_class(protected_tr_commit_class), .tr_commit_present(protected_tr_commit_present),
         .tr_selector(protected_tr_selector), .tr_base(protected_tr_base), .tr_limit(protected_tr_limit),
         .tr_access(protected_tr_access), .tr_class(protected_tr_class), .tr_valid(protected_tr_valid), .tr_present(protected_tr_present),
-        .segment_commit_en(segment_state_commit_en), .segment_commit_index(segment_state_commit_index),
+        .segment_commit_en(segment_state_commit_en), .segment_commit_valid(protected_segment_commit_valid), .segment_commit_index(segment_state_commit_index),
         .segment_commit_selector(segment_state_commit_selector), .segment_commit_base(segment_state_commit_base),
         .segment_commit_limit(segment_state_commit_limit), .segment_commit_access(segment_state_commit_access),
         .segment_commit_class(segment_state_commit_class), .segment_commit_present(segment_state_commit_present),
         .segment_commit_protected(segment_state_commit_protected), .segment_commit_dpl(segment_state_commit_dpl),
         .segment_commit_table_indicator(segment_state_commit_table_indicator), .segment_commit_rpl(segment_state_commit_rpl),
-        .segment_commit_en2(protected_segment_commit_en2), .segment_commit_index2(protected_segment_commit_index2),
+        .segment_commit_en2(protected_segment_commit_en2), .segment_commit_valid2(1'b1), .segment_commit_index2(protected_segment_commit_index2),
         .segment_commit_selector2(protected_segment_commit_selector2), .segment_commit_base2(protected_segment_commit_base2),
         .segment_commit_limit2(protected_segment_commit_limit2), .segment_commit_access2(protected_segment_commit_access2),
         .segment_commit_class2(protected_segment_commit_class2), .segment_commit_present2(protected_segment_commit_present2),
@@ -573,6 +579,7 @@ module spk286 (
         .segment_commit_table_indicator2(protected_segment_commit_table_indicator2), .segment_commit_rpl2(protected_segment_commit_rpl2),
         .outer_return_commit(protected_outer_return_commit),
         .outer_return_cpl(protected_segment_commit_selector[1:0]),
+        .task_load_en(protected_task_load), .task_load_segments(task_loaded_segments),
         .loadall_commit_en(loadall_commit_valid), .loadall_msw(loadall_msw),
         .loadall_gdtr_limit(loadall_gdtr_limit), .loadall_gdtr_base(loadall_gdtr_base),
         .loadall_idtr_limit(loadall_idtr_limit), .loadall_idtr_base(loadall_idtr_base),
@@ -604,7 +611,7 @@ module spk286 (
        service metadata until task-return integration. */
     /* verilator lint_off PINCONNECTEMPTY */
     spk286_task_switch_service task_switch_service (
-        .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(task_switch_start),
+        .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(task_switch_start), .state_loaded(task_state_loaded),
         .nested_call(task_nested_call), .jump_task(task_jump_task), .return_task(task_return_task),
         .target_selector(task_switch_target_selector), .target_base(task_switch_target_base),
         .target_limit(task_switch_target_limit), .target_access(task_switch_target_access),
@@ -612,7 +619,8 @@ module spk286 (
         .current_selector(protected_tr_selector), .current_base(protected_tr_base),
         .current_limit(protected_tr_limit), .current_access(protected_tr_access),
         .current_descriptor_address(protected_gdtr_base + {8'd0, protected_tr_selector[15:3], 3'b000}),
-        .current_ip(debug_ip), .current_flags(debug_flags), .current_gpr(register_state),
+        .current_ip(event_active ? event_ip : debug_ip),
+        .current_flags(event_active ? event_flags : debug_flags), .current_gpr(register_state),
         .current_segments(protected_segment_selectors), .current_ldtr(protected_ldtr_selector),
         .gdtr_limit(protected_gdtr_limit), .gdtr_base(protected_gdtr_base),
         .memory_done(task_memory_done), .memory_read_data(memory_read_data),
@@ -620,10 +628,11 @@ module spk286 (
         .memory_byte(task_memory_byte), .memory_address(task_memory_address),
         .memory_write_data(task_memory_write_data), .busy(task_service_busy),
         .commit_ready(task_service_commit_ready), .memory_lock(task_memory_lock),
+        .cache_commit(task_cache_commit), .cache_commit_index(task_cache_commit_index),
         .complete(task_service_complete), .fault(task_service_fault),
         .fault_vector(task_service_fault_vector), .fault_error_code(task_service_fault_error_code),
         .commit_valid(), .loaded_ip(task_loaded_ip), .loaded_flags(task_loaded_flags),
-        .loaded_gpr(task_loaded_gpr), .loaded_segments(),
+        .loaded_gpr(task_loaded_gpr), .loaded_segments(task_loaded_segments),
         .loaded_ldtr(task_loaded_ldtr), .loaded_ldtr_base(task_loaded_ldtr_base),
         .loaded_ldtr_limit(task_loaded_ldtr_limit), .loaded_ldtr_access(task_loaded_ldtr_access),
         .loaded_ldtr_class(task_loaded_ldtr_class), .loaded_ldtr_valid(task_loaded_ldtr_valid),
@@ -921,6 +930,9 @@ module spk286 (
         .task_switch_target_descriptor_address(task_switch_target_descriptor_address),
         .task_service_busy(task_service_busy), .task_service_complete(task_service_complete),
         .task_service_commit_ready(task_service_commit_ready),
+        .task_cache_commit(task_cache_commit), .task_cache_commit_index(task_cache_commit_index),
+        .protected_task_load(protected_task_load), .task_state_loaded(task_state_loaded),
+        .protected_segment_commit_valid(protected_segment_commit_valid),
         .task_fault_external(task_fault_external),
         .task_service_fault(task_service_fault), .task_service_fault_vector(task_service_fault_vector),
         .task_service_fault_error_code(task_service_fault_error_code),
@@ -1095,7 +1107,7 @@ module spk286 (
     // the architecturally defined zero word until their individual source
     // classification is extended.
     assign fault_error_valid = protected_msw[0] &&
-                                (fault_vector == 8'd10 || fault_vector == 8'd11 ||
+                                (fault_vector == 8'd8 || fault_vector == 8'd10 || fault_vector == 8'd11 ||
                                  fault_vector == 8'd12 || fault_vector == 8'd13);
     assign fault_error_code = system_fault ? system_fault_error_code :
                               loadall_fault ? loadall_fault_error_code : 16'd0;
@@ -1115,15 +1127,21 @@ module spk286 (
     end
     spk286_events events (
         .clk(clk), .reset(reset), .cancel(restart), .enable(execute_enable && commit_allowed && !reset && !restart),
-        .intr(intr), .nmi(nmi), .ss_load(((internal_segment_write || protected_segment_commit_en) && decoded_segment_index == 2'd2) || protected_segment_commit_en2), .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
+        .protected_mode(protected_msw[0]), .delivery_commit(internal_redirect),
+        .intr(intr), .nmi(nmi),
+        .ss_load((internal_segment_write && decoded_segment_index == 2'd2) ||
+                 (protected_segment_commit_en && protected_segment_commit_index == 2'd2) ||
+                 (protected_segment_commit_en2 && protected_segment_commit_index2 == 2'd2)),
+        .ss_shadow(unused_ss_shadow), .instruction_start((prefix_accept || opcode_start) && !context_active), .opcode_dispatch(opcode_start), .instruction_active(micro_active || context_active),
         .repeat_boundary(repeat_boundary), .repeat_stepped(repeat_stepped),
         .retired(raw_retired), .opcode(queue_consume_data), .ip(debug_ip), .cs(debug_cs), .flags(debug_flags),
         .fault_request(fault_request), .fault_vector(fault_vector),
+        .fault_new_task(task_state_loaded && task_service_fault),
         .fault_error_valid(fault_error_valid), .fault_error_code(fault_error_code),
         .software_request(software_taken), .software_vector(selected_software_vector),
         .halt_request(halt_request), .dispatch_ready(decode_ready), .ack_done(ack_done), .ack_vector(ack_vector),
         .event_active(event_active), .cancel_operation(event_cancel), .dispatch(event_dispatch), .event_request(event_request),
-        .event_completed(event_completed), .event_software(event_software), .event_vector(debug_event_vector),
+        .event_completed(event_completed), .event_software(event_software), .event_external(event_external), .event_vector(debug_event_vector),
         .event_ip(event_ip), .event_cs(event_cs), .event_flags(event_flags),
         .event_error_valid(event_error_valid), .event_error_code(event_error_code), .event_needs_ack(event_needs_ack),
         .halted(halted), .shutdown(shutdown), .nmi_pending(debug_nmi_pending), .nmi_blocked(debug_nmi_blocked),

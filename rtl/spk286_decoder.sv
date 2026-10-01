@@ -17,8 +17,8 @@ module spk286_decoder (
     logic binary_byte, binary_word, stack_control, event_instruction, test_instruction, adjust_instruction, segment_instruction, esc_instruction;
     assign segment_instruction = opcode == 8'h06 || opcode == 8'h07 || opcode == 8'h0E || opcode == 8'h16 || opcode == 8'h17 || opcode == 8'h1E || opcode == 8'h1F || opcode == 8'h8C || opcode == 8'h8E;
     assign adjust_instruction = opcode == 8'h27 || opcode == 8'h2F || opcode == 8'h37 || opcode == 8'h3F || opcode == 8'hD4 || opcode == 8'hD5;
-    // Phase 8 no-coprocessor profile: ESC syntax is consumed by a terminal
-    // passthrough microprogram; this core does not emulate an 80287.
+    // No-coprocessor profile: CPU-side ESC/WAIT checks precede a terminal
+    // syntax-only microprogram; this core does not emulate an 80287.
     assign esc_instruction = opcode[7:3] == 5'b11011;
     assign test_instruction = opcode == 8'h84 || opcode == 8'h85 || opcode == 8'hA8 || opcode == 8'hA9 || opcode == 8'hF6 || opcode == 8'hF7;
     assign event_instruction = opcode == 8'h9C || opcode == 8'h9D ||
@@ -38,10 +38,10 @@ module spk286_decoder (
                             !(opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 ||
                               opcode == 8'h03 || opcode == 8'h05 || opcode == 8'h06) :
                             (opcode >= 8'h64 && opcode <= 8'h67);
-    assign supported = extended_opcode ? (opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 || opcode == 8'h03 || opcode == 8'h05 || opcode == 8'h06) : opcode == 8'h63 || opcode == 8'h69 || opcode == 8'h6B || scalar_io || string_io || string_instruction || opcode == 8'hC4 || opcode == 8'hC5 || opcode == 8'h9A || opcode == 8'hEA || opcode == 8'hCA || opcode == 8'hCB || opcode == 8'h60 || opcode == 8'h61 || opcode == 8'h62 || opcode == 8'hC8 || opcode == 8'hC9 || segment_instruction || adjust_instruction || esc_instruction || opcode == 8'hFE || opcode == 8'h86 || opcode == 8'h87 || opcode == 8'h8D || opcode[7:3] == 5'b10010 || opcode[7:2] == 6'b101000 || opcode == 8'hD7 || opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
+    assign supported = extended_opcode ? (opcode == 8'h00 || opcode == 8'h01 || opcode == 8'h02 || opcode == 8'h03 || opcode == 8'h05 || opcode == 8'h06) : opcode == 8'h63 || opcode == 8'h69 || opcode == 8'h6B || scalar_io || string_io || string_instruction || opcode == 8'hC4 || opcode == 8'hC5 || opcode == 8'h9A || opcode == 8'hEA || opcode == 8'hCA || opcode == 8'hCB || opcode == 8'h60 || opcode == 8'h61 || opcode == 8'h62 || opcode == 8'hC8 || opcode == 8'hC9 || segment_instruction || adjust_instruction || esc_instruction || opcode == 8'h9B || opcode == 8'hFE || opcode == 8'h86 || opcode == 8'h87 || opcode == 8'h8D || opcode[7:3] == 5'b10010 || opcode[7:2] == 6'b101000 || opcode == 8'hD7 || opcode == 8'hC0 || opcode == 8'hC1 || opcode[7:2] == 6'b110100 || opcode[7:4] == 4'h4 || opcode == 8'h98 || opcode == 8'h99 || opcode == 8'h9E || opcode == 8'h9F || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD || test_instruction || binary_byte || opcode[7:3] == 5'b10110 || opcode == 8'h88 || opcode == 8'h8A || opcode == 8'h80 || opcode == 8'hC6 || opcode == 8'hC7 || event_instruction || stack_control || opcode[7:3] == 5'b10111 || opcode == 8'h89 || opcode == 8'h8B ||
                        binary_word || opcode == 8'h81 || opcode == 8'h83 || opcode == 8'hD6;
     assign source_index = opcode == 8'h63 || opcode[7:3] == 5'b10010 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
-    assign destination = opcode == 8'h63 ? 3'd0 : scalar_io ? 3'd0 : adjust_instruction ? 3'd0 : esc_instruction ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD6 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
+    assign destination = opcode == 8'h63 ? 3'd0 : scalar_io ? 3'd0 : adjust_instruction ? 3'd0 : esc_instruction || opcode == 8'h9B ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD6 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
     assign entry = extended_opcode && opcode == 8'h05 ? spk286_microcode_pkg::MC_ENTRY_LOADALL :
                    extended_opcode && opcode == 8'h00 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00 :
@@ -83,6 +83,7 @@ module spk286_decoder (
                    opcode == 8'hD6 ? spk286_microcode_pkg::MC_ENTRY_LOAD_CARRY_BYTE :
                    opcode == 8'hD7 ? spk286_microcode_pkg::MC_ENTRY_LOAD_BASE_INDEX8 :
                    esc_instruction ? spk286_microcode_pkg::MC_ENTRY_ESC_NO_COPROCESSOR :
+                   opcode == 8'h9B ? spk286_microcode_pkg::MC_ENTRY_WAIT_NO_COPROCESSOR :
                    opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :
                    opcode == 8'hC1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_IMM8 :
                    opcode == 8'hD0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_ONE :

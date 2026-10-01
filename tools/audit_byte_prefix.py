@@ -19,7 +19,7 @@ PROBES = (
     ('prefix-leak','spk286_instruction_context','spk286_prefix',
      'segment_override <= 0;', 'segment_override <= complete ? segment_override : 0;', 'prefix context cleared at retirement'),
     ('prefix-fault-ip','spk286_events','spk286_prefix',
-     '(repeat_boundary || (selected_kind == KIND_FAULT && instruction_active)) ? instruction_ip : ip', 'ip', 'restart IP includes the first prefix'),
+     '(repeat_boundary || (selected_kind == KIND_FAULT && instruction_active && !fault_new_task)) ? instruction_ip : ip', 'ip', 'restart IP includes the first prefix'),
     ('lock-ownership','spk286_biu','spk286_prefix',
      'lock_request || lock_chain_q', 'lock_chain_q', 'LOCK read accepted'),
 )

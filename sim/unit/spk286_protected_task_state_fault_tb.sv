@@ -250,8 +250,23 @@ module spk286_protected_task_state_fault_tb;
             check(debug_tr_selector == 16'h0020 && debug_ip == incoming_ip &&
                   debug_gpr[15:0] == 16'hBEEF && debug_flags[14] == do_call,
                   "late incoming task fault publishes TSS registers and flags");
-            check(debug_cs == 16'h0010,
-                  "late incoming task fault withholds unvalidated hidden segment caches");
+            // Intel SWITCH_TASKS publishes all visible selectors and invalidates
+            // outgoing caches before validating LDTR, SS, CS and ES/DS.
+            check(debug_cs == case_cs_selector &&
+                  debug_segment_selectors == {case_ds_selector,case_ss_selector,case_cs_selector,case_es_selector},
+                  "late incoming task fault retains incoming visible selectors");
+            if (expected_vector == 8'h0D)
+                check(dut.protected_segment_valid == 4'b1111,
+                      "IP check follows all non-null segment cache loads");
+            else if (case_ss_selector != 16'h0008 || stack_access != 8'h93)
+                check(dut.protected_segment_valid == 4'b0000,
+                      "invalid incoming SS retains no outgoing cache");
+            else if (code_access != 8'h9A)
+                check(dut.protected_segment_valid == 4'b0100,
+                      "invalid incoming CS preserves only validated SS");
+            else
+                check(dut.protected_segment_valid == 4'b0110,
+                      "invalid incoming ES preserves validated SS and CS");
             check({memory[16'h400F], memory[16'h400E]} == 16'h010B,
                   "late incoming task fault saves the outgoing IP");
             check(memory[16'h2025] == 8'h83 &&

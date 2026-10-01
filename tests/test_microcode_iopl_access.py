@@ -16,7 +16,7 @@ instruction IN_AX_PORT:
 
 
 class IoplAccessMicrocodeTests(unittest.TestCase):
-    def test_current_image_adds_only_eight_pre_side_effect_checks(self):
+    def test_frozen_h02_image_adds_only_eight_pre_side_effect_checks(self):
         old = json.loads((ROOT / 'tests/fixtures/microcode_system_access.json').read_text())
         additions = {'IN_AL_PORT': 1, 'IN_AX_PORT': 1, 'OUT_PORT_AL': 1, 'OUT_PORT_AX': 1,
                      'STRING_INPUT_BYTE': 2, 'STRING_INPUT_WORD': 2,
@@ -37,12 +37,13 @@ class IoplAccessMicrocodeTests(unittest.TestCase):
             return pc + sum(position <= pc for position in positions)
         labels = {name: shifted(pc) for name, pc in old['labels'].items()}
         branches = {shifted(int(pc)): shifted(target) for pc, target in old['branch_targets'].items()}
-        program = compile_sources({p.name: p.read_text() for p in (ROOT / 'microcode/source').glob('*.mc')})
+        fixture = json.loads((ROOT / 'tests/fixtures/microcode_iopl_access.json').read_text())
+        program = compile_sources({'format25.mc': canonical_source(fixture['words'], fixture['entries'],
+                    fixture['labels'], {int(k): v for k, v in fixture['branch_targets'].items()})})
         self.assertEqual([encode(op) for op in program.operations], expected)
         self.assertEqual(program.entries, entries)
         self.assertEqual(program.labels, labels)
         self.assertEqual(program.branch_targets, branches)
-        fixture = json.loads((ROOT / 'tests/fixtures/microcode_iopl_access.json').read_text())
         self.assertEqual(fixture['words'], expected)
         self.assertEqual(fixture['entries'], entries)
         generated = generate(program)

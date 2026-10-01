@@ -4,6 +4,9 @@ module spk286_event_lifecycle_tb;
     logic [7:0] memory[0:1114111];
     integer checks=0, cases=0, ticks=0, retires=0, deliveries=0, acks=0, writes=0, timeout_count;
     integer wait_length=0, wait_count=0;
+    // Explicit downstream fixture profile: PCAT already wraps real-mode IP.
+    // The standalone no-wrap limit oracle remains the default.
+    integer real_mode_fetch_wrap=0;
     logic waiting=0, chain=0, first_push_done=0;
     logic [23:0] held_address;
     logic [15:0] held_data;
@@ -39,6 +42,10 @@ module spk286_event_lifecycle_tb;
         end
         #4;
         if(!reset) begin
+            // The INTA lock chain lasts through the first push or an aborted
+            // entry. H11 can replace that failed INTR entry with #GP/#DF;
+            // semantic cancel releases the abandoned chain before dispatch.
+            if (dut.event_cancel) chain=0;
             if(chain) check(bus_lock && !hlda && !(bus_valid && bus_status==13),"INTA chain retains bus through first push");
             if(bus_valid && ready && bus_status==0) begin acks=acks+1; chain=1; end
             if(bus_valid && ready && bus_write) begin
@@ -128,6 +135,8 @@ module spk286_event_lifecycle_tb;
                           debug_micro_pc==12'(spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN)+12'(stage-6);
     endfunction
     initial begin
+        if ($value$plusargs("real_mode_fetch_wrap=%d",real_mode_fetch_wrap)) begin end
+        check(real_mode_fetch_wrap==0 || real_mode_fetch_wrap==1,"valid declared real-mode fetch profile");
 `ifdef __ICARUS__
         if($value$plusargs("trace=%s",trace_path)) begin $dumpfile(trace_path);$dumpvars(0,dut);end
 `endif
@@ -235,7 +244,8 @@ module spk286_event_lifecycle_tb;
             check(acks==2 && retires==0 && !debug_nmi_blocked && debug_ip==16'(1024+vector_value*8),"all programmable INTA vectors preserve external event identity");next_case();
         end
         // An impossible INTR frame still completes the owned acknowledgement
-        // pair and releases its LOCK chain when entry aborts into shutdown.
+        // pair and releases its LOCK chain when entry aborts; replacement
+        // #GP/#DF delivery on this unusable stack eventually reaches shutdown.
         for(integer stack_value=1;stack_value<6;stack_value=stack_value+2) begin
             wait_length=2;setup('h0202,stack_value);intr=1;timeout_count=0;
             while(!shutdown && timeout_count<800) begin service();timeout_count=timeout_count+1;end
@@ -333,8 +343,19 @@ module spk286_event_lifecycle_tb;
 
         // Demanded code byte fault versus harmless speculative limit exhaustion.
         setup(2,'h0200); execute_enable=0; redirect=1; ip_write_en=1; ip_write_data=16'hFFFE; tick(); redirect=0;ip_write_en=0;
-        memory[131070]=8'hB8; memory[131071]=8'h12; execute_enable=1;
-        until_event(1,13); check(retires==0 && debug_gpr[15:0]==16'hA500 && stackword('h01fa)==16'hFFFE,"code fault saves opcode start without partial immediate"); next_case();
+        memory[131070]=8'hB8; memory[131071]=8'h12;
+        if(real_mode_fetch_wrap!=0) memory[65536]=8'h34;
+        execute_enable=1;
+        if(real_mode_fetch_wrap!=0) begin
+            until_retired(1);
+            check(deliveries==0 && debug_ip==1 && debug_gpr[15:0]==16'h3412 && writes==0 &&
+                  debug_gpr[79:64]=='h0200,"PCAT real-mode IP wrap supplies the complete immediate without a fault/frame");
+        end else begin
+            until_event(1,13);
+            check(retires==0 && debug_gpr[15:0]==16'hA500 && stackword('h01fa)==16'hFFFE,
+                  "code fault saves opcode start without partial immediate");
+        end
+        next_case();
         setup(2,'h0200); execute_enable=0; redirect=1; ip_write_en=1; ip_write_data=16'hFFFD; tick(); redirect=0;ip_write_en=0;
         memory[131069]=8'hE9; memory[131070]=0; memory[131071]=1; execute_enable=1;
         until_retired(1); check(deliveries==0 && debug_ip==16'h0100,"taken branch cancels exhausted speculative fetch"); next_case();

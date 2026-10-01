@@ -175,6 +175,8 @@ module spk286_protected_task_gate_error_tb;
 
         while (!halted && cycles < 4200) tick();
         check(halted, "exception task reaches its handler after the error push");
+        check(debug_gpr[79:64] == 16'h00FE,
+              "task-gate error push commits the target SP before entry completes");
         $display("PROTECTED_TASK_GATE_ERROR PASS: %0d checks, cycles=%0d", checks, cycles);
         $finish;
     end

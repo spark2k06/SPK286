@@ -59,6 +59,7 @@ module spk286_protected_state (
     output logic        tr_present,
 
     input  logic        segment_commit_en,
+    input  logic        segment_commit_valid,
     input  logic [1:0]  segment_commit_index,
     input  logic [15:0] segment_commit_selector,
     input  logic [23:0] segment_commit_base,
@@ -71,6 +72,7 @@ module spk286_protected_state (
     input  logic        segment_commit_table_indicator,
     input  logic [1:0]  segment_commit_rpl,
     input  logic        segment_commit_en2,
+    input  logic        segment_commit_valid2,
     input  logic [1:0]  segment_commit_index2,
     input  logic [15:0] segment_commit_selector2,
     input  logic [23:0] segment_commit_base2,
@@ -83,6 +85,8 @@ module spk286_protected_state (
     input  logic        segment_commit_table_indicator2,
     input  logic [1:0]  segment_commit_rpl2,
     input  logic        outer_return_commit,
+    input  logic        task_load_en,
+    input  logic [63:0] task_load_segments,
     input  logic [1:0]  outer_return_cpl,
     input  logic        loadall_commit_en,
     input  logic [15:0] loadall_msw,
@@ -303,7 +307,7 @@ module spk286_protected_state (
                 segment_limit_q[segment_commit_index * 16 +: 16] <= segment_commit_limit;
                 segment_access_q[segment_commit_index * 8 +: 8] <= segment_commit_access;
                 segment_class_q[segment_commit_index * 4 +: 4] <= segment_commit_class;
-                segment_valid_q[segment_commit_index] <= 1'b1;
+                segment_valid_q[segment_commit_index] <= segment_commit_valid;
                 segment_present_q[segment_commit_index] <= segment_commit_present;
                 segment_protected_q[segment_commit_index] <= segment_commit_protected;
                 segment_dpl_q[segment_commit_index * 2 +: 2] <= segment_commit_dpl;
@@ -316,12 +320,25 @@ module spk286_protected_state (
                 segment_limit_q[segment_commit_index2 * 16 +: 16] <= segment_commit_limit2;
                 segment_access_q[segment_commit_index2 * 8 +: 8] <= segment_commit_access2;
                 segment_class_q[segment_commit_index2 * 4 +: 4] <= segment_commit_class2;
-                segment_valid_q[segment_commit_index2] <= 1'b1;
+                segment_valid_q[segment_commit_index2] <= segment_commit_valid2;
                 segment_present_q[segment_commit_index2] <= segment_commit_present2;
                 segment_protected_q[segment_commit_index2] <= segment_commit_protected2;
                 segment_dpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_dpl2;
                 segment_table_q[segment_commit_index2] <= segment_commit_table_indicator2;
                 segment_rpl_q[segment_commit_index2 * 2 +: 2] <= segment_commit_rpl2;
+            end
+            if (task_load_en) begin
+                // Visible selectors belong to the incoming task immediately;
+                // none of their outgoing hidden caches remains usable.
+                segment_selector_q <= task_load_segments;
+                segment_base_q <= 0; segment_limit_q <= 0; segment_access_q <= 0;
+                segment_class_q <= 0; segment_valid_q <= 0; segment_present_q <= 0;
+                segment_protected_q <= 4'hF;
+                for (integer i=0;i<4;i++) begin
+                    segment_rpl_q[i*2 +: 2] <= task_load_segments[i*16 +: 2];
+                    segment_table_q[i] <= task_load_segments[i*16+2];
+                    segment_dpl_q[i*2 +: 2] <= 0;
+                end
             end
             if (outer_return_commit) begin
                 for (integer i = 0; i < 4; i = i + 1) begin

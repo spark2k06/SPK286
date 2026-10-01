@@ -1,10 +1,10 @@
 {
   "address_width": 10,
-  "compiler_version": "25.0",
-  "encoding_version": 25,
-  "format_version": 25,
-  "instruction_entries": 122,
-  "rom_depth": 739,
+  "compiler_version": "27.0",
+  "encoding_version": 27,
+  "format_version": 27,
+  "instruction_entries": 123,
+  "rom_depth": 743,
   "schema_version": 1,
   "source_sha256": {
     "data_move.mc": "dbe0bf6f429113b1769f3b03e5dba3a825fe23389d2cea1e0d7d1e1de9326914",
@@ -23,14 +23,14 @@
     "zzzzzzzzzzz_muldiv.mc": "9f310d9be24327e6c13363c8a3ca2c83400903252369f4a15c6c50970a8d3149",
     "zzzzzzzzzzzz_strings.mc": "c5a0f116040b03bdd2887cfc108df6ef238f7ce8709be6c7258c4f55e1a989c1",
     "zzzzzzzzzzzzz_io.mc": "ae3cef6c5f1a2cf9fac7020963be6514ea2d0c2e0fc8834eb5a0221f076f2727",
-    "zzzzzzzzzzzzzzzz_esc.mc": "03af6f53d08b46b5068ce1194d8b4b168bf82c5bcbb2947d88e1e71cdba8da82",
+    "zzzzzzzzzzzzzzzz_esc.mc": "f9eb12cba9347488ee7ff0a4c03427c4876f435db92fbf81bbbcfccef5415564",
     "zzzzzzzzzzzzzzzzz_system_tables.mc": "4be2ded435303bc83bc7a4586c28a2caa2a791103a87574fd4182d88fe1b83e7",
     "zzzzzzzzzzzzzzzzzzzz_loadall.mc": "64e2c7bcb4cd38a5146bf359a4d07567900dbbcebe33b2e380603f99c62e721b",
     "zzzzzzzzzzzzzzzzzzzzz_salc.mc": "ba1c95a79432f260fafa06fbf847f898b8370d9d2fa2d20a342eb8017a9a449c"
   },
   "timing_metadata": null,
   "unused_words": 0,
-  "used_words": 739,
+  "used_words": 743,
   "validation": "PASS",
   "warnings": [],
   "word_width": 8

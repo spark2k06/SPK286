@@ -67,9 +67,9 @@
     "JMP_REL16": 73,
     "LEAVE_FRAME": 449,
     "LEA_R16_M": 266,
-    "LOADALL": 733,
+    "LOADALL": 737,
     "LOAD_BASE_INDEX8": 307,
-    "LOAD_CARRY_BYTE": 735,
+    "LOAD_CARRY_BYTE": 739,
     "LOAD_DIRECT16": 292,
     "LOAD_DIRECT8": 287,
     "LOAD_FLAGS_BYTE": 207,
@@ -127,24 +127,25 @@
     "STRING_OUTPUT_WORD": 666,
     "STRING_SCAN": 609,
     "STRING_STORE": 595,
-    "SYSTEM_ARPL": 725,
-    "SYSTEM_CLTS": 731,
-    "SYSTEM_GROUP_0F00": 691,
-    "SYSTEM_GROUP_0F01": 677,
-    "SYSTEM_LOAD_ACCESS": 715,
-    "SYSTEM_LOAD_GDTR": 683,
-    "SYSTEM_LOAD_IDTR": 685,
-    "SYSTEM_LOAD_LDTR": 699,
-    "SYSTEM_LOAD_LIMIT": 720,
-    "SYSTEM_LOAD_MSW": 689,
-    "SYSTEM_LOAD_TR": 703,
-    "SYSTEM_STORE_GDTR": 679,
-    "SYSTEM_STORE_IDTR": 681,
-    "SYSTEM_STORE_LDTR": 693,
-    "SYSTEM_STORE_MSW": 687,
-    "SYSTEM_STORE_TR": 696,
-    "SYSTEM_VERIFY_READ": 707,
-    "SYSTEM_VERIFY_WRITE": 711
+    "SYSTEM_ARPL": 729,
+    "SYSTEM_CLTS": 735,
+    "SYSTEM_GROUP_0F00": 695,
+    "SYSTEM_GROUP_0F01": 681,
+    "SYSTEM_LOAD_ACCESS": 719,
+    "SYSTEM_LOAD_GDTR": 687,
+    "SYSTEM_LOAD_IDTR": 689,
+    "SYSTEM_LOAD_LDTR": 703,
+    "SYSTEM_LOAD_LIMIT": 724,
+    "SYSTEM_LOAD_MSW": 693,
+    "SYSTEM_LOAD_TR": 707,
+    "SYSTEM_STORE_GDTR": 683,
+    "SYSTEM_STORE_IDTR": 685,
+    "SYSTEM_STORE_LDTR": 697,
+    "SYSTEM_STORE_MSW": 691,
+    "SYSTEM_STORE_TR": 700,
+    "SYSTEM_VERIFY_READ": 711,
+    "SYSTEM_VERIFY_WRITE": 715,
+    "WAIT_NO_COPROCESSOR": 679
   },
   "labels": {
     "ALU_AX_IMM16.writeback": 28,
@@ -9034,7 +9035,19 @@
       "location": {
         "entry": "ESC_NO_COPROCESSOR",
         "file": "zzzzzzzzzzzzzzzz_esc.mc",
-        "line": 7
+        "line": 8
+      },
+      "operands": [],
+      "operation": "CHECK_NPX_ESC",
+      "statement": "CHECK_NPX_ESC",
+      "word": 196
+    },
+    {
+      "address": 676,
+      "location": {
+        "entry": "ESC_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 9
       },
       "operands": [],
       "operation": "DECODE_MODRM",
@@ -9042,11 +9055,23 @@
       "word": 4
     },
     {
-      "address": 676,
+      "address": 677,
       "location": {
         "entry": "ESC_NO_COPROCESSOR",
         "file": "zzzzzzzzzzzzzzzz_esc.mc",
-        "line": 8
+        "line": 10
+      },
+      "operands": [],
+      "operation": "CHECK_RM16",
+      "statement": "CHECK_RM16",
+      "word": 19
+    },
+    {
+      "address": 678,
+      "location": {
+        "entry": "ESC_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 11
       },
       "operands": [],
       "operation": "END",
@@ -9054,7 +9079,31 @@
       "word": 3
     },
     {
-      "address": 677,
+      "address": 679,
+      "location": {
+        "entry": "WAIT_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 14
+      },
+      "operands": [],
+      "operation": "CHECK_NPX_WAIT",
+      "statement": "CHECK_NPX_WAIT",
+      "word": 197
+    },
+    {
+      "address": 680,
+      "location": {
+        "entry": "WAIT_NO_COPROCESSOR",
+        "file": "zzzzzzzzzzzzzzzz_esc.mc",
+        "line": 15
+      },
+      "operands": [],
+      "operation": "END",
+      "statement": "END",
+      "word": 3
+    },
+    {
+      "address": 681,
       "location": {
         "entry": "SYSTEM_GROUP_0F01",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9066,7 +9115,7 @@
       "word": 4
     },
     {
-      "address": 678,
+      "address": 682,
       "location": {
         "entry": "SYSTEM_GROUP_0F01",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9078,7 +9127,7 @@
       "word": 71
     },
     {
-      "address": 679,
+      "address": 683,
       "location": {
         "entry": "SYSTEM_STORE_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9090,7 +9139,7 @@
       "word": 136
     },
     {
-      "address": 680,
+      "address": 684,
       "location": {
         "entry": "SYSTEM_STORE_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9102,7 +9151,7 @@
       "word": 3
     },
     {
-      "address": 681,
+      "address": 685,
       "location": {
         "entry": "SYSTEM_STORE_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9114,7 +9163,7 @@
       "word": 137
     },
     {
-      "address": 682,
+      "address": 686,
       "location": {
         "entry": "SYSTEM_STORE_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9126,7 +9175,7 @@
       "word": 3
     },
     {
-      "address": 683,
+      "address": 687,
       "location": {
         "entry": "SYSTEM_LOAD_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9138,7 +9187,7 @@
       "word": 138
     },
     {
-      "address": 684,
+      "address": 688,
       "location": {
         "entry": "SYSTEM_LOAD_GDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9150,7 +9199,7 @@
       "word": 3
     },
     {
-      "address": 685,
+      "address": 689,
       "location": {
         "entry": "SYSTEM_LOAD_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9162,7 +9211,7 @@
       "word": 139
     },
     {
-      "address": 686,
+      "address": 690,
       "location": {
         "entry": "SYSTEM_LOAD_IDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9174,7 +9223,7 @@
       "word": 3
     },
     {
-      "address": 687,
+      "address": 691,
       "location": {
         "entry": "SYSTEM_STORE_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9186,7 +9235,7 @@
       "word": 140
     },
     {
-      "address": 688,
+      "address": 692,
       "location": {
         "entry": "SYSTEM_STORE_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9198,7 +9247,7 @@
       "word": 3
     },
     {
-      "address": 689,
+      "address": 693,
       "location": {
         "entry": "SYSTEM_LOAD_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9210,7 +9259,7 @@
       "word": 141
     },
     {
-      "address": 690,
+      "address": 694,
       "location": {
         "entry": "SYSTEM_LOAD_MSW",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9222,7 +9271,7 @@
       "word": 3
     },
     {
-      "address": 691,
+      "address": 695,
       "location": {
         "entry": "SYSTEM_GROUP_0F00",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9234,7 +9283,7 @@
       "word": 4
     },
     {
-      "address": 692,
+      "address": 696,
       "location": {
         "entry": "SYSTEM_GROUP_0F00",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9246,7 +9295,7 @@
       "word": 71
     },
     {
-      "address": 693,
+      "address": 697,
       "location": {
         "entry": "SYSTEM_STORE_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9258,7 +9307,7 @@
       "word": 193
     },
     {
-      "address": 694,
+      "address": 698,
       "location": {
         "entry": "SYSTEM_STORE_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9270,7 +9319,7 @@
       "word": 142
     },
     {
-      "address": 695,
+      "address": 699,
       "location": {
         "entry": "SYSTEM_STORE_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9282,7 +9331,7 @@
       "word": 3
     },
     {
-      "address": 696,
+      "address": 700,
       "location": {
         "entry": "SYSTEM_STORE_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9294,7 +9343,7 @@
       "word": 193
     },
     {
-      "address": 697,
+      "address": 701,
       "location": {
         "entry": "SYSTEM_STORE_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9306,7 +9355,7 @@
       "word": 143
     },
     {
-      "address": 698,
+      "address": 702,
       "location": {
         "entry": "SYSTEM_STORE_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9318,7 +9367,7 @@
       "word": 3
     },
     {
-      "address": 699,
+      "address": 703,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9330,7 +9379,7 @@
       "word": 194
     },
     {
-      "address": 700,
+      "address": 704,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9344,7 +9393,7 @@
       "word": 6
     },
     {
-      "address": 701,
+      "address": 705,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9356,7 +9405,7 @@
       "word": 144
     },
     {
-      "address": 702,
+      "address": 706,
       "location": {
         "entry": "SYSTEM_LOAD_LDTR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9368,7 +9417,7 @@
       "word": 3
     },
     {
-      "address": 703,
+      "address": 707,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9380,7 +9429,7 @@
       "word": 194
     },
     {
-      "address": 704,
+      "address": 708,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9394,7 +9443,7 @@
       "word": 6
     },
     {
-      "address": 705,
+      "address": 709,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9406,7 +9455,7 @@
       "word": 145
     },
     {
-      "address": 706,
+      "address": 710,
       "location": {
         "entry": "SYSTEM_LOAD_TR",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9418,7 +9467,7 @@
       "word": 3
     },
     {
-      "address": 707,
+      "address": 711,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9430,7 +9479,7 @@
       "word": 193
     },
     {
-      "address": 708,
+      "address": 712,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9444,7 +9493,7 @@
       "word": 6
     },
     {
-      "address": 709,
+      "address": 713,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9456,7 +9505,7 @@
       "word": 146
     },
     {
-      "address": 710,
+      "address": 714,
       "location": {
         "entry": "SYSTEM_VERIFY_READ",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9468,7 +9517,7 @@
       "word": 3
     },
     {
-      "address": 711,
+      "address": 715,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9480,7 +9529,7 @@
       "word": 193
     },
     {
-      "address": 712,
+      "address": 716,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9494,7 +9543,7 @@
       "word": 6
     },
     {
-      "address": 713,
+      "address": 717,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9506,7 +9555,7 @@
       "word": 147
     },
     {
-      "address": 714,
+      "address": 718,
       "location": {
         "entry": "SYSTEM_VERIFY_WRITE",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9518,7 +9567,7 @@
       "word": 3
     },
     {
-      "address": 715,
+      "address": 719,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9530,7 +9579,7 @@
       "word": 4
     },
     {
-      "address": 716,
+      "address": 720,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9542,7 +9591,7 @@
       "word": 193
     },
     {
-      "address": 717,
+      "address": 721,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9556,7 +9605,7 @@
       "word": 6
     },
     {
-      "address": 718,
+      "address": 722,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9568,7 +9617,7 @@
       "word": 148
     },
     {
-      "address": 719,
+      "address": 723,
       "location": {
         "entry": "SYSTEM_LOAD_ACCESS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9580,7 +9629,7 @@
       "word": 3
     },
     {
-      "address": 720,
+      "address": 724,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9592,7 +9641,7 @@
       "word": 4
     },
     {
-      "address": 721,
+      "address": 725,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9604,7 +9653,7 @@
       "word": 193
     },
     {
-      "address": 722,
+      "address": 726,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9618,7 +9667,7 @@
       "word": 6
     },
     {
-      "address": 723,
+      "address": 727,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9630,7 +9679,7 @@
       "word": 149
     },
     {
-      "address": 724,
+      "address": 728,
       "location": {
         "entry": "SYSTEM_LOAD_LIMIT",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9642,7 +9691,7 @@
       "word": 3
     },
     {
-      "address": 725,
+      "address": 729,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9654,7 +9703,7 @@
       "word": 4
     },
     {
-      "address": 726,
+      "address": 730,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9666,7 +9715,7 @@
       "word": 166
     },
     {
-      "address": 727,
+      "address": 731,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9680,7 +9729,7 @@
       "word": 6
     },
     {
-      "address": 728,
+      "address": 732,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9694,7 +9743,7 @@
       "word": 9
     },
     {
-      "address": 729,
+      "address": 733,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9706,7 +9755,7 @@
       "word": 167
     },
     {
-      "address": 730,
+      "address": 734,
       "location": {
         "entry": "SYSTEM_ARPL",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9718,7 +9767,7 @@
       "word": 3
     },
     {
-      "address": 731,
+      "address": 735,
       "location": {
         "entry": "SYSTEM_CLTS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9730,7 +9779,7 @@
       "word": 168
     },
     {
-      "address": 732,
+      "address": 736,
       "location": {
         "entry": "SYSTEM_CLTS",
         "file": "zzzzzzzzzzzzzzzzz_system_tables.mc",
@@ -9742,7 +9791,7 @@
       "word": 3
     },
     {
-      "address": 733,
+      "address": 737,
       "location": {
         "entry": "LOADALL",
         "file": "zzzzzzzzzzzzzzzzzzzz_loadall.mc",
@@ -9754,7 +9803,7 @@
       "word": 171
     },
     {
-      "address": 734,
+      "address": 738,
       "location": {
         "entry": "LOADALL",
         "file": "zzzzzzzzzzzzzzzzzzzz_loadall.mc",
@@ -9766,7 +9815,7 @@
       "word": 3
     },
     {
-      "address": 735,
+      "address": 739,
       "location": {
         "entry": "LOAD_CARRY_BYTE",
         "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
@@ -9778,7 +9827,7 @@
       "word": 30
     },
     {
-      "address": 736,
+      "address": 740,
       "location": {
         "entry": "LOAD_CARRY_BYTE",
         "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
@@ -9792,7 +9841,7 @@
       "word": 172
     },
     {
-      "address": 737,
+      "address": 741,
       "location": {
         "entry": "LOAD_CARRY_BYTE",
         "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",
@@ -9807,7 +9856,7 @@
       "word": 54
     },
     {
-      "address": 738,
+      "address": 742,
       "location": {
         "entry": "LOAD_CARRY_BYTE",
         "file": "zzzzzzzzzzzzzzzzzzzzz_salc.mc",

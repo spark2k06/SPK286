@@ -156,6 +156,11 @@ module spk286_micro_executor (
     output logic [23:0] task_switch_target_descriptor_address,
     input logic task_service_busy, task_service_complete, task_service_fault,
     input logic task_service_commit_ready,
+    input logic task_cache_commit,
+    input logic [1:0] task_cache_commit_index,
+    output logic protected_task_load,
+    output logic task_state_loaded,
+    output logic protected_segment_commit_valid,
     input logic task_fault_external,
     input logic [7:0] task_service_fault_vector,
     input logic [15:0] task_service_fault_error_code,
@@ -296,6 +301,14 @@ module spk286_micro_executor (
     logic system_privilege_fault, system_mode_fault, system_protected_check, system_privilege_check, halt_privilege_fault;
     logic arpl_check_operation, arpl_operation, arpl_adjust, arpl_commit, arpl_fault;
     logic clts_operation, clts_commit, clts_privilege_fault, clts_lock_fault, clts_fault;
+    logic npx_esc_check, npx_wait_check, npx_fault;
+    // Intel 286 PRM 10.2.2: ESC traps on EM || TS, WAIT on MP && TS.
+    // These CPU-side checks apply in both modes and at every CPL. No NPX
+    // interface is modeled; the no-coprocessor profile has BUSY inactive.
+    assign npx_esc_check = allowed && operation == spk286_microcode_pkg::MC_CHECK_NPX_ESC;
+    assign npx_wait_check = allowed && operation == spk286_microcode_pkg::MC_CHECK_NPX_WAIT;
+    assign npx_fault = (npx_esc_check && (protected_msw[2] || protected_msw[3])) ||
+                       (npx_wait_check && protected_msw[1] && protected_msw[3]);
     logic system_selector_store, system_operand_request, system_operand_write;
     logic system_operand_done, system_done, system_begin, system_is_gdtr;
     logic [15:0] system_write_data;
@@ -929,7 +942,7 @@ module spk286_micro_executor (
                                             descriptor_unused_accessed) ||
                                            (descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_success_q));
     assign descriptor_null_commit = descriptor_begin && descriptor_selector_null && !descriptor_pre_fault && !system_privilege_fault && descriptor_load_ldtr;
-    assign system_fault = task_service_fault || system_mode_fault || system_privilege_fault || io_privilege_fault || halt_privilege_fault || arpl_fault || clts_fault || call_tss_pre_fault || (stack_range_fault && protected_msw[0]) ||
+    assign system_fault = npx_fault || task_service_fault || system_mode_fault || system_privilege_fault || io_privilege_fault || halt_privilege_fault || arpl_fault || clts_fault || call_tss_pre_fault || (stack_range_fault && protected_msw[0]) ||
                           descriptor_pre_fault || descriptor_post_fault ||
                           event_gate_pre_fault || event_gate_post_fault;
     // Type/privilege checks precede presence for each transfer class.
@@ -939,7 +952,7 @@ module spk286_micro_executor (
                                               descriptor_class == spk286_protected_pkg::DESC_TASK_GATE ? task_gate_access_valid :
                                               descriptor_class == spk286_protected_pkg::DESC_CODE ? descriptor_cs_access_valid :
                                               task_descriptor_access_valid;
-    assign system_fault_vector = task_service_fault ? task_service_fault_vector : system_mode_fault ? 8'd6 : (system_privilege_fault || io_privilege_fault || halt_privilege_fault) ? 8'd13 :
+    assign system_fault_vector = npx_fault ? 8'd7 : task_service_fault ? task_service_fault_vector : system_mode_fault ? 8'd6 : (system_privilege_fault || io_privilege_fault || halt_privilege_fault) ? 8'd13 :
                                  arpl_fault ? 8'd6 :
                                  clts_lock_fault ? 8'd6 :
                                  clts_privilege_fault ? 8'd13 :
@@ -977,7 +990,7 @@ module spk286_micro_executor (
                                    (!descriptor_present && descriptor_segment_access_valid ?
                                     (segment_index == 2'd2 ? 8'd12 : 8'd11) : 8'd13) :
                                  (!descriptor_present && descriptor_system_access_valid ? 8'd11 : 8'd13);
-    assign system_fault_error_code = task_service_fault ?
+    assign system_fault_error_code = npx_fault ? 16'd0 : task_service_fault ?
                                        ((task_service_fault_error_code & 16'hFFFC) |
                                         (task_fault_external ? 16'h0001 : 16'h0000)) :
                                      (system_mode_fault || system_privilege_fault || io_privilege_fault) ? 16'd0 :
@@ -994,7 +1007,7 @@ module spk286_micro_executor (
                                        (descriptor_operand_done && descriptor_phase_q == 3'd3 && descriptor_load_ldtr && descriptor_success_live);
     assign protected_tr_commit_en = task_commit_tr_write ||
                                     (descriptor_operand_done && descriptor_phase_q == 3'd4 && descriptor_load_tr && descriptor_success_q);
-    assign protected_ldtr_commit_selector = task_commit_ldtr_write ? task_loaded_ldtr : descriptor_null_commit ? 16'd0 : tmp0_q;
+    assign protected_ldtr_commit_selector = task_commit_ldtr_write ? task_loaded_ldtr : tmp0_q;
     assign protected_tr_commit_selector = task_commit_tr_write ? task_loaded_tr_selector : tmp0_q;
     assign protected_ldtr_commit_base = task_commit_ldtr_write ? task_loaded_ldtr_base : descriptor_base;
     assign protected_tr_commit_base = task_commit_tr_write ? task_loaded_tr_base : descriptor_base;
@@ -1010,7 +1023,7 @@ module spk286_micro_executor (
                                        descriptor_class;
     assign protected_ldtr_commit_present = task_commit_ldtr_write ? task_loaded_ldtr_present : descriptor_null_commit ? 1'b0 : descriptor_present;
     assign protected_tr_commit_present = task_commit_tr_write ? 1'b1 : descriptor_present;
-    assign protected_ldtr_commit_valid = task_commit_ldtr_write ? task_loaded_ldtr_valid : !descriptor_null_commit;
+    assign protected_ldtr_commit_valid = task_commit_tr_write ? 1'b0 : task_commit_ldtr_write ? task_loaded_ldtr_valid : !descriptor_null_commit;
     assign protected_tr_commit_valid = 1'b1;
     assign protected_segment_commit_en = task_commit_segment_write || task_commit_segment_write2 ||
                                          (context_commit && protected_msw[0] && cs_candidate_valid_q) ||
@@ -1020,7 +1033,7 @@ module spk286_micro_executor (
                                          (descriptor_operand_done && descriptor_phase_q == 3'd4 && segment_reload_operation && descriptor_success_q);
     assign segment_pop_sp_commit = protected_return_cursor_q && segment_pop_opcode &&
                                    segment_reload_operation && protected_segment_commit_en;
-    assign protected_segment_commit_index = task_commit_segment_write ? 2'd0 : task_commit_segment_write2 ? 2'd2 :
+    assign protected_segment_commit_index = task_commit_segment_write ? task_cache_commit_index : task_commit_segment_write2 ? 2'd2 :
                                            (context_commit && protected_msw[0] && cs_candidate_valid_q) ? 2'd1 : segment_index;
     assign protected_segment_commit_selector = task_commit_segment_write || task_commit_segment_write2 ?
                                               task_cache_selectors[task_primary_cache_index * 16 +: 16] :
@@ -1060,7 +1073,7 @@ module spk286_micro_executor (
                                           task_cache_rpl[task_primary_cache_index * 2 +: 2] :
                                           (context_commit && protected_msw[0] && cs_candidate_valid_q) ? cs_candidate_rpl_q :
                                           (descriptor_selector_null ? tmp0_q[1:0] : descriptor_unused_rpl);
-    assign protected_segment_commit_en2 = task_commit_segment_write || task_commit_segment_write2 ? 1'b1 :
+    assign protected_segment_commit_en2 = task_commit_segment_write || task_commit_segment_write2 ? 1'b0 :
                                          context_commit && protected_msw[0] &&
                                          (iret_ss_candidate_valid_q || call_ss_candidate_valid_q);
     assign protected_segment_commit_index2 = task_commit_segment_write ? 2'd1 : task_commit_segment_write2 ? 2'd3 : 2'd2;
@@ -1209,21 +1222,20 @@ module spk286_micro_executor (
     assign task_commit_flags_write = task_commit_active_q && task_commit_phase_q == 4'd8;
     // The early redirect publishes IP for late faults. Once CS is validated,
     // flush again so no byte fetched with the outgoing CS base can execute.
-    assign task_commit_redirect = task_commit_flags_write || task_commit_segment_write;
+    assign task_commit_redirect = task_commit_flags_write || (task_commit_segment_write && task_cache_commit_index == 2'd1);
     assign task_commit_tr_write = task_commit_active_q && task_commit_phase_q == 4'd9;
     // Publish the incoming selector with TR, then refresh the hidden LDTR
     // once its descriptor is validated. Do not wait for segment success:
     // a later CS/SS/ES/DS fault must retain the already validated LDT.
     assign task_commit_ldtr_write = task_commit_tr_write ||
                                    (task_commit_active_q && task_commit_phase_q == 4'd10 && task_loaded_ldtr_valid);
-    // General registers/FLAGS/TR/LDTR publish as soon as the TSS image has
-    // loaded.  Segment hidden caches publish only after the late descriptor
-    // validation has completed; otherwise an in-flight validation would
-    // briefly overwrite CS/SS with unvalidated zero candidates.
-    assign task_commit_segment_write = task_commit_active_q && task_commit_phase_q == 4'd10 && task_service_complete_q;
-    assign task_commit_segment_write2 = task_commit_active_q && task_commit_phase_q == 4'd11 && task_service_complete_q;
-    assign task_commit_done = task_commit_segment_write2;
-    assign task_primary_cache_index = task_commit_segment_write ? 3'd0 : 3'd2;
+    assign protected_task_load = task_commit_tr_write;
+    assign task_state_loaded = task_commit_active_q && task_commit_phase_q == 4'd10;
+    assign task_commit_segment_write = task_state_loaded && task_cache_commit;
+    assign task_commit_segment_write2 = 1'b0;
+    assign protected_segment_commit_valid = !task_commit_segment_write || task_cache_present[task_cache_commit_index];
+    assign task_commit_done = task_state_loaded && task_service_complete_q;
+    assign task_primary_cache_index = {1'b0, task_cache_commit_index};
     assign task_secondary_cache_index = task_commit_segment_write ? 3'd1 : 3'd3;
     assign redirect_request = (redirect_operation && branch_taken) || context_commit || task_commit_redirect;
     assign redirect_target = task_commit_redirect ? task_loaded_ip : (context_commit ? tmp0_q : target_q);
@@ -1484,13 +1496,18 @@ module spk286_micro_executor (
                             (call_gate_stack_switch_operation && (!call_gate_outer_required || (call_gate_stack_write_done && call_gate_stack_switch_phase_q == 2'd1))) ||
                             call_parameter_operation_done ||
                             (check_bounds && !bounds_fault) || read_segment || segment_write || adjust_complete || (check_arithmetic && !arithmetic_fault_q) || dispatch_request || constant_zero || constant_ones || read_ea || read_target || move_source || set_address || add_base || shift_complete || count_low || direct_flags || sign_extend_byte || sign_fill_word || constant_one || read_flags || restore_flags || set_if || clear_if_tf || read_event_flags || read_event_cs || read_event_ip ||
-                            context_commit || request_event || halt_operation || system_protected_check || system_privilege_check || io_privilege_check || clear_event_flags || (push_event_error && (!event_error_valid || push_event_error_transfer && operand_done)) || (ack_operation && (!event_needs_ack || ack_done)) || ((fetch_byte || fetch_byte_tmp1) && byte_valid) ||
+                            context_commit || request_event || halt_operation || system_protected_check || system_privilege_check || io_privilege_check ||
+                            ((npx_esc_check || npx_wait_check) && !npx_fault) ||
+                            clear_event_flags || (push_event_error && (!event_error_valid || push_event_error_transfer && operand_done)) || (ack_operation && (!event_needs_ack || ack_done)) || ((fetch_byte || fetch_byte_tmp1) && byte_valid) ||
                             read_ip || target_relative || target_absolute || adjust_stack || count_operation ||
                             (push_operation && !push_enabled) || (redirect_operation && (!branch_taken || redirect_ready)) || move_word || read_destination || compute_alu || commit_flags || discard_result || result_to_dst ||
                             (fetch_word && byte_valid && high_byte_q) || (fetch_signed_byte && byte_valid) ||
                             (decode_operand && decode_done) || system_done || descriptor_operation_done || event_gate_operation_done ||
                              ((task_switch_operation && !task_descriptor_candidate_valid_q) ||
-                             (task_commit_done_q && task_service_complete_q) || task_switch_skip ||
+                             // Task completion belongs to TASK_SWITCH. Keeping
+                             // it true for the tail would finish PUSH_EVENT_ERROR
+                             // before its bus response/SP commit (H11 #DF gate).
+                             (task_switch_operation && task_commit_done_q && task_service_complete_q) || task_switch_skip ||
                              task_event_switch_skip ||
                              task_return_noop || task_return_commit_done || task_return_skip) ||
                              (arpl_check_operation && protected_msw[0]) || arpl_fault || arpl_commit || clts_commit || clts_fault ||

@@ -1,9 +1,7 @@
 // Hidden-cache construction for the four 80286 task segments.
 //
-// The service reads the descriptors before publishing cache candidates, but
-// reports faults in the architectural SS, CS, ES, DS precedence.  The caller
-// invokes this after the TSS image has been loaded, so a fault is deliberately
-// a late task-state fault rather than a pre-switch rollback.
+// Load SS, CS, ES and DS in architectural order. Each completed descriptor
+// publishes separately, so a later fault retains the earlier valid caches.
 `timescale 1ns/1ps
 
 module spk286_task_segment_service (
@@ -32,6 +30,7 @@ module spk286_task_segment_service (
     output logic [7:0]  fault_vector,
     output logic [15:0] fault_error_code,
     output logic        commit_valid,
+    output logic [1:0]  commit_index,
     output logic [63:0] cache_selectors,
     output logic [95:0] cache_bases,
     output logic [63:0] cache_limits,
@@ -46,18 +45,19 @@ module spk286_task_segment_service (
     localparam logic [7:0] VECTOR_INVALID_TSS = 8'd10;
     localparam logic [7:0] VECTOR_NOT_PRESENT = 8'd11;
     localparam logic [7:0] VECTOR_STACK_FAULT = 8'd12;
-    typedef enum logic [2:0] {
+    typedef enum logic [3:0] {
         ST_IDLE,
         ST_CHECK,
         ST_READ,
         ST_VALIDATE,
         ST_WRITE,
+        ST_PUBLISH,
         ST_COMPLETE,
         ST_FAULT
     } state_t;
 
     state_t state_q;
-    logic [1:0] segment_index_q, word_index_q, write_index_q;
+    logic [1:0] segment_index_q, word_index_q;
     logic [63:0] task_segments_q;
     logic [63:0] descriptor_raw_q [0:3];
     logic [23:0] descriptor_address_q [0:3];
@@ -190,49 +190,29 @@ module spk286_task_segment_service (
                                  !segment_present_valid[k];
         end
 
-        // Intel validates SS, then CS, then ES/DS.  Do not let the physical
-        // descriptor read order (ES, CS, SS, DS) change the reported fault.
-        selected_fault_valid = 1'b0;
-        selected_fault_index = 2'd0;
-        selected_fault_vector = VECTOR_INVALID_TSS;
-        if (segment_invalid[2]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd2; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[2]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd2; selected_fault_vector = VECTOR_STACK_FAULT;
-        end else if (segment_invalid[1]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd1; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[1]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd1; selected_fault_vector = VECTOR_NOT_PRESENT;
-        end else if (segment_invalid[0]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd0; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[0]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd0; selected_fault_vector = VECTOR_NOT_PRESENT;
-        end else if (segment_invalid[3]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd3; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[3]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd3; selected_fault_vector = VECTOR_NOT_PRESENT;
-        end
+        selected_fault_index = segment_index_q;
+        selected_fault_valid = segment_invalid[segment_index_q] || segment_missing[segment_index_q];
+        selected_fault_vector = segment_invalid[segment_index_q] ? VECTOR_INVALID_TSS :
+                                segment_index_q == 2'd2 ? VECTOR_STACK_FAULT : VECTOR_NOT_PRESENT;
     end
 
     always_comb begin
         write_needed = 1'b0;
-        if (update_accessed && write_index_q == 2'd0 && segment_required[0]) write_needed = !descriptor_accessed[0];
-        if (update_accessed && write_index_q == 2'd1) write_needed = !descriptor_accessed[1];
-        if (update_accessed && write_index_q == 2'd2) write_needed = !descriptor_accessed[2];
-        if (update_accessed && write_index_q == 2'd3 && segment_required[3]) write_needed = !descriptor_accessed[3];
+        if (update_accessed && segment_required[segment_index_q]) write_needed = !descriptor_accessed[segment_index_q];
     end
 
-    assign busy = state_q == ST_CHECK || state_q == ST_READ || state_q == ST_VALIDATE || state_q == ST_WRITE;
+    assign busy = state_q == ST_CHECK || state_q == ST_READ || state_q == ST_VALIDATE || state_q == ST_WRITE || state_q == ST_PUBLISH;
     assign complete = state_q == ST_COMPLETE;
     assign fault = state_q == ST_FAULT;
-    assign commit_valid = state_q == ST_COMPLETE;
+    assign commit_valid = state_q == ST_PUBLISH;
+    assign commit_index = segment_index_q;
     assign memory_request = (state_q == ST_READ) || (state_q == ST_WRITE && write_needed);
     assign memory_write = state_q == ST_WRITE;
     assign memory_byte = state_q == ST_WRITE;
     assign memory_address = (state_q == ST_READ) ?
                             (descriptor_address_q[segment_index_q] + {21'd0, word_index_q, 1'b0}) :
-                            (descriptor_address_q[write_index_q] + 24'd5);
-    assign memory_write_data = {8'h00, descriptor_access[write_index_q] | 8'h01};
+                            (descriptor_address_q[segment_index_q] + 24'd5);
+    assign memory_write_data = {8'h00, descriptor_access[segment_index_q] | 8'h01};
     assign cache_selectors = cache_selectors_q;
     assign cache_bases = cache_bases_q;
     assign cache_limits = cache_limits_q;
@@ -252,7 +232,7 @@ module spk286_task_segment_service (
     always_ff @(posedge clk) begin
         if (reset || cancel) begin
             state_q <= ST_IDLE;
-            segment_index_q <= 2'd0; word_index_q <= 2'd0; write_index_q <= 2'd0;
+            segment_index_q <= 2'd2; word_index_q <= 2'd0;
             task_segments_q <= 64'h0;
             cache_selectors_q <= 64'h0; cache_bases_q <= 96'h0; cache_limits_q <= 64'h0;
             cache_access_q <= 32'h0; cache_classes_q <= 16'h0;
@@ -268,13 +248,18 @@ module spk286_task_segment_service (
                 state_q <= ST_IDLE;
             end else if (state_q == ST_IDLE && start) begin
                 task_segments_q <= task_segments;
-                segment_index_q <= 2'd0;
+                segment_index_q <= 2'd2;
                 word_index_q <= 2'd0;
                 precheck_fault_q <= 4'h0;
+                cache_selectors_q <= task_segments;
+                cache_bases_q <= 0; cache_limits_q <= 0; cache_access_q <= 0;
+                cache_classes_q <= 0; cache_present_q <= 0; cache_protected_q <= 4'hF;
+                cache_dpl_q <= 0; cache_tables_q <= 0; cache_rpl_q <= 0;
+                for (integer i = 0; i < 4; i++) descriptor_raw_q[i] <= 0;
                 state_q <= ST_CHECK;
             end else if (state_q == ST_CHECK) begin
                 if ((segment_index_q == 2'd0 || segment_index_q == 2'd3) && selector_null) begin
-                    cache_selectors_q[segment_index_q * 16 +: 16] <= 16'h0;
+                    cache_selectors_q[segment_index_q * 16 +: 16] <= selected_selector;
                     cache_bases_q[segment_index_q * 24 +: 24] <= 24'h0;
                     cache_limits_q[segment_index_q * 16 +: 16] <= 16'h0;
                     cache_access_q[segment_index_q * 8 +: 8] <= 8'h0;
@@ -284,18 +269,11 @@ module spk286_task_segment_service (
                     cache_dpl_q[segment_index_q * 2 +: 2] <= 2'd0;
                     cache_tables_q[segment_index_q] <= selector_table_indicator;
                     cache_rpl_q[segment_index_q * 2 +: 2] <= selected_selector[1:0];
-                    if (segment_index_q == 2'd3) state_q <= ST_VALIDATE;
-                    else begin segment_index_q <= segment_index_q + 2'd1; word_index_q <= 2'd0; end
+                    state_q <= ST_PUBLISH;
                 end else if (selector_null || selector_carry || !selector_limit_valid ||
                              (selected_ldt && (!ldtr_valid || !ldtr_present))) begin
                     precheck_fault_q[segment_index_q] <= 1'b1;
-                    if (segment_index_q == 2'd3) begin
-                        segment_index_q <= 2'd0;
-                        state_q <= ST_VALIDATE;
-                    end else begin
-                        segment_index_q <= segment_index_q + 2'd1;
-                        word_index_q <= 2'd0;
-                    end
+                    state_q <= ST_VALIDATE;
                 end else begin
                     descriptor_address_q[segment_index_q] <= descriptor_address_calc;
                     word_index_q <= 2'd0;
@@ -308,14 +286,7 @@ module spk286_task_segment_service (
                     2'd2: begin descriptor_raw_q[segment_index_q][47:32] <= memory_read_data; word_index_q <= 2'd3; end
                     default: begin
                         descriptor_raw_q[segment_index_q][63:48] <= memory_read_data;
-                        if (segment_index_q == 2'd3) begin
-                            segment_index_q <= 2'd0;
-                            state_q <= ST_VALIDATE;
-                        end else begin
-                            segment_index_q <= segment_index_q + 2'd1;
-                            word_index_q <= 2'd0;
-                            state_q <= ST_CHECK;
-                        end
+                        state_q <= ST_VALIDATE;
                     end
                 endcase
             end else if (state_q == ST_VALIDATE) begin
@@ -323,7 +294,7 @@ module spk286_task_segment_service (
                     state_q <= ST_FAULT;
                 end else begin
                     for (integer j = 0; j < 4; j = j + 1) begin
-                        if (segment_required[j]) begin
+                        if (segment_index_q == 2'(j) && segment_required[j]) begin
                             cache_selectors_q[j * 16 +: 16] <= task_segments_q[j * 16 +: 16];
                             cache_bases_q[j * 24 +: 24] <= descriptor_base[j];
                             cache_limits_q[j * 16 +: 16] <= descriptor_limit[j];
@@ -336,14 +307,22 @@ module spk286_task_segment_service (
                             cache_rpl_q[j * 2 +: 2] <= task_segments_q[j * 16 +: 2];
                         end
                     end
-                    write_index_q <= 2'd0;
                     state_q <= ST_WRITE;
                 end
             end else if (state_q == ST_WRITE) begin
                 if (!write_needed || memory_done) begin
-                    if (write_index_q == 2'd3) state_q <= ST_COMPLETE;
-                    else write_index_q <= write_index_q + 2'd1;
+                    state_q <= ST_PUBLISH;
                 end
+            end else if (state_q == ST_PUBLISH) begin
+                // B-13 leaves DS/ES as a pair without an ordering promise;
+                // retain this implementation's existing ES-before-DS policy.
+                case (segment_index_q)
+                    2'd2: begin segment_index_q <= 2'd1; state_q <= ST_CHECK; end
+                    2'd1: begin segment_index_q <= 2'd0; state_q <= ST_CHECK; end
+                    2'd0: begin segment_index_q <= 2'd3; state_q <= ST_CHECK; end
+                    default: state_q <= ST_COMPLETE;
+                endcase
+                word_index_q <= 2'd0;
             end
         end
     end
