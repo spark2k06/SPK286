@@ -428,7 +428,7 @@ module spk286_micro_executor (
     logic descriptor_result_write;
     logic [15:0] descriptor_result_data;
     logic descriptor_read_begin, descriptor_pre_fault, descriptor_post_fault;
-    logic [63:0] descriptor_raw_q, descriptor_raw_candidate;
+    logic descriptor_low_valid, descriptor_low_reserved_valid, descriptor_high_word_valid;
     logic [15:0] descriptor_limit;
     logic [23:0] descriptor_base;
     logic [7:0] descriptor_access_rights;
@@ -480,6 +480,9 @@ module spk286_micro_executor (
     logic [1:0] call_ss_dpl_q, call_ss_rpl_q;
     logic call_ss_present_q, call_ss_table_q;
     logic [16:0] call_gate_frame_bytes;
+    logic [5:0] call_gate_frame_words;
+    logic [4:0] call_parameter_last_word;
+    logic [16:0] call_parameter_last_byte;
     logic iret_cs_validation_operation, iret_ss_validation_operation;
     logic iret_outer_frame_operation, iret_outer_required;
     logic iret_outer_pop, iret_outer_pop_done, iret_outer_range_fault;
@@ -510,7 +513,7 @@ module spk286_micro_executor (
     logic [15:0] event_gate_target_selector_q, event_gate_target_offset_q;
     logic [3:0] event_gate_class_q;
     logic [15:0] event_gate_entry_offset;
-    logic [63:0] event_gate_raw_q, event_gate_raw_candidate;
+    logic event_gate_low_valid, event_gate_low_reserved_valid, event_gate_high_word_valid;
     /* verilator lint_off UNUSEDSIGNAL */
     logic [15:0] event_gate_limit;
     logic [7:0] event_gate_access_rights;
@@ -650,13 +653,18 @@ module spk286_micro_executor (
                                            descriptor_selector_null && !descriptor_pre_fault && segment_index != 2'd2;
     assign descriptor_read_begin = descriptor_begin && !descriptor_pre_fault && !system_privilege_fault && !descriptor_verify_negative && !descriptor_inspect_negative &&
                                    !descriptor_segment_null_commit && !descriptor_selector_null;
-    assign descriptor_raw_q = {descriptor_word3_q, descriptor_word2_q, descriptor_word1_q, descriptor_word0_q};
-    assign descriptor_raw_candidate = (descriptor_operand_done && descriptor_phase_q == 3'd3) ?
-                                     {operand_read_data, descriptor_word2_q, descriptor_word1_q, descriptor_word0_q} : descriptor_raw_q;
+    // Only the reserved-form check uses word 3. Reduce both possible words
+    // before the late operand-done select, rather than muxing sixteen bits
+    // and then reducing them. Code/data segments ignore this word on a 286.
+    assign descriptor_high_word_valid = descriptor_unused_segment ||
+                                       ((descriptor_operand_done && descriptor_phase_q == 3'd3) ?
+                                        (operand_read_data == 16'h0000) : (descriptor_word3_q == 16'h0000));
+    assign descriptor_valid = descriptor_low_valid && descriptor_high_word_valid;
+    assign descriptor_reserved_valid = descriptor_low_reserved_valid && descriptor_high_word_valid;
     spk286_descriptor descriptor_parser (
-        .raw_descriptor(descriptor_raw_candidate), .limit(descriptor_limit), .base(descriptor_base),
+        .raw_descriptor({16'h0000, descriptor_word2_q, descriptor_word1_q, descriptor_word0_q}), .limit(descriptor_limit), .base(descriptor_base),
         .access_rights(descriptor_access_rights), .descriptor_class(descriptor_class),
-        .descriptor_valid(descriptor_valid), .reserved_form_valid(descriptor_reserved_valid),
+        .descriptor_valid(descriptor_low_valid), .reserved_form_valid(descriptor_low_reserved_valid),
         .present(descriptor_present), .segment(descriptor_unused_segment), .executable(descriptor_unused_executable),
         .conforming(descriptor_unused_conforming), .expand_down(descriptor_unused_expand_down),
         .readable(descriptor_unused_readable), .writable(descriptor_unused_writable), .accessed(descriptor_unused_accessed),
@@ -832,13 +840,15 @@ module spk286_micro_executor (
                                     ({1'b0, event_gate_entry_offset} + 17'd7 > {1'b0, protected_idtr_limit});
     assign event_gate_pre_fault = event_gate_limit_fault;
     assign event_gate_operand_done = event_gate_active_q && operand_done;
-    assign event_gate_raw_q = {event_gate_word3_q, event_gate_word2_q, event_gate_word1_q, event_gate_word0_q};
-    assign event_gate_raw_candidate = (event_gate_operand_done && event_gate_phase_q == 3'd3) ?
-                                      {operand_read_data, event_gate_word2_q, event_gate_word1_q, event_gate_word0_q} : event_gate_raw_q;
+    assign event_gate_high_word_valid = event_gate_unused_segment ||
+                                       ((event_gate_operand_done && event_gate_phase_q == 3'd3) ?
+                                        (operand_read_data == 16'h0000) : (event_gate_word3_q == 16'h0000));
+    assign event_gate_valid = event_gate_low_valid && event_gate_high_word_valid;
+    assign event_gate_reserved_valid = event_gate_low_reserved_valid && event_gate_high_word_valid;
     spk286_descriptor event_gate_parser (
-        .raw_descriptor(event_gate_raw_candidate), .limit(event_gate_limit), .base(event_gate_unused_base),
+        .raw_descriptor({16'h0000, event_gate_word2_q, event_gate_word1_q, event_gate_word0_q}), .limit(event_gate_limit), .base(event_gate_unused_base),
         .access_rights(event_gate_access_rights), .descriptor_class(event_gate_class),
-        .descriptor_valid(event_gate_valid), .reserved_form_valid(event_gate_reserved_valid),
+        .descriptor_valid(event_gate_low_valid), .reserved_form_valid(event_gate_low_reserved_valid),
         .present(event_gate_present), .segment(event_gate_unused_segment), .executable(event_gate_unused_executable),
         .conforming(event_gate_unused_conforming), .expand_down(event_gate_unused_expand_down),
         .readable(event_gate_unused_readable), .writable(event_gate_unused_writable), .accessed(event_gate_unused_accessed),
@@ -1165,34 +1175,52 @@ module spk286_micro_executor (
                                  temporary_valid_q[1] && (tmp1_q[1:0] > protected_cpl);
     assign iret_outer_pop = iret_outer_frame_operation && iret_outer_required && iret_outer_phase_q < 2'd2;
     assign iret_outer_pop_done = iret_outer_pop && operand_done;
-    assign call_gate_frame_bytes = 17'd8 + {11'd0, call_gate_parameter_count_q, 1'b0} +
-                                   (event_gate_candidate_valid_q ? 17'd2 : 17'd0) +
-                                   ((event_gate_candidate_valid_q && event_error_valid) ? 17'd2 : 17'd0);
+    // Count in words before widening: 4 base words, up to 31 parameters,
+    // and up to 2 event words. Keep the final byte arithmetic at 17 bits.
+    assign call_gate_frame_words = {1'b0, call_gate_parameter_count_q} +
+                                   (event_gate_candidate_valid_q ?
+                                    (event_error_valid ? 6'd6 : 6'd5) : 6'd4);
+    assign call_gate_frame_bytes = {10'd0, call_gate_frame_words, 1'b0};
+    // For N != 0, 2*N-1 is {N-1, 1}. The wrapped N=0 value is unused;
+    // the parameter-range predicate below retains its explicit N!=0 guard.
+    assign call_parameter_last_word = call_gate_parameter_count_q - 5'd1;
+    assign call_parameter_last_byte = {1'b0, stack_pointer} +
+                                      {11'd0, call_parameter_last_word, 1'b1};
+    logic [16:0] iret_outer_sum_bits, iret_outer_carry_bits, iret_outer_last_byte;
+    // Carry-save reduction of SP + allocation + 3, followed by one wide adder.
+    // Keep the original 17-bit wrapping arithmetic, including arbitrary state.
+    assign iret_outer_sum_bits = {1'b0, return_stack_pointer} ^
+                                 {1'b0, allocation_valid_q ? allocation_q : 16'd0} ^ 17'd3;
+    assign iret_outer_carry_bits = (({1'b0, return_stack_pointer} &
+                                    {1'b0, allocation_valid_q ? allocation_q : 16'd0}) |
+                                   (({1'b0, return_stack_pointer} |
+                                     {1'b0, allocation_valid_q ? allocation_q : 16'd0}) & 17'd3)) << 1;
+    assign iret_outer_last_byte = iret_outer_sum_bits + iret_outer_carry_bits;
     assign iret_outer_range_fault = iret_outer_frame_operation && iret_outer_required &&
                                     iret_outer_phase_q == 2'd0 &&
                                     (stack_segment_access[2] ?
                                       ({1'b0, return_stack_pointer} <= {1'b0, stack_segment_limit} ||
-                                       ({1'b0, return_stack_pointer} + {1'b0, allocation_valid_q ? allocation_q : 16'd0} + 17'd3 > 17'h0FFFF)) :
-                                      ({1'b0, return_stack_pointer} + {1'b0, allocation_valid_q ? allocation_q : 16'd0} + 17'd3 >
+                                       (iret_outer_last_byte > 17'h0FFFF)) :
+                                      (iret_outer_last_byte >
                                        {1'b0, stack_segment_limit}));
     // Restoring outer SS:SP does not access the new stack. RETF validates
     // the source frame and target descriptor; a subsequent stack access
     // checks its own range. In particular, an empty stack may have
     // SP=limit+1, and RETF's immediate adjustment wraps at 16 bits.
+    // The explicit SP<frame test handles subtraction underflow. Compare
+    // SP with limit+frame directly; that sum fits in 17 bits (frame<=74).
     assign call_stack_range_fault = check_call_frame && (protected_msw[0] || !event_active) &&
                                    (call_gate_outer_required ?
                                     (!call_stack_ready_q ||
                                      {1'b0, call_stack_sp_q} < call_gate_frame_bytes ||
                                      (call_ss_access_q[2] ?
-                                      ({1'b0, call_stack_sp_q} - call_gate_frame_bytes <= {1'b0, call_ss_limit_q} ||
-                                       ({1'b0, call_stack_sp_q} - call_gate_frame_bytes > 17'h0FFFF)) :
-                                      ({1'b0, call_stack_sp_q} - 17'd2 > {1'b0, call_ss_limit_q})) ||
+                                      ({1'b0, call_stack_sp_q} <= {1'b0, call_ss_limit_q} + call_gate_frame_bytes) :
+                                      ({1'b0, call_stack_sp_q} > {1'b0, call_ss_limit_q} + 17'd2)) ||
                                      (call_gate_parameter_count_q != 5'd0 &&
                                       (stack_segment_access[2] ?
                                        ({1'b0, stack_pointer} <= {1'b0, stack_segment_limit} ||
-                                        ({1'b0, stack_pointer} + {11'd0, call_gate_parameter_count_q, 1'b0} - 17'd1 > 17'h0FFFF)) :
-                                       ({1'b0, stack_pointer} + {11'd0, call_gate_parameter_count_q, 1'b0} - 17'd1 >
-                                        {1'b0, stack_segment_limit}))) ) :
+                                        call_parameter_last_byte[16]) :
+                                       (call_parameter_last_byte > {1'b0, stack_segment_limit}))) ) :
                                     (stack_pointer[0] && stack_pointer < 16'd4));
     assign call_gate_stack_switch_begin = call_gate_stack_switch_operation && call_gate_outer_required &&
                                           !call_gate_stack_switch_active_q;

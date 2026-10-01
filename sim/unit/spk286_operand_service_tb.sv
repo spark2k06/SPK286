@@ -5,7 +5,7 @@ module spk286_operand_service_tb;
     logic clk=0, reset=1, cancel=0;
     logic request_valid=0, request_write=0, select_rm=0;
     logic [15:0] write_data=0;
-    wire done;
+    wire done, unlimited_memory_done;
     wire [15:0] read_data;
     logic [127:0] register_state;
     logic [2:0] reg_index=0, rm_index=0;

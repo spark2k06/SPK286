@@ -191,7 +191,8 @@ module spk286 (
     logic address_override, implicit_lock;
     logic [15:0] address_offset;
     logic operand_request, operand_write, operand_select_rm, operand_done, operand_byte;
-    logic [15:0] operand_write_data, operand_read_data;
+    logic unlimited_memory_done, executor_operand_done;
+    logic [15:0] operand_write_data, operand_read_data, executor_operand_read_data;
     logic operand_gpr_write_en, operand_gpr_write_byte;
     logic [2:0] operand_gpr_write_index;
     logic [15:0] operand_gpr_write_data;
@@ -841,6 +842,16 @@ module spk286 (
         .retired(raw_retired), .fault(microcode_fault)
     );
 
+    // These serialized protected services always select a memory operand.
+    // Bypass the general register/byte mux on their response data, retaining
+    // the operand service's existing admission/completion handshake.
+    assign executor_operand_read_data = (protected_descriptor_access || protected_tss_access || protected_event_access) ?
+                                        memory_read_data : operand_read_data;
+    // These three active services unconditionally select a memory request at
+    // offset zero with limit FFFF, and cannot raise ordinary access faults.
+    // Remove that redundant late qualification from descriptor/event responses.
+    assign executor_operand_done = (protected_descriptor_access || protected_tss_access || protected_event_access) ?
+                                   unlimited_memory_done : operand_done;
     spk286_micro_executor micro_executor (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start),
         .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .operation_retire(operation_retire), .dispatch_request(dispatch_request),
@@ -853,8 +864,8 @@ module spk286 (
         .architectural_ip(debug_ip), .stack_pointer(register_state[64 +: 16]), .count_value(register_state[16 +: 16]),
         .push_enabled(event_active || push_enabled), .push_return_ip(!event_active && push_return_ip), .branch_taken(branch_taken), .decrement_count(decrement_count),
         .redirect_request(internal_redirect), .redirect_target(internal_target), .redirect_ready(1'b1),
-        .operand_write_data(operand_write_data), .operand_done(operand_done),
-        .operand_gpr_write_byte(operand_gpr_write_byte), .operand_read_data(operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
+        .operand_write_data(operand_write_data), .operand_done(executor_operand_done),
+        .operand_gpr_write_byte(operand_gpr_write_byte), .operand_read_data(executor_operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
         .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
         .gpr_write_byte(internal_gpr_write_byte), .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
@@ -1007,7 +1018,7 @@ module spk286 (
     spk286_operand operand (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
-        .done(operand_done), .read_data(operand_read_data), .register_state(register_state),
+        .done(operand_done), .unlimited_memory_done(unlimited_memory_done), .read_data(operand_read_data), .register_state(register_state),
         .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !protected_descriptor_access && !protected_tss_access && !protected_call_stack_access && !protected_event_access && !address_override && !stack_request && !vector_request && !io_transfer),
         .physical_address(operand_physical_address),
         .offset((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'd0 : service_offset), .segment_limit((protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 16'hFFFF : (vector_request ? 16'hFFFF : segment_limit)),
@@ -1106,9 +1117,19 @@ module spk286 (
     // family carry one 16-bit error word.  Non-selector protected faults use
     // the architecturally defined zero word until their individual source
     // classification is extended.
-    assign fault_error_valid = protected_msw[0] &&
-                                (fault_vector == 8'd8 || fault_vector == 8'd10 || fault_vector == 8'd11 ||
-                                 fault_vector == 8'd12 || fault_vector == 8'd13);
+    // Classify each source before the late vector-priority mux. Preserve
+    // exactly the same priority, including simultaneous diagnostic faults.
+    logic loadall_fault_has_error, system_fault_has_error;
+    assign loadall_fault_has_error = loadall_fault_vector == 8'd8 || loadall_fault_vector == 8'd10 ||
+                                    loadall_fault_vector == 8'd11 || loadall_fault_vector == 8'd12 || loadall_fault_vector == 8'd13;
+    assign system_fault_has_error = system_fault_vector == 8'd8 || system_fault_vector == 8'd10 ||
+                                   system_fault_vector == 8'd11 || system_fault_vector == 8'd12 || system_fault_vector == 8'd13;
+    assign fault_error_valid = protected_msw[0] && !(invalid_form || invalid_opcode_fault) &&
+                              (loadall_fault ? loadall_fault_has_error :
+                               system_fault ? system_fault_has_error :
+                               (protected_access_ss_fault ||
+                                ((system_limit_fault || range_fault) && protected_msw[0] && service_segment == 2'd2) ||
+                                protected_access_fault || protected_fetch_fault || (!bounds_fault && !arithmetic_fault)));
     assign fault_error_code = system_fault ? system_fault_error_code :
                               loadall_fault ? loadall_fault_error_code : 16'd0;
     assign software_taken = software_request && (opcode_q != 8'hCE || debug_flags[11]);
