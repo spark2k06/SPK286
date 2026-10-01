@@ -61,12 +61,12 @@ PROBES = (('pusha-original-sp',
   'counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] : dispatch_entry',
   'counter_branch_request ? (counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] ^ '
   "spk286_microcode_pkg::MC_ADDR_WIDTH'(1)) : dispatch_entry",
-  'ENTER zero/one-level branch reaches correct frame and stack commits'),
+  'ENTER uses SS parent addresses and frame pointer in sequence'),
  ('enter-early-sp',
   'spk286_micro_executor',
   'spk286_stack_frame_lifecycle',
-  'assign stack_arch_write = stack_write_sp && !stack_cursor_valid_q;',
-  'assign stack_arch_write = stack_write_sp;',
+  'assign stack_arch_write = stack_write_sp && !(stack_cursor_valid_q || begin_return_cursor);',
+  'assign stack_arch_write = stack_write_sp && !begin_return_cursor;',
   'ENTER preserves architectural SP'),
  ('enter-cancel-cursor',
   'spk286_micro_executor',
@@ -107,8 +107,9 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'stack-frame-audit'
     output.mkdir(parents=True, exist_ok=True)
+    packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
     sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+               *packages, *(p for p in sorted((ROOT/'rtl').glob('*.sv')) if p not in packages)]
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

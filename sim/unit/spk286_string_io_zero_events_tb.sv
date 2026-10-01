@@ -102,7 +102,7 @@ module spk286_string_io_zero_events_tb;
         memory[2048]=8'hF7;memory[2049]=8'hD0;memory[2050]=8'hF4;
         for(integer v=0;v<14;v++)begin memory[v*4]=0;memory[v*4+1]=6;memory[v*4+2]=8'h40;memory[v*4+3]=0;end
         memory[140]=0;memory[141]=6;memory[142]=8'h40;memory[143]=0;memory[2560]=8'hCF;memory[2561]=8'hF4;
-        entry_length=8;
+        entry_length=9;
         case(variant%4)
             0:entry_address=int'(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_BYTE);
             1:entry_address=int'(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_WORD);

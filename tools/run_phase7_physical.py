@@ -11,6 +11,14 @@ from tools.run_singlestep import SUPPORTED_OPCODES, run_opcode, SingleStepRunner
 from tools.singlestep import load_revocation_list
 
 
+def required_opcodes(forms_path=Path('docs/phase7_forms.json')):
+    """Keep this pinned gate distinct from later compatibility extensions."""
+    require_complete(forms_path)
+    forms=json.loads(forms_path.read_text())
+    required={form['opcode'] for form in forms['forms'] if form['scope']=='required'}
+    return tuple(opcode for opcode in SUPPORTED_OPCODES if opcode in required)
+
+
 def run_all(opcodes,execute):
     records=[];totals=Counter();errors=[]
     keys=('discovered','revoked','prefix_skipped','exception_skipped','selection_skipped','executed','passed','failed')
@@ -34,7 +42,7 @@ def main():
     parser.add_argument('--repo',type=Path,required=True)
     parser.add_argument('--executable',type=Path,required=True)
     parser.add_argument('--build-dir',type=Path,required=True)
-    args=parser.parse_args();require_complete()
+    args=parser.parse_args();opcodes=required_opcodes()
     if args.build_dir.exists():raise ValueError('choose a previously absent physical output directory')
     if not args.executable.is_file():raise ValueError('missing simulator executable')
     args.build_dir.mkdir(parents=True);logs=args.build_dir/'family-logs';logs.mkdir()
@@ -44,7 +52,7 @@ def main():
     def execute(opcode):
         with (logs/(opcode+'.log')).open('w') as log,contextlib.redirect_stdout(log),contextlib.redirect_stderr(log):
             return run_opcode(opcode,args.repo,revoked,args,args.build_dir,args.executable.resolve())
-    summary=run_all(SUPPORTED_OPCODES,execute)
+    summary=run_all(opcodes,execute)
     from tools.phase7_capture_admission import CAPTURE, validate_dispositions
     from tools.phase6_reports import unique_object
     summary['required_files']=307;summary['required_population']=1386997;summary['required_executed']=1386996

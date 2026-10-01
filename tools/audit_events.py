@@ -45,7 +45,7 @@ PROBES=(
     ('fault-retirement','spk286','spk286_event_instructions',
      '(event_completed && event_software)','event_completed','fault versus instruction retirement'),
     ('restore-system-bits','spk286_micro_executor','spk286_event_instructions',
-     "iret_commit ? 16'h0FD5 :","iret_commit ? 16'h7FD5 :",'exact CS IP FLAGS'),
+     "iret_commit ? stack_flags_write_mask :","iret_commit ? 16'h7FD5 :",'exact CS IP FLAGS'),
     ('iret-cache','spk286','spk286_event_instructions',
      '.load_selector(context_commit ? context_cs : internal_segment_write ? internal_segment_data : segment_load_selector)',
      '.load_selector(internal_segment_write ? internal_segment_data : segment_load_selector)','exact CS IP FLAGS'),

@@ -2042,8 +2042,8 @@ module spk286_protected_expand_down_tb;
         end
         // Exhaustive CPL1 data/stack selector matrix.  For DS and ES the
         // effective privilege is max(CPL,RPL) <= DPL; SS additionally
-        // requires DPL == CPL and RPL == CPL.  Present/type faults are kept
-        // distinct from privilege faults to validate their precedence.
+        // requires DPL == CPL and RPL == CPL. Type/privilege checks precede
+        // presence, including descriptors with multiple invalid conditions.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
             run_segment_load_case(8'hD8, 16'h0040 + rpl, rpl > 1, 8'h0D, 16'h0000,
                                   "CPL1 DS DPL1 writable data RPL matrix");
@@ -2051,7 +2051,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL1 DS DPL2 writable data RPL matrix");
             run_segment_load_case(8'hD8, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL1 DS DPL3 writable data RPL matrix");
-            run_segment_load_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_segment_load_case(8'hD8, 16'h0058 + rpl, 1'b1, rpl > 1 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL1 DS not-present selector matrix");
             run_segment_load_case(8'hD8, 16'h0060 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL1 DS non-readable code rejection");
@@ -2064,7 +2064,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL1 ES DPL2 writable data RPL matrix");
             run_segment_load_case(8'hC0, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL1 ES DPL3 writable data RPL matrix");
-            run_segment_load_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_segment_load_case(8'hC0, 16'h0058 + rpl, 1'b1, rpl > 1 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL1 ES not-present selector matrix");
             run_segment_load_case(8'hC0, 16'h0060 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL1 ES non-readable code rejection");
@@ -2077,7 +2077,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL1 SS DPL2 rejection");
             run_segment_load_case(8'hD0, 16'h0050 + rpl, 1'b1, 8'h0D, 16'h0011,
                                   "CPL1 SS DPL3 rejection");
-            run_segment_load_case(8'hD0, 16'h0058 + rpl, 1'b1, 8'h0C, 16'h0011,
+            run_segment_load_case(8'hD0, 16'h0058 + rpl, 1'b1, rpl != 1 ? 8'h0D : 8'h0C, 16'h0011,
                                   "CPL1 SS not-present selector matrix");
             run_segment_load_case(8'hD0, 16'h0060 + rpl, 1'b1, 8'h0D, 16'h0011,
                                   "CPL1 SS non-readable code rejection");
@@ -2098,7 +2098,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL0 DS DPL2 writable data RPL matrix");
             run_cpl0_segment_case(8'hD8, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL0 DS DPL3 writable data RPL matrix");
-            run_cpl0_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl0_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, rpl > 1 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL0 DS not-present selector matrix");
             run_cpl0_segment_case(8'hD8, 16'h0060 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL0 DS non-readable code rejection");
@@ -2115,7 +2115,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL0 ES DPL2 writable data RPL matrix");
             run_cpl0_segment_case(8'hC0, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL0 ES DPL3 writable data RPL matrix");
-            run_cpl0_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl0_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, rpl > 1 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL0 ES not-present selector matrix");
             run_cpl0_segment_case(8'hC0, 16'h0060 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL0 ES non-readable code rejection");
@@ -2132,7 +2132,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL0 SS DPL2 rejection");
             run_cpl0_segment_case(8'hD0, 16'h0050 + rpl, 1'b1, 8'h0D, 16'h0020,
                                   "CPL0 SS DPL3 rejection");
-            run_cpl0_segment_case(8'hD0, 16'h00A0 + rpl, 1'b1, 8'h0C, 16'h0020,
+            run_cpl0_segment_case(8'hD0, 16'h00A0 + rpl, 1'b1, rpl != 0 ? 8'h0D : 8'h0C, 16'h0020,
                                   "CPL0 SS not-present selector matrix");
             run_cpl0_segment_case(8'hD0, 16'h0098 + rpl, 1'b1, 8'h0D, 16'h0020,
                                   "CPL0 SS non-readable code rejection");
@@ -2187,17 +2187,17 @@ module spk286_protected_expand_down_tb;
                                   "CPL2 DS DPL2 non-readable code rejection");
             run_cpl2_segment_case(8'hD8, 16'h00C0 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 DS DPL3 non-readable code rejection");
-            run_cpl2_segment_case(8'hD8, 16'h00A0 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hD8, 16'h00A0 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 DS DPL0 not-present data matrix");
-            run_cpl2_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 DS DPL1 not-present data matrix");
-            run_cpl2_segment_case(8'hD8, 16'h0130 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hD8, 16'h0130 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL2 DS DPL2 not-present data matrix");
             run_cpl2_segment_case(8'hD8, 16'h00B8 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL2 DS DPL3 not-present data matrix");
-            run_cpl2_segment_case(8'hD8, 16'h00E8 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hD8, 16'h00E8 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 DS DPL1 not-present code matrix");
-            run_cpl2_segment_case(8'hD8, 16'h00F8 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hD8, 16'h00F8 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL2 DS DPL2 not-present code matrix");
             run_cpl2_segment_case(8'hD8, 16'h00F0 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL2 DS DPL3 not-present code matrix");
@@ -2244,17 +2244,17 @@ module spk286_protected_expand_down_tb;
                                   "CPL2 ES DPL2 non-readable code rejection");
             run_cpl2_segment_case(8'hC0, 16'h00C0 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 ES DPL3 non-readable code rejection");
-            run_cpl2_segment_case(8'hC0, 16'h00A0 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hC0, 16'h00A0 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 ES DPL0 not-present data matrix");
-            run_cpl2_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 ES DPL1 not-present data matrix");
-            run_cpl2_segment_case(8'hC0, 16'h0130 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hC0, 16'h0130 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL2 ES DPL2 not-present data matrix");
             run_cpl2_segment_case(8'hC0, 16'h00B8 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL2 ES DPL3 not-present data matrix");
-            run_cpl2_segment_case(8'hC0, 16'h00E8 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hC0, 16'h00E8 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL2 ES DPL1 not-present code matrix");
-            run_cpl2_segment_case(8'hC0, 16'h00F8 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl2_segment_case(8'hC0, 16'h00F8 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B, 16'h0000,
                                   "CPL2 ES DPL2 not-present code matrix");
             run_cpl2_segment_case(8'hC0, 16'h00F0 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL2 ES DPL3 not-present code matrix");
@@ -2301,13 +2301,13 @@ module spk286_protected_expand_down_tb;
                                   "CPL2 SS DPL2 non-readable code rejection");
             run_cpl2_segment_case(8'hD0, 16'h00C0 + rpl, 1'b1, 8'h0D, 16'h004A,
                                   "CPL2 SS DPL3 non-readable code rejection");
-            run_cpl2_segment_case(8'hD0, 16'h00A0 + rpl, 1'b1, 8'h0C, 16'h004A,
+            run_cpl2_segment_case(8'hD0, 16'h00A0 + rpl, 1'b1, 8'h0D, 16'h004A,
                                   "CPL2 SS DPL0 not-present data matrix");
-            run_cpl2_segment_case(8'hD0, 16'h0058 + rpl, 1'b1, 8'h0C, 16'h004A,
+            run_cpl2_segment_case(8'hD0, 16'h0058 + rpl, 1'b1, 8'h0D, 16'h004A,
                                   "CPL2 SS DPL1 not-present data matrix");
-            run_cpl2_segment_case(8'hD0, 16'h0130 + rpl, 1'b1, 8'h0C, 16'h004A,
+            run_cpl2_segment_case(8'hD0, 16'h0130 + rpl, 1'b1, rpl != 2 ? 8'h0D : 8'h0C, 16'h004A,
                                   "CPL2 SS DPL2 not-present data matrix");
-            run_cpl2_segment_case(8'hD0, 16'h00B8 + rpl, 1'b1, 8'h0C, 16'h004A,
+            run_cpl2_segment_case(8'hD0, 16'h00B8 + rpl, 1'b1, 8'h0D, 16'h004A,
                                   "CPL2 SS DPL3 not-present data matrix");
             run_cpl2_segment_case(8'hD0, 16'h0148 + rpl, 1'b1, 8'h0D, 16'h004A,
                                   "CPL2 SS GDT-limit overflow matrix");
@@ -2315,8 +2315,8 @@ module spk286_protected_expand_down_tb;
 
         // CPL3 is reached through the CPL1->CPL0 gate followed by an actual
         // outer IRET.  At this level only DPL3 data is usable; SS additionally
-        // requires RPL3 and writable data, while not-present descriptors keep
-        // their #NP/#SS distinction.
+        // requires RPL3 and writable data. Only otherwise valid absent
+        // descriptors request #NP/#SS after the privilege checks.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
             run_cpl3_segment_case(8'hD8, 16'h0088 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL3 DS DPL0 rejection");
@@ -2326,7 +2326,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL3 DS DPL2 rejection");
             run_cpl3_segment_case(8'hD8, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL3 DS DPL3 writable data RPL matrix");
-            run_cpl3_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl3_segment_case(8'hD8, 16'h0058 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL3 DS DPL1 not-present rejection");
             run_cpl3_segment_case(8'hD8, 16'h00B8 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL3 DS DPL3 not-present selector matrix");
@@ -2347,7 +2347,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL3 ES DPL2 rejection");
             run_cpl3_segment_case(8'hC0, 16'h0050 + rpl, 1'b0, 8'h00, 16'h0000,
                                   "CPL3 ES DPL3 writable data RPL matrix");
-            run_cpl3_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0B, 16'h0000,
+            run_cpl3_segment_case(8'hC0, 16'h0058 + rpl, 1'b1, 8'h0D, 16'h0000,
                                   "CPL3 ES DPL1 not-present rejection");
             run_cpl3_segment_case(8'hC0, 16'h00B8 + rpl, 1'b1, 8'h0B, 16'h0000,
                                   "CPL3 ES DPL3 not-present selector matrix");
@@ -2368,7 +2368,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL3 SS DPL2 rejection");
             run_cpl3_segment_case(8'hD0, 16'h0050 + rpl, rpl != 3, 8'h0D, 16'h0053,
                                   "CPL3 SS DPL3 writable data exact RPL matrix");
-            run_cpl3_segment_case(8'hD0, 16'h00B8 + rpl, 1'b1, 8'h0C, 16'h0053,
+            run_cpl3_segment_case(8'hD0, 16'h00B8 + rpl, 1'b1, rpl != 3 ? 8'h0D : 8'h0C, 16'h0053,
                                   "CPL3 SS DPL3 not-present selector matrix");
             run_cpl3_segment_case(8'hD0, 16'h00C0 + rpl, 1'b1, 8'h0D, 16'h0053,
                                   "CPL3 SS DPL3 non-readable code rejection");
@@ -2509,20 +2509,20 @@ module spk286_protected_expand_down_tb;
                             "CPL3 software INT beyond IDTR limit raises #GP");
 
         // PM3 target privilege/RPL matrix. The event target selector keeps
-        // the descriptor index fixed while RPL varies, so successful cases
-        // also verify the architectural CS-RPL normalization rules.
+        // the descriptor index fixed while RPL varies. Target RPL is ignored;
+        // successful cases verify architectural CS-RPL normalization.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
             run_cpl0_event_matrix_case(16'h0018 + rpl, 8'h86, 16'h0700,
-                                       16'h0018, rpl != 0, 8'h0D,
+                                       16'h0018, 1'b0, 8'h00,
                                        16'hC000 + rpl,
                                        "CPL0 DPL0 event target RPL matrix");
 
             run_cpl1_event_matrix_case(16'h0018 + rpl, 8'hA6, 16'h0700,
-                                       16'h0018, rpl != 0, 8'h0D,
+                                       16'h0018, 1'b0, 8'h00,
                                        16'hC100 + rpl,
                                        "CPL1 outer DPL0 event target RPL matrix");
             run_cpl1_event_matrix_case(16'h0008 + rpl, 8'hA6, 16'h0700,
-                                       16'h0009, rpl > 1, 8'h0D,
+                                       16'h0009, 1'b0, 8'h00,
                                        16'hC110 + rpl,
                                        "CPL1 same-level DPL1 event target RPL matrix");
             run_cpl1_event_matrix_case(16'h00D8 + rpl, 8'hA6, 16'h0700,
@@ -2535,15 +2535,15 @@ module spk286_protected_expand_down_tb;
                                        "CPL1 DPL3 event target rejection matrix");
 
             run_cpl3_event_matrix_case(16'h0018 + rpl, 8'hE6, 16'h0700,
-                                       16'h0018, rpl != 0, 8'h0D,
+                                       16'h0018, 1'b0, 8'h00,
                                        16'hC300 + rpl,
                                        "CPL3 outer DPL0 event target RPL matrix");
             run_cpl3_event_matrix_case(16'h0008 + rpl, 8'hE6, 16'h0700,
-                                       16'h0009, rpl != 1, 8'h0D,
+                                       16'h0009, 1'b0, 8'h00,
                                        16'hC310 + rpl,
                                        "CPL3 outer DPL1 event target RPL matrix");
             run_cpl3_event_matrix_case(16'h00D8 + rpl, 8'hE6, 16'h0700,
-                                       16'h00DA, rpl != 2, 8'h0D,
+                                       16'h00DA, 1'b0, 8'h00,
                                        16'hC320 + rpl,
                                        "CPL3 outer DPL2 event target RPL matrix");
             run_cpl3_event_matrix_case(16'h00A8 + rpl, 8'hE6, 16'h0700,
@@ -2557,15 +2557,15 @@ module spk286_protected_expand_down_tb;
         // invalid outward privilege, and conforming DPL0 code retains CPL2.
         for (logic [2:0] cpl2_rpl = 3'd0; cpl2_rpl < 3'd4; cpl2_rpl = cpl2_rpl + 3'd1) begin
             run_cpl2_event_matrix_case(16'h0018 + cpl2_rpl, 8'hC6, 16'h0700,
-                                       16'h0018, cpl2_rpl != 3'd0, 8'h0D,
+                                       16'h0018, 1'b0, 8'h00,
                                        16'hC200 + cpl2_rpl,
                                        "CPL2 outer DPL0 event target RPL matrix");
             run_cpl2_event_matrix_case(16'h0008 + cpl2_rpl, 8'hC6, 16'h0700,
-                                       16'h0009, cpl2_rpl != 3'd1, 8'h0D,
+                                       16'h0009, 1'b0, 8'h00,
                                        16'hC210 + cpl2_rpl,
                                        "CPL2 outer DPL1 event target RPL matrix");
             run_cpl2_event_matrix_case(16'h00D8 + cpl2_rpl, 8'hC6, 16'h0700,
-                                       16'h00DA, cpl2_rpl > 3'd2, 8'h0D,
+                                       16'h00DA, 1'b0, 8'h00,
                                        16'hC220 + cpl2_rpl,
                                        "CPL2 same-level DPL2 event target RPL matrix");
             run_cpl2_event_matrix_case(16'h00A8 + cpl2_rpl, 8'hC6, 16'h0700,
@@ -2573,7 +2573,7 @@ module spk286_protected_expand_down_tb;
                                        16'hC230 + cpl2_rpl,
                                        "CPL2 DPL3 event target rejection matrix");
             run_cpl2_event_matrix_case(16'h00E0 + cpl2_rpl, 8'hC6, 16'h0700,
-                                       16'h00E2, cpl2_rpl > 3'd2, 8'h0D,
+                                       16'h00E2, 1'b0, 8'h00,
                                        16'hC240 + cpl2_rpl,
                                        "CPL2 non-readable DPL2 event target RPL matrix");
             run_cpl2_event_matrix_case(16'h00C8 + cpl2_rpl, 8'hC6, 16'h0700,
@@ -2863,7 +2863,7 @@ module spk286_protected_expand_down_tb;
                                           16'h00DA, 1'b0, 8'h00, 16'h00DA,
                                           "CPL2 DPL3 same-level gate RPL matrix");
             run_cpl2_same_level_gate_case(16'h0120 + cpl2_gate_rpl, 8'h44,
-                                          16'h00DA, 1'b1, 8'h0B, 16'h00DA,
+                                          16'h00DA, 1'b1, cpl2_gate_rpl > 2 ? 8'h0D : 8'h0B, 16'h00DA,
                                           "CPL2 not-present same-level gate matrix");
             run_cpl2_same_level_gate_case(16'h0148 + cpl2_gate_rpl, 8'hC4,
                                           16'h00DA, 1'b1, 8'h0D, 16'h00DA,
@@ -2898,7 +2898,7 @@ module spk286_protected_expand_down_tb;
                                     "CPL0 DPL2 call gate RPL matrix");
             run_cpl0_call_gate_case(16'h0118 + rpl, 1'b0, 8'h00,
                                     "CPL0 DPL3 call gate RPL matrix");
-            run_cpl0_call_gate_case(16'h0120 + rpl, 1'b1, 8'h0B,
+            run_cpl0_call_gate_case(16'h0120 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B,
                                     "CPL0 not-present call gate matrix");
             run_cpl0_call_gate_case(16'h0148 + rpl, 1'b1, 8'h0D,
                                     "CPL0 call gate GDT-limit matrix");
@@ -2911,7 +2911,7 @@ module spk286_protected_expand_down_tb;
                                     "CPL1 DPL2 call gate RPL matrix");
             run_cpl1_call_gate_case(16'h0118 + rpl, 1'b0, 8'h00,
                                     "CPL1 DPL3 call gate RPL matrix");
-            run_cpl1_call_gate_case(16'h0120 + rpl, 1'b1, 8'h0B,
+            run_cpl1_call_gate_case(16'h0120 + rpl, 1'b1, rpl > 2 ? 8'h0D : 8'h0B,
                                     "CPL1 not-present call gate matrix");
             run_cpl1_call_gate_case(16'h0148 + rpl, 1'b1, 8'h0D,
                                     "CPL1 call gate GDT-limit matrix");
@@ -2924,7 +2924,7 @@ module spk286_protected_expand_down_tb;
                                     "CPL3 DPL2 call gate rejection matrix");
             run_cpl3_call_gate_case(16'h0118 + rpl, 1'b0, 8'h00,
                                     "CPL3 DPL3 call gate RPL matrix");
-            run_cpl3_call_gate_case(16'h0120 + rpl, 1'b1, 8'h0B,
+            run_cpl3_call_gate_case(16'h0120 + rpl, 1'b1, 8'h0D,
                                     "CPL3 not-present call gate matrix");
             run_cpl3_call_gate_case(16'h0148 + rpl, 1'b1, 8'h0D,
                                     "CPL3 call gate GDT-limit matrix");
@@ -2944,7 +2944,7 @@ module spk286_protected_expand_down_tb;
                                     8'h0D, "CPL2 DPL2 call gate RPL matrix");
             run_cpl2_call_gate_case(16'h0118 + cpl2_rpl, 1'b0, 8'h00,
                                     "CPL2 DPL3 call gate RPL matrix");
-            run_cpl2_call_gate_case(16'h0120 + cpl2_rpl, 1'b1, 8'h0B,
+            run_cpl2_call_gate_case(16'h0120 + cpl2_rpl, 1'b1, cpl2_rpl > 2 ? 8'h0D : 8'h0B,
                                     "CPL2 not-present call gate matrix");
             run_cpl2_call_gate_case(16'h0148 + cpl2_rpl, 1'b1, 8'h0D,
                                     "CPL2 call gate GDT-limit matrix");

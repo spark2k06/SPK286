@@ -197,6 +197,57 @@ module spk286_task_segment_service_tb;
         start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0); run_to_end();
         check(fault && fault_vector == 8'd11 && fault_error_code == 16'h0018 && !commit_valid,
               "task absent readable conforming ES raises #NP");
+        // H13: within each segment, access/type/privilege precedes presence.
+        // The segment order remains SS, CS, ES, DS. Presence of CS must not
+        // be folded into its privilege predicate (valid absent CS is #NP).
+        for (integer cpl=0; cpl<4; cpl++)
+            for (integer slot=0; slot<4; slot++)
+                for (integer bad=0; bad<3; bad++)
+                    for (integer p=0; p<2; p++)
+                        if (bad!=2 || p==0) begin
+                            task_segments={16'h0048 | 16'(cpl),16'h0038 | 16'(cpl),
+                                           16'h0028 | 16'(cpl),16'h0018 | 16'(cpl)};
+                            write_descriptor('h118,0,16'hFFFF,8'h92 | (8'(cpl)<<5));
+                            write_descriptor('h128,0,16'hFFFF,8'h9A | (8'(cpl)<<5));
+                            write_descriptor('h138,0,16'hFFFF,8'h92 | (8'(cpl)<<5));
+                            write_descriptor('h148,0,16'hFFFF,8'h92 | (8'(cpl)<<5));
+                            if (bad==0)
+                                write_descriptor('h118+slot*16,0,16'hFFFF,
+                                                 (slot==1 ? 8'h12 : slot==2 ? 8'h10 : 8'h18) |
+                                                 (8'(cpl)<<5) | (p!=0 ? 8'h80 : 0));
+                            else if (bad==1) begin
+                                if (slot==1 || slot==2)
+                                    write_descriptor('h118+slot*16,0,16'hFFFF,
+                                                     (slot==1 ? 8'h1A : 8'h12) |
+                                                     ((8'(cpl)^8'd1)<<5) | (p!=0 ? 8'h80 : 0));
+                                else begin
+                                    if (cpl==0) task_segments[slot*16 +: 2]=2'd1;
+                                    write_descriptor('h118+slot*16,0,16'hFFFF,
+                                                     8'h12 | ((cpl==0 ? 8'd0 : 8'(cpl-1))<<5) | (p!=0 ? 8'h80 : 0));
+                                end
+                            end else
+                                write_descriptor('h118+slot*16,0,16'hFFFF,
+                                                 (slot==1 ? 8'h1A : 8'h12) | (8'(cpl)<<5));
+                            reset=1; tick(0); reset=0; start=1; tick(0); start=0; run_to_end();
+                            check(fault && !commit_valid && fault_vector==(bad==2 ? (slot==2 ? 8'd12 : 8'd11) : 8'd10) &&
+                                  // This service publishes the raw selector;
+                                  // the CPU executor normalizes RPL/EXT (H12).
+                                  fault_error_code==((16'h0018+16'(slot*16)) |
+                                                    (bad==1 && slot!=1 && slot!=2 && cpl==0 ? 16'd1 : 16'(cpl))),
+                                  $sformatf("H13 task fault priority CPL=%0d slot=%0d bad=%0d P=%0d",cpl,slot,bad,p));
+                            check(!memory['h11D][0] && !memory['h12D][0] && !memory['h13D][0] && !memory['h14D][0],
+                                  "failed task descriptors do not set any Accessed bit");
+                        end
+        task_segments=64'h0048003800280018;
+        write_descriptor('h118,0,16'hFFFF,8'h12); // Absent ES.
+        write_descriptor('h128,0,16'hFFFF,8'h12); // Invalid absent CS.
+        write_descriptor('h138,0,16'hFFFF,8'h12); // Valid absent SS wins.
+        write_descriptor('h148,0,16'hFFFF,8'h12);
+        reset=1; tick(0); reset=0; start=1; tick(0); start=0; run_to_end();
+        check(fault && fault_vector==12 && fault_error_code==16'h0038,"SS-before-CS priority survives mixed invalidity");
+        write_descriptor('h138,0,16'hFFFF,8'h92);
+        reset=1; tick(0); reset=0; start=1; tick(0); start=0; run_to_end();
+        check(fault && fault_vector==10 && fault_error_code==16'h0028,"invalid CS beats later absent ES/DS");
         $display("TASK_SEGMENT_SERVICE PASS: %0d checks", checks);
         $finish;
     end

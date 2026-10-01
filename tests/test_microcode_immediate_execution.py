@@ -24,7 +24,9 @@ class ImmediateExecutionMicrocodeTests(unittest.TestCase):
             pc = old['entries'][name] + offset
             self.assertEqual(expected[pc], before)
             expected[pc] = after
-        sources = {p.name: p.read_text() for p in (ROOT/'microcode/source').glob('*.mc')}
+        # This is the frozen format-23 contract, independent of later controls.
+        sources = {'format23.mc': canonical_source(active['words'], active['entries'],
+                    active['labels'], {int(k): v for k, v in active['branch_targets'].items()})}
         program = compile_sources(sources)
         artifacts = generate(program)
         words = read_generated_words(artifacts['spk286_microcode_pkg.sv'], artifacts['spk286_microcode_rom.sv'])

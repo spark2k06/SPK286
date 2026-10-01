@@ -1,4 +1,4 @@
-"""Audit encodings 1 through 21 using emitted RTL and canonical DSL reconstruction.
+"""Audit encodings 1 through 25 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a
 general Verilog parser or a new production ROM format. Entry/label sidecars are
@@ -68,6 +68,8 @@ STATEMENTS.update({131: 'IO_READ8 TMP1 -> TMP0', 132: 'IO_READ16 TMP1 -> TMP0', 
                    148: 'SYSTEM_LOAD_ACCESS', 149: 'SYSTEM_LOAD_LIMIT', 150: 'VALIDATE_CS'})
 STATEMENTS.update({166: 'SYSTEM_ARPL_CHECK', 167: 'SYSTEM_ARPL', 168: 'SYSTEM_CLTS', 169: 'TASK_SWITCH', 170: 'TASK_RETURN'})
 STATEMENTS.update({171: 'LOADALL', 172: 'CARRY_FILL8 TMP0'})
+STATEMENTS.update({193: 'CHECK_PROTECTED_MODE', 194: 'CHECK_SYSTEM_PRIVILEGE'})
+STATEMENTS.update({195: 'CHECK_IO_PRIVILEGE'})
 STATEMENTS.update({173: 'DECODE_ALU_RM16_REG16', 174: 'DECODE_ALU_REG16_RM16',
                    175: 'DECODE_ALU_RM8_REG8', 176: 'DECODE_ALU_REG8_RM8',
                    177: 'DECODE_MOV_RM16_REG16', 178: 'DECODE_MOV_REG16_RM16',
@@ -176,6 +178,10 @@ def read_generated_words(package: str, rom: str) -> tuple[int, ...]:
                          'FETCH_ALU_RM8_IMM8': 185, 'FETCH_MOV_DST16_IMM16': 186,
                          'FETCH_MOV_DST8_IMM8': 187, 'FETCH_MOV_RM16_IMM16': 188,
                          'FETCH_MOV_RM8_IMM8': 189})
+    if dimension('MC_FORMAT_VERSION') >= 24:
+        expected.update({'CHECK_PROTECTED_MODE': 193, 'CHECK_SYSTEM_PRIVILEGE': 194})
+    if dimension('MC_FORMAT_VERSION') >= 25:
+        expected.update({'CHECK_IO_PRIVILEGE': 195})
     if dimension('MC_FORMAT_VERSION') >= 16:
         expected.update({'BRANCH_REPEAT_EMPTY': 121, 'STEP_STRING_SOURCE': 122, 'STEP_STRING_DEST': 123, 'REPEAT_COUNT': 124, 'READ_STRING_TMP0': 125, 'READ_STRING_TMP1': 126, 'WRITE_STRING_TMP0': 127, 'BRANCH_REPEAT_CONTINUE': 128, 'READ_STRING_ACCUMULATOR': 129, 'WRITE_STRING_ACCUMULATOR': 130})
     if dimension('MC_FORMAT_VERSION') >= 14:
@@ -255,6 +261,10 @@ def canonical_source(words, entries, labels=None, branch_targets=None):
         version = 22
     if any(181 <= w <= 189 for w in words):
         version = 23
+    if any(w in (193, 194) for w in words):
+        version = 24
+    if 195 in words:
+        version = 25
     lines = [f"microcode_format {version}"]
     for address, word in enumerate(words[:used]):
         if address in by_address:
@@ -328,7 +338,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "build/microcode-audit")
     parser.add_argument("--contract", type=Path,
-                        default=ROOT / "tests/fixtures/microcode_immediate_execution.json")
+                        default=ROOT / "tests/fixtures/microcode_iopl_access.json")
     args = parser.parse_args()
     audit(args.output, args.contract)
 

@@ -149,7 +149,7 @@ module spk286_task_segment_service (
     logic segment_present_valid [0:3];
     always_comb begin
         target_cpl_valid = descriptor_valid[1] && descriptor_reserved_valid[1] &&
-                           descriptor_present[1] && descriptor_segment[1] &&
+                           descriptor_segment[1] &&
                            descriptor_executable[1] &&
                            ((descriptor_conforming[1] && descriptor_dpl[1] <= task_segments_q[17:16]) ||
                             (!descriptor_conforming[1] && descriptor_dpl[1] == task_segments_q[17:16]));
@@ -195,22 +195,22 @@ module spk286_task_segment_service (
         selected_fault_valid = 1'b0;
         selected_fault_index = 2'd0;
         selected_fault_vector = VECTOR_INVALID_TSS;
-        if (segment_missing[2]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd2; selected_fault_vector = VECTOR_STACK_FAULT;
-        end else if (segment_invalid[2]) begin
+        if (segment_invalid[2]) begin
             selected_fault_valid = 1'b1; selected_fault_index = 2'd2; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[1]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd1; selected_fault_vector = VECTOR_NOT_PRESENT;
+        end else if (segment_missing[2]) begin
+            selected_fault_valid = 1'b1; selected_fault_index = 2'd2; selected_fault_vector = VECTOR_STACK_FAULT;
         end else if (segment_invalid[1]) begin
             selected_fault_valid = 1'b1; selected_fault_index = 2'd1; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[0]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd0; selected_fault_vector = VECTOR_NOT_PRESENT;
+        end else if (segment_missing[1]) begin
+            selected_fault_valid = 1'b1; selected_fault_index = 2'd1; selected_fault_vector = VECTOR_NOT_PRESENT;
         end else if (segment_invalid[0]) begin
             selected_fault_valid = 1'b1; selected_fault_index = 2'd0; selected_fault_vector = VECTOR_INVALID_TSS;
-        end else if (segment_missing[3]) begin
-            selected_fault_valid = 1'b1; selected_fault_index = 2'd3; selected_fault_vector = VECTOR_NOT_PRESENT;
+        end else if (segment_missing[0]) begin
+            selected_fault_valid = 1'b1; selected_fault_index = 2'd0; selected_fault_vector = VECTOR_NOT_PRESENT;
         end else if (segment_invalid[3]) begin
             selected_fault_valid = 1'b1; selected_fault_index = 2'd3; selected_fault_vector = VECTOR_INVALID_TSS;
+        end else if (segment_missing[3]) begin
+            selected_fault_valid = 1'b1; selected_fault_index = 2'd3; selected_fault_vector = VECTOR_NOT_PRESENT;
         end
     end
 

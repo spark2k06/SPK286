@@ -101,7 +101,7 @@ module spk286_string_io_lifecycle_tb;
         memory[2048]=8'hF7;memory[2049]=8'hD0;memory[2050]=8'hF4;
         for(integer v=0;v<14;v++)begin memory[v*4]=0;memory[v*4+1]=6;memory[v*4+2]=8'h40;memory[v*4+3]=0;end
         memory[140]=0;memory[141]=6;memory[142]=8'h40;memory[143]=0;memory[2560]=8'hCF;memory[2561]=8'hF4;
-        entry_length=8;
+        entry_length=9; // Port capture, privilege check, then the iteration loop.
         case(variant%4)
             0:entry_address=int'(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_BYTE);
             1:entry_address=int'(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_WORD);
@@ -141,7 +141,7 @@ module spk286_string_io_lifecycle_tb;
         for(integer variant=0;variant<8;variant++)begin
             setup(variant,16'h08D7,16'h2000);
             for(integer iteration=0;iteration<2;iteration++)for(integer step=0;step<entry_length;step++)begin
-                if(iteration==0 || (step>1 && step!=entry_length-1))begin
+                if(iteration==0 || (step>2 && step!=entry_length-1))begin
                 delay_length=(step+variant)%3;reach(variant,step,iteration);
                 saved_pc=debug_micro_pc;saved_gpr=debug_gpr;saved_segments=debug_segment_selectors;saved_flags=debug_flags;execute_enable=0;
                 repeat(6)begin service();check(debug_micro_pc==saved_pc && debug_gpr==saved_gpr && debug_segment_selectors==saved_segments && debug_flags==saved_flags && retired_count==0 && deliveries==0,"pause at every string operation retains architecture");end
@@ -213,7 +213,7 @@ module spk286_string_io_lifecycle_tb;
             expected_progress(variant,0);expected_gpr[31:16]=0;execute_enable=1;finish_normal(variant,1,0);
             check(reads==0 && writes==0 && port_cycles==0 && port_requests==0,"zero count has no memory or port access");cases++;
         end
-        check(cases==376,"complete string lifetime and event matrix");
+        check(cases==400,"complete string lifetime and event matrix, including the new privilege operation");
         // A constant port responder cannot detect reusing the first INS value
         // while still issuing every IOR. Exercise data changes at one port.
         changing_input=1;
@@ -235,7 +235,7 @@ module spk286_string_io_lifecycle_tb;
                 cases++;
             end
         end
-        check(cases==400,"complete lifetime and changing input matrix");
+        check(cases==424,"complete lifetime and changing input matrix");
         $display("STRING_IO_LIFECYCLE PASS: %0d pause/cancel/reset/iteration/event/resumption cases; %0d checks",cases,checks);$finish;
     end
 endmodule

@@ -375,7 +375,12 @@ module spk286 (
     assign commit_allowed = !control_error;
     assign restart = redirect && commit_allowed;
     assign semantic_cancel = restart || event_cancel;
-    assign task_fault_external = event_active && !event_software;
+    // EXT identifies an event external to the program, not every exception.
+    // Intel 286 PRM B-1 includes INTR/NMI, single step and NPX #NM/#9;
+    // software INT and instruction-generated protection faults keep EXT=0.
+    assign task_fault_external = event_active &&
+                                 (event_kind == 3'd2 || event_kind == 3'd3 || event_kind == 3'd4 ||
+                                  (event_kind == 3'd1 && (debug_event_vector == 8'd7 || debug_event_vector == 8'd9)));
     assign stream_restart = restart || internal_redirect || event_cancel || loadall_commit_valid;
     assign stream_ip = restart ? ip_write_data :
                        (internal_redirect ? internal_target :
@@ -1083,7 +1088,7 @@ module spk286 (
                            invalid_opcode_fault || system_limit_fault || system_fault ||
                            protected_access_fault || protected_fetch_fault || demanded_code_fault || length_fault || loadall_fault;
     assign fault_vector = (invalid_form || invalid_opcode_fault) ? 8'd6 : loadall_fault ? loadall_fault_vector : system_fault ? system_fault_vector :
-                          (protected_access_ss_fault || (system_limit_fault && protected_msw[0] && service_segment == 2'd2)) ? 8'd12 : protected_access_fault ? 8'd13 :
+                          (protected_access_ss_fault || ((system_limit_fault || range_fault) && protected_msw[0] && service_segment == 2'd2)) ? 8'd12 : protected_access_fault ? 8'd13 :
                           protected_fetch_fault ? 8'd13 : bounds_fault ? 8'd5 : arithmetic_fault ? 8'd0 : 8'd13;
     // PM3c frame contract: protected selector faults in the #TS/#NP/#SS/#GP
     // family carry one 16-bit error word.  Non-selector protected faults use

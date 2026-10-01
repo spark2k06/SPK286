@@ -29,5 +29,5 @@ class IoMicrocodeTests(unittest.TestCase):
             if not line.startswith('    '):continue
             with self.subTest(index=index,line=line),self.assertRaises(CompileError):
                 compile_sources({'missing.mc':'\n'.join(lines[:index]+lines[index+1:])})
-        for changed in (source.replace('microcode_format 17','microcode_format 16'),source.replace('BRANCH_REPEAT_EMPTY done','BRANCH_REPEAT_EMPTY loop'),source.replace('BRANCH_REPEAT_CONTINUE loop','BRANCH_REPEAT_CONTINUE done'),source.replace('STEP_STRING_SOURCE','STEP_STRING_DEST')):
+        for changed in (source.replace('microcode_format 25','microcode_format 24'),source.replace('BRANCH_REPEAT_EMPTY done','BRANCH_REPEAT_EMPTY loop'),source.replace('BRANCH_REPEAT_CONTINUE loop','BRANCH_REPEAT_CONTINUE done'),source.replace('STEP_STRING_SOURCE','STEP_STRING_DEST')):
             with self.assertRaises(CompileError):compile_sources({'changed.mc':changed})

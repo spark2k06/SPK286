@@ -1,4 +1,4 @@
-microcode_format 17
+microcode_format 24
 
 # PM1 system instructions remain ordinary project-owned microcode entries.
 instruction SYSTEM_GROUP_0F01:
@@ -34,41 +34,49 @@ instruction SYSTEM_GROUP_0F00:
     DISPATCH DECODED
 
 instruction SYSTEM_STORE_LDTR:
+    CHECK_PROTECTED_MODE
     SYSTEM_STORE_LDTR
     END
 
 instruction SYSTEM_STORE_TR:
+    CHECK_PROTECTED_MODE
     SYSTEM_STORE_TR
     END
 
 instruction SYSTEM_LOAD_LDTR:
+    CHECK_SYSTEM_PRIVILEGE
     READ_RM16 -> TMP0
     SYSTEM_LOAD_LDTR
     END
 
 instruction SYSTEM_LOAD_TR:
+    CHECK_SYSTEM_PRIVILEGE
     READ_RM16 -> TMP0
     SYSTEM_LOAD_TR
     END
 
 instruction SYSTEM_VERIFY_READ:
+    CHECK_PROTECTED_MODE
     READ_RM16 -> TMP0
     SYSTEM_VERIFY_READ
     END
 
 instruction SYSTEM_VERIFY_WRITE:
+    CHECK_PROTECTED_MODE
     READ_RM16 -> TMP0
     SYSTEM_VERIFY_WRITE
     END
 
 instruction SYSTEM_LOAD_ACCESS:
     DECODE_MODRM
+    CHECK_PROTECTED_MODE
     READ_RM16 -> TMP0
     SYSTEM_LOAD_ACCESS
     END
 
 instruction SYSTEM_LOAD_LIMIT:
     DECODE_MODRM
+    CHECK_PROTECTED_MODE
     READ_RM16 -> TMP0
     SYSTEM_LOAD_LIMIT
     END

@@ -139,10 +139,8 @@ module spk286_odd_protected_stack_tb;
             tick(); deadline=deadline+1;
         end
         if (boundary != 0) begin
-            // H12 separately covers return-range vector routing (#SS vs #GP).
-            // Here the negative return controls certify rejection and restart.
-            check(fault_seen && (!entry_case || first_fault_vector == 12) && !instruction_retired,
-                  "invalid complete frame is rejected; gate precheck raises #SS");
+            check(fault_seen && first_fault_vector == 12 && !instruction_retired,
+                  "invalid complete frame is rejected with #SS for both returns and gates");
             check(debug_cs == source_cs && debug_gpr[79:64] == source_sp && stack_writes == 0,
                   "failed range check preserves source context and prevents frame writes");
         end else if (!entry_case) begin

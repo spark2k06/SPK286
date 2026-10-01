@@ -1,4 +1,4 @@
-SPK286 microcode compiler 23.0; format 23; encoding 23
+SPK286 microcode compiler 25.0; format 25; encoding 25
 0000  MOV_R16_IMM16:
 0000  BA  FETCH_MOV_DST16_IMM16  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:
@@ -734,142 +734,158 @@ SPK286 microcode compiler 23.0; format 23; encoding 23
 026A  3  END  # zzzzzzzzzzzz_strings.mc:66
 026B  IN_AL_PORT:
 026B  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:4
-026C  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:5
-026D  36  TMP0 -> DST8  # zzzzzzzzzzzzz_io.mc:6
-026E  3  END  # zzzzzzzzzzzzz_io.mc:7
-026F  IN_AX_PORT:
-026F  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:9
-0270  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:10
-0271  2  TMP0 -> DST  # zzzzzzzzzzzzz_io.mc:11
-0272  3  END  # zzzzzzzzzzzzz_io.mc:12
-0273  OUT_PORT_AL:
-0273  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:14
-0274  35  READ_DST8 -> TMP0  # zzzzzzzzzzzzz_io.mc:15
-0275  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:16
-0276  3  END  # zzzzzzzzzzzzz_io.mc:17
-0277  OUT_PORT_AX:
-0277  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:19
-0278  D  READ_DST16 -> TMP0  # zzzzzzzzzzzzz_io.mc:20
-0279  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:21
-027A  3  END  # zzzzzzzzzzzzz_io.mc:22
-027B  STRING_INPUT_BYTE:
-027B  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:25
-027C  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:26
-027D  STRING_INPUT_BYTE.loop:
-027D  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:28
-027E  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:29
-027F  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:30
-0280  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:31
-0281  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:32
-0282  STRING_INPUT_BYTE.done:
-0282  3  END  # zzzzzzzzzzzzz_io.mc:34
-0283  STRING_INPUT_WORD:
-0283  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:37
-0284  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:38
-0285  STRING_INPUT_WORD.loop:
-0285  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:40
-0286  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:41
-0287  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:42
-0288  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:43
-0289  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:44
-028A  STRING_INPUT_WORD.done:
-028A  3  END  # zzzzzzzzzzzzz_io.mc:46
-028B  STRING_OUTPUT_BYTE:
-028B  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:49
-028C  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:50
-028D  STRING_OUTPUT_BYTE.loop:
-028D  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:52
-028E  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:53
-028F  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:54
-0290  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:55
-0291  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:56
-0292  STRING_OUTPUT_BYTE.done:
-0292  3  END  # zzzzzzzzzzzzz_io.mc:58
-0293  STRING_OUTPUT_WORD:
-0293  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:61
-0294  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:62
-0295  STRING_OUTPUT_WORD.loop:
-0295  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:64
-0296  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:65
-0297  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:66
-0298  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:67
-0299  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:68
-029A  STRING_OUTPUT_WORD.done:
-029A  3  END  # zzzzzzzzzzzzz_io.mc:70
-029B  ESC_NO_COPROCESSOR:
-029B  4  DECODE_MODRM  # zzzzzzzzzzzzzzzz_esc.mc:7
-029C  3  END  # zzzzzzzzzzzzzzzz_esc.mc:8
-029D  SYSTEM_GROUP_0F01:
-029D  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:5
-029E  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:6
-029F  SYSTEM_STORE_GDTR:
-029F  88  SYSTEM_STORE_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:9
-02A0  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:10
-02A1  SYSTEM_STORE_IDTR:
-02A1  89  SYSTEM_STORE_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:13
-02A2  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:14
-02A3  SYSTEM_LOAD_GDTR:
-02A3  8A  SYSTEM_LOAD_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:17
-02A4  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:18
-02A5  SYSTEM_LOAD_IDTR:
-02A5  8B  SYSTEM_LOAD_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:21
-02A6  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:22
-02A7  SYSTEM_STORE_MSW:
-02A7  8C  SYSTEM_STORE_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:25
-02A8  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:26
-02A9  SYSTEM_LOAD_MSW:
-02A9  8D  SYSTEM_LOAD_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:29
-02AA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:30
-02AB  SYSTEM_GROUP_0F00:
-02AB  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:33
-02AC  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:34
-02AD  SYSTEM_STORE_LDTR:
-02AD  8E  SYSTEM_STORE_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:37
-02AE  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:38
-02AF  SYSTEM_STORE_TR:
-02AF  8F  SYSTEM_STORE_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:41
-02B0  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:42
-02B1  SYSTEM_LOAD_LDTR:
-02B1  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:45
-02B2  90  SYSTEM_LOAD_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:46
-02B3  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:47
-02B4  SYSTEM_LOAD_TR:
-02B4  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:50
-02B5  91  SYSTEM_LOAD_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:51
-02B6  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:52
-02B7  SYSTEM_VERIFY_READ:
-02B7  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:55
-02B8  92  SYSTEM_VERIFY_READ  # zzzzzzzzzzzzzzzzz_system_tables.mc:56
-02B9  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:57
-02BA  SYSTEM_VERIFY_WRITE:
-02BA  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:60
-02BB  93  SYSTEM_VERIFY_WRITE  # zzzzzzzzzzzzzzzzz_system_tables.mc:61
-02BC  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:62
-02BD  SYSTEM_LOAD_ACCESS:
-02BD  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:65
-02BE  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:66
-02BF  94  SYSTEM_LOAD_ACCESS  # zzzzzzzzzzzzzzzzz_system_tables.mc:67
-02C0  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:68
-02C1  SYSTEM_LOAD_LIMIT:
-02C1  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:71
-02C2  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:72
-02C3  95  SYSTEM_LOAD_LIMIT  # zzzzzzzzzzzzzzzzz_system_tables.mc:73
-02C4  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:74
-02C5  SYSTEM_ARPL:
-02C5  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:77
-02C6  A6  SYSTEM_ARPL_CHECK  # zzzzzzzzzzzzzzzzz_system_tables.mc:78
-02C7  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:79
-02C8  9  READ_REG16 -> TMP1  # zzzzzzzzzzzzzzzzz_system_tables.mc:80
-02C9  A7  SYSTEM_ARPL  # zzzzzzzzzzzzzzzzz_system_tables.mc:81
-02CA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:82
-02CB  SYSTEM_CLTS:
-02CB  A8  SYSTEM_CLTS  # zzzzzzzzzzzzzzzzz_system_tables.mc:85
-02CC  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:86
-02CD  LOADALL:
-02CD  AB  LOADALL  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:6
-02CE  3  END  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:7
-02CF  LOAD_CARRY_BYTE:
-02CF  1E  READ_FLAGS -> TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:6
-02D0  AC  CARRY_FILL8 TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:7
-02D1  36  TMP0 -> DST8  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:8
-02D2  3  END  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:9
+026C  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:5
+026D  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:6
+026E  36  TMP0 -> DST8  # zzzzzzzzzzzzz_io.mc:7
+026F  3  END  # zzzzzzzzzzzzz_io.mc:8
+0270  IN_AX_PORT:
+0270  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:10
+0271  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:11
+0272  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:12
+0273  2  TMP0 -> DST  # zzzzzzzzzzzzz_io.mc:13
+0274  3  END  # zzzzzzzzzzzzz_io.mc:14
+0275  OUT_PORT_AL:
+0275  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:16
+0276  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:17
+0277  35  READ_DST8 -> TMP0  # zzzzzzzzzzzzz_io.mc:18
+0278  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:19
+0279  3  END  # zzzzzzzzzzzzz_io.mc:20
+027A  OUT_PORT_AX:
+027A  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:22
+027B  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:23
+027C  D  READ_DST16 -> TMP0  # zzzzzzzzzzzzz_io.mc:24
+027D  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:25
+027E  3  END  # zzzzzzzzzzzzz_io.mc:26
+027F  STRING_INPUT_BYTE:
+027F  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:29
+0280  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:30
+0281  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:31
+0282  STRING_INPUT_BYTE.loop:
+0282  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:33
+0283  83  IO_READ8 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:34
+0284  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:35
+0285  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:36
+0286  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:37
+0287  STRING_INPUT_BYTE.done:
+0287  3  END  # zzzzzzzzzzzzz_io.mc:39
+0288  STRING_INPUT_WORD:
+0288  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:42
+0289  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:43
+028A  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:44
+028B  STRING_INPUT_WORD.loop:
+028B  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:46
+028C  84  IO_READ16 TMP1 -> TMP0  # zzzzzzzzzzzzz_io.mc:47
+028D  7B  STEP_STRING_DEST  # zzzzzzzzzzzzz_io.mc:48
+028E  7F  WRITE_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:49
+028F  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:50
+0290  STRING_INPUT_WORD.done:
+0290  3  END  # zzzzzzzzzzzzz_io.mc:52
+0291  STRING_OUTPUT_BYTE:
+0291  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:55
+0292  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:56
+0293  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:57
+0294  STRING_OUTPUT_BYTE.loop:
+0294  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:59
+0295  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:60
+0296  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:61
+0297  85  IO_WRITE8 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:62
+0298  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:63
+0299  STRING_OUTPUT_BYTE.done:
+0299  3  END  # zzzzzzzzzzzzz_io.mc:65
+029A  STRING_OUTPUT_WORD:
+029A  79  BRANCH_REPEAT_EMPTY done  # zzzzzzzzzzzzz_io.mc:68
+029B  87  FETCH_PORT DECODED -> TMP1  # zzzzzzzzzzzzz_io.mc:69
+029C  C3  CHECK_IO_PRIVILEGE  # zzzzzzzzzzzzz_io.mc:70
+029D  STRING_OUTPUT_WORD.loop:
+029D  7A  STEP_STRING_SOURCE  # zzzzzzzzzzzzz_io.mc:72
+029E  7C  REPEAT_COUNT  # zzzzzzzzzzzzz_io.mc:73
+029F  7D  READ_STRING_TMP0  # zzzzzzzzzzzzz_io.mc:74
+02A0  86  IO_WRITE16 TMP1 TMP0  # zzzzzzzzzzzzz_io.mc:75
+02A1  80  BRANCH_REPEAT_CONTINUE loop  # zzzzzzzzzzzzz_io.mc:76
+02A2  STRING_OUTPUT_WORD.done:
+02A2  3  END  # zzzzzzzzzzzzz_io.mc:78
+02A3  ESC_NO_COPROCESSOR:
+02A3  4  DECODE_MODRM  # zzzzzzzzzzzzzzzz_esc.mc:7
+02A4  3  END  # zzzzzzzzzzzzzzzz_esc.mc:8
+02A5  SYSTEM_GROUP_0F01:
+02A5  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:5
+02A6  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:6
+02A7  SYSTEM_STORE_GDTR:
+02A7  88  SYSTEM_STORE_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:9
+02A8  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:10
+02A9  SYSTEM_STORE_IDTR:
+02A9  89  SYSTEM_STORE_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:13
+02AA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:14
+02AB  SYSTEM_LOAD_GDTR:
+02AB  8A  SYSTEM_LOAD_GDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:17
+02AC  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:18
+02AD  SYSTEM_LOAD_IDTR:
+02AD  8B  SYSTEM_LOAD_IDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:21
+02AE  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:22
+02AF  SYSTEM_STORE_MSW:
+02AF  8C  SYSTEM_STORE_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:25
+02B0  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:26
+02B1  SYSTEM_LOAD_MSW:
+02B1  8D  SYSTEM_LOAD_MSW  # zzzzzzzzzzzzzzzzz_system_tables.mc:29
+02B2  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:30
+02B3  SYSTEM_GROUP_0F00:
+02B3  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:33
+02B4  47  DISPATCH DECODED  # zzzzzzzzzzzzzzzzz_system_tables.mc:34
+02B5  SYSTEM_STORE_LDTR:
+02B5  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:37
+02B6  8E  SYSTEM_STORE_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:38
+02B7  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:39
+02B8  SYSTEM_STORE_TR:
+02B8  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:42
+02B9  8F  SYSTEM_STORE_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:43
+02BA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:44
+02BB  SYSTEM_LOAD_LDTR:
+02BB  C2  CHECK_SYSTEM_PRIVILEGE  # zzzzzzzzzzzzzzzzz_system_tables.mc:47
+02BC  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:48
+02BD  90  SYSTEM_LOAD_LDTR  # zzzzzzzzzzzzzzzzz_system_tables.mc:49
+02BE  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:50
+02BF  SYSTEM_LOAD_TR:
+02BF  C2  CHECK_SYSTEM_PRIVILEGE  # zzzzzzzzzzzzzzzzz_system_tables.mc:53
+02C0  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:54
+02C1  91  SYSTEM_LOAD_TR  # zzzzzzzzzzzzzzzzz_system_tables.mc:55
+02C2  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:56
+02C3  SYSTEM_VERIFY_READ:
+02C3  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:59
+02C4  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:60
+02C5  92  SYSTEM_VERIFY_READ  # zzzzzzzzzzzzzzzzz_system_tables.mc:61
+02C6  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:62
+02C7  SYSTEM_VERIFY_WRITE:
+02C7  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:65
+02C8  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:66
+02C9  93  SYSTEM_VERIFY_WRITE  # zzzzzzzzzzzzzzzzz_system_tables.mc:67
+02CA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:68
+02CB  SYSTEM_LOAD_ACCESS:
+02CB  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:71
+02CC  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:72
+02CD  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:73
+02CE  94  SYSTEM_LOAD_ACCESS  # zzzzzzzzzzzzzzzzz_system_tables.mc:74
+02CF  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:75
+02D0  SYSTEM_LOAD_LIMIT:
+02D0  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:78
+02D1  C1  CHECK_PROTECTED_MODE  # zzzzzzzzzzzzzzzzz_system_tables.mc:79
+02D2  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:80
+02D3  95  SYSTEM_LOAD_LIMIT  # zzzzzzzzzzzzzzzzz_system_tables.mc:81
+02D4  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:82
+02D5  SYSTEM_ARPL:
+02D5  4  DECODE_MODRM  # zzzzzzzzzzzzzzzzz_system_tables.mc:85
+02D6  A6  SYSTEM_ARPL_CHECK  # zzzzzzzzzzzzzzzzz_system_tables.mc:86
+02D7  6  READ_RM16 -> TMP0  # zzzzzzzzzzzzzzzzz_system_tables.mc:87
+02D8  9  READ_REG16 -> TMP1  # zzzzzzzzzzzzzzzzz_system_tables.mc:88
+02D9  A7  SYSTEM_ARPL  # zzzzzzzzzzzzzzzzz_system_tables.mc:89
+02DA  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:90
+02DB  SYSTEM_CLTS:
+02DB  A8  SYSTEM_CLTS  # zzzzzzzzzzzzzzzzz_system_tables.mc:93
+02DC  3  END  # zzzzzzzzzzzzzzzzz_system_tables.mc:94
+02DD  LOADALL:
+02DD  AB  LOADALL  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:6
+02DE  3  END  # zzzzzzzzzzzzzzzzzzzz_loadall.mc:7
+02DF  LOAD_CARRY_BYTE:
+02DF  1E  READ_FLAGS -> TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:6
+02E0  AC  CARRY_FILL8 TMP0  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:7
+02E1  36  TMP0 -> DST8  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:8
+02E2  3  END  # zzzzzzzzzzzzzzzzzzzzz_salc.mc:9

@@ -444,3 +444,33 @@ and independent review remain pending; no new waiver or Phase 8 work is claimed.
 See PHASE7_REP_EVENT_EVIDENCE.md and PHASE7_IO_CAPTURE_REVIEW.md for evidence
 limitations. Complete Phase 7 remains incomplete; this directory is not a
 verified Git delivery.
+
+## Protected system access checks — format 24, 2026-09-30
+
+H01 adds controls 193 (`CHECK_PROTECTED_MODE`) and 194
+(`CHECK_SYSTEM_PRIVILEGE`). The H01 milestone image has 122 entries / 731 words,
+ten address bits and eight control bits. LLDT/LTR check protected mode and
+CPL0 before reading the selector operand. SLDT/STR, VERR/VERW and LAR/LSL check
+protected mode before their operand side effects. These are semantic checks,
+not timing padding. Existing compiler formats and their frozen literals remain
+supported. The independent format-24 fixture is `microcode_system_access.json`,
+derived by inserting exactly eight controls into the frozen format-23 image.
+See `docs/PROTECTED_MODE_TARGETED_FIXES_20260930.md` for bounded verification.
+
+## I/O privilege checks — format 25, 2026-09-30
+
+H02's CLI/STI and I/O subset adds control 195 (`CHECK_IO_PRIVILEGE`). The active
+image has 122 entries / 739 words, ten address bits and eight control bits.
+Scalar and string I/O check CPL versus IOPL immediately after capturing the
+port, before any port or memory transaction or count/index change. The string
+loop label follows the check, so resuming an iteration preserves its existing
+protocol. The existing zero-count REP branch remains before the check; its
+protected-mode privilege precedence is explicitly outside this milestone.
+CLI/STI check privilege at their existing IF operation and need no ROM change.
+
+The independent active fixture is `microcode_iopl_access.json`, derived from
+the frozen format-24 image by exactly eight check insertions, with explicitly
+shifted labels and branch targets. Compiler validation rejects omitted, late,
+duplicate or iteration-local checks. Historical fixtures remain frozen.
+See `docs/PROTECTED_MODE_TARGETED_FIXES_20260930.md` for directed results and
+the remaining H02 LOCK / zero-count REP questions.

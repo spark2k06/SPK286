@@ -1,9 +1,30 @@
 """All-file diagnostics cannot turn independent failures into a green gate."""
 import unittest
-from tools.run_phase7_physical import run_all
+from tools.run_phase7_physical import required_opcodes, run_all
 from tools.run_singlestep import SingleStepRunnerError
 
 class FullPhysicalTests(unittest.TestCase):
+    def test_pinned_gate_keeps_all_required_forms_and_excludes_later_extensions(self):
+        import json
+        from pathlib import Path
+        from unittest.mock import patch
+        from tools.run_singlestep import SUPPORTED_OPCODES
+        forms=json.loads(Path('docs/phase7_forms.json').read_text())
+        expected={form['opcode'] for form in forms['forms'] if form['scope']=='required'}
+        actual=required_opcodes()
+        self.assertEqual(len(actual),307)
+        self.assertEqual(set(actual),expected)
+        self.assertNotIn('D6',actual)
+        with patch('tools.run_phase7_physical.SUPPORTED_OPCODES',SUPPORTED_OPCODES+('future_extension',)):
+            self.assertEqual(required_opcodes(),actual)
+
+    def test_missing_required_support_is_still_a_failure(self):
+        from unittest.mock import patch
+        from tools.run_singlestep import SUPPORTED_OPCODES
+        with patch('tools.phase7_scope.SUPPORTED_OPCODES',tuple(op for op in SUPPORTED_OPCODES if op!='F4')):
+            with self.assertRaisesRegex(ValueError,'required opcode families remain unimplemented'):
+                required_opcodes()
+
     def test_preparation_and_execution_failures_are_both_retained(self):
         visited=[]
         def execute(opcode):
