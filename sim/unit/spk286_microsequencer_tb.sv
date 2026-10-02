@@ -5,14 +5,17 @@ module spk286_microsequencer_tb;
     logic [3:0] start_entry = 0;
     logic rom_valid = 1, rom_end = 0, operation_done = 0, operation_retire = 0;
     wire start_ready, operation_valid, active, retired, fault;
-    wire [3:0] micro_pc, micro_entry;
+    wire [3:0] micro_pc, micro_entry, next_micro_pc;
     logic branch_request=0, branch_target_valid=0;
     logic [3:0] branch_target=0;
     integer checks = 0;
     spk286_microsequencer #(.ADDRESS_WIDTH(4), .ROM_DEPTH(10)) dut (.*);
 
     task automatic tick;
-        #5; clk = 1; #5; clk = 0; #1;
+        logic [3:0] expected_pc;
+        #5; expected_pc = next_micro_pc; clk = 1; #5;
+        if (micro_pc !== expected_pc) $fatal(1, "next ROM address differs from committed PC");
+        clk = 0; #1;
     endtask
     task automatic check(input logic condition, input string message);
         if (condition !== 1'b1) $fatal(1, "%s pc=%h entry=%h active=%b retired=%b fault=%b",

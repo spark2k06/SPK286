@@ -1,7 +1,7 @@
 // Functional micro-operation service. Physical fetch/READY belongs to the BIU.
 `timescale 1ns/1ps
 
-module spk286_micro_executor (
+module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     input  logic clk,
     input  logic reset,
     input  logic cancel,
@@ -17,7 +17,7 @@ module spk286_micro_executor (
     input  logic lock_prefix,
     input logic [15:0] target_read_data, effective_offset, address_base,
     input logic [15:0] segment_limit,
-    input logic segment_expand_down,
+    input logic segment_expand_down, parallel_system_limit_fault,
     input logic [15:0] stack_segment_limit,
     /* Only the expand-down bit is consumed by the current stack-range
        predicate; the remaining access bits stay in the segment cache. */
@@ -285,9 +285,18 @@ module spk286_micro_executor (
     assign decrement_frame_address = allowed && operation == spk286_microcode_pkg::MC_DECREMENT_STACK_ADDRESS && frame_address_valid_q;
     assign allocate_stack = allowed && operation == spk286_microcode_pkg::MC_ALLOCATE_STACK && allocation_valid_q && stack_cursor_valid_q;
     assign set_ea_plus2 = allowed && operation == spk286_microcode_pkg::MC_SET_EA_PLUS2;
+    // Finish the independent arithmetic before the late operation selector.
+    // Keep these combinational boundaries to prevent an arithmetic-sharing
+    // rewrite from moving the selector back into the carry path.
+    (* keep *) logic [15:0] call_parameter_write_offset;
+    (* keep *) logic [15:0] iret_parameter_bytes;
+    (* keep *) logic [15:0] iret_outer_stack_offset;
+    assign call_parameter_write_offset = stack_cursor_q - 16'd2;
+    assign iret_parameter_bytes = allocation_valid_q ? allocation_q : 16'd0;
+    assign iret_outer_stack_offset = return_stack_pointer + iret_parameter_bytes;
     assign stack_offset = call_parameter_read ? call_parameter_source_sp_q :
-                          call_parameter_write ? (stack_cursor_q - 16'd2) :
-                          iret_outer_pop ? (return_stack_pointer + (allocation_valid_q ? allocation_q : 16'd0)) :
+                          call_parameter_write ? call_parameter_write_offset :
+                          iret_outer_pop ? iret_outer_stack_offset :
                           read_frame_address ? frame_address_q : stack_native_offset;
 
     logic [15:0] tmp0_q, tmp1_q, tmp2_q, flags_q, flags_mask_q;
@@ -384,7 +393,7 @@ module spk286_micro_executor (
     // Table operands span six bytes. Expand-down segments admit offsets
     // above their limit, with the same non-wrapping 16-bit upper boundary.
     assign system_limit_fault = system_table_operation && !operand_register_direct &&
-                                (segment_expand_down ?
+                                (USE_PARALLEL_SYSTEM_LIMIT ? parallel_system_limit_fault : segment_expand_down ?
                                  (effective_offset <= segment_limit ||
                                   {1'b0, effective_offset} + 17'd5 > 17'h0FFFF) :
                                  ({1'b0, effective_offset} + 17'd5 > {1'b0, segment_limit}));
@@ -1554,7 +1563,53 @@ module spk286_micro_executor (
                                ((move_word && operation == spk286_microcode_pkg::MC_MOVE8) ||
                                 (result_to_dst && operation == spk286_microcode_pkg::MC_WRITE_RESULT_DST8) || operand_gpr_write_byte))));
     assign sequential_gpr_write_index = task_commit_gpr_write ? task_commit_phase_q[2:0] : (iret_outer_sp_commit || retf_outer_sp_commit || return_same_sp_commit || call_gate_sp_commit || segment_pop_sp_commit) ? 3'd4 : descriptor_result_write ? shift_kind : fixed_result_write ? (write_result_dx ? 3'd2 : 3'd0) : string_index_write ? (string_step_source ? 3'd6 : 3'd7) : string_count_write ? 3'd1 : string_write_acc ? 3'd0 : add_allocation_arch ? 3'd4 : frame_write_gpr ? frame_write_index : allocate_stack ? 3'd4 : move_source ? source_index : stack_arch_write ? 3'd4 : (count_operation ? 3'd1 : (move_word || result_to_dst ? destination : operand_gpr_write_index));
-    assign sequential_gpr_write_data = task_commit_gpr_write ? task_loaded_gpr[task_commit_phase_q[2:0] * 16 +: 16] : iret_outer_sp_commit ? iret_outer_sp_q : retf_outer_sp_commit ? iret_outer_sp_q + allocation_q : return_same_sp_commit ? stack_cursor_q + ((commit_context && allocation_valid_q) ? allocation_q : 16'd0) : call_gate_sp_commit ? stack_cursor_q : segment_pop_sp_commit ? stack_cursor_q : descriptor_result_write ? descriptor_result_data : fixed_result_write ? (write_result_dx ? auxiliary_q : tmp2_q) : string_index_write ? (architectural_flags[10] ? string_index-string_delta : string_index+string_delta) : string_count_write ? count_value-16'd1 : string_write_acc ? tmp0_q : add_allocation_arch ? stack_pointer+allocation_q : frame_write_gpr ? tmp0_q : allocate_stack ? stack_cursor_q - allocation_q : move_source ? tmp1_q : stack_arch_write ? stack_next_sp : (count_operation ? count_value - 16'd1 : (result_to_dst ? tmp2_q : (move_word ? tmp0_q : operand_gpr_write_data)));
+    // Preserve the original complete priority, but separate selection from
+    // the 16-bit data reduction so a late completion need not cross a mux chain.
+    logic [19:0] gpr_data_requests;
+    (* keep *) logic [19:0] gpr_data_onehot;
+    logic [319:0] gpr_data_values;
+    function automatic logic [15:0] reduce_gpr_data(
+        input logic [19:0] enables, input logic [319:0] values
+    );
+        reduce_gpr_data = 16'd0;
+        for (integer i = 0; i < 20; i = i + 1)
+            reduce_gpr_data = reduce_gpr_data | ({16{enables[i]}} & values[i*16 +: 16]);
+    endfunction
+    genvar gpr_data_index;
+    generate
+    for (gpr_data_index = 0; gpr_data_index < 20; gpr_data_index = gpr_data_index + 1) begin : g_gpr_data_priority
+        if (gpr_data_index == 0) begin : g_first
+            assign gpr_data_onehot[gpr_data_index] = gpr_data_requests[gpr_data_index];
+        end else begin : g_remaining
+            assign gpr_data_onehot[gpr_data_index] = gpr_data_requests[gpr_data_index] &&
+                                                   !(|gpr_data_requests[gpr_data_index-1:0]);
+        end
+    end
+    endgenerate
+    assign gpr_data_requests = {1'b1, move_word, result_to_dst, count_operation, stack_arch_write, move_source, allocate_stack, frame_write_gpr, add_allocation_arch, string_write_acc, string_count_write, string_index_write, fixed_result_write, descriptor_result_write, segment_pop_sp_commit, call_gate_sp_commit, return_same_sp_commit, retf_outer_sp_commit, iret_outer_sp_commit, task_commit_gpr_write};
+    assign gpr_data_values = {
+        (operand_gpr_write_data),
+        (tmp0_q),
+        (tmp2_q),
+        (count_value - 16'd1),
+        (stack_next_sp),
+        (tmp1_q),
+        (stack_cursor_q - allocation_q),
+        (tmp0_q),
+        (stack_pointer+allocation_q),
+        (tmp0_q),
+        (count_value-16'd1),
+        (architectural_flags[10] ? string_index-string_delta : string_index+string_delta),
+        (write_result_dx ? auxiliary_q : tmp2_q),
+        (descriptor_result_data),
+        (stack_cursor_q),
+        (stack_cursor_q),
+        (stack_cursor_q + ((commit_context && allocation_valid_q) ? allocation_q : 16'd0)),
+        (iret_outer_sp_q + allocation_q),
+        (iret_outer_sp_q),
+        (task_loaded_gpr[task_commit_phase_q[2:0] * 16 +: 16])
+    };
+    assign sequential_gpr_write_data = reduce_gpr_data(gpr_data_onehot, gpr_data_values);
     assign sequential_flags_write_en = !reset && (task_commit_flags_write || arpl_commit || direct_flags || descriptor_verify_flags_write || descriptor_inspect_flags_write || commit_flags || restore_flags || set_if || clear_if_tf || clear_event_flags || iret_commit);
     assign task_flags_write_en = !reset && task_commit_flags_write;
     assign sequential_flags_write_data = task_commit_flags_write ? task_loaded_flags : arpl_commit ? (arpl_adjust ? 16'h0040 : 16'h0000) : direct_flags ? direct_flags_data : descriptor_verify_flags_write ? (descriptor_verify_success_live ? 16'h0040 : 16'h0000) : descriptor_inspect_flags_write ? (descriptor_inspect_success_live ? 16'h0040 : 16'h0000) : restore_flags ? tmp0_q : (iret_commit ? tmp2_q : (set_if ? {6'd0, if_value, 9'd0} : ((clear_if_tf || clear_event_flags) ? 16'd0 : flags_q)));

@@ -2,7 +2,7 @@
 // encoding selects AL..BL/AH..BH independently of word-register encoding.
 // Register access completes locally; memory completes through the BIU response.
 `timescale 1ns/1ps
-module spk286_operand (
+module spk286_operand #(parameter bit USE_PARALLEL_RANGE = 1'b0) (
     input  logic clk, reset, cancel,
     input  logic request_valid, request_write, request_check, request_byte, select_rm,
     input  logic [15:0] write_data,
@@ -13,7 +13,7 @@ module spk286_operand (
     input  logic register_direct,
     input  logic [23:0] physical_address,
     input  logic [15:0] offset, segment_limit,
-    input  logic segment_expand_down,
+    input  logic segment_expand_down, parallel_within_limit,
     output logic blocked,
     output logic gpr_write_en, gpr_write_byte,
     output logic [2:0] gpr_write_index,
@@ -33,7 +33,7 @@ module spk286_operand (
     logic [15:0] register_word;
     assign register_index = select_rm ? rm_index : reg_index;
     assign is_memory = select_rm && !register_direct;
-    assign within_limit = segment_expand_down ?
+    assign within_limit = USE_PARALLEL_RANGE ? parallel_within_limit : segment_expand_down ?
                           (offset > segment_limit &&
                            (request_byte || offset != 16'hFFFF)) :
                           (offset < segment_limit ||

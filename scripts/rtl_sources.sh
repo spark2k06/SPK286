@@ -3,6 +3,7 @@
 python3 -m tools.microcode.compile_microcode --check
 rtl_sources=(microcode/generated/spk286_microcode_pkg.sv
              microcode/generated/spk286_microcode_rom.sv
+             microcode/generated/spk286_microcode_sync_rom.sv
              rtl/spk286_protected_pkg.sv
              rtl/spk286_tss_pkg.sv)
 for source in rtl/*.sv; do

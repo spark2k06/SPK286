@@ -17,7 +17,7 @@ import re
 import sys
 from typing import Mapping
 
-COMPILER_VERSION = "27.0"
+COMPILER_VERSION = "27.1"
 FORMAT_VERSION = 27
 MAX_ADDRESS_WIDTH = 12  # Current numeric CPU debug interface.
 OPERATIONS = {"INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3,
@@ -1137,6 +1137,30 @@ module spk286_microcode_rom (
     end
 endmodule
 """
+    # Read the exact next sequencer PC at the current edge. The CPU's PC
+    # register takes that same value, preserving the asynchronous ROM's
+    # cycle alignment while allowing a synchronous embedded ROM inference.
+    sync_rom = banner + """`timescale 1ns/1ps
+module spk286_microcode_sync_rom (
+    input logic clk,
+    input logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] address,
+    output logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] word,
+    output logic valid
+);
+    localparam integer STORAGE_DEPTH = 1 << spk286_microcode_pkg::MC_ADDR_WIDTH;
+    (* ramstyle = "M10K" *) logic [spk286_microcode_pkg::MC_WORD_WIDTH:0] contents [0:STORAGE_DEPTH-1];
+    initial begin
+        for (integer index = 0; index < STORAGE_DEPTH; index = index + 1)
+            contents[index] = {1'b0, spk286_microcode_pkg::MC_INVALID};
+"""
+    for op in program.operations:
+        sync_rom += (f"        contents[{width}'d{op.address}] = "
+                f"{{1'b1, spk286_microcode_pkg::MC_{op.operation}}};\n")
+    sync_rom += """    end
+    always_ff @(posedge clk)
+        {valid, word} <= contents[address];
+endmodule
+"""
     symbols = {"schema_version": 1, "entries": program.entries, "labels": program.labels,
                "operations": mapping}
     if program.format_version >= 13:
@@ -1151,6 +1175,7 @@ endmodule
     def json_text(value: object) -> str:
         return json.dumps(value, sort_keys=True, indent=2) + "\n"
     return {"spk286_microcode_pkg.sv": package, "spk286_microcode_rom.sv": rom,
+            "spk286_microcode_sync_rom.sv": sync_rom,
             "spk286_microcode.lst": listing, "spk286_microcode_symbols.json": json_text(symbols),
             "spk286_microcode_validation.json": json_text(metadata)}
 

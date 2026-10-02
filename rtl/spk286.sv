@@ -460,28 +460,75 @@ module spk286 (
     assign protected_segment_is_writable = !protected_segment_is_code && selected_segment_access[1];
     assign protected_segment_is_expand_down = !protected_segment_is_code && selected_segment_access[2];
 `ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+    // Compare each offset source before the late stack/address selection.
+    // I/O and vector accesses are excluded by the common fault qualifier.
+    function automatic logic protected_range_exceeded(
+        input logic [15:0] offset_value, limit_value,
+        input logic expand_down, is_byte
+    );
+        protected_range_exceeded = expand_down ?
+            (offset_value <= limit_value || (!is_byte && offset_value == 16'hFFFF)) :
+            (offset_value > limit_value || (!is_byte && offset_value == limit_value));
+    endfunction
+    logic protected_selected_range_fault, protected_call_range_fault;
+    assign protected_selected_range_fault = !parallel_operand_within_limit;
+    // Compare cache ranges before selecting the cache and offset sources.
+    // Keep real-mode hidden limits, vector/I-O overlap and LOADALL state exact.
+    (* keep *) logic [3:0] operand_io_ranges, operand_address_ranges, operand_stack_ranges;
+    (* keep *) logic [3:0] operand_regular_ranges, operand_vector_ranges;
+    (* keep *) logic [3:0] operand_system_ranges;
+    logic parallel_operand_within_limit, parallel_system_cache_fault;
+    genvar operand_cache_index;
+    generate
+    for (operand_cache_index = 0; operand_cache_index < 4; operand_cache_index = operand_cache_index + 1) begin : g_operand_cache_range
+        wire [15:0] cache_limit = protected_msw[0] ?
+            protected_segment_limits[operand_cache_index*16 +: 16] :
+            real_segment_limits[operand_cache_index*16 +: 16];
+        wire cache_expand_down = protected_msw[0] &&
+            !protected_segment_access[operand_cache_index*8+3] &&
+            protected_segment_access[operand_cache_index*8+2];
+        assign operand_io_ranges[operand_cache_index] =
+            !protected_range_exceeded(16'd0, cache_limit, cache_expand_down, operand_byte);
+        assign operand_address_ranges[operand_cache_index] =
+            !protected_range_exceeded(address_offset, cache_limit, cache_expand_down, operand_byte);
+        assign operand_stack_ranges[operand_cache_index] =
+            !protected_range_exceeded(stack_offset, cache_limit, cache_expand_down, operand_byte);
+        assign operand_regular_ranges[operand_cache_index] =
+            !protected_range_exceeded(operand_offset, cache_limit, cache_expand_down, operand_byte);
+        assign operand_vector_ranges[operand_cache_index] =
+            !protected_range_exceeded(io_transfer ? 16'd0 : vector_offset, 16'hFFFF, cache_expand_down, operand_byte);
+        // Six-byte table operands use the ordinary effective offset.
+        // Complete each cache's range comparison before the late index mux.
+        assign operand_system_ranges[operand_cache_index] = cache_expand_down ?
+            (operand_offset <= cache_limit || operand_offset > 16'hFFFA) :
+            ({1'b0, operand_offset} + 17'd5 > {1'b0, cache_limit});
+    end
+    endgenerate
+    assign parallel_operand_within_limit =
+        (protected_event_access || protected_descriptor_access || protected_tss_access || protected_call_stack_access) ? 1'b1 :
+        vector_request ? operand_vector_ranges[selected_segment_index] :
+        io_transfer ? operand_io_ranges[selected_segment_index] :
+        address_override && !stack_request ? operand_address_ranges[selected_segment_index] :
+        stack_request ? operand_stack_ranges[selected_segment_index] :
+        operand_regular_ranges[selected_segment_index];
+    assign parallel_system_cache_fault = operand_system_ranges[selected_segment_index];
+    assign protected_call_range_fault = stack_request ?
+        protected_range_exceeded(stack_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte) :
+        address_override ? protected_range_exceeded(address_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte) :
+        protected_range_exceeded(operand_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte);
     // P05: compare the starting offset in parallel with the late width bit.
     // offset + !byte > limit iff offset > limit || (!byte && offset == limit).
     assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
                                    !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
                                    !io_transfer && !vector_request &&
                                     (protected_call_stack_access ?
-                                    (service_segment != 2'd2 ||
-                                     (protected_call_stack_expand_down ?
-                                      ({1'b0, service_offset} <= {1'b0, protected_call_stack_limit} ||
-                                       (!operand_byte && service_offset == 16'hFFFF)) :
-                                      (service_offset > protected_call_stack_limit ||
-                                       (!operand_byte && service_offset == protected_call_stack_limit)))) :
+                                    (service_segment != 2'd2 || protected_call_range_fault) :
                                     (protected_segment_is_loaded &&
                                      (!protected_segment_is_valid || !protected_segment_is_present ||
                                       (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
                                        (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
                                         (operand_write && !protected_segment_is_writable))) ||
-                                      (protected_segment_is_expand_down ?
-                                       ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
-                                        (!operand_byte && service_offset == 16'hFFFF)) :
-                                       (service_offset > selected_segment_limit ||
-                                        (!operand_byte && service_offset == selected_segment_limit))))));
+                                      protected_selected_range_fault)));
 `else
     assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
                                    !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
@@ -798,9 +845,17 @@ module spk286 (
         .destination(decode_destination), .source_index(decode_source_index), .entry(decode_entry)
     );
 
+`ifdef SPK286_P07_SYNC_MICROCODE
+    logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] next_micro_pc;
+    spk286_microcode_sync_rom microcode_rom (
+        .clk(clk), .address(next_micro_pc), .word(micro_word), .valid(micro_valid)
+    );
+`else
+    logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] unused_next_micro_pc;
     spk286_microcode_rom microcode_rom (
         .address(micro_pc), .word(micro_word), .valid(micro_valid)
     );
+`endif
 
     assign micro_end = micro_word == spk286_microcode_pkg::MC_END;
     assign loadall_start = operation_valid && micro_word == spk286_microcode_pkg::MC_LOADALL;
@@ -839,6 +894,11 @@ module spk286 (
         .branch_target_valid(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH] : dispatch_valid),
         .operation_valid(operation_valid), .active(micro_active),
         .micro_pc(micro_pc), .micro_entry(micro_entry),
+`ifdef SPK286_P07_SYNC_MICROCODE
+        .next_micro_pc(next_micro_pc),
+`else
+        .next_micro_pc(unused_next_micro_pc),
+`endif
         .retired(raw_retired), .fault(microcode_fault)
     );
 
@@ -852,7 +912,18 @@ module spk286 (
     // Remove that redundant late qualification from descriptor/event responses.
     assign executor_operand_done = (protected_descriptor_access || protected_tss_access || protected_event_access) ?
                                    unlimited_memory_done : operand_done;
-    spk286_micro_executor micro_executor (
+    spk286_micro_executor #(
+`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+        .USE_PARALLEL_SYSTEM_LIMIT(1'b1)
+`else
+        .USE_PARALLEL_SYSTEM_LIMIT(1'b0)
+`endif
+    ) micro_executor (
+`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+        .parallel_system_limit_fault(parallel_system_cache_fault),
+`else
+        .parallel_system_limit_fault(1'b0),
+`endif
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start),
         .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .operation_retire(operation_retire), .dispatch_request(dispatch_request),
         .segment_pop_opcode(opcode_q == 8'h07 || opcode_q == 8'h17 || opcode_q == 8'h1F),
@@ -1015,7 +1086,18 @@ module spk286 (
     assign loadall_memory_done = loadall_memory_request && memory_response_valid;
     assign task_memory_done = task_memory_request && memory_response_valid;
 
-    spk286_operand operand (
+    spk286_operand #(
+`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+        .USE_PARALLEL_RANGE(1'b1)
+`else
+        .USE_PARALLEL_RANGE(1'b0)
+`endif
+    ) operand (
+`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
+        .parallel_within_limit(parallel_operand_within_limit),
+`else
+        .parallel_within_limit(1'b0),
+`endif
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .unlimited_memory_done(unlimited_memory_done), .read_data(operand_read_data), .register_state(register_state),
