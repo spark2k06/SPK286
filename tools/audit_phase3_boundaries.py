@@ -12,6 +12,8 @@ from pathlib import Path
 import subprocess
 
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
     ("code-owner", "spk286_biu", "spk286_biu",
@@ -26,9 +28,9 @@ PROBES = (
      "allowed && is_memory && !pending_q && within_limit",
      "allowed && is_memory && within_limit",
      "pending operation cannot resubmit"),
-    ("word-limit-wrap", "spk286_operand", "spk286_operand_service",
-     "({1'b0, offset} + (request_byte ? 17'd0 : 17'd1))",
-     "{1'b0, 16'(offset + (request_byte ? 16'd0 : 16'd1))}",
+    ("word-limit-inclusive", "spk286_operand", "spk286_operand_service",
+     "(offset < segment_limit ||",
+     "(offset <= segment_limit ||",
      "invalid whole word rejected before acceptance"),
 )
 
@@ -40,8 +42,7 @@ def main():
     args = parser.parse_args()
     subprocess.run(["python3", "-m", "tools.microcode.compile_microcode", "--check"],
                    cwd=ROOT, check=True)
-    sources = [ROOT / "microcode/generated/spk286_microcode_pkg.sv",
-               ROOT / "microcode/generated/spk286_microcode_rom.sv", *sorted((ROOT / "rtl").glob("*.sv"))]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     output = args.build_dir.resolve() / "phase3-boundary-audit"
     output.mkdir(parents=True, exist_ok=True)

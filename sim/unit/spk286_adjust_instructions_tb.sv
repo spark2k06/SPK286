@@ -70,7 +70,10 @@ module spk286_adjust_instructions_tb;
         if (waiting) check(bus_valid && address == held_address && data_out == held_data &&
                            bus_status == held_status && bus_write == held_write && bus_bhe_n == held_bhe,
                            "READY retains transaction owner and data");
-        ready = bus_valid && wait_count >= wait_length;
+        // Exercise genuine radix-byte starvation even when READY chaining
+        // overlaps the next CODE request. Keep operand READY latencies and all
+        // architectural expectations from the independent vectors unchanged.
+        ready = bus_valid && wait_count >= wait_length + (bus_status == 4'hD ? 16 : 0);
         waiting = bus_valid && !ready;
         if (waiting) begin
             held_address = address; held_data = data_out; held_status = bus_status;

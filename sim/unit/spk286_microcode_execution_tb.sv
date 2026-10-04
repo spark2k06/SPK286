@@ -5,7 +5,7 @@ module spk286_microcode_execution_tb;
     `include "spk286_signals.svh"
     logic [7:0] memory [0:4095];
     integer cycles = 0, checks = 0, retirements = 0, underfill_cycles = 0;
-    integer phase_cycles = 0;
+    integer phase_cycles = 0, sentinel_cases = 0;
     logic [127:0] expected_gpr;
     logic [63:0] saved_selectors, saved_limits;
     logic [95:0] saved_bases;
@@ -42,9 +42,8 @@ module spk286_microcode_execution_tb;
         memory[ip[11:0]] = 8'hB8 + {5'd0, dst};
         memory[ip[11:0] + 12'd1] = value[7:0];
         memory[ip[11:0] + 12'd2] = value[15:8];
-        // F1 is retained as a legal-but-unimplemented diagnostic sentinel;
-        // invalid 0F escape holes now enter the architectural #UD path.
-        memory[ip[11:0] + 12'd3] = 8'hF1;
+        memory[ip[11:0] + 12'd3] = 8'h0F;
+        memory[ip[11:0] + 12'd4] = 8'hFF;
     endtask
     task automatic redirect_to(input logic [15:0] ip);
         ip_write_en = 1; ip_write_data = ip; redirect = 1;
@@ -78,6 +77,32 @@ module spk286_microcode_execution_tb;
         // Decoder control must own word width and FLAGS even with stale setup inputs.
         gpr_write_byte = 1; flags_write_en = 1; flags_write_data = 0;
     endtask
+    task automatic run_to_ud_accept(input logic [15:0] fault_ip);
+        phase_cycles = 0;
+        while (!dut.event_active && phase_cycles < 300) begin
+            check(!(bus_valid && bus_write), "sentinel acceptance precedes stack writes");
+            service(); phase_cycles = phase_cycles + 1;
+            check(retirements == 1 && !instruction_retired,
+                  "invalid sentinel cannot retire or duplicate the MOV");
+        end
+        check(phase_cycles > 0 && phase_cycles < 300 && dut.event_active && dut.event_cancel,
+              "invalid sentinel reaches first architectural fault acceptance");
+        check(debug_event_vector == 8'd6 && debug_event_kind == 3'd1 &&
+              !debug_event_error_valid && !unsupported_opcode && !event_completed,
+              "invalid sentinel is #UD without a local unsupported latch or entry completion");
+        check(dut.event_ip == fault_ip && dut.event_cs == saved_selectors[16 +: 16] &&
+              dut.event_flags == 16'h7ED7,
+              "#UD retains the sentinel CS:IP and original FLAGS");
+        check(debug_gpr == expected_gpr && debug_flags == 16'h7ED7 &&
+              debug_segment_selectors == saved_selectors && debug_segment_bases == saved_bases &&
+              debug_segment_limits == saved_limits && debug_segment_access == saved_access,
+              "pre-entry #UD leaves the MOV signature and all architectural state intact");
+        check(!(bus_valid && bus_write) && retirements == 1 && !instruction_retired,
+              "stop #UD before any stack write or second retirement");
+        sentinel_cases = sentinel_cases + 1;
+        $display("MICROCODE_EXECUTION_SENTINEL_CASE origin=%h cycles=%0d retires=%0d", fault_ip, phase_cycles, retirements);
+        execute_enable = 0;
+    endtask
     task automatic run_to_retire;
         phase_cycles = 0;
         if (instruction_retired) service();
@@ -108,7 +133,7 @@ module spk286_microcode_execution_tb;
     endtask
 
     initial begin
-        for (integer i = 0; i < 4096; i = i + 1) memory[i] = 8'hF1;
+        for (integer i = 0; i < 4096; i = i + 1) memory[i] = 8'h0F;
         // All register encodings, little-endian/extreme immediates and both alignments.
         for (integer alignment = 0; alignment < 2; alignment = alignment + 1) begin
             for (integer r = 0; r < 8; r = r + 1) begin
@@ -126,17 +151,14 @@ module spk286_microcode_execution_tb;
                         tick(); check(!instruction_retired && debug_prefetch_count == paused_count,
                                       "pause after END / no duplicated prefetch response");
                     end
-                    execute_enable = 1;
-                    phase_cycles = 0;
-                    while (!unsupported_opcode && phase_cycles < 150) begin
-                        service(); phase_cycles = phase_cycles + 1;
-                    end
-                    check(unsupported_opcode && debug_opcode == 8'hF1 && retirements == 1,
-                          "unsupported byte cannot execute as MOV");
                     check_architecture(base_ip + 16'd3);
+                    execute_enable = 1;
+                    run_to_ud_accept(base_ip + 16'd3);
                 end
             end
         end
+        check(sentinel_cases == 48, "every original MOV vector exercises architectural sentinel acceptance");
+        $display("MICROCODE_EXECUTION_SENTINEL_PASS cases=%0d", sentinel_cases);
         check(underfill_cycles > 0, "immediate fetch exercised queue underfill");
 
         // Check architectural state at every END in an uninterrupted MOV stream.

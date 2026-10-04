@@ -8,12 +8,25 @@ module spk286_protected_retf_tb;
     integer retired_count = 0;
     integer checks = 0;
     integer rejected_outer_frame_reads = 0;
+    logic boundary_fault_seen = 1'b0;
+    logic [7:0] boundary_first_fault_vector = 8'h00;
+    logic boundary_observe = 1'b0;
+    integer boundary_stack_writes = 0;
 
     spk286 dut (.*);
 
     task automatic tick;
         begin
             #1;
+            if (reset) begin
+                boundary_fault_seen = 1'b0;
+                boundary_first_fault_vector = 8'h00;
+                boundary_observe = 1'b0;
+                boundary_stack_writes = 0;
+            end else if (boundary_observe && !boundary_fault_seen && dut.fault_request) begin
+                boundary_fault_seen = 1'b1;
+                boundary_first_fault_vector = dut.fault_vector;
+            end
             ready = bus_valid && ((cycles % 4) != 1);
             data_in = 16'h0000;
             if (bus_valid && !bus_write) begin
@@ -23,6 +36,8 @@ module spk286_protected_retf_tb;
                 else data_in = {memory[address[15:0] + 16'd1], memory[address[15:0]]};
             end
             if (bus_valid && ready && bus_write && bus_status == 4'h6) begin
+                if (boundary_observe && address >= 24'h009000 && address < 24'h00A000)
+                    boundary_stack_writes = boundary_stack_writes + 1;
                 if (address[0]) memory[address[15:0]] = data_out[15:8];
                 else begin
                     memory[address[15:0]] = data_out[7:0];
@@ -385,10 +400,15 @@ module spk286_protected_retf_tb;
         enter_ring1_caller(16'hFF3C);
         memory[16'h107C] = 8'h1F;
         memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        boundary_observe = 1'b1;
         wait_shutdown();
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF00 &&
-              debug_event_vector == 8'h0C,
+              boundary_fault_seen && boundary_first_fault_vector == 8'h0C,
               "PM4b.9 source frame crossing the caller SS limit faults before the gate target");
+        // This fixture has no usable IDT. H11 requires #SS -> #DF -> shutdown;
+        // the final delivery vector therefore cannot identify the first fault.
+        check(debug_event_vector == 8'h08 && boundary_stack_writes == 0,
+              "PM4b.9 source rejection reaches failed double-fault delivery without target-stack writes");
 
         enter_ring1_caller(16'hFF3D);
         memory[16'h107C] = 8'h1F;
@@ -426,10 +446,13 @@ module spk286_protected_retf_tb;
         memory[16'h1018] = 8'hFE; memory[16'h1019] = 8'h9F;
         memory[16'h107C] = 8'h1F;
         memory[16'h0101] = 8'h3E; memory[16'h0102] = 8'h00;
+        boundary_observe = 1'b1;
         wait_shutdown();
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF00 &&
-              debug_event_vector == 8'h0C,
+              boundary_fault_seen && boundary_first_fault_vector == 8'h0C,
               "PM4b.9 target frame crossing the destination SS limit faults before writes");
+        check(debug_event_vector == 8'h08 && boundary_stack_writes == 0,
+              "PM4b.9 target rejection reaches failed double-fault delivery without target-stack writes");
 
         // Expand-down outer return: the caller's saved SS accepts the source
         // parameter reads above 9000 and the restored SP remains above the

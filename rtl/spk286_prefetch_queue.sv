@@ -30,7 +30,17 @@ module spk286_prefetch_queue (
 
     assign count = count_q;
     assign consume_valid = (count_q != 4'd0);
-    assign consume_data = storage_q[head_q];
+    // Decode the six legal head positions in parallel, keeping the selection
+    // before the byte reduction instead of cascading byte-wide mux stages.
+    // The pointer resets to zero and increment_pointer wraps at five.
+    (* keep *) logic [5:0] consume_head_select;
+    assign consume_head_select = 6'b000001 << head_q;
+    assign consume_data = ({8{consume_head_select[0]}} & storage_q[0]) |
+                          ({8{consume_head_select[1]}} & storage_q[1]) |
+                          ({8{consume_head_select[2]}} & storage_q[2]) |
+                          ({8{consume_head_select[3]}} & storage_q[3]) |
+                          ({8{consume_head_select[4]}} & storage_q[4]) |
+                          ({8{consume_head_select[5]}} & storage_q[5]);
     assign fill_ready = (fill_count != 2'd0) &&
                         ({1'b0, count_q} + {2'b00, fill_count} <= CAPACITY);
     assign do_consume = consume_valid && consume_ready;

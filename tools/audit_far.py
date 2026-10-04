@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (('lds-cache-index',
   'spk286_control_decode',
@@ -40,8 +42,8 @@ PROBES = (('lds-cache-index',
  ('return-allocation',
   'spk286_micro_executor',
   'spk286_far_instructions',
-  'add_allocation_arch ? stack_pointer+allocation_q',
-  'add_allocation_arch ? stack_pointer-allocation_q',
+  '(stack_pointer+allocation_q)',
+  '(stack_pointer-allocation_q)',
   'all architectural GPR results and preservation'),
  ('far-context-selector',
   'spk286_micro_executor',
@@ -89,8 +91,7 @@ def main():
     output = args.build_dir.resolve()/'far-audit'
     output.mkdir(parents=True, exist_ok=True)
     packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *packages, *sorted(p for p in (ROOT/'rtl').glob('*.sv') if p not in packages)]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

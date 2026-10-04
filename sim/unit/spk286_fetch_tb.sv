@@ -1,17 +1,14 @@
 `timescale 1ns/1ps
 
 module spk286_fetch_tb;
-`ifdef SPK286_P02_FETCH_CHAIN
     localparam logic EXPECT_FETCH_CHAINING = 1'b1;
-`else
-    localparam logic EXPECT_FETCH_CHAINING = 1'b0;
-`endif
 
     logic suspend = 0;
     logic clk = 1'b0, reset = 1'b1, ready = 1'b0;
     logic [15:0] data_in = 16'h0000;
     logic [23:0] code_base = 24'hFF0000;
     logic [15:0] code_limit = 16'hFFFF;
+    logic wrap_ip = 1'b0;
     logic restart = 1'b0;
     logic [15:0] restart_ip = 16'hFFF0;
     logic request = 1'b0, response_ready = 1'b0;
@@ -204,6 +201,29 @@ module spk286_fetch_tb;
         expect_bus(24'h00FFFF);
         complete_read(16'hAACC, 16'h00AA, 2'd1, 16'hFFFF);
         if (cursor !== 17'h10000) $fatal(1, "last odd byte cursor");
+
+        // In real mode IP wraps as a 16-bit architectural register. This is
+        // distinct from a protected fetch whose cursor exceeded its limit.
+        wrap_ip = 1'b1;
+        redirect(24'h010000, 16'hFFFF);
+        expect_bus(24'h01FFFF);
+        complete_read(16'hBBAA, 16'h00BB, 2'd1, 16'hFFFF);
+        if (cursor !== 17'h00000 || blocked !== 1'b0)
+            $fatal(1, "real-mode IP did not wrap at FFFF");
+        consume();
+        request = 1'b1;
+        tick();
+        request = 1'b0;
+        expect_bus(24'h010000);
+        complete_read(16'h2211, 16'h2211, 2'd2, 16'h0000);
+        consume();
+        wrap_ip = 1'b0;
+        redirect(24'h010000, 16'hFFFF);
+        expect_bus(24'h01FFFF);
+        complete_read(16'hDDEE, 16'h00DD, 2'd1, 16'hFFFF);
+        if (cursor !== 17'h10000 || blocked !== 1'b1)
+            $fatal(1, "protected fetch lost segment-end overflow");
+        consume();
 
         // A last even byte must use only the lower lane; inactive high byte is ignored.
         code_limit = 16'h0100;

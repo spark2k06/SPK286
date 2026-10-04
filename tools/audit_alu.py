@@ -8,6 +8,8 @@ import sys
 from tools.alu_reference import write_vectors
 from tools.alu_instruction_vectors import write_vectors as write_instruction_vectors
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
     ('carry', 'spk286_alu', 'spk286_alu', 'candidate_flags[0] = operand_byte ? extended_result[8] : extended_result[16];',
@@ -34,8 +36,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     alu_vectors = output/'alu.txt'; instruction_vectors = output/'instructions.txt'
     write_vectors(alu_vectors); write_instruction_vectors(instruction_vectors)
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

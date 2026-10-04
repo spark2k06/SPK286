@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 from tools.task_late_vectors import generate
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT=Path(__file__).resolve().parents[1]
 PROBES=(
  ('retain-outgoing-caches','spk286_protected_state',
@@ -34,9 +36,7 @@ def main():
     assert len(selected)==4
     (output/'directed.txt').write_text('\n'.join(selected)+'\n')
     packages=[ROOT/'rtl/spk286_protected_pkg.sv',ROOT/'rtl/spk286_tss_pkg.sv']
-    sources=[ROOT/'microcode/generated/spk286_microcode_pkg.sv',
-             ROOT/'microcode/generated/spk286_microcode_rom.sv',*packages,
-             *sorted(p for p in (ROOT/'rtl').glob('*.sv') if p not in packages)]
+    sources = ordered_rtl_sources(ROOT)
     originals={p:p.read_bytes() for p in sources}
     results=[]
     for name,module,old,new in [('pristine',None,None,None),*PROBES]:

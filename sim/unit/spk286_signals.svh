@@ -36,6 +36,7 @@ wire [23:0] address;
 wire [15:0] data_out;
 wire data_oe, bus_valid, bus_write, bus_bhe_n, bus_lock, hlda;
 wire [3:0] bus_status;
+wire [7:0] debug_biu_detail;
 wire [15:0] debug_cs, debug_ip, debug_flags;
 wire [23:0] debug_cs_base;
 wire [11:0] debug_micro_pc;

@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
     ('byte-write-lane','spk286_biu','spk286_biu_width_io',
@@ -33,8 +35,7 @@ def main():
     subprocess.run([sys.executable, '-m', 'tools.microcode.compile_microcode', '--check'], check=True)
     output = args.build_dir.resolve()/'byte-prefix-audit'
     output.mkdir(parents=True, exist_ok=True)
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

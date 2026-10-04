@@ -459,7 +459,6 @@ module spk286 (
     assign protected_segment_is_readable = selected_segment_access[1];
     assign protected_segment_is_writable = !protected_segment_is_code && selected_segment_access[1];
     assign protected_segment_is_expand_down = !protected_segment_is_code && selected_segment_access[2];
-`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
     // Compare each offset source before the late stack/address selection.
     // I/O and vector accesses are excluded by the common fault qualifier.
     function automatic logic protected_range_exceeded(
@@ -529,26 +528,6 @@ module spk286 (
                                        (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
                                         (operand_write && !protected_segment_is_writable))) ||
                                       protected_selected_range_fault)));
-`else
-    assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
-                                   !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
-                                   !io_transfer && !vector_request &&
-                                    (protected_call_stack_access ?
-                                    (service_segment != 2'd2 ||
-                                     (protected_call_stack_expand_down ?
-                                      ({1'b0, service_offset} <= {1'b0, protected_call_stack_limit} ||
-                                       ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
-                                      ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, protected_call_stack_limit}))) :
-                                    (protected_segment_is_loaded &&
-                                     (!protected_segment_is_valid || !protected_segment_is_present ||
-                                      (protected_segment_is_code ? (!protected_segment_is_readable || operand_write) :
-                                       (stack_request ? (!protected_segment_is_writable || service_segment != 2'd2) :
-                                        (operand_write && !protected_segment_is_writable))) ||
-                                      (protected_segment_is_expand_down ?
-                                       ({1'b0, service_offset} <= {1'b0, selected_segment_limit} ||
-                                        ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > 17'h0FFFF)) :
-                                       ({1'b0, service_offset} + (operand_byte ? 17'd0 : 17'd1) > {1'b0, selected_segment_limit})))));
-`endif
     assign protected_access_ss_fault = protected_access_fault && service_segment == 2'd2;
     assign protected_fetch_invalid = protected_msw[0] && protected_segment_protected[2'd1] &&
                                    (!protected_segment_valid[2'd1] || !protected_segment_present[2'd1] ||
@@ -569,11 +548,16 @@ module spk286 (
                                      (execute_enable ? internal_ip_write_data : ip_write_data);
     assign effective_flags_write_en = execute_enable ? internal_flags_write_en : flags_write_en;
 
-    // Keep two bytes of bus capacity available. This lets the current fetch
-    // service preserve both bytes of every word response without a second
-    // response staging slot in the instruction queue.
+    // Reserve every staged response and the current bus beat before granting
+    // another maximum two-byte fetch. A prepared request cannot complete
+    // until the previous response leaves its slot; total reserved bytes still
+    // fit the six-byte queue even when consumption stops on the next edge.
+    logic [4:0] fetch_reserved_bytes;
+    assign fetch_reserved_bytes = {1'b0, queue_count} +
+        (fetch_response_valid ? {3'b000, fetch_response_count} : 5'd0) +
+        (fetch_bus_valid ? 5'd2 : 5'd0);
     assign fetch_request_internal = execute_enable && !event_active && !halted && !shutdown && !unsupported_q && !microcode_fault && !operand_blocked &&
-                                    !protected_fetch_invalid && (queue_count <= 4'd4);
+                                    !protected_fetch_invalid && (fetch_reserved_bytes <= 5'd4);
     assign fetch_response_ready = execute_enable ? queue_fill_ready : fetch_ready;
 
     spk286_registers registers (
@@ -743,10 +727,11 @@ module spk286 (
         .limit_state(real_segment_limits), .access_state(real_segment_access_state)
     );
 
-    spk286_fetch fetch (
+    spk286_fetch #(.READY_CHAINING(1'b1)) fetch (
         .clk(clk), .reset(reset), .ready(fetch_bus_ready), .data_in(data_in),
         .code_base(debug_segment_bases[24 +: 24]),
         .code_limit(debug_segment_limits[16 +: 16]),
+        .wrap_ip(!protected_msw[0]),
         .restart(stream_restart), .restart_ip(stream_ip),
         .request(execute_enable ? fetch_request_internal : fetch_request),
         .suspend(event_active || halted || shutdown),
@@ -845,17 +830,10 @@ module spk286 (
         .destination(decode_destination), .source_index(decode_source_index), .entry(decode_entry)
     );
 
-`ifdef SPK286_P07_SYNC_MICROCODE
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] next_micro_pc;
     spk286_microcode_sync_rom microcode_rom (
         .clk(clk), .address(next_micro_pc), .word(micro_word), .valid(micro_valid)
     );
-`else
-    logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] unused_next_micro_pc;
-    spk286_microcode_rom microcode_rom (
-        .address(micro_pc), .word(micro_word), .valid(micro_valid)
-    );
-`endif
 
     assign micro_end = micro_word == spk286_microcode_pkg::MC_END;
     assign loadall_start = operation_valid && micro_word == spk286_microcode_pkg::MC_LOADALL;
@@ -894,11 +872,7 @@ module spk286 (
         .branch_target_valid(counter_branch_request ? counter_branch_target[spk286_microcode_pkg::MC_ADDR_WIDTH] : dispatch_valid),
         .operation_valid(operation_valid), .active(micro_active),
         .micro_pc(micro_pc), .micro_entry(micro_entry),
-`ifdef SPK286_P07_SYNC_MICROCODE
         .next_micro_pc(next_micro_pc),
-`else
-        .next_micro_pc(unused_next_micro_pc),
-`endif
         .retired(raw_retired), .fault(microcode_fault)
     );
 
@@ -913,17 +887,9 @@ module spk286 (
     assign executor_operand_done = (protected_descriptor_access || protected_tss_access || protected_event_access) ?
                                    unlimited_memory_done : operand_done;
     spk286_micro_executor #(
-`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
         .USE_PARALLEL_SYSTEM_LIMIT(1'b1)
-`else
-        .USE_PARALLEL_SYSTEM_LIMIT(1'b0)
-`endif
     ) micro_executor (
-`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
         .parallel_system_limit_fault(parallel_system_cache_fault),
-`else
-        .parallel_system_limit_fault(1'b0),
-`endif
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start),
         .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .operation_retire(operation_retire), .dispatch_request(dispatch_request),
         .segment_pop_opcode(opcode_q == 8'h07 || opcode_q == 8'h17 || opcode_q == 8'h1F),
@@ -1087,17 +1053,9 @@ module spk286 (
     assign task_memory_done = task_memory_request && memory_response_valid;
 
     spk286_operand #(
-`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
         .USE_PARALLEL_RANGE(1'b1)
-`else
-        .USE_PARALLEL_RANGE(1'b0)
-`endif
     ) operand (
-`ifdef SPK286_P05_PARALLEL_LIMIT_CHECK
         .parallel_within_limit(parallel_operand_within_limit),
-`else
-        .parallel_within_limit(1'b0),
-`endif
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .unlimited_memory_done(unlimited_memory_done), .read_data(operand_read_data), .register_state(register_state),

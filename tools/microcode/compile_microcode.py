@@ -647,7 +647,7 @@ def validate_block(block: Block) -> None:
     if block.location.entry == 'LOAD_CARRY_BYTE' or 'CARRY_FILL8' in names:
         validate_carry_byte_block(block)
         return
-    if 'LOADALL' in names:
+    if block.location.entry == 'LOADALL' or 'LOADALL' in names:
         validate_loadall_block(block)
         return
     if block.location.entry.startswith('SYSTEM_'):

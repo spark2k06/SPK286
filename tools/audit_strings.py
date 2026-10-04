@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (('word-stride',
   'spk286_micro_executor',
@@ -126,8 +128,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     rtl_sources = sorted((ROOT/'rtl').glob('*.sv'))
     protected_pkg = ROOT/'rtl/spk286_protected_pkg.sv'
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               protected_pkg, *(p for p in rtl_sources if p != protected_pkg)]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

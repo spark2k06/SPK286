@@ -20,6 +20,7 @@ module spk286_biu_hold_lock_tb;
     wire [15:0] data_out;
     wire data_oe, bus_valid, bus_write, bus_bhe_n;
     wire [3:0] bus_status;
+    wire [7:0] debug_detail;
     integer checks = 0, writes = 0, physical_cycles = 0;
 
     spk286_biu dut (.*);

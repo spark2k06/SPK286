@@ -15,6 +15,8 @@ import subprocess
 import sys
 
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 
 PROBES = (
@@ -65,11 +67,7 @@ def main():
 
     output = args.build_dir.resolve() / "phase8-audit"
     output.mkdir(parents=True, exist_ok=True)
-    sources = [
-        ROOT / "microcode/generated/spk286_microcode_pkg.sv",
-        ROOT / "microcode/generated/spk286_microcode_rom.sv",
-        *sorted((ROOT / "rtl").glob("*.sv")),
-    ]
+    sources = ordered_rtl_sources(ROOT)
     originals = {path: path.read_bytes() for path in sources}
     source_hashes = {
         path.relative_to(ROOT).as_posix(): hashlib.sha256(data).hexdigest()

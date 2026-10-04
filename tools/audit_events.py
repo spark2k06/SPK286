@@ -8,6 +8,8 @@ import subprocess
 import sys
 from tools.event_vectors import records
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT=Path(__file__).resolve().parents[1]
 PROBES=(
     ('owed-trap-priority','spk286_events','spk286_event_lifecycle',
@@ -67,8 +69,7 @@ def main():
     vectors=output/'event-vectors.txt';rows=list(records())
     vectors.write_text(f'{len(rows):x}\n'+''.join(' '.join(f'{v:x}' for v in row)+'\n' for row in rows))
     packages=[ROOT/'rtl/spk286_protected_pkg.sv',ROOT/'rtl/spk286_tss_pkg.sv']
-    sources=[ROOT/'microcode/generated/spk286_microcode_pkg.sv',ROOT/'microcode/generated/spk286_microcode_rom.sv',*packages,
-             *sorted(p for p in (ROOT/'rtl').glob('*.sv') if p not in packages)]
+    sources = ordered_rtl_sources(ROOT)
     originals={p:p.read_bytes() for p in sources}
     results=[]
     def execute(name,bench,mutation=None,reason=None):

@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (('pusha-original-sp',
   'spk286_micro_executor',
@@ -40,8 +42,8 @@ PROBES = (('pusha-original-sp',
  ('enter-allocation',
   'spk286_micro_executor',
   'spk286_stack_frame_lifecycle',
-  'allocate_stack ? stack_cursor_q - allocation_q',
-  'allocate_stack ? stack_cursor_q + allocation_q',
+  '(stack_cursor_q - allocation_q)',
+  '(stack_cursor_q + allocation_q)',
   'entire instruction completes before event'),
  ('enter-level-mask',
   'spk286_micro_executor',
@@ -108,8 +110,7 @@ def main():
     output = args.build_dir.resolve()/'stack-frame-audit'
     output.mkdir(parents=True, exist_ok=True)
     packages = [ROOT/'rtl/spk286_protected_pkg.sv', ROOT/'rtl/spk286_tss_pkg.sv']
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *packages, *(p for p in sorted((ROOT/'rtl').glob('*.sv')) if p not in packages)]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

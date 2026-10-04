@@ -7,13 +7,16 @@ import subprocess
 import sys
 from tools.stack_control_vectors import records
 
+from tools.rtl_sources import ordered_rtl_sources
+
 ROOT = Path(__file__).resolve().parents[1]
 PROBES = (
     ('sp-width','spk286_stack','spk286_stack_control',"16'hFFFE : 16'd2", "16'hFFFF : 16'd2",'exact GPR result/preservation'),
     ('push-source','spk286_micro_executor','spk286_stack_control','result_operation ? tmp2_q : tmp0_q',
      "result_operation ? tmp2_q : tmp0_q - 16'd2",'write byte'),
-    ('pop-sp-order','spk286_micro_executor','spk286_stack_control','move_word ? tmp0_q : operand_gpr_write_data',
-     "move_word ? tmp0_q + (destination == 3'd4 ? 16'd2 : 16'd0) : operand_gpr_write_data",'exact GPR result/preservation'),
+    ('pop-sp-order','spk286_micro_executor','spk286_stack_control',
+     '(operand_gpr_write_data),\n        (tmp0_q),',
+     "(operand_gpr_write_data),\n        (tmp0_q + (destination == 3'd4 ? 16'd2 : 16'd0)),",'exact GPR result/preservation'),
     ('stack-segment','spk286','spk286_stack_control',"stack_request ? 2'd2 : (segment_override ? override_segment : operand_segment)",
      "stack_request ? 2'd3 : (segment_override ? override_segment : operand_segment)",'ordered data address'),
     ('return-cursor','spk286','spk286_stack_control','.architectural_ip(debug_ip)',
@@ -46,8 +49,7 @@ def main():
     instruction_vectors = output/'instructions.txt'
     vectors=list(records())
     instruction_vectors.write_text(f'{len(vectors):x}\n'+''.join(' '.join(f'{v:x}' for v in row)+'\n' for row in vectors))
-    sources = [ROOT/'microcode/generated/spk286_microcode_pkg.sv', ROOT/'microcode/generated/spk286_microcode_rom.sv',
-               *sorted((ROOT/'rtl').glob('*.sv'))]
+    sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
     (output/'source.sha256').write_text(''.join(f'{hashlib.sha256(data).hexdigest()}  {p.relative_to(ROOT).as_posix()}\n'
                                               for p,data in originals.items()), encoding='utf-8')

@@ -19,6 +19,7 @@ module spk286_biu_width_io_tb;
     wire [15:0] data_out;
     wire data_oe, bus_valid, bus_write, bus_bhe_n;
     wire [3:0] bus_status;
+    wire [7:0] debug_detail;
     integer checks=0, cases=0, accepted=0, responses=0;
     spk286_biu dut(.*);
     task automatic check(input logic condition,input string message);
