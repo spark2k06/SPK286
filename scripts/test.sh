@@ -6,6 +6,7 @@ cd "$ROOT_DIR"
 
 python3 -m tools.microcode.compile_microcode --check
 python3 -m unittest discover -s tests -p 'test_microcode*.py' -v
+python3 -m unittest tests.test_instruction_syntax -v
 python3 -m tools.microcode.audit_microcode --output "${SPK286_BUILD_DIR:-build}/microcode-audit"
 ./scripts/lint.sh
 bash ./scripts/test_units.sh

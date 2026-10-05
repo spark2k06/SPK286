@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "scope": "Current accepted standalone CPU-only functional source; immutable baseline and READY selection retained; provisional instruction metadata and logical host bus policy unchanged",
+  "baseline_contract_path": "tools/profile_cpu_baseline.json",
+  "baseline_contract_sha256": "e706766536c6a40ab95130408f3abb85ca96dd5a0136e5b4c56bc18e66744bf2",
+  "previous_selected_contract_path": "tools/profile_cpu_ready_chain.json",
+  "previous_selected_contract_sha256": "480f5a8431a207a849ea0d1d7fd6b9472fad7d088d4cd25f299489380cfea149",
+  "functional_updates_sha256": {
+    "microcode/generated/spk286_microcode_pkg.sv": "202236c1ec93016bfb17d8a918b61de8af805dabb4ccb55c9cc1ec54875e3e10",
+    "microcode/generated/spk286_microcode_rom.sv": "8861eb3eefeecc72a0e6383cf95d961c0d0cb27f76595bcb5ecc3d2ae711f519",
+    "microcode/generated/spk286_microcode_sync_rom.sv": "31841a56d61b32aaf92c91afbc0258d67ce90a3c67788dc06092c8d845ec1894",
+    "rtl/spk286.sv": "fe945327191099b0c1580eae0819a451cd797b8b0cf3f78166e4b5eefd159b26",
+    "rtl/spk286_control_decode.sv": "026d3217f5290f2b3b7f14da66a660ff0e65372b6dbb11c7db6f1ae2c56b352b",
+    "rtl/spk286_decoder.sv": "d38849308e58512e02f7766a0aa4d513a73771915901e7dd8b44eb457f1606bb",
+    "rtl/spk286_fetch.sv": "1da4efb3273c690d97acba5f8646a3e40b9588b957e00dfc7d4aa40c66b6af3c",
+    "rtl/spk286_micro_executor.sv": "8d41e0187bef3081728780e4683c9e312b1f4beb1f3c40a6244d465c32799710"
+  },
+  "expected_profiled_sha256": {
+    "spk286_profiled.sv": "b1147c93328ca72a10135392af96fde2c39bfa4379517089b62b8c0d47c552a9",
+    "spk286_profiled_events.sv": "a158e55b5b0a66060784c4901576fb717842cc9a009e3656d5feaaf76b51fbef"
+  },
+  "probe_fixture_sha256": {
+    "sim/unit/spk286_signals.svh": "b62b822f37940d0bc66bdfb7f40c8bc4b09ece3a08d4953a63cef41bd566a748"
+  },
+  "reviewed_update_reasons": {
+    "rtl/spk286.sv": "Accepted READY chain and completed legal ten-byte instruction demand boundary",
+    "rtl/spk286_fetch.sv": "Accepted READY response chaining",
+    "microcode/generated/spk286_microcode_pkg.sv": "Accepted generated canonical encoding metadata",
+    "microcode/generated/spk286_microcode_rom.sv": "Accepted regenerated encoding/acquisition metadata; functional micro-operations preserved",
+    "microcode/generated/spk286_microcode_sync_rom.sv": "Accepted regenerated synchronous encoding/acquisition metadata; functional micro-operations preserved",
+    "rtl/spk286_decoder.sv": "Accepted syntax-mode acquisition shape at canonical decoder leaves; default functional map preserved",
+    "rtl/spk286_control_decode.sv": "Accepted syntax-mode acquisition shape at canonical control-decoder leaves; default functional map preserved",
+    "rtl/spk286_micro_executor.sv": "Accepted frame/stack arithmetic, proved null-segment commit specialization and source-extracted consumed stack DATA selector equivalence; idle payload difference is explicit, request/permission controls preserved"
+  },
+  "source_revision": "c9239dc3f02c2cef03d36a7cd2b22301affe7795",
+  "source_update_documents": [
+    "docs/READY_CHAINING_20261004.md",
+    "docs/PORTABLE_ENCODING_UPDATE_20261005.md",
+    "docs/NULL_SEGMENT_COMMIT_SPECIALIZATION_20261005.md",
+    "docs/STACK_DATA_SELECTORS_20261005.md"
+  ]
+}

@@ -1,13 +1,18 @@
 {
   "status": "PROFILED_CPU_GENERATED_NOT_ACCEPTED",
   "sources_sha256": {
-    "rtl/spk286.sv": "9a04d8b46b4fab359ba6739b159444925b4118df51e26227e62f9b584db5f046",
+    "rtl/spk286.sv": "fe945327191099b0c1580eae0819a451cd797b8b0cf3f78166e4b5eefd159b26",
     "rtl/spk286_events.sv": "fb5253389daf3e69338a9aed2e3dfcb0d2352a4ac1e48b07baea3c68ea60fa9d",
-    "microcode/generated/spk286_microcode_pkg.sv": "fedea94b3d1435a77765aa425926ba8efecabdc0806092a7894c6a1b38d85afe",
+    "microcode/generated/spk286_microcode_pkg.sv": "202236c1ec93016bfb17d8a918b61de8af805dabb4ccb55c9cc1ec54875e3e10",
     "rtl/spk286_fetch.sv": "1da4efb3273c690d97acba5f8646a3e40b9588b957e00dfc7d4aa40c66b6af3c",
-    "tools/profile_cpu_ready_chain.json": "480f5a8431a207a849ea0d1d7fd6b9472fad7d088d4cd25f299489380cfea149",
+    "microcode/generated/spk286_microcode_rom.sv": "8861eb3eefeecc72a0e6383cf95d961c0d0cb27f76595bcb5ecc3d2ae711f519",
+    "microcode/generated/spk286_microcode_sync_rom.sv": "31841a56d61b32aaf92c91afbc0258d67ce90a3c67788dc06092c8d845ec1894",
+    "rtl/spk286_decoder.sv": "d38849308e58512e02f7766a0aa4d513a73771915901e7dd8b44eb457f1606bb",
+    "rtl/spk286_control_decode.sv": "026d3217f5290f2b3b7f14da66a660ff0e65372b6dbb11c7db6f1ae2c56b352b",
+    "rtl/spk286_micro_executor.sv": "8d41e0187bef3081728780e4683c9e312b1f4beb1f3c40a6244d465c32799710",
+    "tools/profile_cpu_selected_20261005.json": "025a6280ddd512ed944bafb882f0f26816868187641a94ef8b08279df988c53c",
     "tools/profile_cpu_baseline.json": "e706766536c6a40ab95130408f3abb85ca96dd5a0136e5b4c56bc18e66744bf2",
-    "scripts/build_p06_profile_cpu.py": "5eba84fbfd0b47e2d4d53bad0bda54e50521204b8ae7c65285cad55e68554b69",
+    "scripts/build_p06_profile_cpu.py": "99d49b9e932208df97131dd4d89ef395498a4f9178566ffcf3cc41f2e7becdf9",
     "rtl/timing/spk286_instruction_schedule.sv": "e27dd87bf0c5c8c9c02e7d0ad77b32201e8f666dee336bed0920a86373540307",
     "rtl/timing/spk286_instruction_timing.sv": "41d901063422f6e3532a2fb9653d21a281b0af85d6274334dcca29ec3db4ff02"
   },
@@ -54,19 +59,19 @@
     "rtl/spk286_tss_service.sv": "e720c9ad15449983febda2b3a8c4171f169a74f94586b9cc1ca4a14fd23acdda"
   },
   "selected_functional_sha256": {
-    "microcode/generated/spk286_microcode_pkg.sv": "fedea94b3d1435a77765aa425926ba8efecabdc0806092a7894c6a1b38d85afe",
-    "microcode/generated/spk286_microcode_rom.sv": "a8d40ae8395de692a3d21da9d31ab956e7d6226aa2c2a113ea4d01e85a97bcd0",
-    "microcode/generated/spk286_microcode_sync_rom.sv": "774c1d5a9f2077d691e1f3708f8a300b8eb7dd31a81e93b9ef643deaa6473638",
+    "microcode/generated/spk286_microcode_pkg.sv": "202236c1ec93016bfb17d8a918b61de8af805dabb4ccb55c9cc1ec54875e3e10",
+    "microcode/generated/spk286_microcode_rom.sv": "8861eb3eefeecc72a0e6383cf95d961c0d0cb27f76595bcb5ecc3d2ae711f519",
+    "microcode/generated/spk286_microcode_sync_rom.sv": "31841a56d61b32aaf92c91afbc0258d67ce90a3c67788dc06092c8d845ec1894",
     "rtl/spk286_protected_pkg.sv": "1e4d70a8c9c068402af7441a792e58a1e9e5545d6ba2edb40c236fd93547877f",
     "rtl/spk286_tss_pkg.sv": "04d2c46e1ed5be52f7822b9d948da11860c6ec4d419b2c1cfddf6a834ea09592",
-    "rtl/spk286.sv": "9a04d8b46b4fab359ba6739b159444925b4118df51e26227e62f9b584db5f046",
+    "rtl/spk286.sv": "fe945327191099b0c1580eae0819a451cd797b8b0cf3f78166e4b5eefd159b26",
     "rtl/spk286_adjust.sv": "dfa7b1ffcfa3278d0ae9baf58c9a63f8190cb4146bd385194d296b78ae3ceb58",
     "rtl/spk286_alu.sv": "103cd07b5a3ae79e96b2bb42aa0eb411ba1b4ee6261f7e5f9cfbc5a41f21d232",
     "rtl/spk286_alu_decode.sv": "633b8daad1036370e5b9070d86c64a8a610b026113dc373998eb91030e2cc2a2",
     "rtl/spk286_biu.sv": "0c17999947f7d3ed4e044e10893516d9dfd1ed30a3b4af1578dcc6cfc8202d33",
     "rtl/spk286_condition.sv": "2885a31a13ad49c64460a329b640d4329725c7c8ce82cc0b983148563e9431a9",
-    "rtl/spk286_control_decode.sv": "d56e5de2a0f89f017fc96bb91a85e872dd4b8478d8858f61a7bdc540664860df",
-    "rtl/spk286_decoder.sv": "6afedc009dabbad5947fe888cafc4c2af09b4cc4a15eed8e8082b529c96516f0",
+    "rtl/spk286_control_decode.sv": "026d3217f5290f2b3b7f14da66a660ff0e65372b6dbb11c7db6f1ae2c56b352b",
+    "rtl/spk286_decoder.sv": "d38849308e58512e02f7766a0aa4d513a73771915901e7dd8b44eb457f1606bb",
     "rtl/spk286_descriptor.sv": "cf6ab285f3be15332eb32868571f879c66b5b3c7d250fd5ea1d05b909c36ea5d",
     "rtl/spk286_effective_address.sv": "cb2ec2959b616f92594353a36ecea7e0af18774b32d4cd9a7e547fd28516d988",
     "rtl/spk286_events.sv": "fb5253389daf3e69338a9aed2e3dfcb0d2352a4ac1e48b07baea3c68ea60fa9d",
@@ -74,7 +79,7 @@
     "rtl/spk286_flags_decode.sv": "81527f7053df20cdb32a4a56c499bfaa3abea65e1e956530c1f15ea3b2d032ed",
     "rtl/spk286_instruction_context.sv": "1a17b502e71e13d8520bd3f31cf42f69685a4d49155ae3c0f02c9882729b3aa7",
     "rtl/spk286_loadall_service.sv": "f32239d7b48abbfad8d5798d2b62aa84fb5ba6a54b748342240afa9e42f6d617",
-    "rtl/spk286_micro_executor.sv": "df68b9fe22d0ce01837b587f0cb187f4c01a23d23f37dada9b562b4ccb24a1bc",
+    "rtl/spk286_micro_executor.sv": "8d41e0187bef3081728780e4683c9e312b1f4beb1f3c40a6244d465c32799710",
     "rtl/spk286_microsequencer.sv": "160587b4221faf89b5742f9d52c7a3451045a6aa5cefb1dcedd3a05159e23b8c",
     "rtl/spk286_modrm.sv": "621ab5d58c2f8877559d151d0e270f0062ac069cd781e3c7ac9a8565c3d7193c",
     "rtl/spk286_muldiv.sv": "0816c915198cd2433aec9a74695b90ad398f9a29a39eef8b1e7858810192682f",
@@ -96,8 +101,8 @@
     "rtl/spk286_tss_service.sv": "e720c9ad15449983febda2b3a8c4171f169a74f94586b9cc1ca4a14fd23acdda"
   },
   "generated_sha256": {
-    "spk286_profiled.sv": "847a6930469e67d7345847e39f57ab51a5fe3556c73f8741d5e9c7d69c6038c7",
+    "spk286_profiled.sv": "b1147c93328ca72a10135392af96fde2c39bfa4379517089b62b8c0d47c552a9",
     "spk286_profiled_events.sv": "a158e55b5b0a66060784c4901576fb717842cc9a009e3656d5feaaf76b51fbef"
   },
-  "scope": "Single selected functional core; provisional instruction intervals and logical bus supplied by integration; historical standalone baseline retained; selected READY chaining functional milestone explicitly bound"
+  "scope": "Single selected functional core; provisional instruction intervals and logical bus supplied by integration; historical standalone baseline and READY selection retained; current accepted portable functional source explicitly bound"
 }

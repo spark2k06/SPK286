@@ -1,6 +1,8 @@
 // Captured instruction metadata -> functional stack/control selectors.
 `timescale 1ns/1ps
-module spk286_control_decode (
+module spk286_control_decode #(
+    parameter bit SYNTAX_ONLY = 1'b0
+) (
     input logic [7:0] opcode,
     input logic extended_opcode,
     input logic [2:0] group_extension,
@@ -14,6 +16,16 @@ module spk286_control_decode (
     output logic string_byte, string_compare,
     output logic dispatch_valid
 );
+    localparam integer ENTRY_WIDTH = spk286_microcode_pkg::MC_ADDR_WIDTH;
+    function automatic logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] selected_entry(
+        input logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] functional_entry
+    );
+        logic [6:0] acquisition;
+        acquisition = spk286_microcode_pkg::micro_instruction_syntax(functional_entry);
+        selected_entry = SYNTAX_ONLY ?
+                         {{(ENTRY_WIDTH-7){1'b0}}, acquisition} :
+                         functional_entry;
+    endfunction
     assign muldiv_kind = group_extension[1:0];
     assign string_byte = !opcode[0];
     assign string_compare = opcode[7:1] == 7'b1010011 || opcode[7:1] == 7'b1010111;
@@ -33,42 +45,42 @@ module spk286_control_decode (
         dispatch_entry = '0;
         if (extended_opcode && opcode == 8'h00) begin
             case (group_extension)
-                3'd0: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_LDTR;
-                3'd1: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_TR;
-                3'd2: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LDTR;
-                3'd3: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_TR;
-                3'd4: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_VERIFY_READ;
-                3'd5: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_VERIFY_WRITE;
+                3'd0: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_LDTR);
+                3'd1: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_TR);
+                3'd2: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LDTR);
+                3'd3: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_TR);
+                3'd4: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_VERIFY_READ);
+                3'd5: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_VERIFY_WRITE);
                 default: dispatch_valid = 1'b0;
             endcase
         end else if (extended_opcode && opcode == 8'h01) begin
             case (group_extension)
-                3'd0: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_GDTR;
-                3'd1: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_IDTR;
-                3'd2: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_GDTR;
-                3'd3: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_IDTR;
-                3'd4: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_MSW;
-                3'd6: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_MSW;
+                3'd0: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_GDTR);
+                3'd1: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_IDTR);
+                3'd2: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_GDTR);
+                3'd3: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_IDTR);
+                3'd4: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_STORE_MSW);
+                3'd6: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_MSW);
                 default: dispatch_valid = 1'b0;
             endcase
         end else if (extended_opcode && opcode == 8'h02) begin
-            dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS;
+            dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS);
         end else if (extended_opcode && opcode == 8'h03) begin
-            dispatch_entry = spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT;
+            dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT);
         end else if (opcode == 8'hF6 || opcode == 8'hF7) begin
             case (group_extension)
-                3'd0: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16 : spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8;
-                3'd2: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NOT_RM16 : spk286_microcode_pkg::MC_ENTRY_NOT_RM8;
-                3'd3: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NEG_RM16 : spk286_microcode_pkg::MC_ENTRY_NEG_RM8;
-                3'd4, 3'd5, 3'd6, 3'd7: dispatch_entry = opcode[0] ? spk286_microcode_pkg::MC_ENTRY_MULDIV_RM16 : spk286_microcode_pkg::MC_ENTRY_MULDIV_RM8;
+                3'd0: dispatch_entry = opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8);
+                3'd2: dispatch_entry = opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_NOT_RM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_NOT_RM8);
+                3'd3: dispatch_entry = opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_NEG_RM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_NEG_RM8);
+                3'd4, 3'd5, 3'd6, 3'd7: dispatch_entry = opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MULDIV_RM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_MULDIV_RM8);
                 default: dispatch_valid = 1'b0;
             endcase
         end else if (opcode == 8'hFF) begin
             case (group_extension)
-                3'd0, 3'd1: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM16;
-                3'd2, 3'd4, 3'd6: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_GROUP5_NEAR;
-                3'd3: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_CALL_FAR_RM;
-                3'd5: dispatch_entry = spk286_microcode_pkg::MC_ENTRY_JMP_FAR_RM;
+                3'd0, 3'd1: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM16);
+                3'd2, 3'd4, 3'd6: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_GROUP5_NEAR);
+                3'd3: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_CALL_FAR_RM);
+                3'd5: dispatch_entry = selected_entry(spk286_microcode_pkg::MC_ENTRY_JMP_FAR_RM);
                 default: dispatch_valid = 1'b0;
             endcase
         end else dispatch_valid = 1'b0;

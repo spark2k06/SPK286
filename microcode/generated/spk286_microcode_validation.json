@@ -1,9 +1,1038 @@
 {
   "address_width": 10,
-  "compiler_version": "27.1",
+  "compiler_version": "27.2",
   "encoding_version": 27,
   "format_version": 27,
   "instruction_entries": 123,
+  "instruction_syntax": {
+    "ADJUST_DIRECT": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "ADJUST_RADIX": {
+      "acquisition_micro_pc": [
+        366
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "ALU_AL_IMM8": {
+      "acquisition_micro_pc": [
+        192
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "ALU_AX_IMM16": {
+      "acquisition_micro_pc": [
+        25
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "ALU_R16_RM16": {
+      "acquisition_micro_pc": [
+        18
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "ALU_R8_RM8": {
+      "acquisition_micro_pc": [
+        185
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "ALU_RM16_IMM16": {
+      "acquisition_micro_pc": [
+        31,
+        32
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 2
+    },
+    "ALU_RM16_IMM8S": {
+      "acquisition_micro_pc": [
+        38,
+        39
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "ALU_RM16_R16": {
+      "acquisition_micro_pc": [
+        11
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "ALU_RM8_IMM8": {
+      "acquisition_micro_pc": [
+        198,
+        199
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "ALU_RM8_R8": {
+      "acquisition_micro_pc": [
+        178
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "BRANCH_REL8": {
+      "acquisition_micro_pc": [
+        77
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "CALL_FAR_IMM": {
+      "acquisition_micro_pc": [
+        474,
+        475
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 4
+    },
+    "CALL_FAR_RM": {
+      "acquisition_micro_pc": [
+        498
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "CALL_REL16": {
+      "acquisition_micro_pc": [
+        67
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "CHECK_BOUNDS": {
+      "acquisition_micro_pc": [
+        455
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "CONTROL_FLAGS": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "CONTROL_IF": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "ENTER_FRAME": {
+      "acquisition_micro_pc": [
+        424,
+        426
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 3
+    },
+    "ESC_NO_COPROCESSOR": {
+      "acquisition_micro_pc": [
+        676
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "EVENT_ENTRY": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "EVENT_ENTRY_PROTECTED": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "EXCHANGE_RM16_R16": {
+      "acquisition_micro_pc": [
+        276
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "EXCHANGE_RM8_R8": {
+      "acquisition_micro_pc": [
+        270
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "EXCHANGE_SOURCE_TARGET16": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "EXTEND_BYTE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "EXTEND_WORD": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "GROUP3_DISPATCH": {
+      "acquisition_micro_pc": [
+        313
+      ],
+      "conditional_port": false,
+      "dispatch": true,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "GROUP5_DISPATCH": {
+      "acquisition_micro_pc": [
+        315
+      ],
+      "conditional_port": false,
+      "dispatch": true,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "GROUP5_NEAR": {
+      "acquisition_micro_pc": [
+        61
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "HALT_CPU": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "IMUL_R16_RM16_IMM16": {
+      "acquisition_micro_pc": [
+        562,
+        563
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 2
+    },
+    "IMUL_R16_RM16_IMM8S": {
+      "acquisition_micro_pc": [
+        569,
+        570
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "INC_DEC_R16": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "INC_DEC_RM16": {
+      "acquisition_micro_pc": [
+        352
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "INC_DEC_RM8": {
+      "acquisition_micro_pc": [
+        345
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "INTERRUPT_RETURN": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "IN_AL_PORT": {
+      "acquisition_micro_pc": [
+        619
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "IN_AX_PORT": {
+      "acquisition_micro_pc": [
+        624
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "JMP_FAR_IMM": {
+      "acquisition_micro_pc": [
+        492,
+        493
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 4
+    },
+    "JMP_FAR_RM": {
+      "acquisition_micro_pc": [
+        519
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "JMP_REL16": {
+      "acquisition_micro_pc": [
+        73
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "LEAVE_FRAME": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "LEA_R16_M": {
+      "acquisition_micro_pc": [
+        266
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "LOADALL": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "LOAD_BASE_INDEX8": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "LOAD_CARRY_BYTE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "LOAD_DIRECT16": {
+      "acquisition_micro_pc": [
+        292
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "LOAD_DIRECT8": {
+      "acquisition_micro_pc": [
+        287
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "LOAD_FLAGS_BYTE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "LOAD_POINTER": {
+      "acquisition_micro_pc": [
+        464
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "LOOP_REL8": {
+      "acquisition_micro_pc": [
+        81
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "MOV_R16_IMM16": {
+      "acquisition_micro_pc": [
+        0
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "MOV_R16_RM16": {
+      "acquisition_micro_pc": [
+        7
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MOV_R8_IMM8": {
+      "acquisition_micro_pc": [
+        159
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "MOV_R8_RM8": {
+      "acquisition_micro_pc": [
+        166
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MOV_RM16_IMM16": {
+      "acquisition_micro_pc": [
+        174,
+        175
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 2
+    },
+    "MOV_RM16_R16": {
+      "acquisition_micro_pc": [
+        3
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MOV_RM16_SEG": {
+      "acquisition_micro_pc": [
+        373
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MOV_RM8_IMM8": {
+      "acquisition_micro_pc": [
+        170,
+        171
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "MOV_RM8_R8": {
+      "acquisition_micro_pc": [
+        162
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MOV_SEG_RM16": {
+      "acquisition_micro_pc": [
+        377
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MULDIV_RM16": {
+      "acquisition_micro_pc": [
+        554
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "MULDIV_RM8": {
+      "acquisition_micro_pc": [
+        547
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "NEG_RM16": {
+      "acquisition_micro_pc": [
+        338
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "NEG_RM8": {
+      "acquisition_micro_pc": [
+        331
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "NOT_RM16": {
+      "acquisition_micro_pc": [
+        324
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "NOT_RM8": {
+      "acquisition_micro_pc": [
+        317
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "OUT_PORT_AL": {
+      "acquisition_micro_pc": [
+        629
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "OUT_PORT_AX": {
+      "acquisition_micro_pc": [
+        634
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "POP_ALL": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "POP_FLAGS": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "POP_R16": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "POP_RM16": {
+      "acquisition_micro_pc": [
+        57
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "POP_SEG": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "PUSH_ALL": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "PUSH_FLAGS": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "PUSH_IMM16": {
+      "acquisition_micro_pc": [
+        51
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "PUSH_IMM8S": {
+      "acquisition_micro_pc": [
+        54
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "PUSH_R16": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "PUSH_SEG": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "RET_FAR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "RET_FAR_IMM": {
+      "acquisition_micro_pc": [
+        536
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "RET_IMM16": {
+      "acquisition_micro_pc": [
+        90
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "RET_NEAR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SHIFT_RM16_CL": {
+      "acquisition_micro_pc": [
+        252
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SHIFT_RM16_IMM8": {
+      "acquisition_micro_pc": [
+        259,
+        260
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "SHIFT_RM16_ONE": {
+      "acquisition_micro_pc": [
+        245
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SHIFT_RM8_CL": {
+      "acquisition_micro_pc": [
+        231
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SHIFT_RM8_IMM8": {
+      "acquisition_micro_pc": [
+        238,
+        239
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 1
+    },
+    "SHIFT_RM8_ONE": {
+      "acquisition_micro_pc": [
+        224
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SOFTWARE_EVENT": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SOFTWARE_EVENT_IMM8": {
+      "acquisition_micro_pc": [
+        108
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 1
+    },
+    "STORE_DIRECT16": {
+      "acquisition_micro_pc": [
+        302
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "STORE_DIRECT8": {
+      "acquisition_micro_pc": [
+        297
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 2
+    },
+    "STRING_COMPARE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_INPUT_BYTE": {
+      "acquisition_micro_pc": [
+        640
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_INPUT_WORD": {
+      "acquisition_micro_pc": [
+        649
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_LOAD": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_MOVE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_OUTPUT_BYTE": {
+      "acquisition_micro_pc": [
+        658
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_OUTPUT_WORD": {
+      "acquisition_micro_pc": [
+        667
+      ],
+      "conditional_port": true,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_SCAN": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "STRING_STORE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_ARPL": {
+      "acquisition_micro_pc": [
+        729
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_CLTS": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_GROUP_0F00": {
+      "acquisition_micro_pc": [
+        695
+      ],
+      "conditional_port": false,
+      "dispatch": true,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_GROUP_0F01": {
+      "acquisition_micro_pc": [
+        681
+      ],
+      "conditional_port": false,
+      "dispatch": true,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_ACCESS": {
+      "acquisition_micro_pc": [
+        719
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_GDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_IDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_LDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_LIMIT": {
+      "acquisition_micro_pc": [
+        724
+      ],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": true,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_MSW": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_LOAD_TR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_STORE_GDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_STORE_IDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_STORE_LDTR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_STORE_MSW": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_STORE_TR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_VERIFY_READ": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "SYSTEM_VERIFY_WRITE": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    },
+    "WAIT_NO_COPROCESSOR": {
+      "acquisition_micro_pc": [],
+      "conditional_port": false,
+      "dispatch": false,
+      "modrm": false,
+      "trailing_bytes": 0
+    }
+  },
   "rom_depth": 743,
   "schema_version": 1,
   "source_sha256": {

@@ -20,11 +20,22 @@ ORIGINALS = {
 
 
 # Keep profile_cpu_baseline.json and the old profile receipt unchanged.
+# All updates below are already accepted portable functional sources.
+# READY chaining and legal completed-instruction length handling:
 FUNCTIONAL_UPDATES = {
-    "rtl/spk286.sv": "9a04d8b46b4fab359ba6739b159444925b4118df51e26227e62f9b584db5f046",
+    "rtl/spk286.sv": "fe945327191099b0c1580eae0819a451cd797b8b0cf3f78166e4b5eefd159b26",
     "rtl/spk286_fetch.sv": "1da4efb3273c690d97acba5f8646a3e40b9588b957e00dfc7d4aa40c66b6af3c",
+    # Canonical encoding metadata and acquisition-shape selection; the
+    # default functional decoder map and microcode operations are retained.
+    "microcode/generated/spk286_microcode_pkg.sv": "202236c1ec93016bfb17d8a918b61de8af805dabb4ccb55c9cc1ec54875e3e10",
+    "microcode/generated/spk286_microcode_rom.sv": "8861eb3eefeecc72a0e6383cf95d961c0d0cb27f76595bcb5ecc3d2ae711f519",
+    "microcode/generated/spk286_microcode_sync_rom.sv": "31841a56d61b32aaf92c91afbc0258d67ce90a3c67788dc06092c8d845ec1894",
+    "rtl/spk286_decoder.sv": "d38849308e58512e02f7766a0aa4d513a73771915901e7dd8b44eb457f1606bb",
+    "rtl/spk286_control_decode.sv": "026d3217f5290f2b3b7f14da66a660ff0e65372b6dbb11c7db6f1ae2c56b352b",
+    # Proved stack/frame arithmetic, null commit and consumed stack DATA selectors.
+    "rtl/spk286_micro_executor.sv": "8d41e0187bef3081728780e4683c9e312b1f4beb1f3c40a6244d465c32799710",
 }
-SELECTED_CONTRACT = "tools/profile_cpu_ready_chain.json"
+SELECTED_CONTRACT = "tools/profile_cpu_selected_20261005.json"
 
 
 def load_selected_contract():
@@ -33,6 +44,10 @@ def load_selected_contract():
         raise ValueError("Unsupported standalone selected profile contract")
     if sha(ROOT / contract["baseline_contract_path"]) != contract["baseline_contract_sha256"]:
         raise ValueError("Historical standalone baseline contract changed")
+    if contract["previous_selected_contract_path"] != "tools/profile_cpu_ready_chain.json":
+        raise ValueError("Historical READY selection path changed")
+    if sha(ROOT / contract["previous_selected_contract_path"]) != contract["previous_selected_contract_sha256"]:
+        raise ValueError("Historical READY selection contract changed")
     if contract["functional_updates_sha256"] != FUNCTIONAL_UPDATES:
         raise ValueError("Selected functional update scope changed")
     return contract
@@ -234,7 +249,7 @@ CONNECTION = r'''
 def build(out):
     out = Path(out)
     for name, expected in ORIGINALS.items():
-        if sha(ROOT / name) != expected:
+        if sha(ROOT / name) != FUNCTIONAL_UPDATES.get(name, expected):
             raise ValueError(f"Frozen production source changed: {name}")
     # Portable release contract: complete CPU RTL closure, no board evidence.
     selected_contract = load_selected_contract()
@@ -303,7 +318,7 @@ def build(out):
         "historical_baseline_sha256": baseline["baseline_sha256"],
         "selected_functional_sha256": {name: sha(ROOT / name) for name in baseline["ordered_rtl_sources"]},
         "generated_sha256": {name: sha(path) for name, path in selected.items()},
-        "scope": "Single selected functional core; provisional instruction intervals and logical bus supplied by integration; historical standalone baseline retained; selected READY chaining functional milestone explicitly bound"}
+        "scope": "Single selected functional core; provisional instruction intervals and logical bus supplied by integration; historical standalone baseline and READY selection retained; current accepted portable functional source explicitly bound"}
     (out / "generation.json").write_text(json.dumps(manifest, indent=2) + "\n", newline="\n")
     return selected
 

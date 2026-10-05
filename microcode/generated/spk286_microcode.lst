@@ -1,4 +1,4 @@
-SPK286 microcode compiler 27.1; format 27; encoding 27
+SPK286 microcode compiler 27.2; format 27; encoding 27
 0000  MOV_R16_IMM16:
 0000  BA  FETCH_MOV_DST16_IMM16  # data_move.mc:5
 0001  MOV_R16_IMM16.writeback:

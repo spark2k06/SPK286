@@ -1028,7 +1028,7 @@ module spk286_profiled (
                           !unsupported_q && queue_consume_valid && decode_supported && !is_prefix && !length_fault;
     assign prefix_accept = decode_ready && !event_active && !event_request && !event_completed && !raw_retired &&
                            !unsupported_q && queue_consume_valid && is_prefix && !length_fault;
-    assign length_fault = !event_active && instruction_bytes == 10 &&
+    assign length_fault = !event_active && !raw_retired && !event_completed && instruction_bytes == 10 &&
                           (micro_active ? executor_byte_ready : decode_ready);
     spk286_instruction_context instruction_context (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .complete(profile_retire_fire || event_completed),

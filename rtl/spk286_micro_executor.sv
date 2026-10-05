@@ -294,10 +294,18 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     assign call_parameter_write_offset = stack_cursor_q - 16'd2;
     assign iret_parameter_bytes = allocation_valid_q ? allocation_q : 16'd0;
     assign iret_outer_stack_offset = return_stack_pointer + iret_parameter_bytes;
-    assign stack_offset = call_parameter_read ? call_parameter_source_sp_q :
-                          call_parameter_write ? call_parameter_write_offset :
-                          iret_outer_pop ? iret_outer_stack_offset :
-                          read_frame_address ? frame_address_q : stack_native_offset;
+    logic call_parameter_read_data_select, call_parameter_write_data_select, iret_outer_data_select, frame_address_data_select;
+    assign call_parameter_read_data_select = operation == spk286_microcode_pkg::MC_COPY_CALL_PARAMETERS &&
+                                            call_gate_outer_required && call_parameter_active_q && call_parameter_phase_q == 2'd0;
+    assign call_parameter_write_data_select = operation == spk286_microcode_pkg::MC_COPY_CALL_PARAMETERS &&
+                                             call_gate_outer_required && call_parameter_active_q && call_parameter_phase_q == 2'd1;
+    assign iret_outer_data_select = operation == spk286_microcode_pkg::MC_IRET_OUTER_FRAME &&
+                                    iret_outer_required && iret_outer_phase_q < 2'd2;
+    assign frame_address_data_select = operation == spk286_microcode_pkg::MC_READ_STACK_ADDRESS_TMP0 && frame_address_valid_q;
+    assign stack_offset = call_parameter_read_data_select ? call_parameter_source_sp_q :
+                          call_parameter_write_data_select ? call_parameter_write_offset :
+                          iret_outer_data_select ? iret_outer_stack_offset :
+                          frame_address_data_select ? frame_address_q : stack_native_offset;
 
     logic [15:0] tmp0_q, tmp1_q, tmp2_q, flags_q, flags_mask_q;
     logic system_active_q;
@@ -658,8 +666,8 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
                                         (descriptor_selector_null || descriptor_selector_carry ||
                                          !descriptor_selector_limit_valid ||
                                          (descriptor_selector_ti && (!protected_ldtr_valid || !protected_ldtr_present)));
-    assign descriptor_segment_null_commit = descriptor_begin && segment_reload_operation &&
-                                           descriptor_selector_null && !descriptor_pre_fault && segment_index != 2'd2;
+    assign descriptor_segment_null_commit = !descriptor_active_q && segment_reload_operation &&
+                                           tmp0_q[15:2] == 14'd0 && segment_index != 2'd2;
     assign descriptor_read_begin = descriptor_begin && !descriptor_pre_fault && !system_privilege_fault && !descriptor_verify_negative && !descriptor_inspect_negative &&
                                    !descriptor_segment_null_commit && !descriptor_selector_null;
     // Only the reserved-form check uses word 3. Reduce both possible words

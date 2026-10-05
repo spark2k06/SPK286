@@ -1,7 +1,11 @@
 // Minimal instruction-form decoder. Destination metadata is independent of ROM.
 `timescale 1ns/1ps
 
-module spk286_decoder (
+module spk286_decoder #(
+    // Select generated acquisition metadata at the same canonical form leaves.
+    // Normal CPU consumers retain their functional microcode entry interface.
+    parameter bit SYNTAX_ONLY = 1'b0
+) (
     input  logic [7:0] opcode,
     input logic        extended_opcode,
     output logic supported,
@@ -9,6 +13,16 @@ module spk286_decoder (
     output logic [2:0] destination, source_index,
     output logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] entry
 );
+    localparam integer ENTRY_WIDTH = spk286_microcode_pkg::MC_ADDR_WIDTH;
+    function automatic logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] selected_entry(
+        input logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] functional_entry
+    );
+        logic [6:0] acquisition;
+        acquisition = spk286_microcode_pkg::micro_instruction_syntax(functional_entry);
+        selected_entry = SYNTAX_ONLY ?
+                         {{(ENTRY_WIDTH-7){1'b0}}, acquisition} :
+                         functional_entry;
+    endfunction
     logic scalar_io, string_io;
     assign scalar_io = opcode[7:4] == 4'hE && opcode[2];
     assign string_io = opcode[7:2] == 6'b011011;
@@ -41,97 +55,97 @@ module spk286_decoder (
     assign source_index = opcode == 8'h63 || opcode[7:3] == 5'b10010 || opcode == 8'h98 || opcode == 8'h99 ? 3'd0 : destination;
     assign destination = opcode == 8'h63 ? 3'd0 : scalar_io ? 3'd0 : adjust_instruction ? 3'd0 : esc_instruction || opcode == 8'h9B ? 3'd0 : opcode[7:2] == 6'b101000 || opcode == 8'hD6 || opcode == 8'hD7 ? 3'd0 : opcode == 8'h9F ? 3'd4 : opcode == 8'h98 ? 3'd0 : opcode == 8'h99 ? 3'd2 : binary_word || binary_byte || test_instruction ? 3'd0 : opcode[2:0];
     // Instruction direction is expressed by the generated entry, not the sequencer.
-    assign entry = extended_opcode && opcode == 8'h05 ? spk286_microcode_pkg::MC_ENTRY_LOADALL :
-                   extended_opcode && opcode == 8'h00 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00 :
-                   extended_opcode && opcode == 8'h01 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F01 :
-                   extended_opcode && opcode == 8'h02 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS :
-                   extended_opcode && opcode == 8'h03 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT :
-                   opcode == 8'h63 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_ARPL :
-                   extended_opcode && opcode == 8'h06 ? spk286_microcode_pkg::MC_ENTRY_SYSTEM_CLTS :
-                   opcode == 8'h69 ? spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM16 :
-                   opcode == 8'h6B ? spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM8S : scalar_io ? (opcode[1] ? (opcode[0] ? spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AX : spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AL) :
-                                            (opcode[0] ? spk286_microcode_pkg::MC_ENTRY_IN_AX_PORT : spk286_microcode_pkg::MC_ENTRY_IN_AL_PORT)) :
-                   string_io ? (opcode[1] ? (opcode[0] ? spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_WORD : spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_BYTE) :
-                                            (opcode[0] ? spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_WORD : spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_BYTE)) :
-                   opcode[7:1] == 7'b1010010 ? spk286_microcode_pkg::MC_ENTRY_STRING_MOVE :
-                   opcode[7:1] == 7'b1010011 ? spk286_microcode_pkg::MC_ENTRY_STRING_COMPARE :
-                   opcode[7:1] == 7'b1010101 ? spk286_microcode_pkg::MC_ENTRY_STRING_STORE :
-                   opcode[7:1] == 7'b1010110 ? spk286_microcode_pkg::MC_ENTRY_STRING_LOAD :
-                   opcode[7:1] == 7'b1010111 ? spk286_microcode_pkg::MC_ENTRY_STRING_SCAN :
-                   opcode == 8'hC4 || opcode == 8'hC5 ? spk286_microcode_pkg::MC_ENTRY_LOAD_POINTER :
-                   opcode == 8'h9A ? spk286_microcode_pkg::MC_ENTRY_CALL_FAR_IMM :
-                   opcode == 8'hEA ? spk286_microcode_pkg::MC_ENTRY_JMP_FAR_IMM :
-                   opcode == 8'hCA ? spk286_microcode_pkg::MC_ENTRY_RET_FAR_IMM :
-                   opcode == 8'hCB ? spk286_microcode_pkg::MC_ENTRY_RET_FAR :
-                   opcode == 8'h60 ? spk286_microcode_pkg::MC_ENTRY_PUSH_ALL :
-                   opcode == 8'h61 ? spk286_microcode_pkg::MC_ENTRY_POP_ALL :
-                   opcode == 8'h62 ? spk286_microcode_pkg::MC_ENTRY_CHECK_BOUNDS :
-                   opcode == 8'hC8 ? spk286_microcode_pkg::MC_ENTRY_ENTER_FRAME :
-                   opcode == 8'hC9 ? spk286_microcode_pkg::MC_ENTRY_LEAVE_FRAME :
-                   segment_instruction ? (opcode == 8'h8C ? spk286_microcode_pkg::MC_ENTRY_MOV_RM16_SEG : opcode == 8'h8E ? spk286_microcode_pkg::MC_ENTRY_MOV_SEG_RM16 : opcode[0] ? spk286_microcode_pkg::MC_ENTRY_POP_SEG : spk286_microcode_pkg::MC_ENTRY_PUSH_SEG) : adjust_instruction ? ((opcode == 8'hD4 || opcode == 8'hD5) ? spk286_microcode_pkg::MC_ENTRY_ADJUST_RADIX : spk286_microcode_pkg::MC_ENTRY_ADJUST_DIRECT) :
-                   opcode == 8'hFE ? spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM8 :
-                   opcode == 8'h86 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM8_R8 :
-                   opcode == 8'h87 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM16_R16 :
-                   opcode == 8'h8D ? spk286_microcode_pkg::MC_ENTRY_LEA_R16_M :
-                   opcode[7:3] == 5'b10010 ? spk286_microcode_pkg::MC_ENTRY_EXCHANGE_SOURCE_TARGET16 :
-                   opcode == 8'hA0 ? spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT8 :
-                   opcode == 8'hA1 ? spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT16 :
-                   opcode == 8'hA2 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT8 :
-                   opcode == 8'hA3 ? spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT16 :
-                   opcode == 8'hD6 ? spk286_microcode_pkg::MC_ENTRY_LOAD_CARRY_BYTE :
-                   opcode == 8'hD7 ? spk286_microcode_pkg::MC_ENTRY_LOAD_BASE_INDEX8 :
-                   esc_instruction ? spk286_microcode_pkg::MC_ENTRY_ESC_NO_COPROCESSOR :
-                   opcode == 8'h9B ? spk286_microcode_pkg::MC_ENTRY_WAIT_NO_COPROCESSOR :
-                   opcode == 8'hC0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8 :
-                   opcode == 8'hC1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_IMM8 :
-                   opcode == 8'hD0 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_ONE :
-                   opcode == 8'hD1 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_ONE :
-                   opcode == 8'hD2 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_CL :
-                   opcode == 8'hD3 ? spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_CL :
-                   opcode[7:4] == 4'h4 ? spk286_microcode_pkg::MC_ENTRY_INC_DEC_R16 :
-                   opcode == 8'h98 ? spk286_microcode_pkg::MC_ENTRY_EXTEND_BYTE :
-                   opcode == 8'h99 ? spk286_microcode_pkg::MC_ENTRY_EXTEND_WORD :
-                   opcode == 8'h9F ? spk286_microcode_pkg::MC_ENTRY_LOAD_FLAGS_BYTE :
-                   opcode == 8'h9E || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD ? spk286_microcode_pkg::MC_ENTRY_CONTROL_FLAGS :
-                   opcode == 8'h84 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8 :
-                   opcode == 8'h85 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16 :
-                   opcode == 8'hA8 ? spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8 :
-                   opcode == 8'hA9 ? spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16 :
-                   opcode == 8'hF6 ? spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH :
-                   opcode == 8'hF7 ? spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH :
-                   opcode[7:3] == 5'b10110 ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_IMM8 :
-                   opcode == 8'h88 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM8_R8 :
-                   opcode == 8'h8A ? spk286_microcode_pkg::MC_ENTRY_MOV_R8_RM8 :
-                   opcode == 8'hC6 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM8_IMM8 :
-                   opcode == 8'hC7 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM16_IMM16 :
-                   opcode == 8'h80 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8 :
-                   binary_byte ? (opcode[2:0] == 3'd0 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8 :
-                                  opcode[2:0] == 3'd2 ? spk286_microcode_pkg::MC_ENTRY_ALU_R8_RM8 :
-                                                       spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8) : opcode == 8'h9C ? spk286_microcode_pkg::MC_ENTRY_PUSH_FLAGS :
-                   opcode == 8'h9D ? spk286_microcode_pkg::MC_ENTRY_POP_FLAGS :
-                   opcode == 8'hFA || opcode == 8'hFB ? spk286_microcode_pkg::MC_ENTRY_CONTROL_IF :
-                   opcode == 8'hF4 ? spk286_microcode_pkg::MC_ENTRY_HALT_CPU :
-                   opcode == 8'hCC || opcode == 8'hCE ? spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT :
-                   opcode == 8'hCD ? spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT_IMM8 :
-                   opcode == 8'hCF ? spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN :
-                   opcode[7:3] == 5'b01010 ? spk286_microcode_pkg::MC_ENTRY_PUSH_R16 :
-                   opcode[7:3] == 5'b01011 ? spk286_microcode_pkg::MC_ENTRY_POP_R16 :
-                   opcode == 8'h68 ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM16 :
-                   opcode == 8'h6A ? spk286_microcode_pkg::MC_ENTRY_PUSH_IMM8S :
-                   opcode == 8'h8F ? spk286_microcode_pkg::MC_ENTRY_POP_RM16 :
-                   opcode == 8'hFF ? spk286_microcode_pkg::MC_ENTRY_GROUP5_DISPATCH :
-                   opcode == 8'hE8 ? spk286_microcode_pkg::MC_ENTRY_CALL_REL16 :
-                   opcode == 8'hE9 ? spk286_microcode_pkg::MC_ENTRY_JMP_REL16 :
-                   opcode == 8'hEB || opcode[7:4] == 4'h7 ? spk286_microcode_pkg::MC_ENTRY_BRANCH_REL8 :
-                   opcode[7:2] == 6'b111000 ? spk286_microcode_pkg::MC_ENTRY_LOOP_REL8 :
-                   opcode == 8'hC2 ? spk286_microcode_pkg::MC_ENTRY_RET_IMM16 :
-                   opcode == 8'hC3 ? spk286_microcode_pkg::MC_ENTRY_RET_NEAR :
-                   opcode == 8'h81 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16 :
-                   opcode == 8'h83 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM8S :
-                   binary_word ? (opcode[2:0] == 3'd1 ? spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16 :
-                                  opcode[2:0] == 3'd3 ? spk286_microcode_pkg::MC_ENTRY_ALU_R16_RM16 :
-                                                       spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16) :
-                   opcode == 8'h89 ? spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16 :
-                   (opcode == 8'h8B ? spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16 :
-                    spk286_microcode_pkg::MC_ENTRY_MOV_R16_IMM16);
+    assign entry = extended_opcode && opcode == 8'h05 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOADALL) :
+                   extended_opcode && opcode == 8'h00 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F00) :
+                   extended_opcode && opcode == 8'h01 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_GROUP_0F01) :
+                   extended_opcode && opcode == 8'h02 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_ACCESS) :
+                   extended_opcode && opcode == 8'h03 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_LOAD_LIMIT) :
+                   opcode == 8'h63 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_ARPL) :
+                   extended_opcode && opcode == 8'h06 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SYSTEM_CLTS) :
+                   opcode == 8'h69 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM16) :
+                   opcode == 8'h6B ? selected_entry(spk286_microcode_pkg::MC_ENTRY_IMUL_R16_RM16_IMM8S) : scalar_io ? (opcode[1] ? (opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AX) : selected_entry(spk286_microcode_pkg::MC_ENTRY_OUT_PORT_AL)) :
+                                            (opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_IN_AX_PORT) : selected_entry(spk286_microcode_pkg::MC_ENTRY_IN_AL_PORT))) :
+                   string_io ? (opcode[1] ? (opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_WORD) : selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_OUTPUT_BYTE)) :
+                                            (opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_WORD) : selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_INPUT_BYTE))) :
+                   opcode[7:1] == 7'b1010010 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_MOVE) :
+                   opcode[7:1] == 7'b1010011 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_COMPARE) :
+                   opcode[7:1] == 7'b1010101 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_STORE) :
+                   opcode[7:1] == 7'b1010110 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_LOAD) :
+                   opcode[7:1] == 7'b1010111 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STRING_SCAN) :
+                   opcode == 8'hC4 || opcode == 8'hC5 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_POINTER) :
+                   opcode == 8'h9A ? selected_entry(spk286_microcode_pkg::MC_ENTRY_CALL_FAR_IMM) :
+                   opcode == 8'hEA ? selected_entry(spk286_microcode_pkg::MC_ENTRY_JMP_FAR_IMM) :
+                   opcode == 8'hCA ? selected_entry(spk286_microcode_pkg::MC_ENTRY_RET_FAR_IMM) :
+                   opcode == 8'hCB ? selected_entry(spk286_microcode_pkg::MC_ENTRY_RET_FAR) :
+                   opcode == 8'h60 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_ALL) :
+                   opcode == 8'h61 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_POP_ALL) :
+                   opcode == 8'h62 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_CHECK_BOUNDS) :
+                   opcode == 8'hC8 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ENTER_FRAME) :
+                   opcode == 8'hC9 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LEAVE_FRAME) :
+                   segment_instruction ? (opcode == 8'h8C ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_SEG) : opcode == 8'h8E ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_SEG_RM16) : opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_POP_SEG) : selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_SEG)) : adjust_instruction ? ((opcode == 8'hD4 || opcode == 8'hD5) ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ADJUST_RADIX) : selected_entry(spk286_microcode_pkg::MC_ENTRY_ADJUST_DIRECT)) :
+                   opcode == 8'hFE ? selected_entry(spk286_microcode_pkg::MC_ENTRY_INC_DEC_RM8) :
+                   opcode == 8'h86 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM8_R8) :
+                   opcode == 8'h87 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_EXCHANGE_RM16_R16) :
+                   opcode == 8'h8D ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LEA_R16_M) :
+                   opcode[7:3] == 5'b10010 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_EXCHANGE_SOURCE_TARGET16) :
+                   opcode == 8'hA0 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT8) :
+                   opcode == 8'hA1 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_DIRECT16) :
+                   opcode == 8'hA2 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT8) :
+                   opcode == 8'hA3 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_STORE_DIRECT16) :
+                   opcode == 8'hD6 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_CARRY_BYTE) :
+                   opcode == 8'hD7 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_BASE_INDEX8) :
+                   esc_instruction ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ESC_NO_COPROCESSOR) :
+                   opcode == 8'h9B ? selected_entry(spk286_microcode_pkg::MC_ENTRY_WAIT_NO_COPROCESSOR) :
+                   opcode == 8'hC0 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_IMM8) :
+                   opcode == 8'hC1 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_IMM8) :
+                   opcode == 8'hD0 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_ONE) :
+                   opcode == 8'hD1 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_ONE) :
+                   opcode == 8'hD2 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM8_CL) :
+                   opcode == 8'hD3 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SHIFT_RM16_CL) :
+                   opcode[7:4] == 4'h4 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_INC_DEC_R16) :
+                   opcode == 8'h98 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_EXTEND_BYTE) :
+                   opcode == 8'h99 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_EXTEND_WORD) :
+                   opcode == 8'h9F ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOAD_FLAGS_BYTE) :
+                   opcode == 8'h9E || opcode == 8'hF5 || opcode == 8'hF8 || opcode == 8'hF9 || opcode == 8'hFC || opcode == 8'hFD ? selected_entry(spk286_microcode_pkg::MC_ENTRY_CONTROL_FLAGS) :
+                   opcode == 8'h84 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8) :
+                   opcode == 8'h85 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16) :
+                   opcode == 8'hA8 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8) :
+                   opcode == 8'hA9 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16) :
+                   opcode == 8'hF6 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH) :
+                   opcode == 8'hF7 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_GROUP3_DISPATCH) :
+                   opcode[7:3] == 5'b10110 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_R8_IMM8) :
+                   opcode == 8'h88 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_RM8_R8) :
+                   opcode == 8'h8A ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_R8_RM8) :
+                   opcode == 8'hC6 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_RM8_IMM8) :
+                   opcode == 8'hC7 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_IMM16) :
+                   opcode == 8'h80 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM8_IMM8) :
+                   binary_byte ? (opcode[2:0] == 3'd0 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM8_R8) :
+                                  opcode[2:0] == 3'd2 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_R8_RM8) :
+                                                       selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_AL_IMM8)) : opcode == 8'h9C ? selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_FLAGS) :
+                   opcode == 8'h9D ? selected_entry(spk286_microcode_pkg::MC_ENTRY_POP_FLAGS) :
+                   opcode == 8'hFA || opcode == 8'hFB ? selected_entry(spk286_microcode_pkg::MC_ENTRY_CONTROL_IF) :
+                   opcode == 8'hF4 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_HALT_CPU) :
+                   opcode == 8'hCC || opcode == 8'hCE ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT) :
+                   opcode == 8'hCD ? selected_entry(spk286_microcode_pkg::MC_ENTRY_SOFTWARE_EVENT_IMM8) :
+                   opcode == 8'hCF ? selected_entry(spk286_microcode_pkg::MC_ENTRY_INTERRUPT_RETURN) :
+                   opcode[7:3] == 5'b01010 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_R16) :
+                   opcode[7:3] == 5'b01011 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_POP_R16) :
+                   opcode == 8'h68 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_IMM16) :
+                   opcode == 8'h6A ? selected_entry(spk286_microcode_pkg::MC_ENTRY_PUSH_IMM8S) :
+                   opcode == 8'h8F ? selected_entry(spk286_microcode_pkg::MC_ENTRY_POP_RM16) :
+                   opcode == 8'hFF ? selected_entry(spk286_microcode_pkg::MC_ENTRY_GROUP5_DISPATCH) :
+                   opcode == 8'hE8 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_CALL_REL16) :
+                   opcode == 8'hE9 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_JMP_REL16) :
+                   opcode == 8'hEB || opcode[7:4] == 4'h7 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_BRANCH_REL8) :
+                   opcode[7:2] == 6'b111000 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_LOOP_REL8) :
+                   opcode == 8'hC2 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_RET_IMM16) :
+                   opcode == 8'hC3 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_RET_NEAR) :
+                   opcode == 8'h81 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM16) :
+                   opcode == 8'h83 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM16_IMM8S) :
+                   binary_word ? (opcode[2:0] == 3'd1 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_RM16_R16) :
+                                  opcode[2:0] == 3'd3 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_R16_RM16) :
+                                                       selected_entry(spk286_microcode_pkg::MC_ENTRY_ALU_AX_IMM16)) :
+                   opcode == 8'h89 ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_RM16_R16) :
+                   (opcode == 8'h8B ? selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_R16_RM16) :
+                    selected_entry(spk286_microcode_pkg::MC_ENTRY_MOV_R16_IMM16));
 endmodule
