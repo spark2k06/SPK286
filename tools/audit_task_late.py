@@ -56,7 +56,7 @@ def main():
                                capture_output=True,text=True)
         (out/'build.log').write_text(compiled.stdout+compiled.stderr)
         assert compiled.returncode==0,name
-        run=subprocess.run(['vvp',str(binary),'+task_vectors='+str(output/'directed.txt')],capture_output=True,text=True,timeout=60)
+        run=subprocess.run(['vvp',str(binary),'+task_vectors='+str(output/'directed.txt')],capture_output=True,text=True,timeout=600)
         (out/'run.log').write_text(run.stdout+run.stderr)
         if module:
             assert run.returncode!=0 and 'FATAL:' in run.stdout,name

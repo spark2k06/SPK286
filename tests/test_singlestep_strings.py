@@ -1,9 +1,5 @@
 """String admission preserves prefixes, sparse effects and exact fault identity."""
 import unittest
-import os
-import subprocess
-import tempfile
-from pathlib import Path
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
 from tools.run_singlestep import STRING_OPCODES,prepare_case,scope_exclusion,SingleStepRunnerError
@@ -24,12 +20,3 @@ class StringAdmissionTests(unittest.TestCase):
             for code,fault in (([int(op,16),0,0xf4],None),([0xf3,int(op,16)^1,0xf4],None),([int(op,16),0xf4],6),([int(op,16),0xf4],0)):
                 with self.subTest(op=op,code=code,fault=fault),self.assertRaises(SingleStepRunnerError):
                     prepare_case(SingleStepCase.from_mapping(vector(code,op,fault)),op,True,True)
-
-    def test_string_gate_stops_before_inherited_work_on_input_failure(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);binary=root/'bin';binary.mkdir();stub=binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n');stub.chmod(0o755)
-            env=dict(os.environ,PATH=str(binary)+os.pathsep+os.environ['PATH'],SPK286_BUILD_DIR=str(root/'fresh'))
-            result=subprocess.run(['bash','scripts/validate_phase7_strings.sh'],env=env,capture_output=True,text=True)
-            self.assertEqual(result.returncode,23);self.assertIn('stage=inputs status=23',result.stderr)
-            self.assertNotIn('VALIDATION_PASS',result.stdout+result.stderr);self.assertFalse((root/'fresh/arithmetic').exists())

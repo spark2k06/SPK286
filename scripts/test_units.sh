@@ -154,9 +154,6 @@ for name in "${tests[@]}"; do
         python3 -m tools.event_streams --output "$BUILD_DIR/event-streams.txt"
         run_args=("+stream_vectors=$BUILD_DIR/event-streams.txt")
     fi
-    if [[ "$name" == spk286_event_lifecycle && "${SPK286_TEST_REAL_MODE_FETCH_WRAP:-0}" == 1 ]]; then
-        run_args+=("+real_mode_fetch_wrap=1")
-    fi
     if [[ "$name" == spk286_timing_capture ]]; then
         mkdir -p "$BUILD_DIR/timing"
         run_args=("+trace_out=$BUILD_DIR/timing/spk286_timing_capture.csv")

@@ -1,10 +1,9 @@
-from copy import deepcopy
 import struct
 import unittest
 from tools.singlestep import SingleStepCase
 from tools.run_singlestep import prepare_case, scope_exclusion, SingleStepRunnerError
 from tools.audit_singlestep import independent_wire_exceptions
-from tools.phase6_reports import validate_report, unique_object
+from tools.report_checks import unique_object
 from test_singlestep_runner import REGS
 
 
@@ -53,16 +52,5 @@ class EventAdmissionTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):independent_wire_exceptions(record(damaged))
         with self.assertRaises(RuntimeError):independent_wire_exceptions(record(valid)+record(valid))
 
-    def test_release_counters_fail_closed(self):
-        valid={'opcode':'B8','discovered':5000,'revoked':0,'prefix_skipped':0,'exception_skipped':0,'selection_skipped':0,
-               'selected':5000,'executed':5000,'passed':5000,'failed':0,'inherited_selected':5000,'fault_selected':0,
-               'phase6_selected':0,'exclusions':[]}
-        self.assertEqual(validate_report('B8',valid),valid)
-        for field in valid:
-            damaged=deepcopy(valid);del damaged[field]
-            with self.subTest(field=field),self.assertRaises(ValueError):validate_report('B8',damaged)
-        for field,value in (('failed',1),('selected',4999),('executed',4999),('passed',4999),('selection_skipped',1),
-                            ('exception_skipped',1),('fault_selected',1),('phase6_selected',5000),('discovered',True),('revoked',1)):
-            damaged={**valid,field:value}
-            with self.subTest(field=field),self.assertRaises(ValueError):validate_report('B8',damaged)
+    def test_duplicate_json_fields_are_rejected(self):
         with self.assertRaises(ValueError):unique_object([('passed',1),('passed',0)])

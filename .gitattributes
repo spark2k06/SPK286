@@ -13,4 +13,3 @@
 *.md text eol=lf
 *.json text eol=lf
 Makefile text eol=lf
-docs/evidence/stack-offset-arithmetic-20261002/** -text -whitespace

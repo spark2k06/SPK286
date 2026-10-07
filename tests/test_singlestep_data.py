@@ -1,8 +1,4 @@
 """Exact data-transfer encodings, memory preservation and gate failure propagation."""
-import os
-from pathlib import Path
-import subprocess
-import tempfile
 import unittest
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
@@ -30,14 +26,3 @@ class DataAdmissionTests(unittest.TestCase):
                            ('87', [0x87, 6, 1, 0xf4]), ('8D', [0x8d, 0xc0, 1, 0xf4])]:
             with self.subTest(opcode=name), self.assertRaises(SingleStepRunnerError):
                 prepare_case(SingleStepCase.from_mapping(vector(code, name)), name, True, True)
-
-    def test_data_gate_stops_at_first_failed_dependency(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); binary = root/'bin'; binary.mkdir(); stub = binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n'); stub.chmod(0o755)
-            env = dict(os.environ, PATH=str(binary)+os.pathsep+os.environ['PATH'], SPK286_BUILD_DIR=str(root/'fresh'))
-            result = subprocess.run(['bash', 'scripts/validate_phase7_data.sh'], env=env, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 23)
-            self.assertIn('stage=inputs status=23', result.stderr)
-            self.assertNotIn('VALIDATION_PASS', result.stdout+result.stderr)
-            self.assertFalse((root/'fresh/shift').exists())

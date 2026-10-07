@@ -4,9 +4,9 @@ module spk286_event_lifecycle_tb;
     logic [7:0] memory[0:1114111];
     integer checks=0, cases=0, ticks=0, retires=0, deliveries=0, acks=0, writes=0, timeout_count;
     integer wait_length=0, wait_count=0;
-    // Explicit downstream fixture profile: PCAT already wraps real-mode IP.
-    // The standalone no-wrap limit oracle remains the default.
-    integer real_mode_fetch_wrap=0;
+    // Real-mode instruction fetch wraps IP at FFFF. The no-wrap limit oracle
+    // remains available with +real_mode_fetch_wrap=0.
+    integer real_mode_fetch_wrap=1;
     logic waiting=0, chain=0, first_push_done=0;
     logic [23:0] held_address;
     logic [15:0] held_data;
@@ -43,7 +43,7 @@ module spk286_event_lifecycle_tb;
         #4;
         if(!reset) begin
             // The INTA lock chain lasts through the first push or an aborted
-            // entry. H11 can replace that failed INTR entry with #GP/#DF;
+            // entry. Exception replacement can replace that failed INTR entry with #GP/#DF;
             // semantic cancel releases the abandoned chain before dispatch.
             if (dut.event_cancel) chain=0;
             if(chain) check(bus_lock && !hlda && !(bus_valid && bus_status==13),"INTA chain retains bus through first push");

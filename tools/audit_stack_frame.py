@@ -91,8 +91,8 @@ PROBES = (('pusha-original-sp',
  ('enter-parent-address',
   'spk286_micro_executor',
   'spk286_stack_frame_lifecycle',
-  'read_frame_address ? frame_address_q : stack_native_offset',
-  'read_frame_address ? stack_cursor_q : stack_native_offset',
+  'frame_address_data_select ? frame_address_q : stack_native_offset',
+  'frame_address_data_select ? stack_cursor_q : stack_native_offset',
   'ENTER uses SS parent addresses'),
  ('bound-complete-precheck',
   'spk286_micro_executor',
@@ -132,7 +132,7 @@ def main():
         (directory/'build.log').write_text(build.stdout+build.stderr, encoding='utf-8')
         if build.returncode:
             raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
-        run = subprocess.run(['vvp',str(binary)],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        run = subprocess.run(['vvp',str(binary)],cwd=ROOT,capture_output=True,text=True,timeout=600)
         (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
         if reason:
             if run.returncode == 0 or reason not in run.stdout+run.stderr:

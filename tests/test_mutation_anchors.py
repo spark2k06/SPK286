@@ -21,13 +21,18 @@ class MutationAnchorTests(unittest.TestCase):
                 self.assertNotEqual(old,new)
 
     def test_each_fault_can_be_injected_once_into_current_rtl(self):
-        for name in ('audit_phase3_boundaries', 'audit_alu',
+        for name in ('audit_operand_boundaries', 'audit_alu',
                      'audit_stack_control', 'audit_events', 'audit_double_fault', 'audit_byte_prefix', 'audit_scalar', 'audit_shift', 'audit_data', 'audit_unary', 'audit_adjust', 'audit_segment', 'audit_stack_frame', 'audit_far', 'audit_strings', 'audit_io', 'audit_muldiv'):
             for label, module, bench, old, new, reason in importlib.import_module('tools.' + name).PROBES:
                 with self.subTest(audit=name, mutation=label):
                     source = (ROOT / 'rtl' / (module + '.sv')).read_text()
-                    self.assertEqual(source.count(old), 1, 'stale or ambiguous mutation anchor')
-                    self.assertNotEqual(old, new, 'mutation must change the source')
+                    olds = old if isinstance(old, tuple) else (old,)
+                    news = new if isinstance(new, tuple) else (new,)
+                    self.assertEqual(len(olds), len(news), 'unpaired mutation anchors')
+                    for old_text, new_text in zip(olds, news):
+                        self.assertEqual(source.count(old_text), 1, 'stale or ambiguous mutation anchor')
+                        self.assertNotEqual(old_text, new_text, 'mutation must change the source')
+                        source = source.replace(old_text, new_text)
                     self.assertTrue(reason, 'an intended semantic failure is required')
                     self.assertTrue((ROOT / 'sim/unit' / (bench + '_tb.sv')).is_file())
 

@@ -1,8 +1,4 @@
 """Exact radix encodings, explicit fault admission and failing gate propagation."""
-import os
-from pathlib import Path
-import subprocess
-import tempfile
 import unittest
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
@@ -33,14 +29,3 @@ class AdjustAdmissionTests(unittest.TestCase):
         prepared=prepare_case(SingleStepCase.from_mapping(vector(code,'D4',0)),'D4',True,True)
         self.assertEqual((prepared.expected_event,prepared.expected_retired),(0,0))
         self.assertEqual(prepared.source.instruction_bytes,tuple(code))
-
-    def test_adjust_gate_stops_at_first_failed_dependency(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory); binary=root/'bin'; binary.mkdir(); stub=binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n'); stub.chmod(0o755)
-            env=dict(os.environ,PATH=str(binary)+os.pathsep+os.environ['PATH'],SPK286_BUILD_DIR=str(root/'fresh'))
-            result=subprocess.run(['bash','scripts/validate_phase7_adjust.sh'],env=env,capture_output=True,text=True)
-            self.assertEqual(result.returncode,23)
-            self.assertIn('stage=inputs status=23',result.stderr)
-            self.assertNotIn('VALIDATION_PASS',result.stdout+result.stderr)
-            self.assertFalse((root/'fresh/unary').exists())

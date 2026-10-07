@@ -505,7 +505,7 @@ def run_opcode(
     selected, selection_skipped = select_cases(
         tuple(eligible), frozenset(), args.sample, args.full, args.index, args.test_hash
     )
-    from tools.phase7_capture_admission import prepare_population
+    from tools.singlestep_admission import prepare_population
     selected, prepared, not_evaluable = prepare_population(
         selected, opcode, source_path,
         lambda case: prepare_case(case, opcode, getattr(args, 'include_exceptions', False), getattr(args, 'include_prefixes', False)))
@@ -576,6 +576,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--build-dir", type=Path, default=Path(os.environ.get("SPK286_BUILD_DIR", "build")))
     parser.add_argument("--executable", type=Path)
     parser.add_argument("--opcode", dest="opcodes", action="append", choices=SUPPORTED_OPCODES)
+    parser.add_argument("--all", action="store_true", help="select every supported file with prefixes and exceptions")
     parser.add_argument("--stack-control", action="store_true", help="select all Phase 5 forms")
     parser.add_argument('--events',action='store_true',help='select all nine Phase 6 instruction files')
     parser.add_argument('--phase6',action='store_true',help='select all inherited/new families including real-mode faults')
@@ -593,6 +594,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    if args.all:
+        if args.opcodes or args.alu or args.stack_control or args.events or args.phase6:
+            raise SingleStepRunnerError('--all cannot be combined with another family selector')
+        args.opcodes = list(SUPPORTED_OPCODES)
+        args.include_prefixes = args.include_exceptions = True
     if args.phase6 and args.include_prefixes:
         raise SingleStepRunnerError('the frozen Phase 6 cohort cannot admit prefixes')
     if args.events or args.phase6:

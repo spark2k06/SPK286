@@ -1,3 +1,6 @@
 # Optional host-side configuration. Paths are examples, not machine-specific.
 SPK286_BUILD_DIR=./build
-SPK286_SINGLESTEP_PATH=../SingleStepTests/80286
+# Pinned SingleStepTests/80286 checkout used by the SingleStep targets.
+SPK286_SINGLESTEP_ROOT=./.cache/singlestep-80286
+# Single MOO/JSON file loaded by tools/run_tests.py when --source is omitted.
+SPK286_SINGLESTEP_PATH=./.cache/singlestep-80286/v1_real_mode/B8.MOO.gz

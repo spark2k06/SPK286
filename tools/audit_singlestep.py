@@ -181,7 +181,7 @@ def main():
             elif scope_exclusion(ours, opcode, True, args.include_prefixes) is not None:
                 excluded_count += 1
             else:
-                from tools.phase7_capture_admission import prepare_population
+                from tools.singlestep_admission import prepare_population
                 _, prepared_items, dispositions = prepare_population(
                     [ours], opcode, path,
                     lambda case: prepare_case(case, opcode, True, args.include_prefixes))
@@ -206,7 +206,7 @@ def main():
     print(f"CORPUS_AUDIT total={total} unique_hashes={len(identities)} cycles={total_cycles} "
           f"revoked={revoked_count} prefixes={prefixes} exceptions={exceptions} "
           f"scope_excluded={excluded_count} masked_cases={masked}")
-    from tools.phase7_capture_admission import CAPTURE
+    from tools.singlestep_admission import CAPTURE
     require(incomplete == [CAPTURE], 'changed incomplete physical capture inventory')
     print('CORPUS_AUDIT NOT EVALUABLE: one exact incomplete E7 write capture; raw parser comparison retained')
     require(example is not None, "no supported non-revoked case to probe")
@@ -250,9 +250,11 @@ def main():
     execute("actual-immediate", replace(example, initial_ram=tuple(sorted(values.items()))),
             "architectural register mismatch")
     values = dict(example.initial_ram)
-    values[instruction_address] = 0x0f  # Unsupported system escape: the target must not retire.
-    execute("actual-unsupported", replace(example, initial_ram=tuple(sorted(values.items()))),
-            "unsupported opcode observed before target retirement")
+    # An invalid 0F escape raises #UD; its IVT read lies outside the captured
+    # RAM, so the corrupted target can never retire as a pass.
+    values[instruction_address] = 0x0f
+    execute("actual-invalid-opcode", replace(example, initial_ram=tuple(sorted(values.items()))),
+            "data read from unspecified sparse RAM")
     execute("pristine-after", example)
     require(set(memory_examples) == {"89", "8B"}, "missing supported memory examples")
     read = memory_examples["8B"]

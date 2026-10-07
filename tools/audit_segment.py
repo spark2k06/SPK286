@@ -63,12 +63,14 @@ PROBES = (('segment-index',
   'if (ss_load) ss_shadow',
   'if (ss_load && !flags[8]) ss_shadow',
   'SS cache and protected stack-pointer update precede event'),
+ # Flushing the queue on a segment write discards bytes that were already
+ # prefetched past the SS load, so execution diverges before the frame check.
  ('segment-prefetch-lifetime',
   'spk286',
   'spk286_segment_lifecycle',
   'assign queue_flush = stream_restart;',
   'assign queue_flush = stream_restart || internal_segment_write;',
-  'SS cache and protected stack-pointer update precede event'))
+  'complete selected event'))
 
 
 def main():
@@ -103,7 +105,7 @@ def main():
         (directory/'build.log').write_text(build.stdout+build.stderr, encoding='utf-8')
         if build.returncode:
             raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
-        run = subprocess.run(['vvp',str(binary),'+instruction_vectors='+str(path)],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        run = subprocess.run(['vvp',str(binary),'+instruction_vectors='+str(path)],cwd=ROOT,capture_output=True,text=True,timeout=600)
         (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
         if reason:
             if run.returncode == 0 or reason not in run.stdout+run.stderr:

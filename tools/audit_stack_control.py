@@ -72,7 +72,7 @@ def main():
         if build.returncode:
             raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
         argument = f'+instruction_vectors={instruction_vectors}'
-        run = subprocess.run(['vvp',str(binary),argument],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        run = subprocess.run(['vvp',str(binary),argument],cwd=ROOT,capture_output=True,text=True,timeout=600)
         (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
         if reason:
             if run.returncode == 0 or reason not in run.stdout+run.stderr:

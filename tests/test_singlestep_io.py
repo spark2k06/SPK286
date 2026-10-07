@@ -7,7 +7,7 @@ from pathlib import Path
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
 from tools.run_singlestep import (
-    IO_OPCODES, SCALAR_IO_OPCODES, captured_io_cycles, prepare_case,
+    IO_OPCODES, captured_io_cycles, prepare_case,
     scope_exclusion, SingleStepRunnerError, write_batch,
 )
 
@@ -64,17 +64,3 @@ class IoAdmissionTests(unittest.TestCase):
             self.assertEqual(data[:8],b'SPK286SS')
             self.assertEqual(struct.unpack('<II',data[8:16]),(4,1))
             self.assertEqual(data[-12:],struct.pack('<IBIBH',1,1,4,0,0x9876))
-
-
-class IoGateTests(unittest.TestCase):
-    def test_input_failure_cannot_reach_inherited_work(self):
-        import os, subprocess, tempfile
-        from pathlib import Path
-        with tempfile.TemporaryDirectory() as d:
-            root=Path(d);binary=root/'bin';binary.mkdir();stub=binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n');stub.chmod(0o755)
-            env=dict(os.environ,PATH=str(binary)+os.pathsep+os.environ['PATH'],SPK286_BUILD_DIR=str(root/'fresh'))
-            result=subprocess.run(['bash','scripts/validate_phase7_io.sh'],env=env,capture_output=True,text=True)
-            self.assertEqual(result.returncode,23);self.assertIn('stage=inputs status=23',result.stderr)
-            self.assertNotIn('VALIDATION_PASS',result.stdout+result.stderr)
-            self.assertFalse((root/'fresh/strings').exists())

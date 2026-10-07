@@ -1,9 +1,5 @@
 """Far control lengths, file identities and retained invalid-form capture tails."""
 import unittest
-import os
-import subprocess
-import tempfile
-from pathlib import Path
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
 from tools.run_singlestep import prepare_case,scope_exclusion,SingleStepRunnerError
@@ -43,12 +39,3 @@ class FarAdmissionTests(unittest.TestCase):
         for opcode,code,fault in (('FF.3',[0xff,0x2e,0,0,0xf4],None),('C4',[0xc4,0xc0,0xf4],None),('C5',[0xc5,0xc0,0xf4],13),('FF.5',[0xff,0xe8,0xf4],5),('C4',[0xc4,6,0,0,0,0xf4],None)):
             with self.subTest(opcode=opcode,code=code,fault=fault),self.assertRaises(SingleStepRunnerError):
                 prepare_case(SingleStepCase.from_mapping(vector(code,opcode,fault)),opcode,True,True)
-
-    def test_far_gate_stops_before_dependent_work_on_input_failure(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);binary=root/'bin';binary.mkdir();stub=binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n');stub.chmod(0o755)
-            env=dict(os.environ,PATH=str(binary)+os.pathsep+os.environ['PATH'],SPK286_BUILD_DIR=str(root/'fresh'))
-            result=subprocess.run(['bash','scripts/validate_phase7_far.sh'],env=env,capture_output=True,text=True)
-            self.assertEqual(result.returncode,23);self.assertIn('stage=inputs status=23',result.stderr)
-            self.assertNotIn('VALIDATION_PASS',result.stdout+result.stderr);self.assertFalse((root/'fresh/stack-frame').exists())

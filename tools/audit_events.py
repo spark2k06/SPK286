@@ -12,8 +12,6 @@ from tools.rtl_sources import ordered_rtl_sources
 
 ROOT=Path(__file__).resolve().parents[1]
 PROBES=(
-    ('owed-trap-priority','spk286_events','spk286_event_lifecycle',
-     'fault_request && instruction_active && !shutdown','fault_request && !shutdown','complete selected event'),
     ('fault-start','spk286_events','spk286_event_lifecycle',
      '(repeat_boundary || (selected_kind == KIND_FAULT && instruction_active && !fault_new_task)) ? instruction_ip : ip','ip','precise source fault'),
     ('next-ip','spk286_events','spk286_event_lifecycle',

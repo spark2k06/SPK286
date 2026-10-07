@@ -1,8 +1,4 @@
 """Segment encoding, original-memory admission and failing gate propagation."""
-import os
-from pathlib import Path
-import subprocess
-import tempfile
 import unittest
 from tests.test_singlestep_byte_prefix import vector
 from tools.singlestep import SingleStepCase
@@ -29,12 +25,3 @@ class SegmentAdmissionTests(unittest.TestCase):
                           ('8E',[0x8e,0xd8,0,0xf4]),('8E',[0x8c,0xd8,0xf4])]:
             with self.subTest(code=code),self.assertRaises(SingleStepRunnerError):
                 prepare_case(SingleStepCase.from_mapping(vector(code,name)),name,True,True)
-
-    def test_segment_gate_stops_at_first_failed_dependency(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);binary=root/'bin';binary.mkdir();stub=binary/'python3'
-            stub.write_text('#!/bin/sh\nexit 23\n');stub.chmod(0o755)
-            env=dict(os.environ,PATH=str(binary)+os.pathsep+os.environ['PATH'],SPK286_BUILD_DIR=str(root/'fresh'))
-            result=subprocess.run(['bash','scripts/validate_phase7_segment.sh'],env=env,capture_output=True,text=True)
-            self.assertEqual(result.returncode,23);self.assertIn('stage=inputs status=23',result.stderr)
-            self.assertNotIn('VALIDATION_PASS',result.stdout+result.stderr);self.assertFalse((root/'fresh/adjust').exists())

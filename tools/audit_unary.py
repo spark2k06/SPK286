@@ -36,26 +36,34 @@ PROBES = (('neg-direction',
  ('group-neg-target',
   'spk286_control_decode',
   'spk286_unary_instructions',
-  'opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NEG_RM16 : spk286_microcode_pkg::MC_ENTRY_NEG_RM8',
-  'opcode[0] ? spk286_microcode_pkg::MC_ENTRY_NOT_RM16 : spk286_microcode_pkg::MC_ENTRY_NOT_RM8',
+  'opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_NEG_RM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_NEG_RM8)',
+  'opcode[0] ? selected_entry(spk286_microcode_pkg::MC_ENTRY_NOT_RM16) : selected_entry(spk286_microcode_pkg::MC_ENTRY_NOT_RM8)',
   'exact FLAGS and preserved bits'),
  ('branch-invalid-target',
   'spk286_microsequencer',
   'spk286_microsequencer',
-  "!branch_target_valid || {1'b0, branch_target} >= DEPTH",
-  "{1'b0, branch_target} >= DEPTH",
+  # The synchronous ROM address predictor repeats the branch decision, so
+  # each microsequencer mutant changes the predictor and the commit alike.
+  ("!branch_target_valid || {1'b0, branch_target} >= DEPTH",
+   "if (branch_target_valid && {1'b0, branch_target} < DEPTH)"),
+  ("{1'b0, branch_target} >= DEPTH",
+   "if ({1'b0, branch_target} < DEPTH)"),
   'invalid branch target fails closed'),
  ('branch-range',
   'spk286_microsequencer',
   'spk286_microsequencer',
-  "!branch_target_valid || {1'b0, branch_target} >= DEPTH",
-  '!branch_target_valid',
+  ("!branch_target_valid || {1'b0, branch_target} >= DEPTH",
+   "if (branch_target_valid && {1'b0, branch_target} < DEPTH)"),
+  ('!branch_target_valid',
+   'if (branch_target_valid)'),
   'invalid branch target fails closed'),
  ('branch-disposition',
   'spk286_microsequencer',
   'spk286_microsequencer',
-  'end else if (branch_request) begin',
-  "end else if (1'b0 && branch_request) begin",
+  ('end else if (branch_request) begin',
+   '                    if (branch_request) begin\n'),
+  ("end else if (1'b0 && branch_request) begin",
+   "                    if (1'b0 && branch_request) begin\n"),
   'branch target preserves macro entry without retirement'),
  ('rearm-address',
   'spk286_operand_decode',
@@ -69,6 +77,11 @@ PROBES = (('neg-direction',
   "opcode_q == 8'hFE && operand_reg > 1",
   "1'b0 && opcode_q == 8'hFE && operand_reg > 1",
   'invalid FE faults without displacement or operand effects'))
+
+
+def as_tuple(value):
+    """A probe replaces one anchor, or several anchors applied in order."""
+    return value if isinstance(value, tuple) else (value,)
 
 
 def main():
@@ -92,9 +105,11 @@ def main():
             module, old, new = replacement
             original = ROOT/'rtl'/f'{module}.sv'
             text = originals[original].decode()
-            if text.count(old) != 1:
-                raise RuntimeError(f'{name}: mutation anchor must be unique')
-            mutant = directory/original.name; mutant.write_text(text.replace(old,new), encoding='utf-8')
+            for old_text, new_text in zip(*map(as_tuple, (old, new))):
+                if text.count(old_text) != 1:
+                    raise RuntimeError(f'{name}: mutation anchor must be unique')
+                text = text.replace(old_text, new_text)
+            mutant = directory/original.name; mutant.write_text(text, encoding='utf-8')
             inputs[inputs.index(original)] = mutant
         binary = directory/'test.vvp'
         build = subprocess.run(['iverilog','-g2012','-Wall','-Irtl','-Isim/unit','-s',bench+'_tb',
@@ -103,7 +118,7 @@ def main():
         (directory/'build.log').write_text(build.stdout+build.stderr, encoding='utf-8')
         if build.returncode:
             raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
-        run = subprocess.run(['vvp',str(binary),'+instruction_vectors='+str(path)],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        run = subprocess.run(['vvp',str(binary),'+instruction_vectors='+str(path)],cwd=ROOT,capture_output=True,text=True,timeout=600)
         (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
         if reason:
             if run.returncode == 0 or reason not in run.stdout+run.stderr:

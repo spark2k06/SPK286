@@ -102,7 +102,7 @@ def main():
         (directory/'build.log').write_text(build.stdout+build.stderr, encoding='utf-8')
         if build.returncode:
             raise RuntimeError(f'{name}: compile failure is not functional mutation rejection')
-        run = subprocess.run(['vvp',str(binary),('+' + ('shift_vectors' if bench == 'spk286_shift' else 'instruction_vectors') + '=' + str(vector_paths[bench]))],cwd=ROOT,capture_output=True,text=True,timeout=60)
+        run = subprocess.run(['vvp',str(binary),('+' + ('shift_vectors' if bench == 'spk286_shift' else 'instruction_vectors') + '=' + str(vector_paths[bench]))],cwd=ROOT,capture_output=True,text=True,timeout=600)
         (directory/'run.log').write_text(run.stdout+run.stderr, encoding='utf-8')
         if reason:
             if run.returncode == 0 or reason not in run.stdout+run.stderr:

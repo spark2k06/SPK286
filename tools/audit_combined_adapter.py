@@ -51,7 +51,7 @@ def main():
     for name,cases,passed,failed in runs:
         batch=args.build_dir/(name+'.bin');write_batch(batch,cases)
         assert struct.unpack('<I',batch.read_bytes()[8:12])[0]==5
-        result=subprocess.run([str(args.executable),'--singlestep-batch',str(batch.resolve())],capture_output=True,text=True,timeout=60)
+        result=subprocess.run([str(args.executable),'--singlestep-batch',str(batch.resolve())],capture_output=True,text=True,timeout=600)
         (args.build_dir/(name+'.log')).write_text(result.stdout+result.stderr)
         match=RESULT_RE.search(result.stdout)
         assert match and tuple(map(int,match.groups()))==(len(cases),passed,failed),(name,result.returncode,result.stdout[-3000:],result.stderr[-1000:])

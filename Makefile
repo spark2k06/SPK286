@@ -1,55 +1,47 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help env bootstrap lint verilator test unit regression iverilog waveform timing-trace timing-calibration data-smoke state-smoke synth-check quartus-info verify-failure singlestep-fetch singlestep-smoke singlestep-mov singlestep-audit clean microcode microcode-check microcode-test microcode-audit mcl86-fetch mcl86-check mcl86-test phase2.80-check
+BUILD_DIR := $(or $(SPK286_BUILD_DIR),build)
+SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
+
+.PHONY: help env bootstrap microcode microcode-check microcode-test microcode-audit \
+        lint verilator iverilog waveform unit test synth-check regression verify-failure \
+        data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
+        mutation-audit timing-trace timing-calibration profiled profiled-check full-check \
+        quartus-info clean
 
 help:
-	@echo "SPK286 development targets:"
-	@echo "  make microcode       regenerate committed ROM, constants and source maps"
-	@echo "  make microcode-check fail if any generated microcode artifact is stale"
-	@echo "  make microcode-test  run independent Python compiler/ROM tests"
-	@echo "  make microcode-audit verify the active phase ROM/entry contract and round-trip"
-	@echo "  make mcl86-fetch     fetch hash-pinned public references into .cache"
-	@echo "  make mcl86-check     reconstruct and compare both public MCL86 ROMs"
-	@echo "  make mcl86-test      run isolated offline MCL86 toolchain tests"
-	@echo "  make phase2.80-check run all mandatory phase gates (requires references/corpus)"
-	@echo "  make env          check the WSL toolchain"
-	@echo "  make bootstrap    install missing WSL packages when permitted"
-	@echo "  make lint         run Verilator lint"
-	@echo "  make verilator    build the Verilator smoke executable"
-	@echo "  make iverilog     run the Icarus smoke test"
-	@echo "  make test         run fast dual-simulator and Python tests"
-	@echo "  make unit         run directed RTL tests in both simulators"
-	@echo "  make regression   run test plus Yosys synthesis sanity check"
-	@echo "  make waveform     run Verilator smoke with a VCD trace"
-	@echo "  make timing-trace capture and validate a versioned Phase 9A timing trace"
-	@echo "  make timing-calibration capture the Phase 9B instruction calibration suite"
-	@echo "  make data-smoke   validate the JSON/MOO data loader"
-	@echo "  make state-smoke  initialize RTL and verify first fetch from JSON state"
-	@echo "  make singlestep-fetch acquire the pinned external 80286 MOO working set"
-	@echo "  make singlestep-smoke run ten supported cases per opcode, B8..BF and 89/8B"
-	@echo "  make singlestep-operands run the complete supported 89/8B corpus"
-	@echo "  make phase3-check run mandatory Phase 3 gates with the pinned external corpus"
-	@echo "  make phase5-check run all inherited and stack/control-flow release gates"
-	@echo "  make phase6-check run the complete event release gate in a fresh build directory"
-	@echo "  make phase6-exec-check run all executable checks with explicit provisional evidence status"
-	@echo "  make phase8-check run the ordered Phase 8 development gate with logs"
-	@echo "  make singlestep-phase6 run all 474049 admitted Phase 6 hardware cases"
-	@echo "  make event-audit reject isolated event/arbitration/INTA RTL mutations"
-	@echo "  make stack-control-audit reject twelve isolated stack/control RTL mutants"
-	@echo "  make singlestep-stack-control run all 47 Phase 5 hardware forms"
-	@echo "  make phase4-check run all inherited and word ALU release gates"
-	@echo "  make singlestep-alu run all admitted Phase 4 hardware forms"
-	@echo "  make alu-audit reject eight isolated ALU/datapath mutants"
-	@echo "  make phase3-boundary-audit prove operand/BIU boundary assertions reject RTL faults"
-	@echo "  make singlestep-mov   run all non-revoked B8..BF cases"
-	@echo "  make singlestep-audit cross-check upstream parsing and inject comparison faults"
-	@echo "  make verify-failure prove negative simulator status propagation"
-	@echo "  make synth-check  run the portable RTL through Yosys"
-	@echo "  make quartus-info inspect the local Quartus Docker image"
-	@echo "  make clean        remove generated build output"
+	@echo "SPK286 targets:"
+	@echo "  make env               check the local toolchain"
+	@echo "  make bootstrap         install missing Ubuntu/WSL packages"
+	@echo "  make microcode         regenerate the committed microcode artifacts"
+	@echo "  make microcode-check   fail if any generated microcode artifact is stale"
+	@echo "  make microcode-test    run the microcode compiler tests"
+	@echo "  make microcode-audit   verify the ROM entry contract and round-trip"
+	@echo "  make lint              run Verilator lint"
+	@echo "  make verilator         build the Verilator smoke/SingleStep executable"
+	@echo "  make iverilog          run the Icarus reset smoke test"
+	@echo "  make waveform          run the Verilator smoke test with a VCD trace"
+	@echo "  make unit              run every directed testbench in both simulators"
+	@echo "  make test              microcode, lint, unit benches, Python tests and smokes"
+	@echo "  make synth-check       run the RTL through Yosys"
+	@echo "  make regression        test + synth-check"
+	@echo "  make singlestep-fetch  fetch the pinned SingleStepTests/80286 working set"
+	@echo "  make singlestep-smoke  run ten cases of every supported opcode file"
+	@echo "  make singlestep        run every case of every supported opcode file"
+	@echo "  make singlestep-audit  cross-check SingleStep parsing and comparators"
+	@echo "  make mutation-audit    require the testbenches to reject injected RTL faults"
+	@echo "  make profiled          regenerate the profiled timing variant in rtl/timed"
+	@echo "  make profiled-check    check rtl/timed is current and run its testbenches"
+	@echo "  make timing-trace      capture and validate a timing observation trace"
+	@echo "  make timing-calibration capture the instruction timing calibration suite"
+	@echo "  make full-check        regression, SingleStep, audits and profiled variant"
+	@echo "  make clean             remove build output"
 
 env:
 	./scripts/env_check.sh
+
+bootstrap:
+	./scripts/bootstrap.sh
 
 microcode:
 	python3 -m tools.microcode.compile_microcode
@@ -61,22 +53,7 @@ microcode-test: microcode-check
 	python3 -m unittest discover -s tests -p 'test_microcode*.py' -v
 
 microcode-audit: microcode-check
-	python3 -m tools.microcode.audit_microcode --output "$${SPK286_BUILD_DIR:-build}/microcode-audit"
-
-mcl86-fetch:
-	python3 -m research.mcl86.fetch_references
-
-mcl86-check:
-	python3 -m research.mcl86.mcl86_uccheck --output "$${SPK286_BUILD_DIR:-build}/mcl86"
-
-mcl86-test:
-	python3 -m unittest discover -s research/mcl86/tests -v
-
-phase2.80-check:
-	bash scripts/validate_phase2_80.sh
-
-bootstrap:
-	./scripts/bootstrap.sh
+	python3 -m tools.microcode.audit_microcode --output "$(BUILD_DIR)/microcode-audit"
 
 lint:
 	./scripts/lint.sh
@@ -87,25 +64,25 @@ verilator:
 iverilog:
 	./scripts/test_iverilog.sh
 
-test:
-	./scripts/test.sh
+waveform:
+	./scripts/test_verilator.sh --trace
 
 unit:
 	bash ./scripts/test_units.sh
+
+test:
+	./scripts/test.sh
+
+synth-check:
+	./scripts/synth_check.sh
 
 regression:
 	./scripts/test.sh
 	./scripts/synth_check.sh
 	@echo "REGRESSION PASS"
 
-waveform:
-	./scripts/test_verilator.sh --trace
-
-timing-trace:
-	python3 -m tools.capture_timing_trace
-
-timing-calibration:
-	python3 -m tools.capture_timing_calibration --simulator both
+verify-failure:
+	./scripts/verify_failure_path.sh
 
 data-smoke:
 	python3 tools/run_tests.py --smoke
@@ -114,146 +91,40 @@ state-smoke: verilator
 	python3 -m tools.state_vectors
 	python3 -m tools.state_vectors --source tests/fixtures/state_vectors.json
 
-verify-failure:
-	./scripts/verify_failure_path.sh
-
 singlestep-fetch:
 	python3 -m tools.fetch_singlestep
 
 singlestep-smoke: verilator
-	python3 -m tools.run_singlestep --smoke
-	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --smoke
+	python3 -m tools.run_singlestep --all --smoke
 
-.PHONY: singlestep-operands phase3-check
-.PHONY: singlestep-alu singlestep-alu-smoke
-.PHONY: phase4-check alu-audit
-phase4-check:
-	bash scripts/validate_phase4.sh
-
-alu-audit:
-	python3 -m tools.audit_alu
-
-singlestep-alu: verilator
-	python3 -m tools.run_singlestep --alu --full
-
-singlestep-alu-smoke: verilator
-	python3 -m tools.run_singlestep --alu --smoke
-
-singlestep-operands: verilator
-	python3 -m tools.run_singlestep --opcode 89 --opcode 8B --full
-
-phase3-check:
-	bash scripts/validate_phase3.sh
-
-.PHONY: phase3-boundary-audit
-phase3-boundary-audit:
-	python3 -m tools.audit_phase3_boundaries
-
-singlestep-mov: verilator
-	python3 -m tools.run_singlestep --full
+singlestep: verilator
+	rm -rf "$(BUILD_DIR)/singlestep-all"
+	python3 -m tools.run_singlestep_all --repo "$(SINGLESTEP_ROOT)" \
+	    --executable "$(BUILD_DIR)/verilator/obj_dir/spk286_smoke" --build-dir "$(BUILD_DIR)/singlestep-all"
 
 singlestep-audit: verilator
-	python3 -m tools.audit_singlestep
+	./scripts/run_singlestep_audits.sh
 
-synth-check:
-	./scripts/synth_check.sh
+mutation-audit:
+	./scripts/run_mutation_audits.sh
+
+profiled:
+	python3 scripts/build_profiled_cpu.py
+
+profiled-check:
+	python3 scripts/check_profiled_cpu.py
+
+timing-trace:
+	python3 -m tools.capture_timing_trace
+
+timing-calibration:
+	python3 -m tools.capture_timing_calibration --simulator both
+
+full-check: regression verify-failure data-smoke singlestep singlestep-audit mutation-audit profiled-check
+	@echo "FULL CHECK PASS"
 
 quartus-info:
 	./scripts/quartus_info.sh
 
 clean:
 	rm -rf build
-
-.PHONY: phase5-check stack-control-audit singlestep-stack-control singlestep-stack-control-smoke
-phase5-check:
-	bash scripts/validate_phase5.sh
-
-stack-control-audit:
-	python3 -m tools.audit_stack_control
-
-singlestep-stack-control: verilator
-	python3 -m tools.run_singlestep --stack-control --full
-
-singlestep-stack-control-smoke: verilator
-	python3 -m tools.run_singlestep --stack-control --smoke
-
-.PHONY: phase6-check phase6-exec-check event-audit singlestep-events-smoke singlestep-phase6
-phase6-check:
-	bash scripts/validate_phase6.sh
-
-phase6-exec-check:
-	bash scripts/validate_phase6.sh executable
-
-event-audit:
-	python3 -m tools.audit_events
-
-singlestep-events-smoke: verilator
-	python3 -m tools.run_singlestep --events --smoke
-
-singlestep-phase6: verilator
-	python3 -m tools.run_singlestep --phase6 --full
-
-.PHONY: phase7-check phase7-byte-prefix-check phase8-audit phase8-check
-phase7-byte-prefix-check:
-	bash scripts/validate_phase7_byte_prefix.sh
-
-phase8-audit:
-	python3 -m tools.audit_phase8
-
-phase8-check:
-	bash scripts/validate_phase8.sh
-
-# Full scope cannot pass by running only the byte/prefix increment.
-phase7-check:
-	bash scripts/validate_phase7_complete.sh
-
-.PHONY: phase7-exec-check phase7-evidence-check
-phase7-exec-check:
-	bash scripts/validate_phase7_complete.sh executable
-
-phase7-evidence-check:
-	python3 -m tools.phase7_policy --strict-evidence
-
-.PHONY: phase7-scalar-check
-phase7-scalar-check:
-	bash scripts/validate_phase7_scalar.sh
-
-.PHONY: phase7-shift-check
-phase7-shift-check:
-	bash scripts/validate_phase7_shift.sh
-
-.PHONY: phase7-data-check
-phase7-data-check:
-	bash scripts/validate_phase7_data.sh
-
-.PHONY: phase7-unary-check
-phase7-unary-check:
-	bash scripts/validate_phase7_unary.sh
-
-.PHONY: phase7-adjust-check
-phase7-adjust-check:
-	bash scripts/validate_phase7_adjust.sh
-
-.PHONY: phase7-segment-check
-phase7-segment-check:
-	bash scripts/validate_phase7_segment.sh
-
-.PHONY: phase7-stack-frame-check
-phase7-stack-frame-check:
-	bash scripts/validate_phase7_stack_frame.sh
-
-.PHONY: phase7-far-check
-phase7-far-check:
-	./scripts/validate_phase7_far.sh
-
-.PHONY: phase7-string-check
-.PHONY: phase7-arithmetic-check
-phase7-arithmetic-check:
-	bash scripts/validate_phase7_arithmetic.sh
-
-phase7-string-check:
-	bash scripts/validate_phase7_strings.sh
-
-.PHONY: phase7-io-check
-phase7-io-check:
-	bash scripts/validate_phase7_io.sh
