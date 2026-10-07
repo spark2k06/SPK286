@@ -127,7 +127,6 @@ full-check: regression verify-failure data-smoke singlestep singlestep-audit mut
 resource-report:
 	python3 scripts/resource_report.py --top spk286 --view modules
 	python3 scripts/resource_report.py --top spk286 --view integrated
-	python3 scripts/resource_report.py --top spk286_profiled --view integrated
 
 quartus-info:
 	./scripts/quartus_info.sh

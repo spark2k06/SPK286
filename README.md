@@ -50,6 +50,68 @@ LOCK, INTR/NMI and INTA cycles; see the
 `rtl/timed/spk286_profiled.sv` is a drop-in variant that adds an optional
 historical instruction-interval schedule.
 
+## FPGA resources (estimate)
+
+Yosys 0.33 `synth_intel_alm` estimate for Cyclone V, the reference FPGA target. The
+counts are Yosys cells, not Quartus ALMs: Quartus packs LUTs into ALMs and
+optimizes differently, so its figures differ. Regenerate them with
+`make resource-report`.
+
+Integrated core (only the functional bus and interrupt ports connected,
+setup ports tied off, debug outputs left open, flattened):
+
+| Top | LUTs | Arithmetic | Registers | M10K | MLAB | DSP |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `spk286` | 9,247 | 2,651 | 4,793 | 1 | 0 | 0 |
+
+Per module (hierarchy and all debug ports kept, so it is an upper bound; for
+example `spk286_timing_trace` only holds debug counters):
+
+| Module | LUTs | Arithmetic | Registers | M10K | MLAB | DSP |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `spk286_micro_executor` | 3,185 | 884 | 902 | 0 | 0 | 0 |
+| `spk286` | 1,471 | 496 | 16 | 0 | 0 | 0 |
+| `spk286_protected_state` | 1,273 | 88 | 540 | 0 | 0 | 0 |
+| `spk286_task_segment_service` | 669 | 65 | 734 | 0 | 0 | 0 |
+| `spk286_task_switch_service` | 516 | 296 | 652 | 0 | 0 | 0 |
+| `spk286_segments` | 472 | 32 | 256 | 0 | 0 | 0 |
+| `spk286_muldiv` | 456 | 299 | 202 | 0 | 0 | 0 |
+| `spk286_registers` | 426 | 16 | 160 | 0 | 0 | 0 |
+| `spk286_tss_service` | 318 | 142 | 402 | 0 | 0 | 0 |
+| `spk286_events` | 266 | 0 | 129 | 0 | 0 | 0 |
+| `spk286_decoder` | 229 | 3 | 0 | 0 | 0 | 0 |
+| `spk286_descriptor` (x8) | 200 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_adjust` | 147 | 100 | 84 | 0 | 0 | 0 |
+| `spk286_biu` | 141 | 24 | 90 | 0 | 0 | 0 |
+| `spk286_fetch` | 139 | 91 | 98 | 0 | 0 | 0 |
+| `spk286_loadall_service` | 123 | 6 | 651 | 0 | 0 | 0 |
+| `spk286_prefetch_queue` | 111 | 16 | 58 | 0 | 0 | 0 |
+| `spk286_alu` | 108 | 18 | 0 | 0 | 0 | 0 |
+| `spk286_operand` | 104 | 0 | 2 | 0 | 0 | 0 |
+| `spk286_effective_address` | 100 | 80 | 0 | 0 | 0 | 0 |
+| `spk286_control_decode` | 88 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_timing_trace` | 77 | 832 | 837 | 0 | 0 | 0 |
+| `spk286_microsequencer` | 75 | 45 | 23 | 0 | 0 | 0 |
+| `spk286_shift` | 75 | 6 | 57 | 0 | 0 | 0 |
+| `spk286_alu_decode` | 42 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_operand_decode` | 32 | 0 | 49 | 0 | 0 | 0 |
+| `spk286_stack` | 32 | 33 | 0 | 0 | 0 | 0 |
+| `spk286_instruction_context` | 19 | 4 | 12 | 0 | 0 | 0 |
+| `spk286_flags_decode` | 15 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_selector` (x2) | 12 | 86 | 0 | 0 | 0 | 0 |
+| `spk286_condition` | 4 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_modrm` | 3 | 0 | 0 | 0 | 0 | 0 |
+| `spk286_stack_range` | 2 | 34 | 0 | 0 | 0 | 0 |
+| `spk286_timing_policy` | 1 | 0 | 4 | 0 | 0 | 0 |
+| `spk286_microcode_sync_rom` | 0 | 0 | 0 | 1 | 0 | 0 |
+| **Total `spk286`** | **10,931** | **3,696** | **5,958** | **1** | **0** | **0** |
+
+The `spk286` row is the top-level glue logic. The single M10K block holds the
+microcode ROM. Multiply and divide are
+iterative and use no DSP blocks. The profiled variant in `rtl/timed` is not
+covered because Yosys 0.33 cannot parse the module-scope package import in
+`rtl/timing`.
+
 ## Repository layout
 
 | Path | Content |

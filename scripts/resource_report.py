@@ -128,8 +128,7 @@ def markdown(per_module, total, top):
     return '\n'.join(lines) + '\n'
 
 
-FUNCTIONAL_INPUTS = ('clk', 'reset', 'ready', 'data_in', 'intr', 'nmi', 'hold_request',
-                     'historical_enable', 'cpu_boundary', 'timing_read_wait_event')
+FUNCTIONAL_INPUTS = ('clk', 'reset', 'ready', 'data_in', 'intr', 'nmi', 'hold_request')
 FUNCTIONAL_OUTPUTS = ('address', 'data_out', 'data_oe', 'bus_valid', 'bus_write', 'bus_bhe_n',
                       'bus_status', 'bus_lock', 'hlda', 'halted', 'shutdown')
 PORT = re.compile(r'^\s*(input|output)\s+logic\s*(\[[^\]]+\])?\s*([^;/]*?)\s*,?\s*(//.*)?$')
@@ -154,7 +153,7 @@ def ports(path, module):
 
 def wrapper(top, path):
     """Write a wrapper exposing only the functional ports of the top."""
-    source = ROOT / ('rtl/timed/spk286_profiled.sv' if top == 'spk286_profiled' else 'rtl/spk286.sv')
+    source = ROOT / 'rtl' / f'{top}.sv'
     declared, connections = [], []
     for direction, width, name in ports(source, top):
         if name in FUNCTIONAL_INPUTS or name in FUNCTIONAL_OUTPUTS:
@@ -170,13 +169,10 @@ def wrapper(top, path):
     return path
 
 
-def sources_for(top):
-    sources = [str(path) for path in ordered_rtl_sources(ROOT)]
-    if top == 'spk286_profiled':
-        sources = [s for s in sources if Path(s).name not in ('spk286.sv', 'spk286_events.sv')]
-        sources += [str(p) for p in sorted((ROOT / 'rtl/timing').glob('*.sv'))]
-        sources += [str(p) for p in sorted((ROOT / 'rtl/timed').glob('*.sv'))]
-    return sources
+def sources_for():
+    # The profiled variant is not covered: Yosys 0.33 cannot parse the
+    # module-scope package import in rtl/timing.
+    return [str(path) for path in ordered_rtl_sources(ROOT)]
 
 
 def synthesize(top, sources, stem, flatten):
@@ -193,7 +189,7 @@ def synthesize(top, sources, stem, flatten):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--top', default='spk286', choices=('spk286', 'spk286_profiled'))
+    parser.add_argument('--top', default='spk286', choices=('spk286',))
     parser.add_argument('--view', default='modules', choices=('modules', 'integrated'))
     build = Path(os.environ.get('SPK286_BUILD_DIR', ROOT / 'build'))
     parser.add_argument('--output', type=Path, default=build / 'reports')
@@ -201,7 +197,7 @@ def main():
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     stem = args.output / f'resource_cyclonev_{args.top}_{args.view}'
-    sources = sources_for(args.top)
+    sources = sources_for()
     top = args.top
     if args.view == 'integrated':
         sources.append(str(wrapper(args.top, Path(f'{stem}_wrapper.sv'))))
