@@ -12,7 +12,7 @@ SPEC.loader.exec_module(resource_report)
 def stat(design_ffs=9):
     return {
         'modules': {
-            '\\top': {'num_cells_by_type': {'MISTRAL_FF': 3, '\\leaf': 2,
+            '\\top': {'num_cells_by_type': {'MISTRAL_FF': 3, 'leaf': 2,
                                              '$paramod\\rom\\DEPTH=8': 1}},
             '\\leaf': {'num_cells_by_type': {'MISTRAL_ALUT6': 4, 'MISTRAL_NOT': 1,
                                               'MISTRAL_ALUT_ARITH': 2, 'MISTRAL_FF': 3}},

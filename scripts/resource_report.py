@@ -28,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.rtl_sources import ordered_rtl_sources  # noqa: E402
 
+# Clock and I/O buffers belong to the enclosing design, not to the CPU.
+IGNORED = ('MISTRAL_CLKBUF', 'MISTRAL_IB', 'MISTRAL_OB', 'MISTRAL_IO')
 COLUMNS = ('luts', 'arith', 'ffs', 'm10k', 'mlab', 'dsp')
 HEADINGS = ('LUTs', 'Arithmetic', 'Registers', 'M10K', 'MLAB', 'DSP')
 
@@ -46,6 +48,8 @@ def classify(cell_type):
         return 'mlab'
     if cell_type.startswith('MISTRAL_MUL'):
         return 'dsp'
+    if cell_type in IGNORED:
+        return 'ignored'
     return None
 
 
@@ -60,19 +64,23 @@ def display_name(module):
 def summarize(stat, top):
     """Return per-module own resources, instance counts and the design total."""
     modules = stat['modules']
+    # Cell types name submodules without the leading backslash of module keys.
+    lookup = {name.lstrip('\\'): name for name in modules}
     own = {}
     children = {}
     for name, data in modules.items():
         counts = Counter()
         subs = Counter()
         for cell_type, number in data.get('num_cells_by_type', {}).items():
-            if cell_type in modules:
-                subs[cell_type] += number
+            child = lookup.get(cell_type.lstrip('\\'))
+            if child is not None:
+                subs[child] += number
                 continue
             column = classify(cell_type)
             if column is None:
                 raise ValueError(f'unexpected cell type {cell_type} in {name}')
-            counts[column] += number
+            if column != 'ignored':
+                counts[column] += number
         own[name] = counts
         children[name] = subs
     top_key = next((name for name in modules if display_name(name) == top), None)
@@ -175,8 +183,11 @@ def synthesize(top, sources, stem, flatten):
     script = (f'read_verilog -sv {" ".join(sources)}; '
               f'synth_intel_alm -family cyclonev -top {top} -noiopad{"" if flatten else " -noflatten"}; '
               f'tee -q -o {stem}.json stat -json')
-    subprocess.run(['yosys', '-q', '-l', f'{stem}.log', '-p', script], cwd=ROOT, check=True,
-                   stdout=subprocess.DEVNULL)
+    result = subprocess.run(['yosys', '-q', '-l', f'{stem}.log', '-p', script], cwd=ROOT,
+                            capture_output=True, text=True)
+    if result.returncode:
+        sys.stderr.write(result.stdout + result.stderr)
+        raise SystemExit(f'RESOURCE REPORT FAIL: yosys failed; see {stem}.log')
     return json.loads(Path(f'{stem}.json').read_text())
 
 
