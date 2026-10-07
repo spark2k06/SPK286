@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Phase 9E functional-equivalence evidence for the dependency-driven Max
+// Functional-equivalence evidence for the dependency-driven Max
 // profile.  The policy is intentionally compared through the observation
 // layer: policy metadata may differ, but counters, bus observations,
 // ownership, queue state and dependency classifications must not.

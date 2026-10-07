@@ -628,7 +628,7 @@ def validate_npx_block(block: Block) -> None:
         'WAIT_NO_COPROCESSOR': ('CHECK_NPX_WAIT', 'END'),
     }.get(block.location.entry)
     if block.location.entry == 'ESC_NO_COPROCESSOR' and block.format_version < 26:
-        expected = ('DECODE_MODRM', 'END')  # Frozen pre-H18 images remain readable.
+        expected = ('DECODE_MODRM', 'END')  # Images predating the no-NPX checks remain readable.
     if expected is None or tuple(s.operation for s in block.statements) != expected or block.labels:
         raise CompileError(block.location, 'no-NPX entry requires its exact pre-operand check and terminal sequence')
 

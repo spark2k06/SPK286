@@ -1,4 +1,4 @@
-"""Capture and validate the integrated Phase 9D prefetch observation bank."""
+"""Capture and validate the integrated prefetch observation bank."""
 
 from __future__ import annotations
 

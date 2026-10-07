@@ -24,7 +24,7 @@ class AluMicrocodeTests(unittest.TestCase):
         rebuilt = compile_sources({'a.mc': spaced})
         self.assertEqual([encode(op) for op in original.operations], [encode(op) for op in rebuilt.operations])
 
-    def test_frozen_phase4_contract(self):
+    def test_frozen_word_alu_contract(self):
         frozen = json.loads((ROOT/'tests/fixtures/microcode_phase6_sources.json').read_text())
         p = compile_sources({k:v for k,v in frozen.items() if k in ('data_move.mc','word_alu.mc')})
         contract = json.loads((ROOT/'tests/fixtures/microcode_phase4.json').read_text())

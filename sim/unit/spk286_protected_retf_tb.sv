@@ -239,7 +239,7 @@ module spk286_protected_retf_tb;
               debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF04,
               "PM4b.3 RETF 4 restores outer CS/SS and discards the copied parameters");
 
-        // PM4b.4: re-enter through the same gate with a CPL0 stack limit of
+        // Re-enter through the same gate with a CPL0 stack limit of
         // 9FFB.  After reading IP and CS tentatively, RETF 4 validates the
         // saved SP:SS words at 9FFC..9FFF and must fault before reading them.
         memory[16'h0245] = 8'h9A; memory[16'h0246] = 8'h00; memory[16'h0247] = 8'h01;
@@ -270,7 +270,7 @@ module spk286_protected_retf_tb;
               memory[16'h9FFE] == 8'h69 && memory[16'h9FFF] == 8'h00,
               "PM4b.4 RETF frame-range fault precedes outer SP:SS reads and CS/SS commit");
 
-        // PM4b.5: a null saved SS is rejected after the outer frame is read,
+        // A null saved SS is rejected after the outer frame is read,
         // without committing the candidate context.
         enter_ring1_caller(16'hFFFF);
         retire_one();
@@ -282,7 +282,7 @@ module spk286_protected_retf_tb;
               debug_gpr[79:64] == 16'h9FF4,
               "PM4b.5 null outer SS faults without restored CS/SS/SP commit");
 
-        // PM4b.5: a present writable SS with the wrong DPL/RPL is also
+        // A present writable SS with the wrong DPL/RPL is also
         // rejected.  Selector 0018 is the ring-0 stack, not ring 1's SS.
         enter_ring1_caller(16'hFFFF);
         retire_one();
@@ -294,7 +294,7 @@ module spk286_protected_retf_tb;
               debug_gpr[79:64] == 16'h9FF4,
               "PM4b.5 mismatched outer SS privilege faults atomically");
 
-        // PM4b.6: the remaining immediate SS descriptor classes are rejected
+        // The remaining immediate SS descriptor classes are rejected
         // without restoring the outer context.
         enter_ring1_caller(16'hFFFF);
         retire_one();
@@ -326,7 +326,7 @@ module spk286_protected_retf_tb;
               debug_gpr[79:64] == 16'h9FF4,
               "PM4b.6 LDT-indicator outer SS faults atomically");
 
-        // PM4b.7: the caller stack admits the copied parameters through FF03.
+        // The caller stack admits the copied parameters through FF03.
         // RETF 4 restores FF04, one byte past the limit: a valid empty stack.
         // Intel's RET outer-return checks do not dereference the restored SP.
         enter_ring1_caller(16'hFF03);
@@ -338,7 +338,7 @@ module spk286_protected_retf_tb;
               debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF04,
               "PM4b.7 restored outer SP may point one byte past the stack limit");
 
-        // PM4b.8: the restored SP may equal the outer SS limit.  The inclusive
+        // The restored SP may equal the outer SS limit.  The inclusive
         // upper boundary is valid because RETF does not dereference it.
         enter_ring1_caller(16'hFF04);
         retire_one();
@@ -349,7 +349,7 @@ module spk286_protected_retf_tb;
               debug_segment_selectors[47:32] == 16'h0069 && debug_gpr[79:64] == 16'hFF04,
               "PM4b.8 exact restored-SP limit is accepted");
 
-        // PM4b parameter-count boundaries: the gate field is five bits wide,
+        // Parameter-count boundaries: the gate field is five bits wide,
         // so counts one and thirty-one must use the same atomic frame service
         // as the existing two-parameter case.
         enter_ring1_caller(16'hFFFF);
@@ -386,13 +386,13 @@ module spk286_protected_retf_tb;
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF3E,
               "PM4b RETF 62 discards the complete thirty-one-parameter frame");
 
-        // Restore the ordinary PM4b.2 fixture before the independent
+        // Restore the ordinary two-word gate fixture before the independent
         // expand-down cases below.
         memory[16'h107C] = 8'h02;
         memory[16'h0101] = 8'h04;
         memory[16'h0102] = 8'h00;
 
-        // PM4b.9: exercise the maximum parameter count against multi-word
+        // Exercise the maximum parameter count against multi-word
         // source and target stack boundaries.  The source limit is inclusive
         // for the final parameter byte; the target limit is inclusive for the
         // complete first pushed word and therefore admits the complete
@@ -405,7 +405,7 @@ module spk286_protected_retf_tb;
         check(debug_cs == 16'h0061 && debug_ip == 16'h0245 && debug_gpr[79:64] == 16'hFF00 &&
               boundary_fault_seen && boundary_first_fault_vector == 8'h0C,
               "PM4b.9 source frame crossing the caller SS limit faults before the gate target");
-        // This fixture has no usable IDT. H11 requires #SS -> #DF -> shutdown;
+        // This fixture has no usable IDT. The 80286 requires #SS -> #DF -> shutdown;
         // the final delivery vector therefore cannot identify the first fault.
         check(debug_event_vector == 8'h08 && boundary_stack_writes == 0,
               "PM4b.9 source rejection reaches failed double-fault delivery without target-stack writes");

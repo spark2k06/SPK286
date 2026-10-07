@@ -6,7 +6,7 @@ from tools.microcode.audit_microcode import canonical_source, read_generated_wor
 
 
 class SystemAccessMicrocodeTests(unittest.TestCase):
-    def test_frozen_h01_rom_adds_only_the_eight_documented_checks(self):
+    def test_frozen_system_access_rom_adds_only_the_eight_documented_checks(self):
         old = json.loads((ROOT / 'tests/fixtures/microcode_immediate_execution.json').read_text())
         additions = {
             'SYSTEM_STORE_LDTR': (0, 193), 'SYSTEM_STORE_TR': (0, 193),

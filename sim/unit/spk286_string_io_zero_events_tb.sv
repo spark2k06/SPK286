@@ -1,4 +1,4 @@
-// Retained from the independent D-037 review experiment; synthetic contract coverage.
+// Synthetic contract coverage for zero-count REP string I/O and pending events.
 `timescale 1ns/1ps
 module spk286_string_io_zero_events_tb;
     `include "spk286_signals.svh"

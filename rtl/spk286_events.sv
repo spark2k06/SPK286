@@ -1,5 +1,5 @@
 // Event arbitration, delivery-failure classification and saved context.
-// Functional entry lives in microcode; see the H11 286 delivery contract.
+// Functional entry lives in microcode.
 `timescale 1ns/1ps
 module spk286_events (
     input logic clk, reset, cancel, enable,
@@ -100,9 +100,9 @@ module spk286_events (
             if (opcode_dispatch) begin
                 repeat_ss_inhibit_q <= ss_shadow; repeat_sti_inhibit_q <= sti_shadow;
                 ss_shadow <= 1'b0;
-                // Candidate policy: release at IRET start. The failed-IRET
-                // distinction still requires 286 evidence; the release gate
-                // records it in docs/phase6_evidence.json. Boundaries remain safe.
+                // NMI blocking is released at IRET start. Whether a faulting
+                // IRET also releases it is unconfirmed on 80286 hardware;
+                // instruction boundaries remain safe either way.
                 if (opcode == 8'hCF) nmi_blocked <= 1'b0;
                 if (opcode == 8'hFB && !flags[9]) sti_shadow <= 1'b1;
                 else sti_shadow <= 1'b0;

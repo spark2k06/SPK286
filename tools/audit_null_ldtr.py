@@ -1,4 +1,4 @@
-"""Reject isolated H16 null classification, readback and error defects."""
+"""Reject isolated null-LDTR classification, readback and error defects."""
 import argparse
 import hashlib
 import json

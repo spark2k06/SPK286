@@ -1,4 +1,4 @@
-"""Check that focused H15 observations reject isolated publication defects."""
+"""Check that focused task-publication observations reject isolated publication defects."""
 import argparse
 import hashlib
 import json

@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 // Intel 80286 PRM 10.1: an ordinary gate saves FLAGS before clearing NT.
-// Task gates are covered separately; H03's return-FLAGS masks are not an oracle.
+// Task gates are covered separately; return-FLAGS masks are covered separately.
 module spk286_event_nt_tb;
     `include "spk286_signals.svh"
     logic [7:0] memory [0:65535];
@@ -110,7 +110,7 @@ module spk286_event_nt_tb;
             check(instruction_retired && debug_opcode == 8'hCF && !shutdown &&
                   debug_cs == caller_cs && debug_ip == return_ip && debug_gpr[79:64] == 16'hF000,
                   "handler IRET takes the ordinary stack return, not a TSS backlink");
-            // Restoring the saved NT on this return belongs to H03.
+            // Restoring the saved NT on this return is covered by the return-FLAGS bench.
         end
         cases = cases+1;
     endtask

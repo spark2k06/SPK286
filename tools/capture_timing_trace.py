@@ -1,4 +1,4 @@
-"""Create and validate a reproducible Phase 9A timing observation capture."""
+"""Create and validate a reproducible timing observation capture."""
 
 from __future__ import annotations
 

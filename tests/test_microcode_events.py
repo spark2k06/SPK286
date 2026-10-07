@@ -5,7 +5,7 @@ from tools.microcode.audit_microcode import canonical_source, read_generated_wor
 
 
 class EventMicrocodeTests(unittest.TestCase):
-    def test_frozen_phase6_contract_and_roundtrip(self):
+    def test_frozen_event_contract_and_roundtrip(self):
         sources=json.loads((ROOT/'tests/fixtures/microcode_phase6_sources.json').read_text())
         p=compile_sources(sources)
         contract=json.loads((ROOT/'tests/fixtures/microcode_phase6.json').read_text())
@@ -35,7 +35,7 @@ class EventMicrocodeTests(unittest.TestCase):
             with self.subTest(version=version),self.assertRaises(CompileError):
                 compile_sources({'old.mc':f'microcode_format {version}\ninstruction OLD:\nHALT\nEND\n'})
 
-    def test_phase5_pop_precheck_is_frozen_but_phase6_orders_real_fault(self):
+    def test_pop_precheck_is_frozen_but_event_image_orders_real_fault(self):
         source='microcode_format 5\ninstruction POP:\nDECODE_MODRM\nPOP16 -> TMP0\nTMP0 -> RM16\nEND\n'
         self.assertEqual(len(compile_sources({'p.mc':source}).operations),4)
         with self.assertRaisesRegex(CompileError,'precheck'):

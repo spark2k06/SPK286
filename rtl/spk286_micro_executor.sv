@@ -145,7 +145,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     output logic protected_call_stack_expand_down,
     output logic protected_event_access,
     output logic [23:0] protected_event_address,
-    // PM5 task-transfer service handshake and committed task image.
+    // Task-transfer service handshake and committed task image.
     output logic task_switch_start,
     output logic task_switch_nested_call,
     output logic task_switch_return_task,
@@ -1551,7 +1551,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
                              ((task_switch_operation && !task_descriptor_candidate_valid_q) ||
                              // Task completion belongs to TASK_SWITCH. Keeping
                              // it true for the tail would finish PUSH_EVENT_ERROR
-                             // before its bus response/SP commit (H11 #DF gate).
+                             // before its bus response/SP commit (double-fault gate).
                              (task_switch_operation && task_commit_done_q && task_service_complete_q) || task_switch_skip ||
                              task_event_switch_skip ||
                              task_return_noop || task_return_commit_done || task_return_skip) ||
@@ -1786,7 +1786,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
                                               protected_cpl : descriptor_unused_dpl;
                 end
                 if (event_gate_candidate_valid_q && !descriptor_unused_conforming && descriptor_unused_dpl < protected_cpl) begin
-                    // Reuse the proven PM4 stack-switch service for an
+                    // Reuse the inter-level stack-switch service for an
                     // inter-level event frame.  The event path never copies
                     // call-gate parameters, so its count remains zero.
                     call_gate_candidate_valid_q <= 1'b1;

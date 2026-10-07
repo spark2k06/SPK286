@@ -16,7 +16,7 @@ instruction IN_AX_PORT:
 
 
 class IoplAccessMicrocodeTests(unittest.TestCase):
-    def test_frozen_h02_image_adds_only_eight_pre_side_effect_checks(self):
+    def test_frozen_iopl_image_adds_only_eight_pre_side_effect_checks(self):
         old = json.loads((ROOT / 'tests/fixtures/microcode_system_access.json').read_text())
         additions = {'IN_AL_PORT': 1, 'IN_AX_PORT': 1, 'OUT_PORT_AL': 1, 'OUT_PORT_AX': 1,
                      'STRING_INPUT_BYTE': 2, 'STRING_INPUT_WORD': 2,

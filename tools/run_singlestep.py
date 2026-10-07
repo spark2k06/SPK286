@@ -41,7 +41,7 @@ INHERITED_OPCODES = OPCODES + MODRM_OPCODES + ALU_OPCODES + PHASE5_OPCODES
 BYTE_SCALAR_OPCODES = tuple(f'{v:02X}' for v in range(0xB0,0xB8)) + ('88','8A','C6','C7') + tuple(f'{g*8+f:02X}' for g in range(8) for f in (0,2,4)) + tuple(f'80.{g}' for g in range(8))
 TEST_OPCODES = ('84','85','A8','A9','F6.0','F7.0')
 SCALAR_DIRECT_OPCODES = tuple(f'{v:02X}' for v in range(0x40,0x50)) + ('98','99','9E','9F','F5','F8','F9','FC','FD')
-# Downstream compatibility extension; do not silently expand the frozen Phase 7 cohorts.
+# Compatibility extensions beyond the documented 80286 instruction set.
 COMPATIBILITY_OPCODES = ('D6',)
 NPX_OPCODES = ('9B', 'D8')  # Public no-NPX captures; MSW traps use directed banks.
 SHIFT_OPCODES = tuple(f'{op}.{g}' for op in ('C0','C1','D0','D1','D2','D3') for g in (0,1,2,3,4,5,7))
@@ -87,7 +87,7 @@ class PreparedCase:
 
 
 def scope_exclusion(case: SingleStepCase, opcode: str, include_exceptions: bool = False, include_prefixes: bool = False) -> str | None:
-    """ModR/M and Phase 4 forms permit explicit, counted prefix/exception exclusions.
+    """ModR/M and ALU forms permit explicit, counted prefix/exception exclusions.
 
     B8..BF admission remains strict. Unknown encodings and malformed lengths
     are errors; this never catches an arbitrary preparation/execution failure.
@@ -577,12 +577,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--executable", type=Path)
     parser.add_argument("--opcode", dest="opcodes", action="append", choices=SUPPORTED_OPCODES)
     parser.add_argument("--all", action="store_true", help="select every supported file with prefixes and exceptions")
-    parser.add_argument("--stack-control", action="store_true", help="select all Phase 5 forms")
-    parser.add_argument('--events',action='store_true',help='select all nine Phase 6 instruction files')
+    parser.add_argument("--stack-control", action="store_true", help="select all stack and near-control forms")
+    parser.add_argument('--events',action='store_true',help='select all nine interrupt/exception instruction files')
     parser.add_argument('--phase6',action='store_true',help='select all inherited/new families including real-mode faults')
-    parser.add_argument('--include-prefixes',action='store_true',help='admit supported prefix contexts; separate from the frozen Phase 6 cohort')
+    parser.add_argument('--include-prefixes',action='store_true',help='admit supported prefix contexts')
     parser.add_argument('--include-exceptions',action='store_true',help='admit inherited real-mode exception outcomes')
-    parser.add_argument("--alu", action="store_true", help="select every admitted Phase 4 ALU form")
+    parser.add_argument("--alu", action="store_true", help="select every admitted word ALU form")
     parser.add_argument("--full", action="store_true", help="run every non-revoked case")
     parser.add_argument("--sample", type=int, help="run this many deterministic cases per opcode")
     parser.add_argument("--smoke", action="store_true", help="run the fixed ten-case-per-opcode smoke sample")
@@ -600,7 +600,7 @@ def main() -> int:
         args.opcodes = list(SUPPORTED_OPCODES)
         args.include_prefixes = args.include_exceptions = True
     if args.phase6 and args.include_prefixes:
-        raise SingleStepRunnerError('the frozen Phase 6 cohort cannot admit prefixes')
+        raise SingleStepRunnerError('--phase6 cannot admit prefixes')
     if args.events or args.phase6:
         if args.opcodes or args.alu or args.stack_control or (args.events and args.phase6):
             raise SingleStepRunnerError('incompatible event/family selectors')

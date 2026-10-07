@@ -14,7 +14,7 @@ module spk286_profile_reset_tb;
 
     initial begin
         if ($value$plusargs("expected_fetch=%h", expected_fetch)) begin
-            // The plusarg is used by the Phase 0 failure-path check.
+            // The plusarg is used by the failure-path check.
         end
 
         repeat (2) @(posedge clk);

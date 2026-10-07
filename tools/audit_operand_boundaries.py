@@ -1,4 +1,4 @@
-"""Prove Phase 3 boundary assertions reject isolated RTL faults with Icarus.
+"""Prove operand/BIU boundary assertions reject isolated RTL faults with Icarus.
 
 Mutants are compiled only in the ignored build directory. Production RTL,
 microcode and hardware vectors are never edited. This supplements, rather
@@ -44,7 +44,7 @@ def main():
                    cwd=ROOT, check=True)
     sources = ordered_rtl_sources(ROOT)
     originals = {p: p.read_bytes() for p in sources}
-    output = args.build_dir.resolve() / "phase3-boundary-audit"
+    output = args.build_dir.resolve() / "operand-boundary-audit"
     output.mkdir(parents=True, exist_ok=True)
     (output / "source.sha256").write_text("".join(
         f"{hashlib.sha256(data).hexdigest()}  {path.relative_to(ROOT).as_posix()}\n"
@@ -85,7 +85,7 @@ def main():
         execute(name, bench, (module, old, new), reason)
     if any(path.read_bytes() != data for path, data in originals.items()):
         raise RuntimeError("production sources changed during boundary audit")
-    print("PHASE3_BOUNDARY_AUDIT PASS: 4 rejected RTL mutants; 2 pristine benches; source bytes unchanged")
+    print("OPERAND_BOUNDARY_AUDIT PASS: 4 rejected RTL mutants; 2 pristine benches; source bytes unchanged")
 
 
 if __name__ == "__main__":

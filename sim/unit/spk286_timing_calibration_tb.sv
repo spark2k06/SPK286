@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Phase 9B first increment: measure isolated instruction intervals on the
+// First increment: measure isolated instruction intervals on the
 // normalized functional baseline.  This is an observation harness, not a
 // historical 80286 timing claim.
 module spk286_timing_calibration_tb;

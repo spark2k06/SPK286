@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Phase 9E policy-selection boundary. Policies 0 and 2 are accepted at reset;
+// Policy-selection boundary. Policies 0 and 2 are accepted at reset;
 // policy 2 is the functionally equivalent dependency-driven Max profile. The
 // request is sampled at reset and cannot change after execution starts.
 module spk286_timing_policy_tb;

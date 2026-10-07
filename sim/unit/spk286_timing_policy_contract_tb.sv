@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Phase 9E entry contract.  The current policy is intentionally an
+// Entry contract.  The current policy is intentionally an
 // observation-only normalized baseline.  This bank protects that boundary
 // until independently validated Accurate/Fast/Max policies are introduced.
 module spk286_timing_policy_contract_tb;

@@ -1,4 +1,4 @@
-"""Capture and validate the Phase 9B instruction-timing calibration suite."""
+"""Capture and validate the instruction-timing calibration suite."""
 
 from __future__ import annotations
 
@@ -194,7 +194,7 @@ def validate_simulator_captures(
         validate_calibration(rows)
         if simulator != first_name and rows != reference:
             raise RuntimeError(
-                "Verilator and Icarus produced different Phase 9B calibration records"
+                "Verilator and Icarus produced different calibration records"
             )
     return reference
 

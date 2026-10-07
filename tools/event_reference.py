@@ -19,7 +19,6 @@ class Interruptibility:
 
     The old-IF STI qualifier and fault/TF suppression are documented candidate
     interpretations. Failed IRET deliberately has no asserted hardware oracle.
-    See docs/PHASE6_ARCHITECTURAL_REVIEW.md for the evidence limitations.
     """
     intr: bool = False
     nmi_level: bool = False

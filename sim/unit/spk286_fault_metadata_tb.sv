@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// H12: Intel 80286 PRM 9.6 and CALL/INT/IRET algorithms.
+// Intel 80286 PRM 9.6 and CALL/INT/IRET algorithms.
 // Expected vectors/error provenance are a handwritten fault-site ledger.
 module spk286_fault_metadata_tb;
     `include "spk286_signals.svh"

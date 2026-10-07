@@ -87,7 +87,7 @@ module spk286_execution_tb;
         load_byte(16'h010F, 8'hBE); load_byte(16'h0110, 8'h00); load_byte(16'h0111, 8'h30);
         load_byte(16'h0112, 8'hBF); load_byte(16'h0113, 8'h00); load_byte(16'h0114, 8'h40);
 
-        // Reset and initialize through the normal Phase 1 commit ports.
+        // Reset and initialize through the normal state commit ports.
         tick();
         reset = 1'b0;
         for (integer i = 0; i < 8; i = i + 1) begin

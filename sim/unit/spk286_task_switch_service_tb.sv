@@ -222,7 +222,7 @@ module spk286_task_switch_service_tb;
         check(fault && fault_vector==8'd10 && memory[16'h100E]==8'h34 && memory[16'h0035]==8'h83,
               "invalid incoming CS faults after TSS save and busy update");
 
-        // PM5u: exhaustive incoming LDTR selector/descriptor classification.
+        // Exhaustive incoming LDTR selector/descriptor classification.
         // Null and the exact last-descriptor boundary are valid; table,
         // selector, type, presence and reserved-form failures are atomic.
         run_ldtr_case(16'h0000, 16'h007F, 24'h000000, 16'h0000, 8'h00, 16'h0000,

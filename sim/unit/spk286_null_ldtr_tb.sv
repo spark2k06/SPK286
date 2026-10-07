@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// Executable H16 reset probes; no direct protected-state initialization.
+// Executable null-LDTR reset probes; no direct protected-state initialization.
 module spk286_null_ldtr_tb;
     `include "spk286_signals.svh"
     spk286 dut (.*);

@@ -1,7 +1,7 @@
-"""Reject isolated Phase 8 BIU/ESC RTL mutants with pristine controls.
+"""Reject isolated BIU HOLD/LOCK and ESC RTL mutants with pristine controls.
 
 The mutants are compiled from temporary copies outside the production RTL.
-The audit deliberately uses the focused assertions for the two Phase 8
+The audit deliberately uses the focused assertions for the two
 defects, then proves that the unchanged controls still pass and that no
 production source bytes were modified.
 """
@@ -67,7 +67,7 @@ def main():
         check=True,
     )
 
-    output = args.build_dir.resolve() / "phase8-audit"
+    output = args.build_dir.resolve() / "hold-lock-esc-audit"
     output.mkdir(parents=True, exist_ok=True)
     sources = ordered_rtl_sources(ROOT)
     originals = {path: path.read_bytes() for path in sources}
@@ -133,7 +133,7 @@ def main():
         }
         results.append(result)
         print(
-            f"PHASE8_MUTATION {name}: "
+            f"HOLD_LOCK_ESC_MUTATION {name}: "
             f"{'rejected' if reason else 'passed'} status={run.returncode}",
             flush=True,
         )
@@ -145,7 +145,7 @@ def main():
 
     require(
         all(path.read_bytes() == data for path, data in originals.items()),
-        "production source bytes changed during Phase 8 mutation audit",
+        "production source bytes changed during the HOLD/LOCK/ESC mutation audit",
     )
     summary = {
         "validation": "PASS",
@@ -158,7 +158,7 @@ def main():
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(
-        f"PHASE8_AUDIT PASS: {len(PROBES)} rejected RTL mutants; "
+        f"HOLD_LOCK_ESC_AUDIT PASS: {len(PROBES)} rejected RTL mutants; "
         f"{len(PRISTINE)} pristine controls; production bytes unchanged"
     )
 

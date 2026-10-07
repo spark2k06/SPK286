@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// H03: Intel 80286 PRM 10.1. Derive each expected field independently;
+// Intel 80286 PRM 10.1. Derive each expected field independently;
 // in particular use the executing CPL and the OLD IOPL on an outer IRET.
 module spk286_return_flags_tb;
     `include "spk286_signals.svh"

@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// H13: Intel 80286 load/call/return algorithms validate type/privilege
+// Intel 80286 load/call/return algorithms validate type/privilege
 // before presence. Combine independent invalid conditions explicitly.
 module spk286_fault_precedence_tb;
     `include "spk286_signals.svh"

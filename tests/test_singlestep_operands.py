@@ -1,4 +1,4 @@
-"""Phase 3 strict admission and visible/disjoint scope accounting."""
+"""Strict ModR/M operand admission and visible/disjoint scope accounting."""
 import argparse
 import contextlib
 from copy import deepcopy

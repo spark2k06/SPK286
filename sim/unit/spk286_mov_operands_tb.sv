@@ -200,7 +200,7 @@ module spk286_mov_operands_tb;
                             check(debug_ip == 16'h0100 + 16'(alignment+instruction_length) && retirements == 1, "memory MOV length / single END");
                             check({memory[target_address+1], memory[target_address]} == expected_value, "little-endian memory contents");
                         end else begin
-                            // Pause at the real fault producer; Phase 6 checks its
+                            // Pause at the real fault producer; the event benches check its
                             // completed frame separately with the physical corpus.
                             for (integer cycle=0;cycle<150 && !operand_blocked;cycle=cycle+1) service();
                             execute_enable=0; repeat (6) service();

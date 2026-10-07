@@ -80,7 +80,7 @@ module spk286_fetch_tb;
         end
         complete_read(16'hBBAA, 16'hBBAA, 2'd2, 16'hFFF0);
         if (cursor !== 17'h0FFF2) $fatal(1, "word cursor advance");
-        // P02 can retire a response and launch the next request on the same
+        // Fetch chaining can retire a response and launch the next request on the same
         // edge. The reference profile deliberately preserves the bubble.
         if (EXPECT_FETCH_CHAINING) begin
             code_base = 24'hFF0000;

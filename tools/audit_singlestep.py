@@ -278,7 +278,7 @@ def main():
     values[write_address] ^= 1
     execute("expected-operand-byte", replace(write, expected_ram=tuple(sorted(values.items()))),
             "memory state mismatch")
-    require(set(stack_control_examples) == set(PHASE5_OPCODES), 'missing Phase 5 comparator probes')
+    require(set(stack_control_examples) == set(PHASE5_OPCODES), 'missing stack/control comparator probes')
     for opcode, prepared in stack_control_examples.items():
         execute('pristine-stack-control-'+opcode, prepared)
         values = list(prepared.expected_regs)

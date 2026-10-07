@@ -19,7 +19,7 @@ instruction WAIT_NO_COPROCESSOR:
 
 
 def expected_npx_image(old):
-    # Independent literal transformation of the frozen pre-H18 ROM, including
+    # Independent literal transformation of the frozen ROM preceding the no-NPX checks, including
     # every unrelated entry and branch. No expectations come from new sources.
     words, entries, positions = [], {}, []
     ordered = sorted(old['entries'].items(), key=lambda item: item[1])
@@ -45,7 +45,7 @@ def expected_npx_image(old):
 
 
 class NpxAccessMicrocodeTests(unittest.TestCase):
-    def test_frozen_h18_image_changes_only_esc_check_and_adds_wait(self):
+    def test_frozen_npx_image_changes_only_esc_check_and_adds_wait(self):
         old = json.loads((ROOT / 'tests/fixtures/microcode_iopl_access.json').read_text())
         words, entries, labels, branches = expected_npx_image(old)
         frozen = json.loads((ROOT / 'tests/fixtures/microcode_npx_access.json').read_text())

@@ -2086,7 +2086,7 @@ module spk286_protected_expand_down_tb;
         end
 
         // The same selector truth table is exercised at CPL0 after a real
-        // PM4 inter-level call-gate transition.  The target starts with the
+        // inter-level call-gate transition.  The target starts with the
         // TSS-selected SS=0020, so invalid DS/ES and SS reloads have distinct
         // unchanged-cache expectations.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
@@ -2376,7 +2376,7 @@ module spk286_protected_expand_down_tb;
                                   "CPL3 SS DPL3 read-only data rejection");
         end
 
-        // PM2b direct far-CS matrix. Non-conforming code requires DPL=CPL
+        // Direct far-CS matrix. Non-conforming code requires DPL=CPL
         // and RPL<=CPL; conforming code requires DPL<=CPL and retains the
         // caller CPL in the visible CS selector. Not-present code is kept in
         // the matrix to verify #NP and atomic CS/cache behavior.
@@ -2488,7 +2488,7 @@ module spk286_protected_expand_down_tb;
                                  "CPL2 direct far-CS GDT-limit matrix");
         end
 
-        // PM3 software-event matrix: same-level CPL0/CPL3 delivery, outer
+        // Software-event matrix: same-level CPL0/CPL3 delivery, outer
         // CPL1 delivery, software DPL rejection, not-present gate/target and
         // IDTR limit preflight.
         run_cpl0_event_case(8'h22, 1'b0, 8'h00, 16'h2222,
@@ -2508,7 +2508,7 @@ module spk286_protected_expand_down_tb;
         run_cpl3_event_case(8'h2F, 1'b1, 8'h0D, 16'h0000,
                             "CPL3 software INT beyond IDTR limit raises #GP");
 
-        // PM3 target privilege/RPL matrix. The event target selector keeps
+        // Target privilege/RPL matrix. The event target selector keeps
         // the descriptor index fixed while RPL varies. Target RPL is ignored;
         // successful cases verify architectural CS-RPL normalization.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin
@@ -2552,7 +2552,7 @@ module spk286_protected_expand_down_tb;
                                        "CPL3 same-level DPL3 event target RPL matrix");
         end
 
-        // PM3 CPL2 target privilege/RPL matrix. The DPL0 and DPL1 targets
+        // CPL2 target privilege/RPL matrix. The DPL0 and DPL1 targets
         // exercise real TSS stack descents; DPL2 is same-level, DPL3 is an
         // invalid outward privilege, and conforming DPL0 code retains CPL2.
         for (logic [2:0] cpl2_rpl = 3'd0; cpl2_rpl < 3'd4; cpl2_rpl = cpl2_rpl + 3'd1) begin
@@ -2582,7 +2582,7 @@ module spk286_protected_expand_down_tb;
                                        "CPL2 conforming DPL0 event target RPL matrix");
         end
 
-        // PM3 gate DPL/type/presence matrix with a valid same-level target.
+        // Gate DPL/type/presence matrix with a valid same-level target.
         run_cpl0_event_matrix_case(16'h0018, 8'h86, 16'h0700, 16'h0018,
                                    1'b0, 8'h00, 16'hC400,
                                    "CPL0 interrupt gate DPL0 is accepted");
@@ -2685,7 +2685,7 @@ module spk286_protected_expand_down_tb;
                                    "CPL3 target CS limit fault is pre-commit");
         memory[16'h04A8] = 8'hFF; memory[16'h04A9] = 8'hFF;
 
-        // PM1 inspection matrix at CPL1. These groups reuse the protected
+        // Inspection matrix at CPL1. These groups reuse the protected
         // selector fixture's DPL0..DPL3 data/code descriptors and execute all
         // four selector-inspection operations for every RPL. CPL3 requires a
         // separately validated outer-level entry harness and remains pending.
@@ -2734,7 +2734,7 @@ module spk286_protected_expand_down_tb;
         run_pm1_level_group(2'd1, 16'h0148, 2'd0, 3'd0, 1'b0,
                              "PM1 CPL1 GDT-limit overflow group");
 
-        // PM1 selector-inspection matrix at CPL3. The DPL0..DPL2 groups are
+        // Selector-inspection matrix at CPL3. The DPL0..DPL2 groups are
         // retained as negative privilege cases; DPL3 is the valid level for
         // all RPL0..RPL3 selectors after the real outer-level transition.
         run_pm1_cpl3_group(16'h0088, 2'd0, 3'd0, 1'b1,
@@ -2782,7 +2782,7 @@ module spk286_protected_expand_down_tb;
         run_pm1_cpl3_group(16'h0148, 2'd0, 3'd0, 1'b0,
                            "PM1 CPL3 GDT-limit overflow group");
 
-        // PM1 selector-inspection matrix at CPL2. The real outer-level IRET
+        // Selector-inspection matrix at CPL2. The real outer-level IRET
         // in each case establishes CPL2 before VERR/VERW/LAR/LSL execute.
         // Include normal and expand-down writable data, read-only data,
         // readable/non-readable code, not-present descriptors and the GDT
@@ -2845,7 +2845,7 @@ module spk286_protected_expand_down_tb;
         run_pm1_cpl2_group(16'h0148, 2'd0, 3'd0, 1'b0,
                            "PM1 CPL2 GDT-limit overflow group");
 
-        // PM4a same-level call-gate matrix at CPL2. The caller is established
+        // Same-level call-gate matrix at CPL2. The caller is established
         // by a real outer IRET, so successful cases must keep CPL2 and SS:SP
         // while rejected gates must fault before a same-level return frame.
         for (logic [2:0] cpl2_gate_rpl = 3'd0; cpl2_gate_rpl < 3'd4;
@@ -2879,14 +2879,14 @@ module spk286_protected_expand_down_tb;
                                       16'h00DA, "CPL2 same-level not-present target is rejected");
 
         // Restore the DPL0..DPL3 and not-present inter-level gates used by
-        // the PM4b matrix below.
+        // the inter-level call-gate matrix below.
         write_cpl2_gate_descriptor(16'h0100, 8'h84, 16'h0018);
         write_cpl2_gate_descriptor(16'h0108, 8'hA4, 16'h0018);
         write_cpl2_gate_descriptor(16'h0110, 8'hC4, 16'h0018);
         write_cpl2_gate_descriptor(16'h0118, 8'hE4, 16'h0018);
         write_cpl2_gate_descriptor(16'h0120, 8'h44, 16'h0018);
 
-        // PM4 call-gate privilege/presence matrix. Every gate targets the
+        // Call-gate privilege/presence matrix. Every gate targets the
         // same ring-0 entry point, so the only variables are caller CPL,
         // gate DPL, selector RPL, presence and the GDT table boundary.
         for (integer rpl = 0; rpl < 4; rpl = rpl + 1) begin

@@ -1,4 +1,4 @@
-"""Reject focused H11 RTL mutants using independent directed delivery tests."""
+"""Reject focused double-fault RTL mutants using independent directed delivery tests."""
 import argparse
 import hashlib
 import json

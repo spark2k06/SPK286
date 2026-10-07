@@ -131,7 +131,7 @@ module spk286_stack_control_tb;
             end
             if (blocked != 0) begin
                 // Preserve the original fault-producer check under debug pause.
-                // Completed delivery and frame effects are covered by Phase 6.
+                // Completed delivery and frame effects are covered by the event benches.
                 execute_enable = 0;
                 repeat (6) service();
                 check(operand_blocked && retires == 0 && writes == 0, "whole word blocks without effects");

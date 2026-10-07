@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// H10: Intel 80286 PRM chapter 9. Target selector RPL is ignored by gates.
+// Intel 80286 PRM chapter 9. Target selector RPL is ignored by gates.
 // Gate DPL checks depend on software versus external event origin.
 module spk286_gate_target_rpl_tb;
     `include "spk286_signals.svh"
@@ -106,7 +106,7 @@ module spk286_gate_target_rpl_tb;
         if (denied && origin==0) begin
             deadline=0;
             while (!fault_seen && deadline<1200) begin tick(); deadline++; end
-            // H11's delivery-of-delivery-fault handling is a separate story.
+            // Faults during delivery of a fault are covered by the double-fault benches.
             check(fault_seen && first_vector==13 && first_error==16'h0102,
                   "software INT checks gate DPL and reports IDT selector");
             check(debug_gpr[79:64]==16'hF000 && debug_cs==source_cs && debug_flags==old_flags,

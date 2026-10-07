@@ -567,8 +567,8 @@ module spk286_profiled (
     // EXT identifies an event external to the program, not every exception.
     // Intel 286 PRM B-1 includes INTR/NMI, single step and NPX #NM/#9;
     // software INT and instruction-generated protection faults keep EXT=0.
-    // The event controller retains the original provenance across H11
-    // replacement exceptions, whose current kind/vector can be #GP/#DF.
+    // The event controller retains the original provenance across exception
+    // replacement, whose current kind/vector can be #GP/#DF.
     assign task_fault_external = event_active && event_external;
     assign stream_restart = restart || internal_redirect || event_cancel || loadall_commit_valid;
     assign stream_ip = restart ? ip_write_data :
@@ -700,7 +700,7 @@ module spk286_profiled (
         protected_range_exceeded(stack_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte) :
         address_override ? protected_range_exceeded(address_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte) :
         protected_range_exceeded(operand_offset, protected_call_stack_limit, protected_call_stack_expand_down, operand_byte);
-    // P05: compare the starting offset in parallel with the late width bit.
+    // Compare the starting offset in parallel with the late width bit.
     // offset + !byte > limit iff offset > limit || (!byte && offset == limit).
     assign protected_access_fault = operand_request && operand_select_rm && !operand_register_direct &&
                                    !protected_descriptor_access && !protected_tss_access && !protected_event_access &&
@@ -722,7 +722,7 @@ module spk286_profiled (
     assign protected_fetch_fault = protected_fetch_invalid && execution_allowed && !event_active && !micro_active &&
                                    (!historical_enable || profile_head_permit);
 
-    // The Phase 1 state ports remain the setup/debug path. Once execution is
+    // The external state ports remain the setup/debug path. Once execution is
     // enabled, the microcode path owns GPR/IP writeback, while an explicit redirect
     // still has priority for the architectural IP and CS cache transaction.
     assign effective_gpr_write_en = execute_enable ? internal_gpr_write_en : gpr_write_en;
@@ -1340,7 +1340,7 @@ module spk286_profiled (
     assign fault_vector = (invalid_form || invalid_opcode_fault) ? 8'd6 : loadall_fault ? loadall_fault_vector : system_fault ? system_fault_vector :
                           (protected_access_ss_fault || ((system_limit_fault || range_fault) && protected_msw[0] && service_segment == 2'd2)) ? 8'd12 : protected_access_fault ? 8'd13 :
                           protected_fetch_fault ? 8'd13 : bounds_fault ? 8'd5 : arithmetic_fault ? 8'd0 : 8'd13;
-    // PM3c frame contract: protected selector faults in the #TS/#NP/#SS/#GP
+    // Error words: protected selector faults in the #TS/#NP/#SS/#GP
     // family carry one 16-bit error word.  Non-selector protected faults use
     // the architecturally defined zero word until their individual source
     // classification is extended.

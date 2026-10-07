@@ -1,6 +1,6 @@
 microcode_format 24
 
-# PM1 system instructions remain ordinary project-owned microcode entries.
+# Protected-mode system instructions are ordinary project-owned microcode entries.
 instruction SYSTEM_GROUP_0F01:
     DECODE_MODRM
     DISPATCH DECODED

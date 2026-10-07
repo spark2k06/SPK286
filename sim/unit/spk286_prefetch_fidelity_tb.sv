@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Integrated Phase 9D observation bank.  The reference stream below is built
+// Integrated prefetch observation bank.  The reference stream below is built
 // from accepted code-bus transfers and response handshakes; it never reads the
 // DUT prefetch FIFO storage.  It therefore checks byte order, loss, duplicate
 // bytes and stale responses at the instruction-unit boundary.

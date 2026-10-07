@@ -1,4 +1,4 @@
-// Phase 9A timing observation only. This module counts and exposes existing
+// Timing observation only. This module counts and exposes existing
 // CPU/BIU relationships; it does not insert waits or alter functional state.
 `timescale 1ns/1ps
 
@@ -128,7 +128,7 @@ module spk286_timing_trace (
             if (event_complete_edge) event_complete_count <= event_complete_count + 64'd1;
 
             // No compatibility delay is inserted by the normalized baseline.
-            // Keep the counter in the schema so Phase 9E can populate it
+            // Keep the counter in the schema so a timing policy can populate it
             // without changing trace consumers.
             prefetch_request_q <= prefetch_request_valid;
             stream_restart_q <= stream_restart;

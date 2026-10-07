@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 0 SingleStep data selection smoke tool.
+"""SingleStep data selection smoke tool.
 
 This command validates and selects external SingleStep data. It deliberately
 does not claim to execute instructions until a CPU adapter exists.
@@ -61,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         "parsed": len(cases),
         "selected": len(selected),
         "indices": [case.index for case in selected],
-        "execution": "not implemented in Phase 0",
+        "execution": "not performed by this tool",
     }
     if args.json:
         print(json.dumps(summary, sort_keys=True))

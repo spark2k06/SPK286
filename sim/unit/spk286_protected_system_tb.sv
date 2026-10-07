@@ -370,7 +370,7 @@ module spk286_protected_system_tb;
         memory[16'h0074] = 8'h0F; memory[16'h0075] = 8'h02; memory[16'h0076] = 8'hD8;
         memory[16'h0077] = 8'h0F; memory[16'h0078] = 8'h03; memory[16'h0079] = 8'hC8;
         memory[16'h007A] = 8'hF4;
-        // PM2 data/stack segment reloads and a pre-cycle limit fault.
+        // Data/stack segment reloads and a pre-cycle limit fault.
         memory[16'h0080] = 8'hB8; memory[16'h0081] = 8'h18; memory[16'h0082] = 8'h00;
         memory[16'h0083] = 8'h8E; memory[16'h0084] = 8'hD8;
         memory[16'h0085] = 8'h8E; memory[16'h0086] = 8'hC0;
@@ -381,22 +381,22 @@ module spk286_protected_system_tb;
         memory[16'h0091] = 8'h8E; memory[16'h0092] = 8'hD8;
         memory[16'h0093] = 8'hB8; memory[16'h0094] = 8'h03; memory[16'h0095] = 8'h00;
         memory[16'h0096] = 8'hA1; memory[16'h0097] = 8'h03; memory[16'h0098] = 8'h00;
-        // PM2b direct far transfers: valid code selector 0038 and invalid data selector 0018.
+        // Direct far transfers: valid code selector 0038 and invalid data selector 0018.
         memory[16'h0099] = 8'hEA; memory[16'h009A] = 8'h00; memory[16'h009B] = 8'h01;
         memory[16'h009C] = 8'h38; memory[16'h009D] = 8'h00;
         memory[16'h00A0] = 8'hEA; memory[16'h00A1] = 8'h00; memory[16'h00A2] = 8'h01;
         memory[16'h00A3] = 8'h18; memory[16'h00A4] = 8'h00;
-        // PM2 conforming-code transfer: the selector RPL is deliberately
+        // Conforming-code transfer: the selector RPL is deliberately
         // different from CPL and must not reject or lower the current level.
         memory[16'h00A5] = 8'hEA; memory[16'h00A6] = 8'hD0; memory[16'h00A7] = 8'h02;
         memory[16'h00A8] = 8'h83; memory[16'h00A9] = 8'h00;
-        // PM2 negative reload: selector 0040 names a valid-form but
+        // Negative reload: selector 0040 names a valid-form but
         // not-present data descriptor.  The #NP handler is temporarily
         // changed to consume the error word and return through IRET.
         memory[16'h00B0] = 8'hB8; memory[16'h00B1] = 8'h40; memory[16'h00B2] = 8'h00;
         memory[16'h00B3] = 8'h8E; memory[16'h00B4] = 8'hD8;
         memory[16'h00B5] = 8'hF4;
-        // PM4 conforming-code call gate: the target remains intra-level and
+        // Conforming-code call gate: the target remains intra-level and
         // therefore uses the caller's stack rather than the TSS stack.
         memory[16'h01E8] = 8'h9A; memory[16'h01E9] = 8'h40; memory[16'h01EA] = 8'h03;
         memory[16'h01EB] = 8'h88; memory[16'h01EC] = 8'h00; memory[16'h01ED] = 8'hF4;
@@ -461,13 +461,13 @@ module spk286_protected_system_tb;
         memory[16'h4014] = 8'h00; memory[16'h4015] = 8'h84;
         memory[16'h4016] = 8'h00; memory[16'h4017] = 8'h00;
 
-        // PM3a: vector 0D in the loaded IDT (base DE9ABC, low 16-bit bus
+        // Vector 0D in the loaded IDT (base DE9ABC, low 16-bit bus
         // address 9ABC) points at the existing protected CS handler.
         memory[16'h9B24] = 8'h00; memory[16'h9B25] = 8'h01;
         memory[16'h9B26] = 8'h38; memory[16'h9B27] = 8'h00;
         memory[16'h9B28] = 8'h00; memory[16'h9B29] = 8'h86;
         memory[16'h9B2A] = 8'h00; memory[16'h9B2B] = 8'h00;
-        // PM3a: software INT 20 uses an interrupt gate; INT 21 uses a trap
+        // Software INT 20 uses an interrupt gate; INT 21 uses a trap
         // gate. Both remain same-level transitions to CS=0038.
         memory[16'h9BBC] = 8'h40; memory[16'h9BBD] = 8'h01;
         memory[16'h9BBE] = 8'h38; memory[16'h9BBF] = 8'h00;
@@ -477,7 +477,7 @@ module spk286_protected_system_tb;
         memory[16'h9BC6] = 8'h38; memory[16'h9BC7] = 8'h00;
         memory[16'h9BC8] = 8'h00; memory[16'h9BC9] = 8'h87;
         memory[16'h9BCA] = 8'h00; memory[16'h9BCB] = 8'h00;
-        // PM3b: vector 02 and external vector 22 use same-level interrupt
+        // Vector 02 and external vector 22 use same-level interrupt
         // gates whose handlers execute IRET back into the protected caller.
         memory[16'h9ACC] = 8'hC0; memory[16'h9ACD] = 8'h01;
         memory[16'h9ACE] = 8'h38; memory[16'h9ACF] = 8'h00;
@@ -491,7 +491,7 @@ module spk286_protected_system_tb;
         memory[16'h9B16] = 8'h38; memory[16'h9B17] = 8'h00;
         memory[16'h9B18] = 8'h00; memory[16'h9B19] = 8'h86;
         memory[16'h9B1A] = 8'h00; memory[16'h9B1B] = 8'h00;
-        // PM2: vector 0C uses the same temporary #SS handler for the
+        // Vector 0C uses the same temporary #SS handler for the
         // not-present SS reload boundary.
         memory[16'h9B1C] = 8'hE0; memory[16'h9B1D] = 8'h01;
         memory[16'h9B1E] = 8'h38; memory[16'h9B1F] = 8'h00;
@@ -502,7 +502,7 @@ module spk286_protected_system_tb;
         memory[16'h56BA] = 8'h00; memory[16'h56BB] = 8'h00;
         memory[16'h56BC] = 8'h00; memory[16'h56BD] = 8'h12;
         memory[16'h56BE] = 8'h00; memory[16'h56BF] = 8'h00;
-        // PM3d: ring-3 code/data descriptors for an outer-level IRET frame.
+        // Ring-3 code/data descriptors for an outer-level IRET frame.
         memory[16'h56C0] = 8'hFF; memory[16'h56C1] = 8'h01;
         memory[16'h56C2] = 8'h00; memory[16'h56C3] = 8'h00;
         memory[16'h56C4] = 8'h00; memory[16'h56C5] = 8'hFA;
@@ -511,14 +511,14 @@ module spk286_protected_system_tb;
         memory[16'h56CA] = 8'h00; memory[16'h56CB] = 8'h00;
         memory[16'h56CC] = 8'h00; memory[16'h56CD] = 8'hF2;
         memory[16'h56CE] = 8'h00; memory[16'h56CF] = 8'h00;
-        // PM4a: present DPL-0 call gate at selector 0058 targeting 0038:01C8.
+        // Present DPL-0 call gate at selector 0058 targeting 0038:01C8.
         memory[16'h56D0] = 8'hD8; memory[16'h56D1] = 8'h01;
         memory[16'h56D2] = 8'h38; memory[16'h56D3] = 8'h00;
         memory[16'h56D4] = 8'h00; memory[16'h56D5] = 8'h84;
         memory[16'h56D6] = 8'h00; memory[16'h56D7] = 8'h00;
-        // PM4b: ring-1 code/data descriptors and DPL-1 call gates back into
+        // Ring-1 code/data descriptors and DPL-1 call gates back into
         // the existing ring-0 code segment.  Selector 0071 is the zero-word
-        // PM4b.1 gate; selector 0079 is the PM4b.2 two-word gate.
+        // gate; selector 0079 is the two-word gate.
         memory[16'h56D8] = 8'hFF; memory[16'h56D9] = 8'h03;
         memory[16'h56DA] = 8'h00; memory[16'h56DB] = 8'h00;
         memory[16'h56DC] = 8'h00; memory[16'h56DD] = 8'hBA;
@@ -531,7 +531,7 @@ module spk286_protected_system_tb;
         memory[16'h56EA] = 8'h38; memory[16'h56EB] = 8'h00;
         memory[16'h56EC] = 8'h00; memory[16'h56ED] = 8'hA4;
         memory[16'h56EE] = 8'h00; memory[16'h56EF] = 8'h00;
-        // PM4b.2: a second DPL-1 gate targeting the same entry point with
+        // A second DPL-1 gate targeting the same entry point with
         // two 80286 parameter words.
         memory[16'h56F0] = 8'h00; memory[16'h56F1] = 8'h01;
         memory[16'h56F2] = 8'h38; memory[16'h56F3] = 8'h00;
@@ -547,7 +547,7 @@ module spk286_protected_system_tb;
         memory[16'h5702] = 8'h83; memory[16'h5703] = 8'h00;
         memory[16'h5704] = 8'h00; memory[16'h5705] = 8'h84;
         memory[16'h5706] = 8'h00; memory[16'h5707] = 8'h00;
-        // PM4 gate-fault matrix: reserved-form, not-present and bad-target
+        // Gate-fault matrix: reserved-form, not-present and bad-target
         // call gates.  The target of the valid descriptor forms is 0038:01D8.
         memory[16'h5718] = 8'hD8; memory[16'h5719] = 8'h01;
         memory[16'h571A] = 8'h38; memory[16'h571B] = 8'h00;
@@ -567,7 +567,7 @@ module spk286_protected_system_tb;
         memory[16'h8006] = 8'h00; memory[16'h8007] = 8'hFF;
         memory[16'h8008] = 8'h69; memory[16'h8009] = 8'h00;
         // Ring-1 entry calls the DPL-1 gate.  The ring-0 target restores the
-        // pre-test SP before continuing with the existing PM3 checks.
+        // pre-test SP before continuing with the existing event checks.
         memory[16'h0240] = 8'h9A; memory[16'h0241] = 8'h00; memory[16'h0242] = 8'h01;
         memory[16'h0243] = 8'h79; memory[16'h0244] = 8'h00; memory[16'h0245] = 8'hF4;
         memory[16'h01B8] = 8'hCF;
@@ -581,14 +581,14 @@ module spk286_protected_system_tb;
         memory[16'h01A0] = 8'hFB; memory[16'h01A1] = 8'h40; memory[16'h01A2] = 8'hF4;
         memory[16'h01B0] = 8'hCD; memory[16'h01B1] = 8'h22; memory[16'h01B2] = 8'h90;
         memory[16'h01C0] = 8'hCF;
-        // PM3c handler consumes the saved error word, then leaves the event
+        // Handler consumes the saved error word, then leaves the event
         // path so the following directed nested-entry failure can be tested.
         memory[16'h01D0] = 8'hB8; memory[16'h01D1] = 8'h40; memory[16'h01D2] = 8'h00;
         memory[16'h01D3] = 8'h8E; memory[16'h01D4] = 8'hD8;
         memory[16'h01E0] = 8'h58; memory[16'h01E1] = 8'hE9; memory[16'h01E2] = 8'h0C; memory[16'h01E3] = 8'h00;
         memory[16'h01F0] = 8'hCD; memory[16'h01F1] = 8'h0B;
 
-        // PM1 selector-inspection matrix at GDT indices 40..63. Each group
+        // Selector-inspection matrix at GDT indices 40..63. Each group
         // contains DPL0..DPL3 variants so CPL0 can exercise every RPL rule.
         write_pm1_matrix_descriptor(6'd40, 8'h92);
         write_pm1_matrix_descriptor(6'd41, 8'hB2);
@@ -716,7 +716,7 @@ module spk286_protected_system_tb;
         check(debug_gpr[31:16] == 16'hFFFF && debug_flags[6] == 1'b0,
               "LSL clears ZF and preserves its destination for a null selector");
 
-        // PM1 selector matrix: LLDT/LTR descriptor class, presence, table
+        // Selector matrix: LLDT/LTR descriptor class, presence, table
         // origin and exact GDT-limit boundary. The alternate descriptors use
         // otherwise-unused GDT indices 32..38 so the later VERR/VERW/LAR/LSL
         // matrix can restore its own descriptor bank independently.
@@ -792,7 +792,7 @@ module spk286_protected_system_tb;
                                 16'h0010, 24'h038000, 16'h0067, 8'h00,
                                 "PM1 LTR rejects a GDT-limit overflow");
 
-        // PM1 selector matrix: LLDT also accepts the null selector, but a present
+        // Selector matrix: LLDT also accepts the null selector, but a present
         // non-LDT descriptor must fault without replacing the current LDTR.
         memory[16'h00B0] = 8'hB8; memory[16'h00B1] = 8'h00; memory[16'h00B2] = 8'h00;
         memory[16'h00B3] = 8'h0F; memory[16'h00B4] = 8'h00; memory[16'h00B5] = 8'hD0;
@@ -846,7 +846,7 @@ module spk286_protected_system_tb;
         gpr_write_en = 1'b0;
         execute_enable = 1'b1;
 
-        // PM1c descriptor-class matrix: system-descriptor DPL is not a
+        // Descriptor-class matrix: system-descriptor DPL is not a
         // substitute for the CPL0 instruction privilege check, and selector
         // RPL is retained in the visible LDTR/TR selector. Exercise every
         // DPL/RPL combination for present GDT LDT and available-TSS targets.
@@ -882,7 +882,7 @@ module spk286_protected_system_tb;
            RTL datapath widths. */
         /* verilator lint_off WIDTHEXPAND */
         /* verilator lint_off WIDTHTRUNC */
-        // PM1 selector-inspection matrix. At CPL0, VERR accepts readable
+        // Selector-inspection matrix. At CPL0, VERR accepts readable
         // data/readable code, VERW accepts writable data, and LAR/LSL accept
         // visible segment descriptor with max(CPL,RPL) <= DPL regardless of
         // presence (Intel 286 PRM, LAR/LSL). Negative inspection results
@@ -985,7 +985,7 @@ module spk286_protected_system_tb;
         /* verilator lint_on WIDTHTRUNC */
         /* verilator lint_on WIDTHEXPAND */
 
-        // Restore the PM2 not-present DS program that reuses this address.
+        // Restore the not-present DS program that reuses this address.
         memory[16'h00B0] = 8'hB8; memory[16'h00B1] = 8'h40; memory[16'h00B2] = 8'h00;
         memory[16'h00B3] = 8'h8E; memory[16'h00B4] = 8'hD8;
         memory[16'h00B5] = 8'hF4;
@@ -1189,7 +1189,7 @@ module spk286_protected_system_tb;
               debug_gpr[79:64] == ldt_gate_return_sp,
               "PM4 LDT call gate returns through the same-level frame");
 
-        // PM4 gate-fault matrix: a rejected gate must not push a call return
+        // Gate-fault matrix: a rejected gate must not push a call return
         // frame before its own fault frame is delivered.
         memory[16'h0100] = 8'h58; memory[16'h0101] = 8'hCF;
         memory[16'h01E0] = 8'h58; memory[16'h01E1] = 8'hCF;
@@ -1259,7 +1259,7 @@ module spk286_protected_system_tb;
         gpr_write_en = 1'b0;
         execute_enable = 1'b1;
 
-        // Restore the PM3b program that reuses this address.
+        // Restore the same-level event program that reuses this address.
         memory[16'h01B0] = 8'hCD; memory[16'h01B1] = 8'h22; memory[16'h01B2] = 8'h90;
 
         // A same-level protected event may target conforming code.  The
@@ -1283,7 +1283,7 @@ module spk286_protected_system_tb;
         memory[16'h9BCC] = 8'hC0; memory[16'h9BCD] = 8'h01;
         memory[16'h9BCE] = 8'h38; memory[16'h9BCF] = 8'h00;
 
-        // PM4b.2: use the already validated outer IRET path to enter ring 1,
+        // Use the already validated outer IRET path to enter ring 1,
         // then call back through a DPL-1 gate into ring 0 with a TSS stack
         // switch and a copied two-parameter return frame.
         memory[pm4a_return_sp] = 8'h40; memory[pm4a_return_sp + 16'd1] = 8'h02;
@@ -1293,11 +1293,11 @@ module spk286_protected_system_tb;
         memory[pm4a_return_sp + 16'd8] = 8'h69; memory[pm4a_return_sp + 16'd9] = 8'h00;
         memory[16'hFF00] = 8'h57; memory[16'hFF01] = 8'h13;
         memory[16'hFF02] = 8'h68; memory[16'hFF03] = 8'h24;
-        // PM4b.2 uses the TSS SS0 descriptor as an expand-down stack after
-        // the earlier PM2/PM3 checks have finished using it as ordinary data.
+        // Uses the TSS SS0 descriptor as an expand-down stack after
+        // the earlier segment and event checks have finished using it as ordinary data.
         memory[16'h5690] = 8'h00; memory[16'h5691] = 8'h90;
         memory[16'h5695] = 8'h96;
-        // The target offset is 0100, which was used by PM2b before this
+        // The target offset is 0100, which was used by the direct far-CS checks before this
         // point; rewrite it with a target that restores the saved SP.
         memory[16'h0100] = 8'hB8; memory[16'h0101] = pm4a_return_sp[7:0]; memory[16'h0102] = pm4a_return_sp[15:8];
         memory[16'h0103] = 8'h89; memory[16'h0104] = 8'hC4;
@@ -1310,7 +1310,7 @@ module spk286_protected_system_tb;
               memory[16'h56DD] == 8'hBB && memory[16'h56E5] == 8'hB3,
               "PM4b.1 outer IRET enters the ring-1 caller and accesses its code/stack descriptors");
 
-        // A ring-1 caller may not use the DPL-0 PM4a gate.  The rejected call
+        // A ring-1 caller may not use the DPL-0 same-level gate.  The rejected call
         // must enter the protected fault gate on the TSS-selected ring-0
         // stack, without changing the caller's own stack or call frame.
         memory[16'h0240] = 8'h9A; memory[16'h0241] = 8'hD8; memory[16'h0242] = 8'h01;
@@ -1335,7 +1335,7 @@ module spk286_protected_system_tb;
               memory[16'hFF02] == 8'h68 && memory[16'hFF03] == 8'h24,
               "PM4 CPL1 gate rejection restores the caller context without call-frame writes");
 
-        // Restore the valid PM4b.2 call and ring-0 target handler.
+        // Restore the valid two-word gate call and ring-0 target handler.
         memory[16'h0240] = 8'h9A; memory[16'h0241] = 8'h00; memory[16'h0242] = 8'h01;
         memory[16'h0243] = 8'h79; memory[16'h0244] = 8'h00;
         memory[16'h0100] = 8'hB8; memory[16'h0101] = pm4a_return_sp[7:0]; memory[16'h0102] = pm4a_return_sp[15:8];
@@ -1378,8 +1378,8 @@ module spk286_protected_system_tb;
               memory[16'hFFDC] == 8'h40 && memory[16'hFFDD] == 8'h00,
               "PM3c #NP pushes one 16-bit selector error word and the handler consumes it");
 
-        // PM3d uses the current post-error-handler stack position.  The
-        // earlier PM3c event occupied the initially reserved FFE0 area, so
+        // Uses the current post-error-handler stack position.  The
+        // earlier error-code event occupied the initially reserved FFE0 area, so
         // install the outer-return frame at the live SP after that event.
         memory[16'hFFDE] = 8'h94; memory[16'hFFDF] = 8'h01;
         memory[16'hFFE0] = 8'h4B; memory[16'hFFE1] = 8'h00;

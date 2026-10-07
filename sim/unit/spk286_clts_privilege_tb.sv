@@ -197,7 +197,7 @@ module spk286_clts_privilege_tb;
         check(debug_cs == 16'h0009 && debug_protected_msw[0] && debug_protected_msw[3],
               "LOCK CLTS raises #UD at CPL1 without changing MSW");
 
-        // Repeat the privileged PM1 matrix at CPL3. The setup frame and
+        // Repeat the privileged system-instruction matrix at CPL3. The setup frame and
         // exception gates are changed to DPL3, so every fault is same-level
         // and no untested TSS transition can hide a partial system-state write.
         memory[16'h0089] = 8'h33;

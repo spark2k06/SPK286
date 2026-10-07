@@ -1,7 +1,7 @@
-// PM0 architectural state foundation.
+// Protected-mode architectural state (MSW, CPL, GDTR, IDTR, LDTR and TR).
 //
 // This block is the single architectural protected-state commit owner.
-// Descriptor and segment services are still added incrementally by phase.
+// Descriptor and segment services request commits through its ports.
 `timescale 1ns/1ps
 
 module spk286_protected_state (

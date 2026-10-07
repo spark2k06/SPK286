@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Phase 9B remaining instruction classes.  These are normalized functional
+// Remaining instruction classes.  These are normalized functional
 // observations; they are not historical 80286 timing claims.
 module spk286_timing_calibration_extra_tb;
     `include "spk286_signals.svh"

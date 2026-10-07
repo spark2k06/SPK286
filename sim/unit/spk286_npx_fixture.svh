@@ -146,7 +146,7 @@
                 0: begin memory[pos] = 8'hC0; pos++; end
                 // Invalid word boundary stresses #NM priority only when EM/TS
                 // demands #NM. Successful no-NPX syntax uses a valid pointer;
-                // residual ESC boundary checking is tracked separately in H19.
+                // residual ESC boundary checking is covered by the ESC boundary bench.
                 1: begin memory[pos] = 8'h06;
                     word_at(pos+1,(control_bits[2] || control_bits[1]) ? 'hFFFF : 'h4000);
                     pos += 3; end

@@ -1,5 +1,5 @@
-// One outstanding fetch and one response slot for the future six-byte prefetch.
-// Transaction semantics only: native 80286 Ts/Tc timing is not implemented yet.
+// One outstanding fetch and one response slot feeding the six-byte prefetch queue.
+// Transaction semantics only: native 80286 Ts/Tc pin timing is not modeled.
 `timescale 1ns/1ps
 
 module spk286_fetch #(

@@ -208,7 +208,7 @@ module spk286_task_segment_service_tb;
         start = 1'b1; tick(1'b0); start = 1'b0; tick(1'b0); run_to_end();
         check(fault && fault_vector == 8'd11 && fault_error_code == 16'h0018 && !commit_valid,
               "task absent readable conforming ES raises #NP");
-        // H13: within each segment, access/type/privilege precedes presence.
+        // Within each segment, access/type/privilege precedes presence.
         // The segment order remains SS, CS, ES, DS. Presence of CS must not
         // be folded into its privilege predicate (valid absent CS is #NP).
         for (integer cpl=0; cpl<4; cpl++)
@@ -242,7 +242,7 @@ module spk286_task_segment_service_tb;
                             reset=1; tick(0); reset=0; start=1; tick(0); start=0; run_to_end();
                             check(fault && !commit_valid && fault_vector==(bad==2 ? (slot==2 ? 8'd12 : 8'd11) : 8'd10) &&
                                   // This service publishes the raw selector;
-                                  // the CPU executor normalizes RPL/EXT (H12).
+                                  // the CPU executor normalizes RPL/EXT.
                                   fault_error_code==((16'h0018+16'(slot*16)) |
                                                     (bad==1 && slot!=1 && slot!=2 && cpl==0 ? 16'd1 : 16'(cpl))),
                                   $sformatf("H13 task fault priority CPL=%0d slot=%0d bad=%0d P=%0d",cpl,slot,bad,p));
