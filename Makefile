@@ -6,7 +6,7 @@ SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
 .PHONY: help env bootstrap microcode microcode-check microcode-test microcode-audit \
         lint verilator iverilog waveform unit test synth-check regression verify-failure \
         data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
-        mutation-audit timing-trace timing-calibration profiled profiled-check full-check \
+        mutation-audit timing-trace timing-calibration profiled profiled-check full-check resource-report \
         quartus-info clean
 
 help:
@@ -35,6 +35,7 @@ help:
 	@echo "  make timing-trace      capture and validate a timing observation trace"
 	@echo "  make timing-calibration capture the instruction timing calibration suite"
 	@echo "  make full-check        regression, SingleStep, audits and profiled variant"
+	@echo "  make resource-report   estimate Cyclone V resources per module with Yosys"
 	@echo "  make clean             remove build output"
 
 env:
@@ -122,6 +123,11 @@ timing-calibration:
 
 full-check: regression verify-failure data-smoke singlestep singlestep-audit mutation-audit profiled-check
 	@echo "FULL CHECK PASS"
+
+resource-report:
+	python3 scripts/resource_report.py --top spk286 --view modules
+	python3 scripts/resource_report.py --top spk286 --view integrated
+	python3 scripts/resource_report.py --top spk286_profiled --view integrated
 
 quartus-info:
 	./scripts/quartus_info.sh
