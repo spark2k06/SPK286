@@ -124,3 +124,4 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 | `scripts/` | Build, lint, test and synthesis scripts |
 | `tests/` | Python tests and fixtures |
 | `docs/SPK286.md` | Technical reference |
+| `docs/report/CORE_REPORT.html` | Self-contained technical datasheet (open in a browser) |
