@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "Vspk286.h"
 #include "state_inputs.h"
 #include "state_vector.h"

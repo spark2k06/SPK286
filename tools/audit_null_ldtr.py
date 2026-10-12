@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Reject isolated null-LDTR classification, readback and error defects."""
 import argparse
 import hashlib

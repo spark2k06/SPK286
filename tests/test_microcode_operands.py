@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Format-2 operand ordering, versioning and independent phase contract."""
 import json
 import unittest

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent adjust image and mandatory fault-check/FLAGS ordering."""
 import json
 import unittest

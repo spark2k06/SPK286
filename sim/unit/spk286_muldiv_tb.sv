@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 module spk286_muldiv_tb;
     logic clk=0,reset=1,cancel=0,enable=1,request_valid=0,response_ready=0;

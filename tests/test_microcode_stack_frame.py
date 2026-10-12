@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent stack/frame primitives and bounded symbolic branch contracts."""
 import json
 import unittest

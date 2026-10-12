@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Reject stale mutation definitions before the long dual-simulator gate."""
 import importlib
 from pathlib import Path

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Prove operand/BIU boundary assertions reject isolated RTL faults with Icarus.
 
 Mutants are compiled only in the ignored build directory. Production RTL,

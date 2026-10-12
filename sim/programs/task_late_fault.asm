@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: MIT
 ; CPU-only reset ROM: deterministic late task-switch probes, no BIOS/OS dependency.
 ; NASM -f bin -DFAULT_STAGE=0..6 -DENTRY=0..3 -DTASK_HANDLER=0..1.
 bits 16

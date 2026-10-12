@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent far pointer control and ordered stack/cache disposition contract."""
 import json
 import unittest

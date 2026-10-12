@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Physical D8 captures require a first-word check even without an NPX.
 // Intel 286 PRM 7.4 / 9.6.3: later NPX words are a separately scoped #9 path.

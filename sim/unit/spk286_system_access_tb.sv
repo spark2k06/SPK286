@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM chapter 10 and instruction appendices: mode/CPL checks

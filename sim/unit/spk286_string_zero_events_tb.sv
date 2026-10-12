@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Synthetic contract coverage for zero-count REP strings and pending events.
 `timescale 1ns/1ps
 module spk286_string_zero_events_tb;

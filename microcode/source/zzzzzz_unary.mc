@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 22
 # Group dispatch is terminal; targets reuse the cached operand context.
 instruction GROUP3_DISPATCH:

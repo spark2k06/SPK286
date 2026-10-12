@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Arithmetic admission and original EXCP/RMSK-bounded FLAGS comparison."""
 import copy
 from pathlib import Path

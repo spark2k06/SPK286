@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Exact radix encodings, explicit fault admission and failing gate propagation."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

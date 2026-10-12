@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Protected-mode architectural state (MSW, CPL, GDTR, IDTR, LDTR and TR).
 //
 // This block is the single architectural protected-state commit owner.

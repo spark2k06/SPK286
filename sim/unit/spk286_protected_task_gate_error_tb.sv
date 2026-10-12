@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // An exception routed through an IDT task gate must retain its error word.

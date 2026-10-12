@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Event arbitration, delivery-failure classification and saved context.
 // Functional entry lives in microcode.
 `timescale 1ns/1ps

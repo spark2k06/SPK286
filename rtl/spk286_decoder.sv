@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Instruction-form decoder. Destination metadata is independent of ROM.
 `timescale 1ns/1ps
 

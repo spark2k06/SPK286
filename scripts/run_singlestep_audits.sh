@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Cross-check the SingleStep parser and comparators against independent
 # decoders and injected comparison faults.
 set -euo pipefail

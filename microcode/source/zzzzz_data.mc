@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 9
 # Address acquisition and exchange use the shared operand and architectural owners.
 instruction LEA_R16_M:

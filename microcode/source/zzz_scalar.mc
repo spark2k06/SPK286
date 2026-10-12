@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 22
 # Decode supplies flag masks and register selectors; no instruction timing padding.
 instruction CONTROL_FLAGS:

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Timing observation only. This module counts and exposes existing
 // CPU/BIU relationships; it does not insert waits or alter functional state.
 `timescale 1ns/1ps

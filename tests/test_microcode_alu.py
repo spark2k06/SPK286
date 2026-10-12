@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import json
 import unittest
 from tools.microcode.compile_microcode import ROOT, CompileError, compile_sources, generate, encode

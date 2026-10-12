@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Full-CPU adjust expectations; independent arithmetic model with varied prefixes."""
 import argparse
 from pathlib import Path

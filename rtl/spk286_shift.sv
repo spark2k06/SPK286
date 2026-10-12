@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Iterative mathematical shift/rotate service. No x86 opcode or architectural state.
 `timescale 1ns/1ps
 module spk286_shift (

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Require valid, isolated port expectation mutations to fail the comparator."""
 import argparse
 from dataclasses import replace

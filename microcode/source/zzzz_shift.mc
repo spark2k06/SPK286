@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 8
 # Count acquisition precedes data access; count zero still performs the real operand read.
 instruction SHIFT_RM8_ONE:

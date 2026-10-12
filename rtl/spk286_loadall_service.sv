@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Serialized 80286 LOADALL image acquisition.
 //
 // LOADALL is an undocumented but guaranteed 80286 instruction.  The image is

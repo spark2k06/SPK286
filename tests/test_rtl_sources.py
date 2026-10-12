@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Keep mutation audits on the same complete source manifest as shell builds."""
 
 from pathlib import Path

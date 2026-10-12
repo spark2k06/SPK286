@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Shared normalized 80286 bus. Fetch supplies code-cycle metadata; the BIU
 // sequences logical memory/I/O bytes and words and owns every READY handshake.
 // I/O starts with a zero-extended port; an odd word retains physical carry

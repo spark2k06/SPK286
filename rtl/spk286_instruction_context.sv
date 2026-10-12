@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Instruction byte/prefix lifetime. No architectural storage or bus sequencing.
 `timescale 1ns/1ps
 module spk286_instruction_context (

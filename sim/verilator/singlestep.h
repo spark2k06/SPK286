@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef SPK286_SINGLESTEP_H
 #define SPK286_SINGLESTEP_H
 

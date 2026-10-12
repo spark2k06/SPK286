@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Capture and validate the instruction-timing calibration suite."""
 
 from __future__ import annotations

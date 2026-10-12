@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Functional-equivalence evidence for the dependency-driven Max

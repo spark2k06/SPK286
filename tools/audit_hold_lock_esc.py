@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Reject isolated BIU HOLD/LOCK and ESC RTL mutants with pristine controls.
 
 The mutants are compiled from temporary copies outside the production RTL.

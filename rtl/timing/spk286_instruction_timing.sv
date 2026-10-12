@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Compact instruction minima for provisional historical CPU profiles.
 // Reuses the functional decoder's entry and current-instruction metadata;
 // this module neither decodes instruction bytes nor advances the CPU/BIU.

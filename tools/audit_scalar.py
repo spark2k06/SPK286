@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """TEST disposition, scalar source selection and flag preservation mutation evidence."""
 import argparse
 import hashlib

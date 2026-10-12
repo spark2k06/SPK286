@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Captured iterative integer arithmetic; no opcode, register or bus owner.
 `timescale 1ns/1ps
 module spk286_muldiv (

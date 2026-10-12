@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Pure byte/word ALU. Operation encoding: ADD=0 OR=1 ADC=2 SBB=3 AND=4 SUB=5 XOR=6.
 // Candidate flags have no architectural update authority; the caller masks them.
 `timescale 1ns/1ps

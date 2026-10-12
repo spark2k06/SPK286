@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // 80286 eight-byte descriptor parser.
 // The parser returns a typed candidate and never writes architectural state.
 `timescale 1ns/1ps

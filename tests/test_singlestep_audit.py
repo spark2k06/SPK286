@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Adversarial checks for corpus admission and simulator result accounting."""
 
 import argparse

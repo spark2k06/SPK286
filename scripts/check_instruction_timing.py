@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Directed acceptance of compact provisional instruction timing metadata.
 
 The independent caller oracle selects rows by x86 opcode/form, never by the

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent mathematical word ALU oracle and deterministic RTL vectors.
 
 Signed range checks and nibble arithmetic deliberately differ from the RTL's

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Whole-stream measurements include opcode dispatch, retirement boundaries and

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 module spk286_encoding_preview_tb;
     logic clk = 1'b0;

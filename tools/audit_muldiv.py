@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Iterative arithmetic, fixed-register disposal and cancellation mutation evidence."""
 import argparse
 import hashlib

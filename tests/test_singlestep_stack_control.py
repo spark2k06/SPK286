@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import unittest
 from tools.run_singlestep import PHASE5_OPCODES, REG_ORDER, SingleStepRunnerError, prepare_case, scope_exclusion
 from tools.singlestep import SingleStepCase

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Fail-closed helpers shared by the SingleStep report tools."""
 
 

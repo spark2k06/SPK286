@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Segment encoding, original-memory admission and failing gate propagation."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent unary/dispatch ABI and fail-closed compiler protocols."""
 import json
 import unittest

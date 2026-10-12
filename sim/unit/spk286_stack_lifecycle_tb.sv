@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 module spk286_stack_lifecycle_tb;
     // TF delivery is verified by the event suite; this stream isolates its original datapath contract.

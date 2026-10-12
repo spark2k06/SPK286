@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent address/byte-alias/exchange expectations for data transfers."""
 import argparse
 from pathlib import Path

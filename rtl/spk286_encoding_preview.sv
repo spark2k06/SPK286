@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Side-effect-free instruction-byte qualification for a retained target.
 // Opcode selection, prefixes, groups and ModR/M reuse functional decoders;
 // trailing-byte requirements are generated from canonical microcode.

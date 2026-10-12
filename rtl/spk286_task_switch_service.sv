@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Serialized 80286 task-switch transaction.
 //
 // This is the single task-service boundary used by direct TSS transfers,

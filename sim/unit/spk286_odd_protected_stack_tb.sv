@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM 2.2: words, including stack words, may be unaligned.

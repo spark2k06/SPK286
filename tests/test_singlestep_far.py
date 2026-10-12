@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Far control lengths, file identities and retained invalid-form capture tails."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

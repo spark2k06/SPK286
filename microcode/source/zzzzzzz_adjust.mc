@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 11
 # Arithmetic flags precede the explicit fault check, including zero-radix AAM.
 instruction ADJUST_DIRECT:

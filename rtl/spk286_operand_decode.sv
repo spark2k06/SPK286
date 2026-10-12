@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Streaming ModR/M/displacement acquisition and stable instruction EA context.
 // The decoder and EA table are reusable; no opcode or bus sequencing lives here.
 `timescale 1ns/1ps

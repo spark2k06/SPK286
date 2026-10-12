@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """No-NPX physical admission preserves capture identities and comparison state."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

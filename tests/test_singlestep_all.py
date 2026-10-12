@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """All-file diagnostics cannot turn independent failures into a green run."""
 import unittest
 

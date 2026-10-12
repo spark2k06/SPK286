@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Reject isolated stack/control faults through exact state, bus and lifecycle assertions."""
 import argparse
 import hashlib

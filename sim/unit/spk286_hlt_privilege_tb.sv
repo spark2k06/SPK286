@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM B-42: HLT requires CPL0, independently of IOPL.

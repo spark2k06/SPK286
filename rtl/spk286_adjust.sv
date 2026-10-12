@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Decimal/radix arithmetic service. No opcode, architectural register or bus owner.
 `timescale 1ns/1ps
 module spk286_adjust (

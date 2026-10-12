@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Shift arithmetic, ownership and CPU result disposition mutation evidence."""
 import argparse
 import hashlib

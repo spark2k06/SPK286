@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent data-control encodings and operand/commit protocol checks."""
 import json
 import unittest

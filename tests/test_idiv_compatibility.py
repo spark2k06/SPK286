@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Preserve documented division while bounding the physical overflow exception."""
 import unittest
 from tools.muldiv_reference import evaluate

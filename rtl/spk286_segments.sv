@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // 80286 segment state. This port performs ordinary real-mode segment reloads;
 // the protected-state owner supplies LOADALL cache commits.
 `timescale 1ns/1ps

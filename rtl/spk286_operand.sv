@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // One logical byte/word service, shared by REG and RM. Byte register
 // encoding selects AL..BL/AH..BH independently of word-register encoding.
 // Register access completes locally; memory completes through the BIU response.

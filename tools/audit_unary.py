@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Unary arithmetic, decoded branches and cached operand lifetime mutation evidence."""
 import argparse
 import hashlib

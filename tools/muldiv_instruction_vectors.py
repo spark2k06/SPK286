@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Full-CPU arithmetic vectors with independent integer results and operand addressing."""
 import argparse
 from pathlib import Path

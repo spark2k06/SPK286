@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import unittest
 from tools.event_reference import Machine, WordLimit, Interruptibility, UnresolvedEvidence, physical_accesses
 

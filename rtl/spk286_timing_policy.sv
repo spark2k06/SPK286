@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Timing policy boundary. The normalized functional baseline and the
 // dependency-driven Max profile currently share the same functional schedule.
 // Max is accepted only as an explicit functional-equivalence profile; this is

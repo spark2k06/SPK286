@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Require isolated ALU/datapath mutants to fail an intended assertion."""
 import argparse
 import hashlib

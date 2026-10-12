@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Directed instruction and ordered physical-bus vectors from an independent model."""
 import argparse
 from pathlib import Path

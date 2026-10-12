@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Instruction semantics resolved from captured opcode and ModR/M extension.
 // Neither the pure ALU nor the executor interprets an x86 opcode.
 `timescale 1ns/1ps

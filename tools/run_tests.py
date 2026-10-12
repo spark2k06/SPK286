@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """SingleStep data selection smoke tool.
 
 This command validates and selects external SingleStep data. It deliberately

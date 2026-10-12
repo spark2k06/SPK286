@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef SPK286_STATE_INPUTS_H
 #define SPK286_STATE_INPUTS_H
 

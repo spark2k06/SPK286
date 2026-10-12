@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent multiply/divide control and ordered fault-disposition contract."""
 import json
 import unittest

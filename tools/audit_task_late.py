@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Check that focused task-publication observations reject isolated publication defects."""
 import argparse
 import hashlib

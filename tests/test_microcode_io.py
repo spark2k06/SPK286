@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent encoding and complete source/iteration/commit contracts."""
 import json
 from pathlib import Path

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Transactional 80286 TSS descriptor resolver.
 //
 // This service owns selector/table lookup and descriptor classification for a

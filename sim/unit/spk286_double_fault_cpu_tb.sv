@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Oracle: Intel 286 PRM 9.6.2 / B-8 / 11.6. Executable LOADALL
 // enters the fixture; all exceptions then travel through normal CPU services.

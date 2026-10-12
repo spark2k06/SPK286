@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Generate directed CPU vectors from independent word ALU/EA arithmetic."""
 import argparse
 from pathlib import Path

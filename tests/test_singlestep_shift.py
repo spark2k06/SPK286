@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """All shift forms retain exact prefixes/bytes and reject malformed encodings."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

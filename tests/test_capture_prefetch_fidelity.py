@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import csv
 import tempfile
 import unittest

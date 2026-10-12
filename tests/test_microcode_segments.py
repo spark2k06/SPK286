@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent segment control ABI and source-before-cache commit protocols."""
 import json
 import unittest

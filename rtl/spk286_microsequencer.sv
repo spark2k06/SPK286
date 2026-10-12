@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Generic functional sequencing. No x86 decode, byte assembly or bus policy.
 // enable permits implementation progress; it is not a historical timing mode.
 `timescale 1ns/1ps

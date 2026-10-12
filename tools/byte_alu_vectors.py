@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Exhaustive byte arithmetic expectations using integers and signed ranges."""
 import argparse
 from pathlib import Path

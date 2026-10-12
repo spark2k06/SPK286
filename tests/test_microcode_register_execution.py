@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent schedule contract for the eight register-direct early exits."""
 import json
 import unittest

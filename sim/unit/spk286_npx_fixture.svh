@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Executable LOADALL/READY fixtures shared by NPX trap and ESC boundary banks.
     `include "spk286_signals.svh"
     spk286 dut (.*);

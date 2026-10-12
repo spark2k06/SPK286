@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent byte scalar/EA CPU expectations, with selected word C7 controls."""
 import argparse
 from pathlib import Path

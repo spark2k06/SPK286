@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Hand-derived boundary examples constrain the independent closed-form oracle."""
 import unittest
 from tools.shift_reference import evaluate

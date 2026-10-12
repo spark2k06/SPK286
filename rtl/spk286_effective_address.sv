@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // The single 16-bit EA table. Displacement arrives as a sign-extended word.
 // Offset arithmetic wraps at 16 bits; segment translation is a separate stage.
 `timescale 1ns/1ps

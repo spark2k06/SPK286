@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Exact data-transfer encodings, memory preservation and gate failure propagation."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

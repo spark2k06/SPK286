@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM 10.1: an ordinary gate saves FLAGS before clearing NT.

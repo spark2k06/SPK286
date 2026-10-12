@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent Intel 80286 stack/near-control arithmetic and instruction oracle.
 
 No production decoder, microcode compiler, corpus adapter or RTL encodings are

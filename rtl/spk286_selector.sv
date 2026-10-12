@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // 80286 selector decomposition and complete 8-byte descriptor-table bounds.
 // This service is pure combinational infrastructure. It does not fetch
 // memory or commit architectural state.

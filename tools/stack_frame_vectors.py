@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent word-address enumeration and stack/frame architectural vectors."""
 import argparse
 from pathlib import Path

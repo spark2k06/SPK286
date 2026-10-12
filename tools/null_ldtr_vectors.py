@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Assemble null-LDTR field, readback and no-fetch reset programs."""
 import argparse
 import hashlib

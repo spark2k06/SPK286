@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Byte acquisition metadata is derived from functional microcode, not opcodes."""
 import json
 import unittest

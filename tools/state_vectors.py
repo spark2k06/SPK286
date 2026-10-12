@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Initialize the RTL datapath and verify its first fetch from SingleStep-shaped data.
 
 This deliberately does not execute or compare instructions. A normal CS reload

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Stack, frame cursor, generated loop target and signed BOUND mutation evidence."""
 import argparse
 import hashlib

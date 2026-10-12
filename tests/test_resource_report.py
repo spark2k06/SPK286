@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Aggregation of Yosys Cyclone V statistics into per-module resources."""
 import importlib.util
 from pathlib import Path

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Small, dependency-free readers for SingleStepTests 80286 data.
 
 The reader normalizes the published JSON representation and the MOO 1.1

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Real Mode PUSHA/POPA preflight. Even words may wrap between transfers;
 // a word beginning at FFFF is illegal. ENTER checks each actual transfer.
 `timescale 1ns/1ps

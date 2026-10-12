@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent encoding-6 controls, frozen-source stability and rejection cases."""
 import json
 import unittest

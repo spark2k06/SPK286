@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Strict ModR/M operand admission and visible/disjoint scope accounting."""
 import argparse
 import contextlib

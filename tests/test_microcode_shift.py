@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent shift control encoding and explicit width/disposition protocols."""
 import json
 import unittest

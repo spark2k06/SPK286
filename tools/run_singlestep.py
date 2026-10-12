@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Run selected SingleStepTests 80286 real-mode vectors against SPK286.
 
 The MOO files remain external.  This adapter reads them directly, applies the

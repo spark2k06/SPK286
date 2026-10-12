@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Assemble CPU-only late-task reset ROMs and their simulator manifest."""
 import argparse
 import hashlib

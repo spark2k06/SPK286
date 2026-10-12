@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Strict port capture admission; missing external effects remain errors."""
 import copy
 import struct

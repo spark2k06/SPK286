@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Scalar admission is strict about instruction bytes, widths and group extensions."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

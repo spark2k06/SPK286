@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 module spk286_stack_control_tb;
     `include "spk286_signals.svh"

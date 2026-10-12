@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independently cross-check the external corpus and exercise real RTL failures.
 
 This opt-in audit requires the external upstream moo2json.py reference and an

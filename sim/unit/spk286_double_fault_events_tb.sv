@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Independent first-exception table from Intel 286 PRM 9.6.2/B-8.
 // This bank drives the event-controller interface, never forced CPU state.

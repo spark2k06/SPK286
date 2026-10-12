@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent closed-form 286 shift/rotate arithmetic; no RTL bit-step recurrence."""
 import argparse
 from pathlib import Path

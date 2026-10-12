@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """SALC's literal control sequence, strict lifecycle and append-only extension."""
 import unittest
 from tools.microcode.compile_microcode import ROOT, CompileError, compile_sources, generate, encode, emit

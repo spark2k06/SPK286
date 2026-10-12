@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Acquired far pointers precede stack/cache/register disposition.
 microcode_format 20
 

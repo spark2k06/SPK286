@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Shared portable RTL inputs. Source after changing to the repository root.
 # Committed generated artifacts must match source before any RTL build begins.
 python3 -m tools.microcode.compile_microcode --check

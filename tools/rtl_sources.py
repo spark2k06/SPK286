@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Canonical package-first RTL inputs for portable Python verification tools."""
 
 from pathlib import Path

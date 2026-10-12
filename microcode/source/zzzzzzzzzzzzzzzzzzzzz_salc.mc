@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 21
 
 # Undocumented 80286 SALC: AL = CF ? FFh : 00h; preserve AH and all FLAGS.

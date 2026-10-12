@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Testbench connections to the normal execution/state boundary.
 logic clk = 1'b0, reset = 1'b1, ready = 1'b0, execute_enable = 1'b0;
 logic [1:0] timing_policy_request = 2'd0;

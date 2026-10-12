@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent far-pointer, return-link and modular stack transaction vectors."""
 import argparse
 from pathlib import Path

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Integer oracle with a separately evidenced finite byte-IDIV overflow rule."""
 import argparse
 from pathlib import Path

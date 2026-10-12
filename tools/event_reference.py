@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent architectural real-mode event model, with ordered word effects.
 
 No generated microcode, RTL constants, corpus expected values or CPU helpers are

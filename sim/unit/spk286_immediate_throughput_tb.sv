@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Same architectural stream on the old and new CPUs. Counts include fetch,

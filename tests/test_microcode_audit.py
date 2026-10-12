@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import contextlib
 import hashlib
 import io

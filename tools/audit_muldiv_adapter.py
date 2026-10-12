@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Prove the EXCP/RMSK boundary with genuine RTL executions and isolated mutations."""
 import argparse
 from dataclasses import replace

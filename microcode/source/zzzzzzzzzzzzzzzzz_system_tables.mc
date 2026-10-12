@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 24
 
 # Protected-mode system instructions are ordinary project-owned microcode entries.

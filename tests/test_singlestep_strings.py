@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """String admission preserves prefixes, sparse effects and exact fault identity."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

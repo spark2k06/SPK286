@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent byte-addressed string oracle with explicit physical fault effects."""
 import argparse
 from pathlib import Path

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Compare the new ROM/sequencer pair with the committed asynchronous pair.
 module spk286_sync_microcode_tb;

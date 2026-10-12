@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """New forms retain strict lengths, masks, group admission and HLT boundary."""
 from copy import deepcopy
 import unittest

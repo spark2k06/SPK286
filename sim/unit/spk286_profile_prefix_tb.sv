@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Passive full-TOP aggregation oracle. Original functional expectations stay
 // in the compatibility banks; these cases inspect only actual prefix metadata.

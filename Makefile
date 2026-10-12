@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 SHELL := /usr/bin/env bash
 
 BUILD_DIR := $(or $(SPK286_BUILD_DIR),build)

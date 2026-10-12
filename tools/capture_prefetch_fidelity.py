@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Capture and validate the integrated prefetch observation bank."""
 
 from __future__ import annotations

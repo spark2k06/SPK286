@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent TEST expectations: integer AND, flag parity and no destination write."""
 import argparse
 from pathlib import Path

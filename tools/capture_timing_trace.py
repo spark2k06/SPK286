@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Create and validate a reproducible timing observation capture."""
 
 from __future__ import annotations

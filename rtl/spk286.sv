@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Standalone CPU: decoder -> generated microcode -> functional datapath service.
 // Architectural state, prefetch storage and physical fetch retain separate owners.
 `timescale 1ns/1ps

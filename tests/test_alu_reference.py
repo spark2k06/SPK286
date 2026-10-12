@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 import unittest
 from tools.alu_reference import evaluate, EDGES, OPERATIONS
 

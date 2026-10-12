@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent selector, stack, EA and hidden-cache expectations for segments."""
 import argparse
 from pathlib import Path

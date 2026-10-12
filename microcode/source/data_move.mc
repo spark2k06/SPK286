@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 23
 
 # One shared entry; the decoder supplies the word-register destination.

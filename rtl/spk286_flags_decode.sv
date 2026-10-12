@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Instruction metadata for direct flag controls. Architectural storage is shared.
 `timescale 1ns/1ps
 module spk286_flags_decode (

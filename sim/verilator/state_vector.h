@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #ifndef SPK286_STATE_VECTOR_H
 #define SPK286_STATE_VECTOR_H
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Exercise the same module as both a source-list definition and repeated
 // wrapper includes; the global guard must make this safe.

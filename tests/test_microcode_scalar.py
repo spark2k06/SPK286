@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent scalar wire contract, frozen prior formats and protocol negatives."""
 import json
 import unittest

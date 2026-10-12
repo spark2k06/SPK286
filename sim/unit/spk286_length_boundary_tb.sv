@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Public CPU boundary: a complete legal ten-byte encoding must not become a
 // demand for byte11 while RAW completion clears its prefix context.

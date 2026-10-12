@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 25
 # Port operands are captured before the irreversible bus transaction.
 instruction IN_AL_PORT:

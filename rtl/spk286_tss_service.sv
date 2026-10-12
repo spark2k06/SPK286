@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Fixed-80286 TSS image service.
 //
 // This block owns only TSS image movement and descriptor busy-byte updates.

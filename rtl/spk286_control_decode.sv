@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Captured instruction metadata -> functional stack/control selectors.
 `timescale 1ns/1ps
 module spk286_control_decode #(

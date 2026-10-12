@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Executable null-LDTR reset probes; no direct protected-state initialization.
 module spk286_null_ldtr_tb;

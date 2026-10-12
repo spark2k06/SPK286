@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Stack address and SP commit service. Physical transfers belong to the operand/BIU.
 `timescale 1ns/1ps
 module spk286_stack (

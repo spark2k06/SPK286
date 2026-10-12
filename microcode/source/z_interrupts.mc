@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Shared real-mode event services; no instruction-level timing padding.
 microcode_format 18
 

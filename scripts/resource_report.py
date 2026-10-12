@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Estimate Cyclone V resources with Yosys synth_intel_alm.
 
 Two views are produced, both without I/O buffers:

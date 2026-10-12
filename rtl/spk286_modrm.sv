@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // 16-bit 80286 ModR/M metadata. No opcode or physical bus semantics.
 `timescale 1ns/1ps
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // One outstanding fetch and one response slot feeding the six-byte prefetch queue.
 // Transaction semantics only: native 80286 Ts/Tc pin timing is not modeled.
 `timescale 1ns/1ps

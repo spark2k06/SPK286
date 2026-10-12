@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Integrated incoming-task image validation.  Incoming task-state faults are

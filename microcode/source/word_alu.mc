@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 23
 
 # Decode supplies the functional operation, FLAGS mask and IF_WRITE permission.

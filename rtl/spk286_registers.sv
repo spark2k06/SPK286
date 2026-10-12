@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Architectural storage; instruction policy and ALU flag generation live upstream.
 `timescale 1ns/1ps
 

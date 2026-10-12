@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Extra unit arguments must not silently reduce validation coverage."""
 import subprocess
 import unittest

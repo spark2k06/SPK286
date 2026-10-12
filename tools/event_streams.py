@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Deterministic dependent streams checked at every architectural completion.
 
 This model uses instruction-level arithmetic and the independent event rules.

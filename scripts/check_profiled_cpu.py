@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Check the profiled timing variant: freshness, strict lint and dual-simulator oracles.
 
 No board RTL, FPGA tool or external corpus is required. All simulator output

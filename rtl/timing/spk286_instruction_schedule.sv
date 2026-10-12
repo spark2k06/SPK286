@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Provisional instruction-interval scheduler. Functional services stay on the
 // fabric clock; this module qualifies observable instruction/event boundaries.
 // The metadata budget is independent of micro-operation implementation count.

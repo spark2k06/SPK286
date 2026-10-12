@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 // Identical reset ROM bytes are also executable in native/SPK 86Box.
 module spk286_task_late_publication_tb;

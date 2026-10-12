@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """The state adapter validates initialization/fetch, never instruction execution."""
 
 import unittest

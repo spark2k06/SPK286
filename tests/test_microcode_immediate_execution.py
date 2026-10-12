@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Literal format-23 delta and rejection tests independent of RTL decoding."""
 import json
 import unittest

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent direct-scalar arithmetic and bit-transfer CPU expectations."""
 import argparse
 from pathlib import Path

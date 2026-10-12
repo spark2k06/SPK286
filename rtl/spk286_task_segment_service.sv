@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Hidden-cache construction for the four 80286 task segments.
 //
 // Load SS, CS, ES and DS in architectural order. Each completed descriptor

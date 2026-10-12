@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Far pointer, stack-link and context-lifetime mutation evidence."""
 import argparse
 import hashlib

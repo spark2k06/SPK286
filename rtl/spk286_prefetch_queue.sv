@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Six-byte 80286 instruction prefetch storage.
 // Fetch address generation and bus transactions remain outside this module.
 `timescale 1ns/1ps

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Shift CPU vectors reuse independent EA construction and closed-form arithmetic."""
 import argparse
 from pathlib import Path

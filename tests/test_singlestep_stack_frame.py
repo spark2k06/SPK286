@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Stack-frame lengths and unchanged invalid-BOUND generator tails."""
 import unittest
 from tests.test_singlestep_byte_prefix import vector

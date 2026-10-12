@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Reject focused double-fault RTL mutants using independent directed delivery tests."""
 import argparse
 import hashlib

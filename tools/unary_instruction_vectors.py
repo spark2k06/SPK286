@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Unary expectations from integer complement, negation and signed boundaries."""
 import argparse
 from pathlib import Path

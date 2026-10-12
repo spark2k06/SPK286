@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Policy-selection boundary. Policies 0 and 2 are accepted at reset;

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Admission of the single known incomplete physical capture in the corpus.
 
 Strict parsing and CPU expectations are never relaxed; only one exactly

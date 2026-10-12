@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Segment selector/cache, invalid encoding and SS interrupt-shadow mutation evidence."""
 import argparse
 import hashlib

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 microcode_format 16
 
 # Explicit functional iteration; opcode decoding and physical bus cycles stay outside.

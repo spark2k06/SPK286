@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Functional micro-operation service. Physical fetch/READY belongs to the BIU.
 `timescale 1ns/1ps
 

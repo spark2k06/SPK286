@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Deterministic event vectors with independently modeled state and bus effects."""
 import argparse
 from pathlib import Path

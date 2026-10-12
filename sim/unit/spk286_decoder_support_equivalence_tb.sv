@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 module spk286_decoder_support_equivalence_tb;
     logic [7:0] opcode;

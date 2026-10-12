@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Intel 80286 condition-code predicates; no architectural state or opcode decode.
 `timescale 1ns/1ps
 module spk286_condition (

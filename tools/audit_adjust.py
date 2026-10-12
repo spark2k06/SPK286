@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Decimal/radix arithmetic, full fault frames and service lifetime mutation evidence."""
 import argparse
 import hashlib

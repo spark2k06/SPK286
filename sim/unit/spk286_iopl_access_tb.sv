@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM 10.1: CLI/STI and I/O require CPL <= IOPL in protected

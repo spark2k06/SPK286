@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent closed-form decimal and radix expectations; no RTL recurrence."""
 import argparse
 from pathlib import Path

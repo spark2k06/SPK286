@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Run every supported SingleStep opcode file and fail on any failure or exclusion.
 
 Every admitted case of each supported file is executed, including prefixed and

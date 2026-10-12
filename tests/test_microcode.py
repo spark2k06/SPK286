@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent compiler/ROM contract tests; no RTL simulator required."""
 
 import contextlib

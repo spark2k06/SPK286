@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """String effects, repeat boundaries and interruption mutation evidence."""
 import argparse
 import hashlib

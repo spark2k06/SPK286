@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Exercise both batch extensions together on the actual CPU comparator."""
 import argparse
 from dataclasses import replace

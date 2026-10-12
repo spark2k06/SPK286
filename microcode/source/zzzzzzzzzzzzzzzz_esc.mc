@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # CPU-side NPX checks for the standalone no-coprocessor profile.
 # ESC tests EM || TS before acquiring ModR/M/displacement; a successful
 # check validates the first word without transferring an operand to an NPX.

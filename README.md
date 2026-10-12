@@ -125,3 +125,22 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 | `tests/` | Python tests and fixtures |
 | `docs/SPK286.md` | Technical reference |
 | `docs/report/CORE_REPORT.html` | Self-contained technical datasheet (open in a browser) |
+
+## Authorship
+
+SPK286 is directed by Aitor Gómez García (spark2k06). Its RTL, microcode,
+tools and tests were written with AI coding agents. The author set the
+architecture and scope, defined the verification strategy, ran the testing
+and drove the adjustments needed to make the core work. Correctness rests on
+that verification — hardware-captured 80286 test data, independent reference
+models and mutation audits — not on who or what wrote the code.
+
+## License
+
+SPK286 is released under the [MIT License](LICENSE). Source files carry an
+`SPDX-License-Identifier: MIT` line, and the generators emit it in the files
+they produce. The license allows the core to be integrated into designs under
+any license, including GPL machine cores.
+
+The SingleStepTests/80286 corpus (MIT) is fetched at build time and is not
+redistributed; see [the references](docs/SPK286.md#12-references-and-third-party-material).

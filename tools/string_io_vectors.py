@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Independent ordered memory/port oracle with retained irreversible effects."""
 import argparse
 from pathlib import Path

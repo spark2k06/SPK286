@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Prove event state/bus/lifecycle checks reject isolated functional RTL defects."""
 import argparse
 import hashlib

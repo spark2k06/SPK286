@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 `timescale 1ns/1ps
 
 // Intel 80286 PRM 10.2.2, tables 10-1/10-2 and #NM B-2:

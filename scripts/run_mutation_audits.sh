@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Inject isolated RTL faults into temporary copies of the sources and require
 # the directed testbenches to reject every mutant. Production files are never
 # modified.

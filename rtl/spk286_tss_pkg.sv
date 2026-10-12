@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Named offsets for the fixed 80286 task-state segment.
 `timescale 1ns/1ps
 

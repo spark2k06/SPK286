@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Data transfer, address lifetime and implicit LOCK mutation evidence."""
 import argparse
 import hashlib

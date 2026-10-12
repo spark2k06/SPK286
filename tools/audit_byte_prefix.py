@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Byte lanes, register halves and prefix/event ownership mutation evidence."""
 import argparse
 import hashlib

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Functional stack/near-control operations; no historical timing delays.
 microcode_format 5
 

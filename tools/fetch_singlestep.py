@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Acquire the small, pinned SingleStepTests 80286 working set.
 
 The repository is deliberately kept outside Git history in ``.cache``.  A

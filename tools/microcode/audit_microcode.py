@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Audit encodings 1 through 27 using emitted RTL and canonical DSL reconstruction.
 
 This is an offline checker for the existing generated case-ROM template, not a

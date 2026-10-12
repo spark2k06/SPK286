@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // Exercise the logical operand API directly, independently of MOV and TMP0.
 `timescale 1ns/1ps
 module spk286_operand_service_tb;
