@@ -1,7 +1,7 @@
 # SPK286 native bus contract
 
-Status: draft specification for the planned `spk286_native` wrapper. Nothing
-in this document is implemented yet.
+Status: stage 1 is implemented in `rtl/native/spk286_native.sv` and checked by
+`sim/unit/spk286_native_tb.sv`. Rules labeled V (section 2) are still open.
 
 This document defines how SPK286 presents itself at the pins of an 80286 when
 the core runs in its own device, for example a dedicated FPGA on a board where
@@ -26,8 +26,9 @@ here only as the expectations the CPU places on them.
 - `spk286_native` converts each normalized transaction into an 80286 bus
   cycle: pin polarities, the T-state sequence, READY# sampling, HOLD/HLDA
   floating, reset and the halt/shutdown cycle.
-- A board-specific top level for the CPU device instantiates `spk286_native`
-  and assigns pins. It lives with the board project.
+- A board-specific top level for the CPU device instantiates `spk286_native`,
+  turns each value/enable pair into a three-state pin and assigns pins. It
+  lives with the board project.
 
 ## 2. Evidence labels
 
@@ -67,6 +68,18 @@ three-state where noted.
 | PEACK# | out | Processor extension acknowledge. | Driven high (inactive) | P |
 | BUSY# | in | Processor extension busy. | Ignored | P |
 | ERROR# | in | Processor extension error. | Ignored | P |
+
+### Module ports
+
+`spk286_native` exposes the pins as plain inputs and outputs, so the board top
+level owns the I/O buffers:
+
+| Pins | Ports |
+| --- | --- |
+| A23-A0, BHE#, S1#, S0#, M/IO#, COD/INTA# | `a`, `bhe_n`, `s1_n`, `s0_n`, `m_io`, `cod_inta_n`; driven while `bus_oe` is high |
+| D15-D0 | `d_in`; `d_out` driven while `d_oe` is high |
+| Other pins | `clk`, `reset`, `lock_n`, `ready_n`, `hold`, `hlda`, `intr`, `nmi`, `pereq`, `peack_n`, `busy_n`, `error_n` |
+| Not 80286 pins | `timing_policy` strap; `halted` and `shutdown` status for the board |
 
 The core has no processor extension interface; ESC and WAIT follow the MSW
 no-NPX rules (C). The four processor extension pins are reserved so that a
@@ -120,13 +133,15 @@ or merge transfers.
 - The core must close timing at the CLK frequency of the board (for example
   16 MHz for an 8 MHz part, 32 MHz for 16 MHz). This has to be confirmed per
   device family (V).
-- The falling edge of RESET defines the phase relationship (I). The adapter
-  keeps a phase bit that starts at phase 1 on the first CLK edge after RESET
-  falls (P; exact edge V).
+- The falling edge of RESET defines the phase relationship (I). RESET is
+  registered; the first processor clock starts, in phase 1, on the first CLK
+  edge after RESET falls (P; exact edge V).
 - All inputs are synchronous to CLK because the system side generates CLK
-  and drives READY#, HOLD, INTR and NMI from it (P). Every input is registered
-  once on entry. An asynchronous source must be synchronized on the system
-  side.
+  and drives READY#, HOLD, INTR and NMI from it (P). RESET, HOLD, INTR and NMI
+  are registered once on entry; READY# and D15-D0 are sampled directly at the
+  end of Tc. An asynchronous source must be synchronized on the system side.
+- Every pin output is registered and changes only where a processor clock
+  begins (P).
 
 ## 5. Bus states
 
@@ -150,19 +165,21 @@ is V.
 The normalized bus offers one transaction at a time and only shows the next
 one after the current one completes. Stage 1 of the adapter therefore always
 inserts one Ti before Ts, with address, BHE# and M/IO#/COD/INTA# already
-valid (P):
+valid, and hands the result to the core in the Ti after the cycle (P):
 
 ```text
-processor clock   | Ti(addr) |    Ts    |    Tc    |   Tc(w)  | Ti(addr) | ...
-A23-A0, BHE#      |<====== cycle N address ==================>|<= N+1 ===...
-S1#, S0#          |  passive |  active  |  passive |  passive |  passive |
-READY# sampled    |          |          |   high   |   low    |          |
-core ready        |          |          |          |  pulse   |          |
+processor clock | Ti(addr) |   Ts   |   Tc   | Tc(wait) |    Ti     | Ti(addr) |   Ts   |
+A23-A0, BHE#    |<============== cycle N ===================>|<======= cycle N+1 ====...
+S1#, S0#        | passive  | active | passive| passive  | passive   | passive  | active |
+READY# sampled  |          |        |  high  |   low    |           |          |        |
+core            |          |        |        |          | READY,    |          |        |
+                |          |        |        |          | offers N+1|          |        |
 ```
 
-Every cycle costs one extra processor clock compared with a pipelined 80286.
-In return the address is valid for a full processor clock before Ts, which
-should be at least as early as an 80286 drives it (V). A system device that
+Back-to-back cycles take two processor clocks more than on a pipelined 80286:
+four instead of two without wait states. In return the address is valid for
+a full processor clock before Ts, which should be at least as early as an
+80286 drives it (V). A system device that
 latches the address from status, as the 82288 ALE does, sees a valid address.
 
 ### Stage 2: pipelined addressing
@@ -176,16 +193,17 @@ is verified on hardware (P).
 
 For each transaction (P unless noted):
 
-1. In Ti, when `bus_valid` is high and the adapter is idle and not in hold,
-   the adapter latches `address`, `bus_bhe_n`, `bus_status`, `bus_write` and
-   `data_out`. From the next processor clock it drives the address-setup Ti.
+1. At the end of a Ti, when `bus_valid` is high, the adapter latches
+   `address`, `bus_bhe_n`, `bus_status`, `bus_write` and `data_out`. The next
+   processor clock is the address-setup Ti.
 2. Ts: S1#/S0# active with the latched status.
 3. Tc: READY# is sampled at the end of each Tc (I; exact CLK edge V). While
    READY# is high, Tc repeats.
-4. On the Tc that samples READY# low, the adapter captures D15-D0 for reads
-   and drives `ready` high for one CLK with `data_in` set to the captured
-   value. The core accepts the transfer on that edge (C).
-5. The adapter returns to Ti and may accept the next `bus_valid`.
+4. At the end of the Tc that samples READY# low, the adapter captures
+   D15-D0. In phase 1 of the following Ti it drives `ready` high for one CLK
+   with `data_in` set to the captured value, and the core accepts the
+   transfer (C).
+5. At the end of that Ti the adapter may latch the next `bus_valid`.
 
 The core never sees `ready` before step 4. The adapter relies on two
 properties of the core (C):
@@ -195,12 +213,13 @@ properties of the core (C):
 - data and code arbitration is decided by the core; the adapter serves
   whatever `bus_valid` presents.
 
-A bench must assert both properties at the adapter boundary.
+The bench asserts both properties at the adapter boundary.
 
 ## 7. Data bus
 
-- Writes: D15-D0 are driven with the latched write data during Tc and float
-  at the end of the cycle (I; exact enable and float points V). The byte lanes
+- Writes: D15-D0 are driven with the latched write data during every Tc of
+  the cycle and float from the next processor clock (P; the exact enable and
+  float points of an 80286 are V). The byte lanes
   follow `data_out`; the core already places a byte on the lane selected by
   BHE#/A0 (C).
 - Reads and INTA: D15-D0 are inputs throughout and sampled with READY# (I).
@@ -216,25 +235,29 @@ A bench must assert both properties at the adapter boundary.
   a locked read-modify-write or the INTA chain (C).
 - When the core raises `hlda` and the adapter is in Ti, the adapter floats
   A23-A0, D15-D0, BHE#, S1#, S0#, M/IO# and COD/INTA#, then raises HLDA on
-  the next processor clock (P; float set and ordering V). Whether LOCK# also
-  floats is V.
-- When HOLD falls, the core drops `hlda`. The adapter lowers HLDA, drives the
-  bus passive for one processor clock, then resumes (P; V against the Intel
-  release timing).
+  the next processor clock (P; float set and ordering V). LOCK# stays driven
+  (P; whether an 80286 floats it is V).
+- When HOLD falls, the core drops `hlda`. The adapter lowers HLDA while the
+  bus is still floated, drives the bus passive on the next processor clock,
+  and only then may start a cycle (P; V against the Intel release timing).
 - Pins that float need board pull-ups so the system side sees passive status
-  (S1#, S0#, BHE#, LOCK#).
+  (S1#, S0#, BHE#).
 
 ## 9. Interrupt acknowledge, halt and shutdown
 
 - INTA is a pair of status-0 cycles, both READY-qualified, with the vector
   taken from D7-D0 of the second (C). LOCK# links both cycles and the first
-  stack push (C). The adapter runs each as a normal cycle. The number of idle
-  processor clocks an 80286 inserts between the two INTA cycles is V; the
-  adapter adds them once known.
+  stack push (C). The adapter runs each as a normal cycle, so stage 1 timing
+  separates them by two Ti. The number of idle processor clocks an 80286
+  inserts between the two INTA cycles is V.
+- LOCK# follows the core lock at the start of each processor clock: it is
+  active from the address-setup Ti of the first locked cycle and released at
+  the start of the processor clock after the core accepts the last one (P).
 - The core shows halt and shutdown as a steady level: `bus_status` 4 with
   address 2 (halt) or 0 (shutdown), without a bus transaction (C). On entering
   either state the adapter runs one status-4 cycle with A1 set for halt and
-  clear for shutdown, then stays in Ti until the core leaves the state (P).
+  clear for shutdown and BHE# high, then stays in Ti until the core leaves the
+  state (P).
 - Whether the halt/shutdown cycle waits for READY# like other cycles is V.
   Until confirmed the adapter waits for READY#, so the system side must
   return READY# for status-4 cycles.
@@ -243,8 +266,8 @@ A bench must assert both properties at the adapter boundary.
 
 - RESET is active high and must stay high for at least 16 CLK periods (I).
 - While RESET is high the adapter holds S1#/S0#, BHE#, LOCK# and PEACK# high,
-  floats D15-D0, drives HLDA low and drives A23-A0 to a fixed value (P; must
-  match the Intel pin-state table, V).
+  floats D15-D0, drives HLDA low and drives A23-A0, M/IO# and COD/INTA# high
+  (P; must match the Intel pin-state table, V).
 - After RESET falls, the core fetches from FFFFF0 (C). The delay from RESET
   falling to the first Ts on an 80286 is V; the adapter may start earlier
   until the historical value is known.
@@ -267,12 +290,27 @@ adapter behavior is treated as final:
 9. Pin states during reset and the delay to the first Ts.
 10. Core timing closure at the board CLK frequency for each target device.
 
-## 12. Verification plan
+## 12. Verification
 
-- A directed bench for `spk286_native`, in Verilator and Icarus, that
-  checks the T-state sequence, status encoding, BHE#/A0 lanes, wait states,
-  HOLD/HLDA floating, INTA, halt/shutdown and reset at the pins.
-- Assertions at the adapter boundary for the core properties in section 6.
+Implemented:
+
+- `sim/unit/spk286_native_tb.sv`, part of `make unit` in Verilator and
+  Icarus. A program runs through the pins against a memory and I/O model:
+  far jump from the reset vector, word and odd-word writes, a word read,
+  OUT and IN, STI and HLT, and an INTR handler that ends in a second HLT.
+  Every cycle gets 0 to 2 random wait states and one HOLD is requested
+  mid-program. An independent processor-clock monitor checks that pins change
+  only where a processor clock begins, the address-setup Ti before every Ts,
+  status and BHE#/A0 encodings, Tc holding, the write data window, READY#
+  waits, LOCK# across the INTA chain, the HOLD/HLDA float order, one halt
+  cycle per HLT and the reset pin states. The program results are then
+  checked in memory, including the interrupt frame.
+- The same bench asserts the core properties of section 6.
+- `tools/audit_native.py`, part of `make mutation-audit`, injects ten adapter
+  faults and requires the intended assertion of the bench to reject each.
+
+Planned:
+
 - A co-simulation with a minimal system model (clock and READY# generator,
   82288-style status decode, memory) that runs the existing directed programs
   through the pins, so functional results can be compared with the

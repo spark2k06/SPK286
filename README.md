@@ -48,7 +48,9 @@ Instantiate `spk286` from `rtl/spk286.sv` with the sources listed in
 LOCK, INTR/NMI and INTA cycles; see the
 [interface description](docs/SPK286.md#3-external-interface-and-biu).
 `rtl/timed/spk286_profiled.sv` is a drop-in variant that adds an optional
-historical instruction-interval schedule.
+historical instruction-interval schedule. For a CPU in its own device,
+`rtl/native/spk286_native.sv` presents the core at 80286 pins; see the
+[native bus contract](docs/NATIVE_BUS.md).
 
 ## FPGA resources (estimate)
 
@@ -116,7 +118,7 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 
 | Path | Content |
 | --- | --- |
-| `rtl/` | CPU RTL (`rtl/timing` and `rtl/timed` hold the profiled variant) |
+| `rtl/` | CPU RTL (`rtl/timing` and `rtl/timed` hold the profiled variant, `rtl/native` the 80286 pin adapter) |
 | `microcode/source/` | Authoritative microcode source |
 | `microcode/generated/` | Committed compiler output; never edited by hand |
 | `sim/` | Directed testbenches and simulator harnesses |
@@ -124,7 +126,7 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 | `scripts/` | Build, lint, test and synthesis scripts |
 | `tests/` | Python tests and fixtures |
 | `docs/SPK286.md` | Technical reference |
-| `docs/NATIVE_BUS.md` | Draft contract for the planned 80286 pin-level bus wrapper |
+| `docs/NATIVE_BUS.md` | Contract of the 80286 pin-level bus adapter |
 | `docs/report/CORE_REPORT.html` | Self-contained technical datasheet (open in a browser) |
 
 ## Authorship
