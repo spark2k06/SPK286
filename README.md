@@ -127,6 +127,7 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 | `tools/` | Microcode compiler, SingleStep tools, reference models and audits |
 | `scripts/` | Build, lint, test and synthesis scripts |
 | `tests/` | Python tests and fixtures |
+| `boards/qmtech_xc7a100t/` | Open-source (openXC7) build for the QMTECH Artix-7 XC7A100T core board |
 | `docs/SPK286.md` | Technical reference |
 | `docs/NATIVE_BUS.md` | Contract of the 80286 pin-level bus adapter |
 | `docs/report/CORE_REPORT.html` | Self-contained technical datasheet (open in a browser) |

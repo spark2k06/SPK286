@@ -29,4 +29,7 @@ verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_loadall_service -Irtl rtl/spk286_loadall_service.sv
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_native -Irtl "${rtl_sources[@]}" rtl/native/spk286_native.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_qmtech_top -Irtl "${rtl_sources[@]}" rtl/native/spk286_native.sv \
+    boards/qmtech_xc7a100t/spk286_qmtech_top.sv
 echo "LINT PASS"

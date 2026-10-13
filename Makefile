@@ -8,7 +8,7 @@ SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
         lint verilator iverilog waveform unit test synth-check regression verify-failure \
         data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
         mutation-audit timing-trace timing-calibration profiled profiled-check full-check resource-report \
-        quartus-info clean
+        qmtech-openxc7 quartus-info clean
 
 help:
 	@echo "SPK286 targets:"
@@ -37,6 +37,7 @@ help:
 	@echo "  make timing-calibration capture the instruction timing calibration suite"
 	@echo "  make full-check        regression, SingleStep, audits and profiled variant"
 	@echo "  make resource-report   estimate Cyclone V resources per module with Yosys"
+	@echo "  make qmtech-openxc7     build the QMTECH XC7A100T bitstream with openXC7"
 	@echo "  make clean             remove build output"
 
 env:
@@ -128,6 +129,9 @@ full-check: regression verify-failure data-smoke singlestep singlestep-audit mut
 resource-report:
 	python3 scripts/resource_report.py --top spk286 --view modules
 	python3 scripts/resource_report.py --top spk286 --view integrated
+
+qmtech-openxc7:
+	./boards/qmtech_xc7a100t/build.sh
 
 quartus-info:
 	./scripts/quartus_info.sh
