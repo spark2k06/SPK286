@@ -54,6 +54,7 @@ tests+=(spk286_null_ldtr)
 tests+=(spk286_immediate_execution spk286_immediate_throughput)
 tests+=(spk286_encoding_preview)
 tests+=(spk286_length_boundary)
+tests+=(spk286_native)
 if [[ "$unit" != all ]]; then tests=("$unit"); fi
 
 for name in "${tests[@]}"; do
@@ -173,6 +174,9 @@ for name in "${tests[@]}"; do
     fi
     tb="${name}_tb"
     test -f "sim/unit/$tb.sv"
+    # Pin-level wrappers sit outside rtl/*.sv so the core manifest stays CPU-only.
+    unit_sources=("${rtl_sources[@]}")
+    if [[ "$name" == spk286_native ]]; then unit_sources+=(rtl/native/spk286_native.sv); fi
     if [[ "$name" == spk286_protected_expand_down && "${SPK286_EXPAND_DOWN_TERMINATION_SMOKE:-0}" == 1 ]]; then
         run_args=("+termination_smoke")
     fi
@@ -185,7 +189,7 @@ for name in "${tests[@]}"; do
         mkdir -p "$obj"
         verilator --binary --build-jobs "${SPK286_BUILD_JOBS:-1}" --timing --assert --language 1800-2012 \
             --top-module "$tb" --Mdir "$obj" -Irtl -Isim/unit \
-            -o "$tb" "${rtl_sources[@]}" "sim/unit/$tb.sv" >"$obj/build.log" 2>&1 || {
+            -o "$tb" "${unit_sources[@]}" "sim/unit/$tb.sv" >"$obj/build.log" 2>&1 || {
                 cat "$obj/build.log"; exit 1;
             }
         cat "$obj/build.log"
@@ -194,7 +198,7 @@ for name in "${tests[@]}"; do
     if [[ "$simulator" != verilator ]]; then
         obj="$BUILD_DIR/iverilog/$tb"
         mkdir -p "$obj"
-        iverilog -g2012 -Wall -Irtl -Isim/unit -s "$tb" -o "$obj/$tb.vvp" "${rtl_sources[@]}" "sim/unit/$tb.sv"
+        iverilog -g2012 -Wall -Irtl -Isim/unit -s "$tb" -o "$obj/$tb.vvp" "${unit_sources[@]}" "sim/unit/$tb.sv"
         vvp "$obj/$tb.vvp" "${run_args[@]}"
     fi
 done

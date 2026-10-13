@@ -26,6 +26,7 @@ yosys -Q -p "read_verilog -sv ${rtl_sources[*]}; hierarchy -check -top spk286_se
 yosys -Q -p "read_verilog -sv ${rtl_sources[*]}; hierarchy -check -top spk286_descriptor; proc; opt; check -assert; stat" | tee "$BUILD_DIR/reports/yosys_spk286_descriptor.log"
 yosys -Q -p "read_verilog -sv ${rtl_sources[*]}; hierarchy -check -top spk286_protected_state; proc; opt; check -assert; stat" | tee "$BUILD_DIR/reports/yosys_spk286_protected_state.log"
 yosys -Q -p "read_verilog -sv ${rtl_sources[*]}; hierarchy -check -top spk286_loadall_service; proc; opt; check -assert; stat" | tee "$BUILD_DIR/reports/yosys_spk286_loadall_service.log"
+yosys -Q -p "read_verilog -sv ${rtl_sources[*]} rtl/native/spk286_native.sv; hierarchy -check -top spk286_native; proc; opt; check -assert; stat" | tee "$BUILD_DIR/reports/yosys_spk286_native.log"
 # Fully lower/map memories and logic too; proc/check alone is not a synthesis run.
 yosys -Q -p "read_verilog -sv ${rtl_sources[*]}; synth -top spk286; check -assert; stat" | tee "$BUILD_DIR/reports/yosys_mapped.log"
 echo "SYNTH_CHECK PASS: $REPORT"

@@ -27,4 +27,6 @@ for module in spk286_microsequencer spk286_decoder spk286_encoding_preview spk28
 done
 verilator --lint-only --language 1800-2012 --Wall \
     --top-module spk286_loadall_service -Irtl rtl/spk286_loadall_service.sv
+verilator --lint-only --language 1800-2012 --Wall \
+    --top-module spk286_native -Irtl "${rtl_sources[@]}" rtl/native/spk286_native.sv
 echo "LINT PASS"

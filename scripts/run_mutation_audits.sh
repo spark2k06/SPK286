@@ -11,7 +11,7 @@ cd "$ROOT_DIR"
 mkdir -p "$BUILD_DIR"
 
 for audit in operand_boundaries alu stack_control events byte_prefix scalar shift data unary \
-             adjust segment stack_frame far strings io muldiv hold_lock_esc; do
+             adjust segment stack_frame far strings io muldiv hold_lock_esc native; do
     echo "== audit_$audit"
     python3 -m "tools.audit_$audit" --build-dir "$BUILD_DIR"
 done

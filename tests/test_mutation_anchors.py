@@ -21,6 +21,14 @@ class MutationAnchorTests(unittest.TestCase):
                 self.assertEqual((ROOT/'rtl'/(module+'.sv')).read_text().count(old),1)
                 self.assertNotEqual(old,new)
 
+    def test_native_adapter_mutation_anchors(self):
+        source = (ROOT / 'rtl/native/spk286_native.sv').read_text()
+        for label, old, new, reason in importlib.import_module('tools.audit_native').PROBES:
+            with self.subTest(mutation=label):
+                self.assertEqual(source.count(old), 1, 'stale or ambiguous mutation anchor')
+                self.assertNotEqual(old, new)
+                self.assertIn(reason, (ROOT / 'sim/unit/spk286_native_tb.sv').read_text())
+
     def test_each_fault_can_be_injected_once_into_current_rtl(self):
         for name in ('audit_operand_boundaries', 'audit_alu',
                      'audit_stack_control', 'audit_events', 'audit_double_fault', 'audit_byte_prefix', 'audit_scalar', 'audit_shift', 'audit_data', 'audit_unary', 'audit_adjust', 'audit_segment', 'audit_stack_frame', 'audit_far', 'audit_strings', 'audit_io', 'audit_muldiv'):
