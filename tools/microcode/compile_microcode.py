@@ -18,7 +18,7 @@ import re
 import sys
 from typing import Mapping
 
-COMPILER_VERSION = "27.3"
+COMPILER_VERSION = "27.4"
 FORMAT_VERSION = 27
 MAX_ADDRESS_WIDTH = 12  # Current numeric CPU debug interface.
 OPERATIONS = {"INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3,
@@ -1208,6 +1208,8 @@ endmodule
     # Read the exact next sequencer PC at the current edge. The CPU's PC
     # register takes that same value, preserving the asynchronous ROM's
     # cycle alignment while allowing a synchronous embedded ROM inference.
+    # No vendor attribute: an initialized array with a registered read is
+    # inferred as block memory by Quartus, Yosys and other synthesizers.
     sync_rom = banner + """`timescale 1ns/1ps
 module spk286_microcode_sync_rom (
     input logic clk,
@@ -1216,7 +1218,7 @@ module spk286_microcode_sync_rom (
     output logic valid
 );
     localparam integer STORAGE_DEPTH = 1 << spk286_microcode_pkg::MC_ADDR_WIDTH;
-    (* ramstyle = "M10K" *) logic [spk286_microcode_pkg::MC_WORD_WIDTH:0] contents [0:STORAGE_DEPTH-1];
+    logic [spk286_microcode_pkg::MC_WORD_WIDTH:0] contents [0:STORAGE_DEPTH-1];
     initial begin
         for (integer index = 0; index < STORAGE_DEPTH; index = index + 1)
             contents[index] = {1'b0, spk286_microcode_pkg::MC_INVALID};

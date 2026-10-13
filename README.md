@@ -107,7 +107,9 @@ example `spk286_timing_trace` only holds debug counters):
 | **Total `spk286`** | **10,931** | **3,696** | **5,958** | **1** | **0** | **0** |
 
 The `spk286` row is the top-level glue logic. The single M10K block holds the
-microcode ROM. Multiply and divide are
+microcode ROM. The generated ROM carries no vendor attribute, so Yosys also
+maps it to one block RAM on ECP5 (DP16KD), Gowin (SPX9) and Xilinx 7-series
+(RAMB18E1). Multiply and divide are
 iterative and use no DSP blocks. The profiled variant in `rtl/timed` is not
 covered because Yosys 0.33 cannot parse the module-scope package import in
 `rtl/timing`.
