@@ -103,3 +103,10 @@ always @(posedge clk)
 always @(posedge clk)
     if (!reset && dut.operand.pending_q && dut.protected_access_fault)
         $fatal(1, "access fault raised while an operand transfer is pending");
+// The executor and operand decoder see a byte validity that leaves out their
+// own request; whenever they request a byte it must equal the length-fault
+// qualified validity.
+always @(posedge clk)
+    if (!reset && dut.executor_byte_ready &&
+        dut.consumer_byte_valid != (dut.queue_consume_valid && !dut.length_fault))
+        $fatal(1, "consumer byte validity differs from the length-fault validity");

@@ -845,6 +845,14 @@ module spk286 (
                            !unsupported_q && queue_consume_valid && is_prefix && !length_fault;
     assign length_fault = !event_active && !raw_retired && !event_completed && instruction_bytes == 10 &&
                           (micro_active ? executor_byte_ready : decode_ready);
+    // The next queue byte as the executor and the operand decoder see it.
+    // Both take a byte only while they request one (executor_byte_ready,
+    // which includes the decoder's request), and then this equals
+    // "queue_consume_valid && !length_fault". Leaving the request out keeps
+    // the byte's validity from depending on its consumer's ready.
+    logic consumer_byte_valid;
+    assign consumer_byte_valid = queue_consume_valid &&
+                                 !(!event_active && !raw_retired && !event_completed && instruction_bytes == 10);
     spk286_instruction_context instruction_context (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .complete(raw_retired || event_completed),
         .consume(queue_consume_valid && queue_consume_ready && !event_active), .prefix_accept(prefix_accept),
@@ -894,7 +902,7 @@ module spk286 (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start),
         .operation_valid(operation_valid), .operation(micro_word), .operation_done(executor_done), .operation_retire(operation_retire), .dispatch_request(dispatch_request),
         .segment_pop_opcode(opcode_q == 8'h07 || opcode_q == 8'h17 || opcode_q == 8'h1F),
-        .byte_valid(queue_consume_valid && !length_fault), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
+        .byte_valid(consumer_byte_valid), .byte_data(queue_consume_data), .byte_ready(executor_byte_ready),
         .decode_operand(operand_decode_enable), .decode_done(operand_decode_done), .decode_modrm_valid(operand_context_valid),
         .decode_byte_ready(operand_byte_ready), .operand_request(operand_request),
         .operand_write(operand_write), .operand_byte(operand_byte), .operand_select_rm(operand_select_rm), .operand_check(operand_check),
@@ -1029,7 +1037,7 @@ module spk286 (
     spk286_operand_decode operand_decode (
         .clk(clk), .reset(reset), .cancel(semantic_cancel), .start(service_start), .enable(operand_decode_enable && !invalid_form),
         .rearm(dispatch_request && dispatch_valid && execution_allowed),
-        .byte_valid(queue_consume_valid && !length_fault), .byte_data(queue_consume_data),
+        .byte_valid(consumer_byte_valid), .byte_data(queue_consume_data),
         .byte_ready(operand_byte_ready), .done(operand_decode_done), .modrm_valid(operand_context_valid),
         .bx(register_state[48 +: 16]), .bp(register_state[80 +: 16]),
         .si(register_state[96 +: 16]), .di(register_state[112 +: 16]),
