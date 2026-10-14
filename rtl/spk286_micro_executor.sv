@@ -48,6 +48,9 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     output logic [15:0] operand_write_data,
     input  logic operand_done,
     input  logic [15:0] operand_read_data,
+    // Raw BIU response data. Descriptor, TSS and event-gate accesses always
+    // select memory, so while one is active this equals operand_read_data.
+    input  logic [15:0] memory_read_data,
     input  logic operand_gpr_write_en, operand_gpr_write_byte,
     input  logic [2:0] operand_gpr_write_index,
     input  logic [15:0] operand_gpr_write_data,
@@ -674,9 +677,11 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     // Only the reserved-form check uses word 3. Reduce both possible words
     // before the late operand-done select, rather than muxing sixteen bits
     // and then reducing them. Code/data segments ignore this word on a 286.
+    // The arriving word is read straight from the BIU: a descriptor access
+    // always selects memory, so this skips the register/memory operand mux.
     assign descriptor_high_word_valid = descriptor_unused_segment ||
                                        ((descriptor_operand_done && descriptor_phase_q == 3'd3) ?
-                                        (operand_read_data == 16'h0000) : (descriptor_word3_q == 16'h0000));
+                                        (memory_read_data == 16'h0000) : (descriptor_word3_q == 16'h0000));
     assign descriptor_valid = descriptor_low_valid && descriptor_high_word_valid;
     assign descriptor_reserved_valid = descriptor_low_reserved_valid && descriptor_high_word_valid;
     spk286_descriptor descriptor_parser (
@@ -860,7 +865,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     assign event_gate_operand_done = event_gate_active_q && operand_done;
     assign event_gate_high_word_valid = event_gate_unused_segment ||
                                        ((event_gate_operand_done && event_gate_phase_q == 3'd3) ?
-                                        (operand_read_data == 16'h0000) : (event_gate_word3_q == 16'h0000));
+                                        (memory_read_data == 16'h0000) : (event_gate_word3_q == 16'h0000));
     assign event_gate_valid = event_gate_low_valid && event_gate_high_word_valid;
     assign event_gate_reserved_valid = event_gate_low_reserved_valid && event_gate_high_word_valid;
     spk286_descriptor event_gate_parser (

@@ -904,6 +904,7 @@ module spk286 (
         .redirect_request(internal_redirect), .redirect_target(internal_target), .redirect_ready(1'b1),
         .operand_write_data(operand_write_data), .operand_done(executor_operand_done),
         .operand_gpr_write_byte(operand_gpr_write_byte), .operand_read_data(executor_operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
+        .memory_read_data(memory_read_data),
         .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
         .gpr_write_byte(internal_gpr_write_byte), .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),
