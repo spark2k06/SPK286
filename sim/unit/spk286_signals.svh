@@ -91,3 +91,9 @@ wire [1:0] debug_timing_trace_owner;
 wire debug_timing_trace_lock, debug_timing_trace_hold;
 wire debug_timing_trace_hlda, debug_timing_trace_ready;
 wire [2:0] debug_timing_trace_phase;
+// The executor's operation gate does not repeat service_start: an instruction
+// or event may start only while the microsequencer is idle, and operations
+// are valid only while it is active. Every bench on this boundary checks it.
+always @(posedge clk)
+    if (!reset && dut.service_start && dut.micro_active)
+        $fatal(1, "service_start while the microsequencer is active");

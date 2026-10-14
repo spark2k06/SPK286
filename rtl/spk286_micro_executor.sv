@@ -1498,7 +1498,11 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
 
     spk286_alu alu (.operation(alu_operation), .operand_a(reverse_operands ? tmp1_q : tmp0_q), .operand_b(reverse_operands ? tmp0_q : tmp1_q),
                    .carry_in(carry_in), .operand_byte(alu_byte), .result(alu_result), .candidate_flags(alu_flags));
-    assign allowed = operation_valid && !reset && !cancel && !start &&
+    // start is not repeated here: an instruction or event starts only while
+    // the microsequencer is idle (start_ready), and operation_valid holds
+    // only while it is active, so the two never coincide. Leaving start out
+    // keeps instruction-head decode off every micro-operation's path.
+    assign allowed = operation_valid && !reset && !cancel &&
                      !task_switch_skip && !task_return_skip && !task_event_switch_skip;
     assign fetch_tmp1 = operation == spk286_microcode_pkg::MC_FETCH_IMM16_TMP1;
     assign fetch_word = allowed && (operation == spk286_microcode_pkg::MC_FETCH_IMM16 || fetch_tmp1);
