@@ -1257,7 +1257,11 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     assign pop_operation = allowed && (operation == spk286_microcode_pkg::MC_POP16 ||
                                       operation == spk286_microcode_pkg::MC_POP16_TMP1 ||
                                       operation == spk286_microcode_pkg::MC_POP16_TMP2 || iret_outer_pop);
-    assign stack_request = !range_fault &&
+    // Of the range_fault terms only the IRET outer frame shares an operation
+    // with these stack transfers; the others belong to CHECK_* and string
+    // operations. Testing just that one keeps the unrelated range compares
+    // off the stack request, segment and operand-completion path.
+    assign stack_request = !iret_outer_range_fault &&
                            (push_transfer || push_event_error_transfer || pop_operation || read_frame_address ||
                             call_gate_stack_write || call_parameter_read || call_parameter_write);
     assign read_ip = allowed && operation == spk286_microcode_pkg::MC_READ_IP16;
