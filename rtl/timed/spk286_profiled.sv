@@ -1018,11 +1018,16 @@ module spk286_profiled (
     );
 
     logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] next_micro_pc;
+    // The ROM returns each word with its flags (MC_FLAG_*), decoded by the
+    // microcode compiler. END and the task-skip exemptions gate every
+    // micro-operation through operation_valid and allowed, so they are read
+    // from the ROM rather than compared from the word.
+    logic [spk286_microcode_pkg::MC_FLAG_WIDTH-1:0] micro_flags;
     spk286_microcode_sync_rom microcode_rom (
-        .clk(clk), .address(next_micro_pc), .word(micro_word), .valid(micro_valid)
+        .clk(clk), .address(next_micro_pc), .word(micro_word), .flags(micro_flags), .valid(micro_valid)
     );
 
-    assign micro_end = micro_word == spk286_microcode_pkg::MC_END;
+    assign micro_end = micro_flags[spk286_microcode_pkg::MC_FLAG_END];
     assign loadall_start = operation_valid && micro_word == spk286_microcode_pkg::MC_LOADALL;
     assign operation_done = micro_end || executor_done || loadall_complete;
     assign opcode_start = decode_ready && !event_active && !event_request && !event_completed && !raw_retired &&
@@ -1099,6 +1104,7 @@ module spk286_profiled (
         .operand_write_data(operand_write_data), .operand_done(executor_operand_done),
         .operand_gpr_write_byte(operand_gpr_write_byte), .operand_read_data(executor_operand_read_data), .operand_gpr_write_en(operand_gpr_write_en),
         .memory_read_data(memory_read_data),
+        .operation_flags(micro_flags),
         .operand_gpr_write_index(operand_gpr_write_index), .operand_gpr_write_data(operand_gpr_write_data),
         .gpr_write_byte(internal_gpr_write_byte), .destination(destination_q), .gpr_write_en(internal_gpr_write_en),
         .gpr_write_index(internal_gpr_write_index), .gpr_write_data(internal_gpr_write_data),

@@ -110,3 +110,12 @@ always @(posedge clk)
     if (!reset && dut.executor_byte_ready &&
         dut.consumer_byte_valid != (dut.queue_consume_valid && !dut.length_fault))
         $fatal(1, "consumer byte validity differs from the length-fault validity");
+// END and the task-skip exemptions are read as ROM flags beside each word;
+// they must state exactly which operation the word is.
+always @(posedge clk)
+    if (!reset &&
+        (dut.micro_flags[spk286_microcode_pkg::MC_FLAG_END] != (dut.micro_word == spk286_microcode_pkg::MC_END) ||
+         dut.micro_flags[spk286_microcode_pkg::MC_FLAG_TASK_SWITCH] != (dut.micro_word == spk286_microcode_pkg::MC_TASK_SWITCH) ||
+         dut.micro_flags[spk286_microcode_pkg::MC_FLAG_TASK_RETURN] != (dut.micro_word == spk286_microcode_pkg::MC_TASK_RETURN) ||
+         dut.micro_flags[spk286_microcode_pkg::MC_FLAG_PUSH_EVENT_ERROR] != (dut.micro_word == spk286_microcode_pkg::MC_PUSH_EVENT_ERROR)))
+        $fatal(1, "microcode ROM flags disagree with the presented word");

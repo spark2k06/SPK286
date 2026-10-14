@@ -18,9 +18,14 @@ import re
 import sys
 from typing import Mapping
 
-COMPILER_VERSION = "27.4"
+COMPILER_VERSION = "27.5"
 FORMAT_VERSION = 27
 MAX_ADDRESS_WIDTH = 12  # Current numeric CPU debug interface.
+# Operations whose identity gates every micro-operation (END ends the routine;
+# the task operations are exempt from the task-switch skip). The synchronous
+# ROM stores one flag per entry beside each word, so the core reads these
+# decisions directly instead of comparing the word.
+FLAG_OPERATIONS = ("END", "TASK_SWITCH", "TASK_RETURN", "PUSH_EVENT_ERROR")
 OPERATIONS = {"INVALID": 0, "FETCH_IMM16": 1, "MOVE": 2, "END": 3,
               "DECODE_MODRM": 4, "READ_REG16": 5, "READ_RM16": 6,
               "WRITE_REG16": 7, "WRITE_RM16": 8,
@@ -1158,6 +1163,11 @@ def generate(program: Program) -> dict[str, str]:
     package += f"    localparam integer MC_ADDR_WIDTH = {width};\n"
     package += f"    localparam integer MC_WORD_WIDTH = {word_width};\n"
     package += f"    localparam integer MC_DEPTH = {program.depth};\n"
+    package += ("    // Word flags stored beside each ROM word: whether the word is the named\n"
+                "    // operation. They decode in the ROM what gates every micro-operation.\n")
+    package += f"    localparam integer MC_FLAG_WIDTH = {len(FLAG_OPERATIONS)};\n"
+    for index, name in enumerate(FLAG_OPERATIONS):
+        package += f"    localparam integer MC_FLAG_{name} = {index};\n"
     for name, value in operations.items():
         package += f"    localparam logic [MC_WORD_WIDTH-1:0] MC_{name} = {word_width}'d{value};\n"
     for name, address in program.entries.items():
@@ -1210,25 +1220,30 @@ endmodule
     # cycle alignment while allowing a synchronous embedded ROM inference.
     # No vendor attribute: an initialized array with a registered read is
     # inferred as block memory by Quartus, Yosys and other synthesizers.
+    # Each word is stored with its flags (MC_FLAG_*), read in the same access.
     sync_rom = banner + """`timescale 1ns/1ps
 module spk286_microcode_sync_rom (
     input logic clk,
     input logic [spk286_microcode_pkg::MC_ADDR_WIDTH-1:0] address,
     output logic [spk286_microcode_pkg::MC_WORD_WIDTH-1:0] word,
+    output logic [spk286_microcode_pkg::MC_FLAG_WIDTH-1:0] flags,
     output logic valid
 );
     localparam integer STORAGE_DEPTH = 1 << spk286_microcode_pkg::MC_ADDR_WIDTH;
-    logic [spk286_microcode_pkg::MC_WORD_WIDTH:0] contents [0:STORAGE_DEPTH-1];
+    localparam integer STORAGE_WIDTH = 1 + spk286_microcode_pkg::MC_FLAG_WIDTH + spk286_microcode_pkg::MC_WORD_WIDTH;
+    logic [STORAGE_WIDTH-1:0] contents [0:STORAGE_DEPTH-1];
     initial begin
         for (integer index = 0; index < STORAGE_DEPTH; index = index + 1)
-            contents[index] = {1'b0, spk286_microcode_pkg::MC_INVALID};
+            contents[index] = {1'b0, {spk286_microcode_pkg::MC_FLAG_WIDTH{1'b0}}, spk286_microcode_pkg::MC_INVALID};
 """
+    flag_width = len(FLAG_OPERATIONS)
     for op in program.operations:
+        flags = sum(1 << index for index, name in enumerate(FLAG_OPERATIONS) if op.operation == name)
         sync_rom += (f"        contents[{width}'d{op.address}] = "
-                f"{{1'b1, spk286_microcode_pkg::MC_{op.operation}}};\n")
+                f"{{1'b1, {flag_width}'b{flags:0{flag_width}b}, spk286_microcode_pkg::MC_{op.operation}}};\n")
     sync_rom += """    end
     always_ff @(posedge clk)
-        {valid, word} <= contents[address];
+        {valid, flags, word} <= contents[address];
 endmodule
 """
     symbols = {"schema_version": 1, "entries": program.entries, "labels": program.labels,

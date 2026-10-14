@@ -47,6 +47,9 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     input logic redirect_ready,
     output logic [15:0] operand_write_data,
     input  logic operand_done,
+    // The ROM's flags for the current word (MC_FLAG_*). The task-skip
+    // terms gate allowed, so they read these instead of comparing operation.
+    input  logic [spk286_microcode_pkg::MC_FLAG_WIDTH-1:0] operation_flags,
     input  logic [15:0] operand_read_data,
     // Raw BIU response data. Descriptor, TSS and event-gate accesses always
     // select memory, so while one is active this equals operand_read_data.
@@ -1351,7 +1354,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     assign task_return_commit_done = task_return_started_q && task_commit_done;
     assign task_return_finish = task_return_started_q && operation_valid &&
                                 operation == spk286_microcode_pkg::MC_END;
-    assign task_return_skip = task_return_started_q && operation != spk286_microcode_pkg::MC_TASK_RETURN &&
+    assign task_return_skip = task_return_started_q && !operation_flags[spk286_microcode_pkg::MC_FLAG_TASK_RETURN] &&
                               !task_commit_done;
     assign task_switch_nested_call = task_switch_operation &&
                                      ((event_gate_candidate_valid_q &&
@@ -1368,7 +1371,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     assign task_switch_target_access = task_descriptor_access_q;
     assign task_switch_target_descriptor_address = task_descriptor_address_q;
     assign task_switch_skip = task_descriptor_candidate_valid_q &&
-                              operation != spk286_microcode_pkg::MC_TASK_SWITCH &&
+                              !operation_flags[spk286_microcode_pkg::MC_FLAG_TASK_SWITCH] &&
                               !(event_gate_candidate_valid_q &&
                                 event_gate_class_q == spk286_protected_pkg::DESC_TASK_GATE) &&
                               !task_service_busy && !task_service_complete && !task_commit_active_q;
@@ -1379,7 +1382,7 @@ module spk286_micro_executor #(parameter bit USE_PARALLEL_SYSTEM_LIMIT = 1'b0) (
     // error word is still pushed on the new task's stack.  Keep only that
     // micro-op live after the task commit; the remaining frame tail is stale.
     assign task_event_switch_skip = task_event_switch_done_q &&
-                                    operation != spk286_microcode_pkg::MC_PUSH_EVENT_ERROR;
+                                    !operation_flags[spk286_microcode_pkg::MC_FLAG_PUSH_EVENT_ERROR];
 
 
     spk286_stack_range stack_range (
