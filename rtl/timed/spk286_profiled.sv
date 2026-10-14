@@ -1244,7 +1244,7 @@ module spk286_profiled (
         .USE_PARALLEL_RANGE(1'b1)
     ) operand (
         .parallel_within_limit(parallel_operand_within_limit),
-        .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request && !protected_access_fault),
+        .clk(clk), .reset(reset), .cancel(semantic_cancel), .request_valid(operand_request), .request_fault(protected_access_fault),
         .request_byte(operand_byte), .request_write(operand_write), .request_check(operand_check), .select_rm(operand_select_rm), .write_data(operand_write_data),
         .done(operand_done), .unlimited_memory_done(unlimited_memory_done), .read_data(operand_read_data), .register_state(register_state),
         .reg_index(operand_reg), .rm_index(operand_rm), .register_direct(operand_register_direct && !protected_descriptor_access && !protected_tss_access && !protected_call_stack_access && !protected_event_access && !address_override && !stack_request && !vector_request && !io_transfer),

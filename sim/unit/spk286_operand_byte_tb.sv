@@ -30,6 +30,7 @@ module spk286_operand_byte_tb;
     wire[15:0]read_a,read_b,ip,flags;
     logic[127:0]expected;
     integer checks=0,cases=0,requests=0;
+    logic request_fault=0;
     spk286_operand dut(.*);
     spk286_registers storage(
         .clk(clk),.reset(reset),.read_a_index(3'd0),.read_b_index(3'd0),
@@ -72,7 +73,10 @@ module spk286_operand_byte_tb;
         for(integer wr=0;wr<2;wr++)begin
             clear();register_direct=0;select_rm=1;request_byte=1;request_write=1'(wr);request_valid=1;
             request_check=1;#1;
-            check(done && !memory_request && !blocked,"validate-only byte at segment end");
+            check(!done && !memory_request && !blocked,"validate-only byte at segment end records its outcome");
+            tick();
+            check(done && !memory_request && !blocked,"validate-only byte at segment end completes on the next clock");
+            tick();
             request_check=0;memory_request_ready=1;#1;
             check(memory_request && memory_byte && memory_address==24'h10FFFF && memory_write==1'(wr),"byte memory metadata and A20");
             tick();memory_request_ready=0;

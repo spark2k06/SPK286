@@ -29,6 +29,7 @@ module spk286_operand_service_tb;
     integer checks=0, requests=0, responses=0, commits=0;
     logic [127:0] before_state;
     logic request_check = 0;
+    logic request_fault = 0;
     spk286_operand dut (.*);
 
     task automatic check(input logic condition, input string message);
@@ -122,13 +123,38 @@ module spk286_operand_service_tb;
         check(!done && !memory_response_ready && !memory_request && !gpr_write_en,"cancel suppresses coincident response consumption");
         tick(); request_valid=0; memory_response_valid=0; cancel=0; tick();
         check(responses==3 && requests==4 && commits==17,"canceled response cannot become a semantic effect");
-        // Validate a future POP destination without issuing a bus access or write.
+        // An access fault holds a memory request back: no transfer, no
+        // completion, no limit block. Releasing it issues the request.
+        request_valid=1;request_write=0;select_rm=1;register_direct=0;request_fault=1;
+        memory_request_ready=1;offset=0;segment_limit=16'hFFFF;
+        repeat(3) begin
+            #1; check(!memory_request && !done && !blocked && !memory_response_ready,"faulting memory request is not issued");
+            tick();
+        end
+        request_fault=0;#1;
+        check(memory_request,"fault-free memory request issues");
+        tick();memory_response_valid=1;memory_read_data=16'h4B1D;#1;
+        check(done && memory_response_ready && read_data==16'h4B1D,"issued request completes on its response");
+        tick();request_valid=0;memory_response_valid=0;#1;
+        check(requests==5 && responses==4,"one transfer for the released request");
+        // Validate a future POP destination without issuing a bus access or
+        // write. A memory precheck records its outcome and completes on the
+        // next clock, keeping the access-fault logic off the completion path.
         request_check=1;request_valid=1;request_write=1;select_rm=1;register_direct=0;
-        offset=16'hFFFE;segment_limit=16'hFFFF;#1;
-        check(done && !memory_request && !gpr_write_en,"valid precheck completes without memory or GPR effects");
+        offset=16'hFFFE;segment_limit=16'hFFFF;request_fault=1;
+        repeat(2) begin
+            #1; check(!done && !memory_request && !gpr_write_en,"faulting precheck never completes");
+            tick();
+        end
+        request_fault=0;#1;
+        check(!done && !memory_request && !gpr_write_en,"precheck records its outcome first");
+        tick();request_valid=0;
+        repeat(2) begin #1; check(!done,"paused precheck does not complete"); tick(); end
+        request_valid=1;#1;
+        check(done && !memory_request && !gpr_write_en,"valid precheck completes on the next clock without memory or GPR effects");
         tick();offset=16'hFFFF;#1;
         check(!done && !memory_request,"precheck rejects overflowing destination word");
-        tick();check(blocked && requests==4 && commits==17,"precheck blocks before any transfer");
+        tick();check(blocked && requests==5 && commits==17,"precheck blocks before any transfer");
         cancel=1;tick();cancel=0;request_valid=0;request_check=0;
         $display("OPERAND_SERVICE PASS: independent REG/RM direction, repeated context, backpressure, limits and cancellation; %0d checks",checks);
         $finish;

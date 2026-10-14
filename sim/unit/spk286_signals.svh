@@ -97,3 +97,9 @@ wire [2:0] debug_timing_trace_phase;
 always @(posedge clk)
     if (!reset && dut.service_start && dut.micro_active)
         $fatal(1, "service_start while the microsequencer is active");
+// Operand completion does not repeat the access fault: a memory transfer was
+// fault-free when issued, and nothing that decides the fault may change
+// before it completes.
+always @(posedge clk)
+    if (!reset && dut.operand.pending_q && dut.protected_access_fault)
+        $fatal(1, "access fault raised while an operand transfer is pending");
