@@ -78,5 +78,7 @@ A 32 MHz CLK (16 MHz 80286) closes; the result depends on the seed, not on
 the constraint. The critical path runs from the register file through the
 execution datapath back to a register: 28 logic levels, of which routing
 takes 24.6 ns and logic 4.5 ns of 29.6 ns. These are open-source tool
-figures; vendor tools may reach a higher frequency on the same device. One
-build takes about 14 minutes and 1.5 GB of memory.
+figures for d51725b, before the cpu-timing changes. With Vivado 2025.2,
+the CPU-only build in `boards/artix7_timing` reaches 54.27 MHz for d51725b and
+61.29 MHz for ef62028 on the xc7a100tfgg484-2. An openXC7 build takes
+about 14 minutes and 1.5 GB of memory.

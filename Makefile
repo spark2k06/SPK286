@@ -8,7 +8,7 @@ SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
         lint verilator iverilog waveform unit test synth-check regression verify-failure \
         data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
         mutation-audit timing-trace timing-calibration profiled profiled-check full-check resource-report \
-        qmtech-openxc7 quartus-info clean
+        qmtech-openxc7 cyclone-v-timing artix7-timing quartus-info clean
 
 help:
 	@echo "SPK286 targets:"
@@ -38,6 +38,8 @@ help:
 	@echo "  make full-check        regression, SingleStep, audits and profiled variant"
 	@echo "  make resource-report   estimate Cyclone V resources per module with Yosys"
 	@echo "  make qmtech-openxc7     build the QMTECH XC7A100T bitstream with openXC7"
+	@echo "  make cyclone-v-timing   CPU-only Quartus timing on the MiSTer Cyclone V"
+	@echo "  make artix7-timing      CPU-only Vivado timing on the ZXTRES+ Artix-7"
 	@echo "  make clean             remove build output"
 
 env:
@@ -132,6 +134,12 @@ resource-report:
 
 qmtech-openxc7:
 	./boards/qmtech_xc7a100t/build.sh
+
+cyclone-v-timing:
+	./boards/cyclone_v_timing/build.sh
+
+artix7-timing:
+	./boards/artix7_timing/build.sh
 
 quartus-info:
 	./scripts/quartus_info.sh
