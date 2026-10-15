@@ -8,7 +8,7 @@ SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
         lint verilator iverilog waveform unit test synth-check regression verify-failure \
         data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
         mutation-audit timing-trace timing-calibration profiled profiled-check full-check resource-report \
-        qmtech-openxc7 cyclone-v-timing artix7-timing quartus-info clean
+        qmtech-openxc7 cyclone-v-timing artix7-timing zxtres-demo zxtres-demo-sim quartus-info clean
 
 help:
 	@echo "SPK286 targets:"
@@ -40,6 +40,8 @@ help:
 	@echo "  make qmtech-openxc7     build the QMTECH XC7A100T bitstream with openXC7"
 	@echo "  make cyclone-v-timing   CPU-only Quartus timing on the MiSTer Cyclone V"
 	@echo "  make artix7-timing      CPU-only Vivado timing on the ZXTRES+ Artix-7"
+	@echo "  make zxtres-demo        build the ZXTRES+ bring-up demo core (.ZX3) with Vivado"
+	@echo "  make zxtres-demo-sim    simulate the ZXTRES+ bring-up demo with Verilator"
 	@echo "  make clean             remove build output"
 
 env:
@@ -140,6 +142,12 @@ cyclone-v-timing:
 
 artix7-timing:
 	./boards/artix7_timing/build.sh
+
+zxtres-demo:
+	./boards/zxtres_plus/build.sh
+
+zxtres-demo-sim:
+	./boards/zxtres_plus/run_sim.sh
 
 quartus-info:
 	./scripts/quartus_info.sh

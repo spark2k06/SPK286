@@ -130,6 +130,7 @@ covered because Yosys 0.33 cannot parse the module-scope package import in
 | `boards/qmtech_xc7a100t/` | Open-source (openXC7) build for the QMTECH Artix-7 XC7A100T core board |
 | `boards/cyclone_v_timing/` | CPU-only Quartus timing harness for the MiSTer Cyclone V |
 | `boards/artix7_timing/` | CPU-only Vivado timing harness for Artix-7 (ZXTRES+ device by default) |
+| `boards/zxtres_plus/` | Bring-up demo for the ZXTRES+: the core on block RAM, self-tests on VGA, `.ZX3` core |
 | `docs/SPK286.md` | Technical reference |
 | `docs/NATIVE_BUS.md` | Contract of the 80286 pin-level bus adapter |
 | `docs/report/CORE_REPORT.html` | Self-contained technical datasheet (open in a browser) |
