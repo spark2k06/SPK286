@@ -1371,6 +1371,54 @@
         text-decoration: none;
       }
     }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.35rem;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--amber), var(--cyan));
+      color: #071018;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      box-shadow: 0 12px 34px rgba(85, 214, 232, 0.28);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .cta svg {
+      width: 20px;
+      height: 20px;
+      flex: none;
+    }
+
+    .cta-github {
+      border: 1px solid var(--line-strong);
+      background: var(--panel-strong);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .cta:hover,
+    .cta:focus-visible {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    @media print {
+      .hero-cta {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1408,6 +1456,13 @@
           <span class="hero-chip">Bus: 24-bit address · 16-bit data</span>
           <span class="hero-chip">Reference target: Cyclone V</span>
           <span class="hero-chip">License: MIT</span>
+        </div>
+
+        <div class="hero-cta">
+          <a class="cta cta-github" href="https://github.com/spark2k06/SPK286" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            github.com/spark2k06/SPK286
+          </a>
         </div>
       </div>
 
@@ -2210,6 +2265,19 @@ python3 -m tools.microcode.compile_microcode --pc 0x1</code></pre>
           <code>make resource-report</code>.
         </p>
 
+        <div class="callout">
+          <div class="callout-mark">i</div>
+          <div>
+            <strong>Quartus, Vivado and openXC7</strong>
+            <p>
+              Clock speed, resources, build times and bitstreams of the core
+              built with the three FPGA toolchains, including the ZXTRES+
+              bring-up demo, are compared in the
+              <a href="TOOLCHAIN_REPORT.html">toolchain report</a>.
+            </p>
+          </div>
+        </div>
+
         <div class="table-wrap">
           <table>
             <thead>
@@ -2426,6 +2494,7 @@ make full-check        <span class="comment"># everything, plus the profiled var
               <tr><td><a href="https://github.com/dbalsom/moo" target="_blank" rel="noopener noreferrer">dbalsom/moo</a> (MIT)</td><td>MOO 1.1 format, implemented independently.</td></tr>
               <tr><td>86Box, PCem</td><td>Behavioral cross-references only; no code copied.</td></tr>
               <tr><td>MCL86, 80x86, z386, ao486</td><td>Architectural ideas only; no code copied.</td></tr>
+              <tr><td><a href="TOOLCHAIN_REPORT.html">SPK286 toolchain report</a></td><td>Quartus, Vivado and openXC7 builds of the core compared.</td></tr>
             </tbody>
           </table>
         </div>
