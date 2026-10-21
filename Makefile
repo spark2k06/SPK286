@@ -8,7 +8,8 @@ SINGLESTEP_ROOT := $(or $(SPK286_SINGLESTEP_ROOT),.cache/singlestep-80286)
         lint verilator iverilog waveform unit test synth-check regression verify-failure \
         data-smoke state-smoke singlestep-fetch singlestep-smoke singlestep singlestep-audit \
         mutation-audit timing-trace timing-calibration profiled profiled-check full-check resource-report \
-        qmtech-openxc7 cyclone-v-timing artix7-timing zxtres-demo zxtres-demo-sim quartus-info clean
+        qmtech-openxc7 cyclone-v-timing artix7-timing zxtres-demo zxtres-demo-sim zxtres-demo-openxc7 \
+        zxtres-demo-netlist quartus-info clean
 
 help:
 	@echo "SPK286 targets:"
@@ -42,6 +43,8 @@ help:
 	@echo "  make artix7-timing      CPU-only Vivado timing on the ZXTRES+ Artix-7"
 	@echo "  make zxtres-demo        build the ZXTRES+ bring-up demo core (.ZX3) with Vivado"
 	@echo "  make zxtres-demo-sim    simulate the ZXTRES+ bring-up demo with Verilator"
+	@echo "  make zxtres-demo-openxc7  build the ZXTRES+ demo core with openXC7"
+	@echo "  make zxtres-demo-netlist  simulate the openXC7 (Yosys) netlist against the RTL"
 	@echo "  make clean             remove build output"
 
 env:
@@ -148,6 +151,12 @@ zxtres-demo:
 
 zxtres-demo-sim:
 	./boards/zxtres_plus/run_sim.sh
+
+zxtres-demo-openxc7:
+	./boards/zxtres_plus_openxc7/build.sh
+
+zxtres-demo-netlist:
+	./boards/zxtres_plus_openxc7/run_netlist_sim.sh
 
 quartus-info:
 	./scripts/quartus_info.sh
