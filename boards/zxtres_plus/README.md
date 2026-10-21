@@ -71,7 +71,7 @@ screen says so.
 
 ```sh
 boards/zxtres_plus/build.sh [40|50]    # Vivado 2025.2; 40 MHz CPU by default
-boards/zxtres_plus/run_sim.sh          # Verilator, from Linux or WSL
+boards/zxtres_plus/run_sim.sh [MAX_MS] [CPU_KHZ]   # Verilator, from Linux or WSL
 ```
 
 `build.sh` writes `build/zxtres_plus/<MHz>mhz/SPK286DEMO.ZX3`, the `.bit`
@@ -82,7 +82,9 @@ file, `demo.lst` and the timing and utilization reports. It needs `nasm`
 `run_sim.sh` simulates the same system for up to 400 ms and fails unless the
 demo reports that all its checks passed. It writes the text screen
 (`zxtres_demo_screen.txt`), two VGA frames as PNG and the POST log to
-`build/zxtres_plus/sim`.
+`build/zxtres_plus/sim`. `CPU_KHZ` (default 40000) sets the CPU clock;
+`run_sim.sh 400 33333` simulates the clock of the openXC7 build and writes
+to `build/zxtres_plus/sim_33333khz`.
 
 A `.ZX3` core is the bitstream without its `.bit` header, padded to a
 multiple of 16 KiB, as `bit2bin_zx3` of github.com/zxtres/tools writes it.

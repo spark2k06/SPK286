@@ -22,9 +22,9 @@
 //   ECh  RW scratch register for the I/O instruction test
 `timescale 1ns/1ps
 module zxtres_demo_system #(
-    parameter string ROM_FILE  = "demo_rom.mem",
-    parameter string TEXT_FILE = "demo_text.mem",
-    parameter string FONT_FILE = "font8x8.mem",
+    parameter ROM_FILE  = "demo_rom.mem",
+    parameter TEXT_FILE = "demo_text.mem",
+    parameter FONT_FILE = "font8x8.mem",
     parameter int unsigned CPU_KHZ = 40000
 ) (
     input  logic       clk_cpu,

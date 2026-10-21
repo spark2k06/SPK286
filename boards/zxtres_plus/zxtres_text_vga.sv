@@ -4,7 +4,7 @@
 // vertically, plus one status line generated in hardware from the CPU state.
 `timescale 1ns/1ps
 module zxtres_text_vga #(
-    parameter string FONT_FILE = "font8x8.mem"
+    parameter FONT_FILE = "font8x8.mem"
 ) (
     input  logic        clk,            // 25 MHz dot clock
     input  logic        reset,
@@ -84,21 +84,20 @@ module zxtres_text_vga #(
 
     // Stage 1: character and attribute, then the font lookup.
     function automatic logic [7:0] hex_char(input logic [3:0] nibble);
-        return (nibble < 4'd10) ? 8'h30 + 8'(nibble) : 8'h37 + 8'(nibble);
+        hex_char = (nibble < 4'd10) ? 8'h30 + {4'h0, nibble} : 8'h37 + {4'h0, nibble};
     endfunction
     function automatic logic [7:0] flag_char(input logic flag);
-        return flag ? 8'h31 : 8'h30;
+        flag_char = flag ? 8'h31 : 8'h30;
     endfunction
 
-    // Indexed by column, left to right.
-    /* verilator lint_off ASCRANGE */
-    localparam logic [0:79][7:0] STATUS_TEMPLATE =
+    // 80 characters, the first (column 0) in the top byte.
+    localparam logic [639:0] STATUS_TEMPLATE =
         " HW  POST --  CS:IP ----:----  HLT -  SHUTDOWN -  FAULT -  FRAME ----           ";
-    /* verilator lint_on ASCRANGE */
 
+    wire  [6:0] status_index = 7'd79 - p1_column;
     logic [7:0] status_char;
     always_comb begin
-        status_char = STATUS_TEMPLATE[p1_column];
+        status_char = STATUS_TEMPLATE[{status_index, 3'b000} +: 8];
         case (p1_column)
             7'd10: status_char = hex_char(post_q[7:4]);
             7'd11: status_char = hex_char(post_q[3:0]);
@@ -148,22 +147,22 @@ module zxtres_text_vga #(
     // Stage 2: pixel colour from the standard 16-colour CGA palette.
     function automatic logic [17:0] palette(input logic [3:0] index);
         case (index)
-            4'h0: return {6'h00, 6'h00, 6'h00};
-            4'h1: return {6'h00, 6'h00, 6'h2A};
-            4'h2: return {6'h00, 6'h2A, 6'h00};
-            4'h3: return {6'h00, 6'h2A, 6'h2A};
-            4'h4: return {6'h2A, 6'h00, 6'h00};
-            4'h5: return {6'h2A, 6'h00, 6'h2A};
-            4'h6: return {6'h2A, 6'h15, 6'h00};
-            4'h7: return {6'h2A, 6'h2A, 6'h2A};
-            4'h8: return {6'h15, 6'h15, 6'h15};
-            4'h9: return {6'h15, 6'h15, 6'h3F};
-            4'hA: return {6'h15, 6'h3F, 6'h15};
-            4'hB: return {6'h15, 6'h3F, 6'h3F};
-            4'hC: return {6'h3F, 6'h15, 6'h15};
-            4'hD: return {6'h3F, 6'h15, 6'h3F};
-            4'hE: return {6'h3F, 6'h3F, 6'h15};
-            default: return {6'h3F, 6'h3F, 6'h3F};
+            4'h0: palette = {6'h00, 6'h00, 6'h00};
+            4'h1: palette = {6'h00, 6'h00, 6'h2A};
+            4'h2: palette = {6'h00, 6'h2A, 6'h00};
+            4'h3: palette = {6'h00, 6'h2A, 6'h2A};
+            4'h4: palette = {6'h2A, 6'h00, 6'h00};
+            4'h5: palette = {6'h2A, 6'h00, 6'h2A};
+            4'h6: palette = {6'h2A, 6'h15, 6'h00};
+            4'h7: palette = {6'h2A, 6'h2A, 6'h2A};
+            4'h8: palette = {6'h15, 6'h15, 6'h15};
+            4'h9: palette = {6'h15, 6'h15, 6'h3F};
+            4'hA: palette = {6'h15, 6'h3F, 6'h15};
+            4'hB: palette = {6'h15, 6'h3F, 6'h3F};
+            4'hC: palette = {6'h3F, 6'h15, 6'h15};
+            4'hD: palette = {6'h3F, 6'h15, 6'h3F};
+            4'hE: palette = {6'h3F, 6'h3F, 6'h15};
+            default: palette = {6'h3F, 6'h3F, 6'h3F};
         endcase
     endfunction
 

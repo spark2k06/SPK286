@@ -1,22 +1,34 @@
 // SPDX-License-Identifier: MIT
-// Simulation of the ZXTRES+ demo system: 40 MHz CPU clock, 25 MHz dot clock.
+// Simulation of the ZXTRES+ demo system: CPU clock CPU_KHZ (default 40 MHz),
+// 25 MHz dot clock.
 // Logs POST codes, checks the VGA sync timing, and once the demo reaches its
 // live loop (POST F0h), halts or faults, captures two VGA frames as PPM files
 // and writes the text screen as plain text.
 //   +OUT=<prefix>       output file prefix (default zxtres_demo)
 //   +MAX_MS=<ms>        simulated time limit (default 400)
 `timescale 1ns/1ps
-module zxtres_demo_tb;
+module zxtres_demo_tb #(
+    parameter int unsigned CPU_KHZ = 40000
+);
+    localparam realtime CPU_HALF_PERIOD = 500000.0 / CPU_KHZ;    // ns
+
     logic clk_cpu = 1'b0, clk_pix = 1'b0;
     logic reset_cpu = 1'b1, reset_pix = 1'b1;
-    always #12.5 clk_cpu = !clk_cpu;
+    always #(CPU_HALF_PERIOD) clk_cpu = !clk_cpu;
     always #20.0 clk_pix = !clk_pix;
 
     logic [5:0] vga_r, vga_g, vga_b;
     logic vga_hs, vga_vs, led_user, cpu_halted, cpu_shutdown, cpu_fault;
     logic [7:0] post_code;
 
-    zxtres_demo_system #(.CPU_KHZ(40000)) dut (
+    // ZXTRES_NETLIST simulates a synthesized netlist of the system, whose
+    // parameters are fixed and whose internals are not visible: the text
+    // dump and CS:IP are then left out, and the VGA frames are compared.
+`ifdef ZXTRES_NETLIST
+    zxtres_demo_system dut (
+`else
+    zxtres_demo_system #(.CPU_KHZ(CPU_KHZ)) dut (
+`endif
         .clk_cpu(clk_cpu), .reset_cpu(reset_cpu),
         .clk_pix(clk_pix), .reset_pix(reset_pix),
         .vga_r(vga_r), .vga_g(vga_g), .vga_b(vga_b),
@@ -123,6 +135,9 @@ module zxtres_demo_tb;
     task automatic dump_text();
         int fd;
         fd = $fopen({prefix, "_screen.txt"}, "w");
+`ifdef ZXTRES_NETLIST
+        $fwrite(fd, "(netlist simulation: the text memory is not visible)\n");
+`else
         for (int row = 0; row < 25; row++) begin
             string line;
             line = "";
@@ -134,6 +149,7 @@ module zxtres_demo_tb;
             end
             $fwrite(fd, "%s\n", line);
         end
+`endif
         $fclose(fd);
     endtask
 
@@ -160,8 +176,13 @@ module zxtres_demo_tb;
         frames_to_capture = 2;
         wait (frames_to_capture == 0);
         dump_text();
+`ifdef ZXTRES_NETLIST
+        $display("POST %02h halted %0d shutdown %0d fault %0d",
+                 post_code, cpu_halted, cpu_shutdown, cpu_fault);
+`else
         $display("POST %02h halted %0d shutdown %0d fault %0d cs:ip %04h:%04h",
                  post_code, cpu_halted, cpu_shutdown, cpu_fault, dut.debug_cs, dut.debug_ip);
+`endif
         $display("VGA sync errors: %0d", sync_errors);
         $display("ZXTRES_DEMO_SIM_END %s", reason);
         $finish;
